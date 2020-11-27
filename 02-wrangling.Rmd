@@ -1,0 +1,2076 @@
+
+# Wrangling {#wrangling}
+
+<!-- TODO: -->
+
+<!-- Look at the code used in the Temperance section of chapter 7. Explain all the key parts here, including rowwise, ungroup and matrices. -->
+
+<!-- Add sample() to random numbers. -->
+
+<!-- Create vectors of lots of draws from the random numbers. -->
+
+<!-- Make a tibble and then pipe tibble to ggplot -->
+
+<!-- tibble(heads = rbinom . .. .) %>%  -->
+<!--  ggplot() -->
+
+<!-- Include math formulas (sort of?) in the margin. $C ~ binomial(n, p)$, where $C \subset (H,T)$  -->
+
+<!-- Last example might be create two rnorm variables with different means and sd (rnorm_5_1, rnorm_0_3, where the first number is the mean and the second the sd), then add them to make a third. Then, pivot_longer to make it easier for them to be plotted together as overlapping densities.  -->
+
+<!-- Are these commands worth covering? -->
+
+<!-- tidyr::separate_rows() -->
+<!-- dplyr::coalesce() -->
+<!-- expand(data, ...) -->
+<!-- crossing(...) -->
+<!-- nesting(...) -->
+
+
+<!-- Add discussion of allowed variable names, the use of ``, and  early in the book. skimr() also. You can have a variable name be a number, but in order to refer to that variable, you need to use backticks. -->
+
+<!-- Maybe make a big set of FEC data from the 2016 election for use as the practice data? Ought to use something different from airlines . . . which are boring. -->
+
+<!-- Get rid of some of these garbage data packages which we don't really use. Why not use PPBDS.data for everything? -->
+
+Start by loading the packages which we will need in this chapter.
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+library(ggrepel)
+library(knitr)
+```
+
+```{r, message=FALSE}
+library(tidyverse)
+library(PPBDS.data)
+library(lubridate)
+library(skimr)
+library(janitor)
+library(gapminder)
+library(nycflights13)
+library(fivethirtyeight)
+```
+
+The **tidyverse** package will be used in every chapter. **PPBDS.data** is the data package created specifically for this course. **lubridate** is a package for working with dates and times. **janitor** offers functions for cleaning up dirty data. **skimr** contains functions that are useful for providing summary statistics. **nycflights** includes data associated with flights out of New York City's three major airports. **gapminder** has data for countries across decades. **fivethirtyeight** cleans up data from the [FiveThirtyEight](https://fivethirtyeight.com/) team.  
+
+## Data Gathering
+
+<!-- DK: Not sure I like this example. We should do our own thing. -->
+
+Recall the `read_csv()` function introduced briefly in chapter 1 of this textbook. Let’s import a Comma Separated Values .csv file that exists on the internet. The .csv file dem_score.csv contains ratings of the level of democracy in different countries spanning 1952 to 1992 and is accessible at https://moderndive.com/data/dem_score.csv. Let’s use the read_csv() function from the readr package to read it off the web, import it into R, and save it in a data frame called dem_score. 
+
+```{r}
+dem_score <- read_csv(file = "https://moderndive.com/data/dem_score.csv")
+```
+
+In this dem_score data frame, the minimum value of -10 corresponds to a highly autocratic nation, whereas a value of 10 corresponds to a highly democratic nation. Note also that backticks surround the different variable names. Variable names in R by default are not allowed to start with a number nor include spaces, but we can get around this fact by surrounding the column name with backticks.
+
+Note that the read_csv() function included in the readr package is different than the read.csv() function that comes installed with R. While the difference in the names might seem trivial (an _ instead of a .), the read_csv() function is, in our opinion, easier to use since it can more easily read data off the web and generally imports data at a much faster speed. Furthermore, the read_csv() function included in the readr saves data frames as tibbles by default.
+
+The result of this code chunk is pretty tame. It tells us that each comma from the .csv file corresponds to a column, and the column names are taken from the first line of the file. Then, the function "guesses" an appropriate data type for each of the columns it creates. Sometimes .csv files are a lot dirtier and require significant wrangling before you can explore the data and create usable graphics. 
+
+Let's try to run `read_csv()` on another dataset. This is a link to a file containing the faculty's gender data across departments at Harvard University. Note, the file argument of the `read_csv()` function can take the link to a dataset in a number of forms. In the previous example and the one below, the file argument takes a url. Other formats that this argument could take are full or partial file paths for .csv files saved locally on your computer. 
+
+```{r}
+url <- "https://raw.githubusercontent.com/davidkane9/PPBDS/master/02-wrangling/data/harvard-faculty-gender-final.csv"
+gender_data <- read_csv(file = url)
+```
+
+Now, call `gender_data`.
+
+```{r}
+gender_data
+```
+
+As you can see, the second row was likely meant to contain the column names. You can run `?read_csv()` in your console to see the additional arguments that the `read_csv()` function may contain to make the new dataframe easier to work with. The skip argument allows you to skip rows of the dataset. 
+
+```{r}
+gender_data <- read_csv(file = url, skip = 1)
+gender_data
+```
+
+
+```{r echo=FALSE, fig.margin=TRUE, out.width="100%"}
+knitr::include_graphics("https://imgs.xkcd.com/comics/scientist_tech_help.png")
+```
+
+Now suppose we want to change the data type of one of more of the columns. The `col_type` argument allows us to do this. Without the `col_type` argument, the `division` column is read in as a character column. Instead, we want it to be read in as a factor.  
+
+```{r}
+gender_data <- read_csv(file = url, skip = 1, col_type = cols(division = col_factor()))
+```
+
+Now that the new dataset has been read in, explore it using the `View()` and `glimpse()` functions and the `$` operator from the previous chapter. 
+
+```{r, eval=FALSE}
+View(gender_data)
+```
+
+```{r}
+glimpse(gender_data)
+
+gender_data$division
+```
+Run the `summary()` function on the `gender_data` dataframe.
+```{r}
+summary(gender_data)
+```
+You may notice that something appears to be wrong with this dataset. Which department could have employed 644 male full professors? Let's explore what is going wrong here. 
+```{r}
+gender_data %>% filter(full_profs_m == 644)
+```
+
+It seems that one row of the table takes the sum of each of the other rows. This is likely the last row of the dataframe. Use `tail()` to print the last rows of the dataframe to check the final row.
+```{r}
+tail(gender_data)
+```
+
+Now, remove the "Total" row because it will affect any dplyr functions we try to run on the dataframe. Check the `tail()` of the dataframe again to make sure that the proper row was removed. 
+```{r}
+gender_data <- gender_data %>%
+  filter(concentration != "Total")
+
+tail(gender_data)
+```
+
+### HTML
+
+The data we need to answer a question is not always in a spreadsheet ready for us to read. For example, we can find interesting data about murders in the US in [this Wikipedia page](https://en.wikipedia.org/w/index.php?title=Gun_violence_in_the_United_States_by_state): 
+
+```{r}
+url <- paste0("https://en.wikipedia.org/w/index.php?title=",
+              "Gun_violence_in_the_United_States_by_state",
+              "&direction=prev&oldid=810166167")
+```
+
+You can see the data table when you visit the webpage:
+
+```{r, echo=FALSE, out.width="100%"}
+knitr::include_graphics("02-wrangling/images/murders-data-wiki-page.png")
+```
+
+To get this data, we need to do some web scraping. 
+
+Web scraping, or web harvesting, is the term we use to describe the process of extracting data from a website. The reason we can do this is because the information used by a browser to render webpages is received as a text file from a server. The text is code written in hyper text markup language (HTML). Every browser has a way to show the html source code for a page, each one different. On Chrome, you can use Control-U on a PC and command+option+U on a Mac. You will see something like this:
+
+```{r, echo=FALSE, out.width="100%"}
+knitr::include_graphics("02-wrangling/images/html-code.png")
+```
+
+Because this code is accessible, we can download the HTML file, import it into R, and then write programs to extract the information we need from the page. However, once we look at HTML code, this might seem like a daunting task. But we will show you some convenient tools to facilitate the process. To get an idea of how it works, here are a few lines of code from the Wikipedia page that provides the US murders data:
+
+```
+<table class="wikitable sortable">
+<tr>
+<th>State</th>
+<th><a href="/wiki/List_of_U.S._states_and_territories_by_population" 
+title="List of U.S. states and territories by population">Population</a><br />
+<small>(total inhabitants)</small><br />
+<small>(2015)</small> <sup id="cite_ref-1" class="reference">
+<a href="#cite_note-1">[1]</a></sup></th>
+<th>Murders and Nonnegligent
+<p>Manslaughter<br />
+<small>(total deaths)</small><br />
+<small>(2015)</small> <sup id="cite_ref-2" class="reference">
+<a href="#cite_note-2">[2]</a></sup></p>
+</th>
+<th>Murder and Nonnegligent
+<p>Manslaughter Rate<br />
+<small>(per 100,000 inhabitants)</small><br />
+<small>(2015)</small></p>
+</th>
+</tr>
+<tr>
+<td><a href="/wiki/Alabama" title="Alabama">Alabama</a></td>
+<td>4,853,875</td>
+<td>348</td>
+<td>7.2</td>
+</tr>
+<tr>
+<td><a href="/wiki/Alaska" title="Alaska">Alaska</a></td>
+<td>737,709</td>
+<td>59</td>
+<td>8.0</td>
+</tr>
+<tr>
+```
+
+You can actually see the data, except data values are surrounded by html code such as `<td>`. We can also see a pattern of how it is stored. If you know HTML, you can write programs that leverage knowledge of these patterns to extract what we want. We also take advantage of a language widely used to make webpages look "pretty" called Cascading Style Sheets (CSS).
+
+Although we provide tools that make it possible to scrape data without knowing HTML, as a data scientist it is quite useful to learn some HTML and CSS. Not only does this improve your scraping skills, but it might come in handy if you are creating a webpage to showcase your work. 
+
+### The rvest package
+
+The tidyverse contains a web harvesting package called rvest. The first step using this package is to import the webpage into R. The package makes this quite simple:
+
+```{r, message=FALSE, warning=FALSE}
+library(tidyverse)
+library(rvest)
+h <- read_html(url)
+```
+
+
+Note that the entire Murders in the US Wikipedia webpage is now contained in `h`. The class of this object is:
+
+```{r}
+class(h)
+```
+
+The rvest package is actually more general; it handles XML documents. XML is a general markup language (that's what the ML stands for) that can be used to represent any kind of data. HTML is a specific type of XML specifically developed for representing webpages. Here we focus on HTML documents.
+
+Now, how do we extract the table from the object `h`? If we print `h`, we don't really see much:
+
+```{r}
+h
+```
+
+We can see all the code that defines the downloaded webpage using the `html_text` function like this:
+
+```{r, eval=FALSE}
+html_text(h)
+```
+
+We don't show the output here because it includes thousands of characters, but if we look at it, we can see the data we are after is stored in an HTML table: you can see this in this line of the HTML code above `<table class="wikitable sortable">`. The different parts of an HTML document, often defined with a message in between  `<` and `>`  are referred to as nodes. The rvest package includes functions to extract nodes of an HTML document: `html_nodes` extracts all nodes of different types and `html_node` extracts the first one. To extract the tables from the html code we use:
+
+```{r} 
+tab <- h %>% html_nodes("table")
+```
+
+Now, instead of the entire webpage, we just have the html code for the tables in the page:
+
+```{r}
+tab
+```
+
+The table we are interested is the first one:
+
+```{r}
+tab[[1]]
+```
+
+This is clearly not a tidy dataset, not even a data frame. In the code above, you can definitely see a pattern and writing code to extract just the data is very doable. In fact, rvest includes a function just for converting HTML tables into data frames:
+
+
+```{r}
+tab <- tab[[1]] %>% html_table
+class(tab)
+```
+
+We are now much closer to having a usable data table:
+
+```{r}
+tab <- tab %>% setNames(c("state", "population", "total", "murder_rate")) 
+head(tab)
+```
+
+We still have some wrangling to do. For example, we need to remove the commas and turn characters into numbers. Before continuing with this, we will learn a more general approach to extracting information from web sites.
+
+
+### CSS selectors
+
+The default look of a webpage made with the most basic HTML is quite unattractive. The aesthetically pleasing pages we see today are made using CSS to define the look and style of webpages. The fact that all pages for a company have the same style usually results from their use of the same CSS file to define the style. The general way these CSS files work is by defining how each of the elements of a webpage will look. The title, headings, itemized lists, tables, and links, for example, each receive their own style including font, color, size, and distance from the margin. CSS does this by leveraging patterns used to define these elements, referred to as selectors. An example of such a pattern, which we used above, is `table`, but there are many, many more. 
+
+If we want to grab data from a webpage and we happen to know a selector that is unique to the part of the page containing this data, we can use the `html_nodes` function. However, knowing which selector can be quite complicated. 
+In fact, the complexity of webpages has been increasing as they become more sophisticated. For some of the more advanced ones, it seems almost impossible to find the nodes that define a particular piece of data. However, selector gadgets actually make this possible.
+
+SelectorGadget^[http://selectorgadget.com/] is piece of software that allows you to interactively determine what CSS selector you need to extract specific components from the webpage. If you plan on scraping data other than tables from html pages, we highly recommend you install it. A Chrome extension is available which permits you to turn on the gadget and then, as you click through the page, it highlights parts and shows you the selector you need to extract these parts. There are various demos of how to do this including rvest author Hadley Wickham's
+vignette^[https://cran.r-project.org/web/packages/rvest/vignettes/selectorgadget.html] and other tutorials based on the vignette^[https://stat4701.github.io/edav/2015/04/02/rvest_tutorial/] ^[https://www.analyticsvidhya.com/blog/2017/03/beginners-guide-on-web-scraping-in-r-using-rvest-with-hands-on-knowledge/].
+
+### JSON
+
+Sharing data on the internet has become more and more common. Unfortunately, providers use different formats, which makes it harder for data scientists to wrangle data into R. Yet there are some standards that are also becoming more common. Currently, a format that is widely being adopted is the JavaScript Object Notation or JSON. Because this format is very general, it is nothing like a spreadsheet. This JSON file looks more like the code you use to define a list. Here is an example of information stored in a JSON format:
+
+```{r, echo=FALSE}
+library(jsonlite)
+example <- data.frame(name= c("Miguel", "Sofia", "Aya", "Cheng"), student_id = 1:4, exam_1 = c(85, 94, 87, 90), exam_2 = c(86, 93, 88, 91))
+json <- toJSON(example, pretty = TRUE) 
+json
+```
+
+The file above actually represents a data frame. To read it, we can use the function `fromJSON` from the jsonlite package. Note that JSON files are often made available via the internet. Several organizations provide a JSON API or a web service that you can connect directly to and obtain data. 
+
+You can learn much more by examining tutorials and help files from the jsonlite package. This package is intended for relatively simple tasks such as converging data into tables. For more flexibility, we recommend `rjson`.
+
+## Characters 
+
+We've spent a lot of time working with big, beautiful data frames that are clean and wholesome, like the `gapminder` and `nycflights13` data.
+
+But real life will be much nastier. You will bring data into R from the outside world and discover there are problems. You might think: how hard can it be to deal with character data? And the answer is: it can be very hard!
+
+Here we discuss common remedial tasks for cleaning and transforming character data, also known as "strings". A data frame or tibble will consist of one or more *atomic vectors* of a certain class. This lesson deals with things you can do with vectors of class `character`.
+
+At the beginning of the chapter, we loaded the **tidyverse**, which includes `stringr`. This package allows users to manipulate strings with its functions that being with `str_`.
+
+There are some basic string manipulation tasks:
+
+* Study a single character vector
+  - How long are the strings?
+  - Presence/absence of a literal string
+* Operate on a single character vector
+  - Keep/discard elements that contain a literal string
+  - Split into two or more character vectors using a fixed delimiter    
+  - Snip out pieces of the strings based on character position
+  - Collapse into a single string
+* Operate on two or more character vectors
+  - Glue them together element-wise to get a new character vector.
+
+`fruit`, `words`, and `sentences` are character vectors that ship with stringr for practicing.*
+
+### Studying a single character vector
+
+Determine presence/absence of a literal string with `str_detect()`. Spoiler: later we see `str_detect()` also detects regular expressions.
+
+Which fruits actually use the word "fruit"?
+
+```{r}
+str_detect(fruit, pattern = "fruit")
+```
+
+What's the easiest way to get the actual fruits that match? Use `str_subset()` to keep only the matching elements. Note we are storing this new vector `my_fruit` to use in later examples!
+
+```{r}
+(my_fruit <- str_subset(fruit, pattern = "fruit"))
+```
+
+Use `stringr::str_view()` to create a window in your viewer that highlights a specified pattern for any and all instances within the list. Below we look at a subset of fruit and highlight the pattern "berry" within items in that list. 
+
+```{r}
+str_view(fruit[5:10], pattern = "berry")
+```
+
+This can be helpful when you want to check that you are highlighting the correct pattern (especially when using regex). What do you think the following regex means? (This will be explained in more depth later)
+
+```{r}
+str_view(fruit[1:5], pattern = "^a.*o")
+```
+
+### Operating on a single character vector
+
+Use `stringr::str_split()` to split strings on a delimiter. Some of our fruits are compound words, like "grapefruit", but some have two words, like "ugli fruit". Here we split on a single space `" "`, but show use of a regular expression later. 
+
+```{r}
+str_split(my_fruit, pattern = " ")
+```
+
+It's bummer that we get a *list* back. But it must be so! In full generality, split strings must return list, because who knows how many pieces there will be?
+
+If you are willing to commit to the number of pieces, you can use `str_split_fixed()` and get a character matrix. You're welcome!
+
+```{r}
+str_split_fixed(my_fruit, pattern = " ", n = 2)
+```
+
+If the to-be-split variable lives in a data frame, `tidyr::separate()` will split it into 2 or more variables.
+
+```{r}
+my_fruit_df <- tibble(my_fruit)
+my_fruit_df %>% 
+  separate(my_fruit, into = c("pre", "post"), sep = " ")
+```
+
+Count characters in your strings with `str_length()`. Note this is different from the length of the character vector itself.
+
+```{r}
+length(my_fruit)
+str_length(my_fruit)
+```
+
+You can snip out substrings based on character position with `str_sub()`.
+
+```{r}
+head(fruit) %>% 
+  str_sub(1, 3)
+```
+
+The `start` and `end` arguments are vectorised. __Example:__ a sliding 3-character window.
+
+```{r}
+tibble(fruit) %>% 
+  head() %>% 
+  mutate(snip = str_sub(fruit, 1:6, 3:8))
+```
+
+Finally, `str_sub()` also works for assignment, i.e. on the left hand side of `<-`.
+
+```{r}
+(x <- head(fruit, 3))
+str_sub(x, 1, 3) <- "AAA"
+x
+```
+
+You can collapse a character vector of length `n > 1` to a single string with `str_c()`, which also has other uses (see the [next section](#catenate-vectors)).
+
+
+```{r}
+head(fruit) %>% 
+  str_c(collapse = ", ")
+```
+
+You can replace a pattern with `str_replace()`. Here we use an explicit string-to-replace, but later we revisit with a regular expression.
+
+```{r}
+str_replace(my_fruit, pattern = "fruit", replacement = "THINGY")
+```
+
+A special case that comes up a lot is replacing `NA`, for which there is `str_replace_na()`.
+
+```{r}
+melons <- str_subset(fruit, pattern = "melon")
+melons[2] <- NA
+melons
+str_replace_na(melons, "UNKNOWN MELON")
+```
+
+If the `NA`-afflicted variable lives in a data frame, you can use `tidyr::replace_na()`.
+
+```{r}
+tibble(melons) %>% 
+  replace_na(replace = list(melons = "UNKNOWN MELON"))
+```
+
+And that concludes our treatment of regex-free manipulations of character data!
+
+### Operating on two or more character vectors 
+
+If you have two or more character vectors of the same length, you can glue them together element-wise, to get a new vector of that length. Here are some ... awful smoothie flavors?
+
+```{r}
+str_c(fruit[1:4], fruit[5:8], sep = " & ")
+```
+
+Element-wise catenation can be combined with collapsing.
+
+```{r}
+str_c(fruit[1:4], fruit[5:8], sep = " & ", collapse = ", ")
+```
+
+If the to-be-combined vectors are variables in a data frame, you can use `tidyr::unite()` to make a single new variable from them.
+
+```{r}
+fruit_df <- tibble(
+  fruit1 = fruit[1:4],
+  fruit2 = fruit[5:8]
+)
+fruit_df %>% 
+  unite("flavor_combo", fruit1, fruit2, sep = " & ")
+```
+
+### Regular expressions with stringr
+
+```{r echo = FALSE, fig.cap = "From [\\@ThePracticalDev](https://twitter.com/ThePracticalDev/status/774309983467016193)", out.width = "70%", fig.align='center'}
+knitr::include_graphics("02-wrangling/images/regexp.jpg")
+
+```
+
+Frequently your string tasks cannot be expressed in terms of a fixed string, but can be described in terms of a pattern. Regular expressions, aka "regexes", are the standard way to specify these patterns. In regexes, specific characters and constructs take on special meaning in order to match multiple strings.
+
+The country names in the `gapminder` dataset are convenient for examples. Load it now and store 
+the `r nlevels(gapminder::gapminder$country)` unique country names in the object `countries`.
+
+```{r}
+countries <- levels(gapminder$country)
+```
+
+The first metacharacter is the period `.`, which stands for any single character, except a newline (which by the way, is represented by `\n`). The regex `i.a` will match all countries that have an `i`, followed by any single character, followed by `a`. Yes, regexes are case sensitive, i.e. "Italy" does not match.
+
+```{r}
+str_subset(countries, pattern = "i.a")
+```
+
+Notice that `i.a` matches "ina", "ica", "ita", and more.
+
+Anchors can be included to express where the expression must occur within the string. The `^` indicates the beginning of string and `$` indicates the end.
+
+Note how the regex `i.a$` matches many fewer countries than `i.a` alone. Likewise, more elements of `my_fruit` match `d` than `^d`, which requires "d" at string start.
+
+```{r}
+str_subset(countries, pattern = "i.a$")
+str_subset(my_fruit, pattern = "d")
+str_subset(my_fruit, pattern = "^d")
+```
+
+The metacharacter `\b` indicates a word boundary and `\B` indicates NOT a word boundary. This is our first encounter with something called "escaping" and right now I just want you at accept that we need to prepend a second backslash to use these sequences in regexes in R. We'll come back to this tedious point later.
+
+```{r}
+str_subset(fruit, pattern = "melon")
+str_subset(fruit, pattern = "\\bmelon")
+str_subset(fruit, pattern = "\\Bmelon")
+```
+
+Characters can be specified via classes. You can make them explicitly "by hand" or use some pre-existing ones.  Character classes are usually given inside square brackets, `[]` but a few come up so often that we have a metacharacter for them, such as `\d` for a single digit.
+
+Here we match `ia` at the end of the country name, preceded by one of the characters in the class. Or, in the negated class, preceded by anything but one of those characters.
+
+```{r}
+# Make a class "by hand"
+
+str_subset(countries, pattern = "[nls]ia$")
+
+# Use ^ to negate the class
+
+str_subset(countries, pattern = "[^nls]ia$")
+```
+
+Here we revisit splitting `my_fruit` with two more general ways to match whitespace: the `\s` metacharacter and the POSIX class `[:space:]`. Notice that we must prepend an extra backslash `\` to escape `\s` and the POSIX class has to be surrounded by two sets of square brackets.
+
+```{r}
+# Remember this?
+# str_split_fixed(fruit, pattern = " ", n = 2)
+# Alternatives:
+
+str_split_fixed(my_fruit, pattern = "\\s", n = 2)
+str_split_fixed(my_fruit, pattern = "[[:space:]]", n = 2)
+```
+
+Let's see the country names that contain punctuation.
+
+```{r}
+str_subset(countries, "[[:punct:]]")
+```
+
+### Quantifiers
+
+You can decorate characters (and other constructs, like metacharacters and classes) with information about how many characters they are allowed to match.
+
+| quantifier | meaning   | quantifier | meaning                    |
+|------------|-----------|------------|----------------------------|
+| *          | 0 or more | {n}        | exactly n                  |
+| +          | 1 or more | {n,}       | at least n                 |
+| ?          | 0 or 1    | {,m}       | at most m                  |
+|            |           | {n,m}      | between n and m, inclusive |
+
+Explore these by inspecting matches for `l` followed by `e`, allowing for various numbers of characters in between.
+
+`l.*e` will match strings with 0 or more characters in between, i.e. any string with an `l` eventually followed by an `e`. This is the most inclusive regex for this example, so we store the result as `matches` to use as a baseline for comparison.
+
+```{r}
+(matches <- str_subset(fruit, pattern = "l.*e"))
+```
+
+Change the quantifier from `*` to `+` to require at least one intervening character. The strings that no longer match: all have a literal `le` with no preceding `l` and no following `e`.
+
+```{r}
+list(match = intersect(matches, str_subset(fruit, pattern = "l.+e")),
+     no_match = setdiff(matches, str_subset(fruit, pattern = "l.+e")))
+```
+
+Change the quantifier from `*` to `?` to require at most one intervening character. In the strings that no longer match, the shortest gap between `l` and following `e` is at least two characters.
+
+```{r}
+list(match = intersect(matches, str_subset(fruit, pattern = "l.?e")),
+     no_match = setdiff(matches, str_subset(fruit, pattern = "l.?e")))
+```
+
+Finally, we remove the quantifier and allow for no intervening characters. The strings that no longer match lack a literal `le`.
+
+```{r}
+list(match = intersect(matches, str_subset(fruit, pattern = "le")),
+     no_match = setdiff(matches, str_subset(fruit, pattern = "le")))
+```
+
+### Raw strings
+
+You’ve probably caught on by now that there are certain characters with special meaning in regexes, 
+including `$ * + . ? [ ] ^ { } | ( ) \`. This makes things difficult when we want to use these characters within the strings instead of as regexes. Previously, we would have to do a lot of maneuvering to create strings containing special characters, but now we can use `r"()"`. 
+
+```{r}
+r"(Do you use "airquotes" much?)"
+```
+
+The `\` preceding each quote is what is known as escaping. It signals to the computer that the quotations are part of the string. Now, what happens if we have a backslash within the string. 
+
+```{r echo=FALSE, fig.margin=TRUE, out.width="100%"}
+knitr::include_graphics("https://imgs.xkcd.com/comics/backslashes.png")
+```
+
+```{r}
+r"(\)"
+```
+
+As you can see, a backslash is used to escape the initial backslash.  
+
+## Factors
+
+Factors are categorical variables that may only take on a specified set of values. Thus, they are known as categorical variables, as they can be separated into categories. To manipulate factors we will use the [forcats][forcats-web] package, a core package in the tidyverse. Like the stringr package whose functions begin with `str_`, main functions of the forcats package start with `fct_`.
+
+Get to know your factor before you start touching it! It's polite. Let's use `gapminder$continent` as our example.
+
+```{r}
+str(gapminder$continent)
+levels(gapminder$continent)
+nlevels(gapminder$continent)
+class(gapminder$continent)
+```
+
+To get a frequency table as a tibble, from a tibble, use `dplyr::count()`. To get a similar result from a free-range factor, use `forcats::fct_count()`.
+
+```{r}
+gapminder %>% 
+  count(continent)
+fct_count(gapminder$continent)
+```
+
+### Dropping unused levels
+
+Just because you drop all the rows corresponding to a specific factor level, the levels of the factor itself do not change. Sometimes all these unused levels can come back to haunt you later, e.g., in figure legends.
+
+Watch what happens to the levels of `country` when we filter Gapminder to a handful of countries.
+
+```{r}
+nlevels(gapminder$country)
+h_countries <- c("Egypt", "Haiti", "Romania", "Thailand", "Venezuela")
+h_gap <- gapminder %>%
+filter(country %in% h_countries)
+nlevels(h_gap$country)
+```
+
+Even though `h_gap` only has data for a handful of countries, we are still schlepping around all levels from the original `gapminder` tibble.
+
+How can you get rid of them? The base function `droplevels()` operates on all the factors in a data frame or on a single factor. The function `forcats::fct_drop()` operates on a factor.
+
+```{r}
+h_gap_dropped <- h_gap %>% 
+  droplevels()
+nlevels(h_gap_dropped$country)
+
+# Use forcats::fct_drop() on a free-range factor
+
+h_gap$country %>%
+  fct_drop() %>%
+  levels()
+```
+
+### Change order of the levels
+
+By default, factor levels are ordered alphabetically. When you think about it, this ordering might as well be random! It is preferable to order the levels according to some principle:
+
+* Frequency. Make the most common level the first and so on.
+* Another variable. Order factor levels according to a summary statistic for another variable.
+
+First, let's order continent by frequency, forwards and backwards. This is often a great idea for tables and figures, esp. frequency barplots.
+
+```{r}
+# Default order is alphabetical
+
+gapminder$continent %>%
+  levels()
+
+# Order by frequency
+
+gapminder$continent %>% 
+  fct_infreq() %>%
+  levels()
+
+# Backwards!
+
+gapminder$continent %>% 
+  fct_infreq() %>%
+  fct_rev() %>% 
+  levels()
+```
+
+These two barcharts of frequency by continent differ only in the order of the continents. Which do you prefer?
+
+```{r, fig.show = 'hold', out.width = '49%', out.height="60%", echo = FALSE}
+p <- ggplot(gapminder, aes(x = continent)) +
+  geom_bar() +
+  coord_flip()
+p
+
+gap_tmp <- gapminder %>% 
+  mutate(continent = continent %>% fct_infreq() %>% fct_rev())
+
+p <- ggplot(gap_tmp, aes(x = continent)) +
+  geom_bar() +
+  coord_flip()
+p
+```
+
+Now we order `country` by another variable, forwards and backwards. This other variable is usually quantitative and you will order the factor according to a grouped summary. The factor is the grouping variable and the default summarizing function is `median()` but you can specify something else.
+
+```{r}
+# Order countries by median life expectancy
+
+fct_reorder(gapminder$country, gapminder$lifeExp) %>% 
+  levels() %>% head()
+
+# Order according to minimum life exp instead of median
+
+fct_reorder(gapminder$country, gapminder$lifeExp, min) %>% 
+  levels() %>% head()
+
+# Backwards!
+
+fct_reorder(gapminder$country, gapminder$lifeExp, .desc = TRUE) %>% 
+  levels() %>% head()
+```
+
+So why do we reorder factor levels? It often makes plots much better! When a factor is mapped to x or y, it should almost always be reordered by the quantitative variable you are mapping to the other one.
+Compare the interpretability of these two plots of life expectancy in Asian countries in 2007. The only difference is the order of the `country` factor. Which one do you find easier to learn from?
+
+```{r alpha-order-silly, fig.show = 'hold', out.width = '49%', out.height="80%"}
+gap_asia_2007 <- gapminder %>% filter(year == 2007, continent == "Asia")
+ggplot(gap_asia_2007, aes(x = lifeExp, y = country)) + geom_point()
+ggplot(gap_asia_2007, aes(x = lifeExp, y = fct_reorder(country, lifeExp))) +
+  geom_point()
+```
+
+Use `fct_reorder2()` when you have a line chart of a quantitative x against another quantitative y and your factor provides the color. This way the legend appears in the same order as the data! Note, the order is taken by the right side of the plot (not the left). Contrast the legend on the left with the one on the right. 
+
+```{r legends-made-for-humans, fig.show = 'hold', out.width = '49%', out.height="80%"}
+h_countries <- c("Egypt", "Haiti", "Romania", "Thailand", "Venezuela")
+h_gap <- gapminder %>%
+  filter(country %in% h_countries) %>% 
+  droplevels()
+ggplot(h_gap, aes(x = year, y = lifeExp, color = country)) +
+  geom_line()
+ggplot(h_gap, aes(x = year, y = lifeExp,
+                  color = fct_reorder2(country, year, lifeExp))) +
+  geom_line() +
+  labs(color = "country")
+```
+
+Sometimes you just want to hoist one or more levels to the front. Why? Because we said so. This resembles what we do when we move variables to the front with `dplyr::select(special_var, everything())`.
+
+```{r}
+h_gap$country %>% 
+  levels()
+
+h_gap$country %>% 
+  fct_relevel("Romania", "Haiti") %>% 
+  levels()
+```
+
+This might be useful if you are preparing a report for, say, the Romanian government. The reason for always putting Romania first has nothing to do with the data, it is important for external reasons and you need a way to express this.
+
+### Recode the levels
+
+Sometimes you have better ideas about what certain levels should be. This is called recoding.
+
+```{r}
+i_gap <- gapminder %>% 
+  filter(country %in% c("United States", "Sweden", 
+                        "Australia")) %>% 
+  droplevels()
+
+i_gap$country %>% 
+  levels()
+
+i_gap$country %>%
+  fct_recode("USA" = "United States", "Oz" = "Australia") %>% 
+  levels()
+```
+
+### Grow a factor
+
+Let's create two data frames, each with data from two countries, dropping unused factor levels.
+
+```{r}
+df1 <- gapminder %>%
+  filter(country %in% c("United States", "Mexico"), year > 2000) %>%
+  droplevels()
+df2 <- gapminder %>%
+  filter(country %in% c("France", "Germany"), year > 2000) %>%
+  droplevels()
+```
+
+The `country` factors in `df1` and `df2` have different levels.
+
+```{r}
+levels(df1$country)
+levels(df2$country)
+```
+
+Can you just combine them?
+
+```{r}
+c(df1$country, df2$country)
+```
+
+Umm, no. That is wrong on many levels! Use `fct_c()` to do this.
+
+```{r}
+fct_c(df1$country, df2$country)
+```
+
+## Lists
+
+Lists are a type of vector that is a step up in complexity from atomic vectors, because lists can contain other lists. This makes them suitable for representing hierarchical or tree-like structures. You create a list with `list()`:
+
+```{r}
+x <- list(1, 2, 3)
+x
+```
+
+A very useful tool for working with lists is `str()` because it focuses on the **str**ucture, not the contents.
+
+```{r}
+str(x)
+x_named <- list(a = 1, b = 2, c = 3)
+str(x_named)
+```
+
+Unlike atomic vectors, `list()` can contain a mix of objects:
+
+```{r}
+y <- list("a", 1L, 1.5, TRUE)
+str(y)
+```
+
+Lists can even contain other lists!
+
+```{r}
+z <- list(list(1, 2), list(3, 4))
+str(z)
+```
+
+### Visualizing lists
+
+To explain more complicated list manipulation functions, it's helpful to have a visual representation of lists. For example, take these three lists:
+
+```{r}
+x1 <- list(c(1, 2), c(3, 4))
+x2 <- list(list(1, 2), list(3, 4))
+x3 <- list(1, list(2, list(3)))
+```
+
+I'll draw them as follows:
+
+```{r, echo = FALSE, out.width = "75%", fig.align='center'}
+knitr::include_graphics("02-wrangling/images/lists-structure.png")
+```
+
+There are three principles:
+
+- Lists have rounded corners. Atomic vectors have square corners.
+- Children are drawn inside their parent, and have a slightly darker background to make it easier to see  the hierarchy.
+- The orientation of the children (i.e. rows or columns) isn't important, so I'll pick a row or column orientation to either save space or illustrate an important property in the example.
+
+### Subsetting
+
+There are three ways to subset a list, which I'll illustrate with a list named `a`:
+
+```{r}
+a <- list(a = 1:3, b = "a string", c = pi, d = list(-1, -5))
+```
+
+`[` extracts a sub-list. The result will always be a list.
+
+```{r}
+str(a[1:2])
+str(a[4])
+```
+
+Like with vectors, you can subset with a logical, integer, or character vector.
+    
+`[[` extracts a single component from a list. It removes a level of hierarchy from the list.
+
+```{r}
+str(a[[1]])
+str(a[[4]])
+```
+
+`$` is a shorthand for extracting named elements of a list. It works similarly to `[[` except that you don't need to use quotes.
+    
+```{r}
+a$a
+a[["a"]]
+```
+
+The distinction between `[` and `[[` is really important for lists, because `[[` drills down into the list while `[` returns a new, smaller list. Compare the code and output above with the visual representation.
+
+```{r lists-subsetting, echo = FALSE, out.width = "75%", fig.align='center', fig.cap = "Subsetting a list, visually."}
+knitr::include_graphics("02-wrangling/images/lists-subsetting.png")
+```
+
+### Lists of condiments
+
+The difference between `[` and `[[` is very important, but it's easy to get confused. To help you remember, let me show you an unusual pepper shaker.
+
+```{r, echo = FALSE, out.width = "40%", fig.align='center'} 
+knitr::include_graphics("02-wrangling/images/pepper.jpg")
+```
+
+If this pepper shaker is your list `x`, then, `x[1]` is a pepper shaker containing a single pepper packet:
+
+```{r, echo = FALSE, out.width = "40%", fig.align='center'}
+knitr::include_graphics("02-wrangling/images/pepper-1.jpg")
+```
+
+`x[2]` would look the same, but would contain the second packet. `x[1:2]` would be a pepper shaker containing two pepper packets. 
+
+`x[[1]]` is:
+
+```{r echo = FALSE, out.width = "40%", fig.align='center'} 
+knitr::include_graphics("02-wrangling/images/pepper-2.jpg")
+```
+
+If you wanted to get the content of the pepper package, you'd need `x[[1]][[1]]`:
+
+```{r, echo = FALSE, out.width = "40%", fig.align='center'}
+knitr::include_graphics("02-wrangling/images/pepper-3.jpg")
+```
+
+## Date-Times 
+
+We will manipulate date-times using the lubridate package, which makes it easier to work with dates and times in R. `lubridate` is not part of the core tidyverse because you only need it when you're working with dates/times.
+
+```{r echo=FALSE, fig.margin=TRUE, out.width="60%", fig.align='center'}
+knitr::include_graphics("https://imgs.xkcd.com/comics/iso_8601.png")
+```
+
+There are three types of date/time data that refer to an instant in time:
+
+* A `date`. Tibbles print this as `<date>`.
+
+* A `time` within a day. Tibbles print this as `<time>`.
+
+* A `date-time` is a date plus a time: it uniquely identifies an
+  instant in time (typically to the nearest second). Tibbles print this
+  as `<dttm>`. Elsewhere in R these are called POSIXct, but I don't think
+  that's a very useful name.
+
+You should always use the simplest possible data type that works for your needs. That means if you can use a date instead of a date-time, you should. Date-times are substantially more complicated because of the need to handle time zones, which we'll come back to at the end of the chapter.
+
+To get the current date or date-time you can use `today()` or `now()`:
+
+```{r}
+today()
+now()
+```
+
+Otherwise, there are three ways you're likely to create a date/time:
+
+* From a string.
+* From individual date-time components.
+* From an existing date/time object.
+
+They work as follows:
+
+### From strings
+
+Date/time data often comes as strings. The lubridate functions automatically work out the format once you specify the order of the component. To use them, identify the order in which year, month, and day appear in your dates, then arrange "y", "m", and "d" in the same order. That gives you the name of the lubridate function that will parse your date. For example:
+
+```{r}
+ymd("2017-01-31")
+mdy("January 31st, 2017")
+dmy("31-Jan-2017")
+```
+
+These functions also take unquoted numbers. This is the most concise way to create a single date/time object, as you might need when filtering date/time data. `ymd()` is short and unambiguous:
+
+```{r}
+ymd(20170131)
+```
+
+`ymd()` and friends create dates. To create a date-time, add an underscore and one or more of "h", "m", and "s" to the name of the parsing function:
+
+```{r}
+ymd_hms("2017-01-31 20:11:59")
+mdy_hm("01/31/2017 08:01")
+```
+
+You can also force the creation of a date-time from a date by supplying a timezone:
+
+```{r}
+ymd(20170131, tz = "UTC")
+```
+
+### From individual components
+
+Instead of a single string, sometimes you'll have the individual components of the date-time spread across multiple columns. This is what we have in the flights data:
+
+```{r}
+flights %>% 
+  select(year, month, day, hour, minute)
+```
+
+To create a date/time from this sort of input, use `make_date()` for dates, or `make_datetime()` for date-times:
+
+```{r}
+flights %>% 
+  select(year, month, day, hour, minute) %>% 
+  mutate(departure = make_datetime(year, month, day, hour, minute))
+```
+
+Let's do the same thing for each of the four time columns in `flights`. The times are represented in a slightly odd format, so we use modulus arithmetic to pull out the hour and minute components. Once I've created the date-time variables, I focus in on the variables we'll explore in the rest of the chapter.
+
+```{r}
+make_datetime_100 <- function(year, month, day, time) {
+  make_datetime(year, month, day, time %/% 100, time %% 100)
+}
+flights_dt <- flights %>% 
+  filter(!is.na(dep_time), !is.na(arr_time)) %>% 
+  mutate(
+    dep_time = make_datetime_100(year, month, day, dep_time),
+    arr_time = make_datetime_100(year, month, day, arr_time),
+    sched_dep_time = make_datetime_100(year, month, day, sched_dep_time),
+    sched_arr_time = make_datetime_100(year, month, day, sched_arr_time)
+  ) %>% 
+  select(origin, dest, ends_with("delay"), ends_with("time"))
+flights_dt
+```
+
+With this data, I can visualise the distribution of departure times across the year:
+
+```{r}
+flights_dt %>% 
+  ggplot(aes(dep_time)) + 
+  geom_freqpoly(binwidth = 86400) # 86400 seconds = 1 day
+```
+
+Or within a single day:
+
+```{r}
+flights_dt %>% 
+  filter(dep_time < ymd(20130102)) %>% 
+  ggplot(aes(dep_time)) + 
+  geom_freqpoly(binwidth = 600) # 600 s = 10 minutes
+```
+
+Note that when you use date-times in a numeric context (like in a histogram), 1 means 1 second, so a binwidth of 86400 means one day. For dates, 1 means 1 day.
+
+### From other types
+
+You may want to switch between a date-time and a date. That's the job of `as_datetime()` and `as_date()`:
+
+```{r}
+as_datetime(today())
+as_date(now())
+```
+
+Sometimes you'll get date/times as numeric offsets from the "Unix Epoch", 1970-01-01. If the offset is in seconds, use `as_datetime()`; if it's in days, use `as_date()`.
+
+```{r}
+as_datetime(60 * 60 * 10)
+as_date(365 * 10 + 2)
+```
+
+### Date-time components
+
+Now that you know how to get date-time data into R's date-time data structures, let's explore what you can do with them. This section will focus on the accessor functions that let you get and set individual components. The next section will look at how arithmetic works with date-times.
+
+You can pull out individual parts of the date with the accessor functions `year()`, `month()`, `mday()` (day of the month), `yday()` (day of the year), `wday()` (day of the week), `hour()`, `minute()`, and `second()`. 
+
+```{r}
+datetime <- ymd_hms("2016-07-08 12:34:56")
+year(datetime)
+month(datetime)
+mday(datetime)
+yday(datetime)
+wday(datetime)
+```
+
+For `month()` and `wday()` you can set `label = TRUE` to return the abbreviated name of the month or day of the week. Set `abbr = FALSE` to return the full name.
+
+```{r}
+month(datetime, label = TRUE)
+wday(datetime, label = TRUE, abbr = FALSE)
+```
+
+We can use `wday()` to see that more flights depart during the week than on the weekend:
+
+```{r}
+flights_dt %>% 
+  mutate(wday = wday(dep_time, label = TRUE)) %>% 
+  ggplot(aes(x = wday)) +
+    geom_bar()
+```
+
+There's an interesting pattern if we look at the average departure delay by minute within the hour. It looks like flights leaving in minutes 20-30 and 50-60 have much lower delays than the rest of the hour!
+
+```{r}
+flights_dt %>% 
+  mutate(minute = minute(dep_time)) %>% 
+  group_by(minute) %>% 
+  summarise(
+    avg_delay = mean(arr_delay, na.rm = TRUE),
+    n = n()) %>% 
+  ggplot(aes(minute, avg_delay)) +
+    geom_line()
+```
+
+Interestingly, if we look at the scheduled departure time we don't see such a strong pattern:
+
+```{r}
+sched_dep <- flights_dt %>% 
+  mutate(minute = minute(sched_dep_time)) %>% 
+  group_by(minute) %>% 
+  summarise(
+    avg_delay = mean(arr_delay, na.rm = TRUE),
+    n = n())
+ggplot(sched_dep, aes(minute, avg_delay)) +
+  geom_line()
+```
+
+So why do we see that pattern with the actual departure times? Well, like much data collected by humans, there's a strong bias towards flights leaving at "nice" departure times. Always be alert for this sort of pattern whenever you work with data that involves human judgement!
+
+```{r}
+ggplot(sched_dep, aes(minute, n)) +
+  geom_line()
+```
+
+
+### Setting components
+
+You can create a new date-time with `update()`.
+
+```{r}
+update(datetime, year = 2020, month = 2, mday = 2, hour = 2)
+```
+
+If values are too big, they will roll-over:
+
+```{r}
+ymd("2015-02-01") %>% 
+  update(mday = 30)
+ymd("2015-02-01") %>% 
+  update(hour = 400)
+```
+
+You can use `update()` to show the distribution of flights across the course of the day for every day of the year: 
+
+```{r}
+flights_dt %>% 
+  mutate(dep_hour = update(dep_time, yday = 1)) %>% 
+  ggplot(aes(dep_hour)) +
+    geom_freqpoly(binwidth = 300)
+```
+
+Setting larger components of a date to a constant is a powerful technique that allows you to explore patterns in the smaller components.
+
+### Time zones 
+
+Time zones are an enormously complicated topic because of their interaction with geopolitical entities. Fortunately we don't need to dig into all the details as they're not all that important for data analysis. You can see the complete list of possible timezones with the function `OlsonNames()`. Unless otherwise specified, lubridate always uses UTC (Coordinated Universal Time).
+
+In R, the time zone is an attribute of the date-time that only controls printing. For example, these three objects represent the same instant in time:
+
+```{r}
+(x1 <- ymd_hms("2015-06-01 12:00:00", tz = "America/New_York"))
+(x2 <- ymd_hms("2015-06-01 18:00:00", tz = "Europe/Copenhagen"))
+(x3 <- ymd_hms("2015-06-02 04:00:00", tz = "Pacific/Auckland"))
+```
+
+## Combining Data
+
+There are many ways to bring data together.
+
+Bind - This is basically smashing ~~rocks~~ tibbles together. You can smash things together row-wise ("row binding") or column-wise ("column binding"). Why do I characterize this as rock-smashing? They're often fairly crude operations, with lots of responsibility falling on the analyst for making sure that the whole enterprise even makes sense.
+
+When row binding, you need to consider the variables in the two tibbles. Do the same variables exist in each? Are they of the same type? Different approaches for row binding have different combinations of flexibility vs rigidity around these matters.
+
+When column binding, the onus is entirely on the analyst to make sure that the rows are aligned. I would avoid column binding whenever possible. If you can introduce new variables through any other, safer means, do so! By safer, I mean: use a mechanism where the row alignment is correct by definition. A proper join is the gold standard.
+
+Join - Here you designate a variable (or a combination of variables) as a key. A row in one data frame gets matched with a row in another data frame because they have the same key. You can then bring information from variables in a secondary data frame into a primary data frame based on this key-based lookup. That description is incredibly oversimplified, but that's the basic idea.
+
+A variety of row- and column-wise operations fit into this framework, which implies there are many different flavors of join. The concepts and vocabulary around joins come from the database world. The relevant functions in dplyr follow this convention and all mention `join`. The most relevant base R function is `merge()`.
+
+Let's explore each type of operation with a few examples.
+
+### Row binding
+
+Here's what a perfect row bind of three (untidy!) data frames looks like using data from the Lord of the Rings trilogy.
+
+```{r}
+fship <- tribble(
+                         ~Film,    ~Race, ~Female, ~Male,
+  "The Fellowship Of The Ring",    "Elf",    1229,   971,
+  "The Fellowship Of The Ring", "Hobbit",      14,  3644,
+  "The Fellowship Of The Ring",    "Man",       0,  1995
+)
+rking <- tribble(
+                         ~Film,    ~Race, ~Female, ~Male,
+      "The Return Of The King",    "Elf",     183,   510,
+      "The Return Of The King", "Hobbit",       2,  2673,
+      "The Return Of The King",    "Man",     268,  2459
+)
+ttow <- tribble(
+                         ~Film,    ~Race, ~Female, ~Male,
+              "The Two Towers",    "Elf",     331,   513,
+              "The Two Towers", "Hobbit",       0,  2463,
+              "The Two Towers",    "Man",     401,  3589
+)
+(lotr_untidy <- bind_rows(fship, ttow, rking))
+```
+
+`dplyr::bind_rows()` works like a charm with these very row-bindable data frames. But what if one of the data frames is somehow missing a variable? Let's mangle one and find out.
+
+```{r error = TRUE}
+ttow_no_Female <- ttow %>% mutate(Female = NULL)
+bind_rows(fship, ttow_no_Female, rking)
+rbind(fship, ttow_no_Female, rking)
+```
+
+We see that `dplyr::bind_rows()` does the row bind and puts `NA` in for the missing values caused by the lack of `Female` data from The Two Towers. Nonetheless, this can be problematic with more dissimilar datasets. 
+
+### Column binding
+
+```{r, echo = FALSE, fig.cap = "Attempting to bind columns correctly", out.width="80%", fig.align='center'}
+knitr::include_graphics("02-wrangling/images/wrangling.gif")
+```
+
+Column binding is much more dangerous because it often "works" when it should not. It's your job to make sure the rows are aligned and it's all too easy to screw this up.
+
+The data in `gapminder` was originally excavated from 3 messy Excel spreadsheets: one each for life expectancy, population, and GDP per capital. Let's relive some of the data wrangling joy and show a column bind gone wrong.
+
+I create 3 separate data frames, do some evil row sorting, then column bind. There are no errors. The result `gapminder_garbage` sort of looks OK. Univariate summary statistics and exploratory plots will look OK. But I've created complete nonsense!
+
+```{r}
+life_exp <- gapminder %>%
+  select(country, year, lifeExp)
+
+pop <- gapminder %>%
+  arrange(year) %>% 
+  select(pop)
+  
+gdp_percap <- gapminder %>% 
+  arrange(pop) %>% 
+  select(gdpPercap)
+
+(gapminder_garbage <- bind_cols(life_exp, pop, gdp_percap))
+
+summary(gapminder$lifeExp)
+summary(gapminder_garbage$lifeExp)
+range(gapminder$gdpPercap)
+range(gapminder_garbage$gdpPercap)
+```
+
+One last cautionary tale about column binding. This one requires the use of `cbind()` and it's why the tidyverse is generally unwilling to recycle when combining things of different length.
+
+I create a tibble with most of the `gapminder` columns. I create another with the remainder, but filtered down to just one country. I am able to `cbind()` these objects! Why? Because the 12 rows for Canada divide evenly into the 1704 rows of `gapminder`. Note that `dplyr::bind_cols()` refuses to column bind here.
+
+```{r}
+gapminder_mostly <- gapminder %>% select(-pop, -gdpPercap)
+gapminder_leftovers_filtered <- gapminder %>% 
+  filter(country == "Canada") %>% 
+  select(pop, gdpPercap)
+
+gapminder_nonsense <- cbind(gapminder_mostly, gapminder_leftovers_filtered)
+head(gapminder_nonsense, 14)
+```
+
+This data frame isn't obviously wrong, but it is wrong. See how Canada's population and GDP per capita repeat for each country?
+
+Bottom line: Row bind when you need to, but inspect the results re: coercion. Column bind only if you must and be extremely paranoid.
+
+### Joins in dplyr
+The most recent release of gapminder includes a new data frame, `country_codes`, with country names and ISO codes. Therefore you can also use it to practice joins.
+
+```{r end_multi_tibbles}
+gapminder %>% 
+  select(country, continent) %>% 
+  group_by(country) %>% 
+  slice(1) %>% 
+  left_join(country_codes)
+```
+
+Join (a.k.a. merge) two tables: dplyr join cheatsheet with comic characters and publishers.
+
+```{r, include = FALSE}
+# function to style the tables for display
+# used alongside CSS
+
+style_table <- function(data, table_title) {
+  data %>% 
+  gt() %>% 
+  tab_header(
+    title = table_title
+  ) %>% 
+  tab_options(
+    table.align = "left",
+    table.font.size = pct(80),
+    heading.title.font.size = pct(90),
+    column_labels.font.size = pct(90),
+    table.width = "100%",
+    row.striping.include_table_body = TRUE
+  )
+}
+
+get_col_widths <- function(super_first = TRUE) {
+  if (super_first == TRUE) {
+    col_left <- 38; col_mid <- 18; col_right <- (100 - col_left - col_mid)
+  } else {
+    col_left <- 18; col_mid <- 38; col_right <- (100 - col_left - col_mid)
+  }
+  gt_col_widths <- list(col_left_width = col_left, 
+                        col_mid_width = col_mid, 
+                        col_right_width = col_right)
+  return(gt_col_widths)
+}
+  
+make_three_gt <- function(gt_left, gt_mid, gt_right, ...) {
+  gt_col_widths <- get_col_widths(...)
+  htmltools::withTags(
+  table(style = "width: 100%; border: 0px;",
+    tr(
+      td(style = glue::glue("width: {gt_col_widths[[1]]}%; vertical-align: top;"),
+        gt:::as.tags.gt_tbl(gt_left)
+      ),
+      td(style = glue::glue("width: {gt_col_widths[[2]]}%; vertical-align: top;"),
+        gt:::as.tags.gt_tbl(gt_mid)
+      ),
+      td(style = glue::glue("width: {gt_col_widths[[3]]}%; vertical-align: top;"),
+        gt:::as.tags.gt_tbl(gt_right)
+      )
+    )
+  )
+)
+}
+```
+  
+Working with two small data frames: `superheroes` and `publishers`.
+
+```{r, message = FALSE, warning = FALSE}
+
+superheroes <- tibble::tribble(
+       ~name, ~alignment,  ~gender,          ~publisher,
+   "Magneto",      "bad",   "male",            "Marvel",
+     "Storm",     "good", "female",            "Marvel",
+  "Mystique",      "bad", "female",            "Marvel",
+    "Batman",     "good",   "male",                "DC",
+     "Joker",      "bad",   "male",                "DC",
+  "Catwoman",      "bad", "female",                "DC",
+   "Hellboy",     "good",   "male", "Dark Horse Comics"
+  )
+
+publishers <- tibble::tribble(
+  ~publisher, ~yr_founded,
+        "DC",       1934L,
+    "Marvel",       1939L,
+     "Image",       1992L
+  )
+```
+
+Sorry, the cheat sheet does not illustrate "multiple match" situations terribly well.
+
+Sub-plot: watch the row and variable order of the join results for a healthy reminder of why it's dangerous to rely on any of that in an analysis.
+
+```{r style-gt-tables, include = FALSE}
+# superheroes will always be lilac
+super_gt <- style_table(superheroes, "superheroes") %>% 
+  tab_options(
+    table.background.color = "#edc7fc" # lilac
+  )
+
+# publishers will always be light blue
+pub_gt <- style_table(publishers, "publishers") %>% 
+  tab_options(
+    table.background.color = "#cce6f6" # light blue
+  )
+```
+
+#### `inner_join()`
+
+`inner_join(x, y)`: Return all rows from `x` where there are matching values in `y`, and all columns from `x` and `y`. If there are multiple matches between `x` and `y`, all combination of the matches are returned. This is a mutating join.
+
+```{r, echo= FALSE, out.width="100%", fig.cap="Inner join."}
+knitr::include_graphics("02-wrangling/images/join-inner.png")
+```
+
+```{r}
+(ijsp <- inner_join(superheroes, publishers))
+```
+
+We lose Hellboy in the join because, although he appears in `x = superheroes`, his publisher Dark Horse Comics does not appear in `y = publishers`. The join result has all variables from `x = superheroes` plus `yr_founded`, from `y`.
+
+```{r echo = FALSE}
+ijsp_gt <- style_table(ijsp, "inner_join(x = superheroes, y = publishers)") 
+```
+
+```{r echo = FALSE, out.width="33%"}
+make_three_gt(super_gt, pub_gt, ijsp_gt)
+```
+
+Now compare this result to that of using `inner_join()` with the two datasets in opposite positions. 
+```{r}
+(ijps <- inner_join(publishers, superheroes))
+```
+
+In a way, this does illustrate multiple matches, if you think about it from the `x = publishers` direction. Every publisher that has a match in `y = superheroes` appears multiple times in the result, once for each match. In fact, we're getting the same result as with `inner_join(superheroes, publishers)`, up to variable order (which you should also never rely on in an analysis).
+
+```{r echo = FALSE, out.width="100%"}
+ijps_gt <- style_table(ijps, "inner_join(x = publishers, y = superheroes)") 
+```
+
+```{r echo = FALSE}
+make_three_gt(pub_gt, super_gt, ijps_gt, super_first = FALSE)
+```
+
+The `inner_join()` will solve nearly all of the problems you'll encounter in this book.
+
+#### `full_join()`
+
+`full_join(x, y)`: Return all rows and all columns from both `x` and `y`. Where there are not matching values, returns `NA` for the one missing. This is a mutating join.
+
+```{r}
+(fjsp <- full_join(superheroes, publishers))
+```
+
+We get all rows of `x = superheroes` plus a new row from `y = publishers`, containing the publisher Image. We get all variables from `x = superheroes` AND all variables from `y = publishers`. Any row that derives solely from one table or the other carries `NA`s in the variables found only in the other table.
+
+```{r echo = FALSE}
+fjsp_gt <- style_table(fjsp, "full_join(x = superheroes, y = publishers)") 
+```
+
+```{r echo = FALSE, out.width="100%"}
+make_three_gt(super_gt, pub_gt, fjsp_gt)
+```
+
+Because `full_join()` returns all rows and all columns from both `x` and `y` the result of `full_join(x = superheroes, y = publishers)` should match that of `full_join(x = publishers, y = superheroes)`.
+
+#### `left_join()`
+
+`left_join(x, y)`: Return all rows from `x`, and all columns from `x` and `y`. If there are multiple matches between `x` and `y`, all combination of the matches are returned. This is a mutating join.
+
+```{r}
+(ljsp <- left_join(superheroes, publishers))
+```
+
+We basically get `x = superheroes` back, but with the addition of variable `yr_founded`, which is unique to `y = publishers`. Hellboy, whose publisher does not appear in `y = publishers`, has an `NA` for `yr_founded`.
+
+```{r echo = FALSE}
+ljsp_gt <- style_table(ljsp, "left_join(x = superheroes, y = publishers)") 
+```
+
+```{r echo = FALSE, out.width="100%"}
+make_three_gt(super_gt, pub_gt, ljsp_gt)
+```
+
+Now compare this result to that of running `left_join(x = publishers, y = superheroes)`. Unlike `inner_join()` and `full_join()` the order of the arguments has a significant effect on the resulting dataframe. 
+
+```{r}
+(ljps <- left_join(publishers, superheroes))
+```
+
+We get a similar result as with `inner_join()` but the publisher Image survives in the join, even though no superheroes from Image appear in `y = superheroes`. As a result, Image has `NA`s for `name`, `alignment`, and `gender`.
+
+```{r echo = FALSE}
+ljps_gt <- style_table(ljps, "left_join(x = publishers, y = superheroes)") 
+```
+
+```{r echo = FALSE, out.width="100%"}
+make_three_gt(pub_gt, super_gt, ljps_gt, super_first = FALSE)
+```
+
+There is a similar function, `right_join(x, y)` that return all rows from `y`, and all columns from `x` and `y`. Like `left_join()`, this is a mutating join.
+
+#### `semi_join()`
+
+`semi_join(x, y)`: Return all rows from `x` where there are matching values in `y`, keeping just columns from `x`. A semi join differs from an inner join because an inner join will return one row of `x` for each matching row of `y`, where a semi join will never duplicate rows of `x`. This is a filtering join.
+
+```{r}
+(sjsp <- semi_join(superheroes, publishers))
+```
+
+We get a similar result as with `inner_join()` but the join result contains only the variables originally found in `x = superheroes`.
+
+```{r echo = FALSE}
+sjsp_gt <- style_table(sjsp, "semi_join(x = superheroes, y = publishers)") 
+```
+
+```{r echo = FALSE, out.width="100%"}
+make_three_gt(super_gt, pub_gt, sjsp_gt)
+```
+
+Now compare the result of switching the values of the arguments. 
+
+```{r}
+(sjps <- semi_join(x = publishers, y = superheroes))
+```
+
+Now the effects of switching the `x` and `y` roles is more clear. The result resembles `x = publishers`, but the publisher Image is lost, because there are no observations where `publisher == "Image"` in `y = superheroes`.
+
+```{r echo = FALSE}
+sjps_gt <- style_table(sjps, "semi_join(x = publishers, y = superheroes)") 
+```
+
+```{r echo = FALSE, out.width="100%"}
+make_three_gt(pub_gt, super_gt, sjps_gt, super_first = FALSE)
+```
+
+#### `anti_join(superheroes, publishers)`
+
+`anti_join(x, y)`: Return all rows from `x` where there are not matching values in `y`, keeping just columns from `x`. This is a filtering join.
+
+```{r}
+(ajsp <- anti_join(superheroes, publishers))
+```
+
+We keep only Hellboy now (and do not get `yr_founded`).
+
+```{r echo = FALSE}
+ajsp_gt <- style_table(ajsp, "anti_join(x = superheroes, y = publishers)") 
+```
+
+```{r echo = FALSE, out.width="100%"}
+make_three_gt(super_gt, pub_gt, ajsp_gt)
+```
+
+Now switch the arguments and compare the result.
+
+```{r}
+(ajps <- anti_join(publishers, superheroes))
+```
+
+We keep only publisher Image now (and the variables found in `x = publishers`).
+
+```{r echo = FALSE}
+ajps_gt <- style_table(ajps, "anti_join(x = publishers, y = superheroes)") 
+```
+
+```{r echo = FALSE, out.width="100%"}
+make_three_gt(pub_gt, super_gt, ajps_gt, super_first = FALSE)
+```
+
+### Join data frames with "key" variables
+
+"Joining" or "merging" two different datasets is tricky stuff. Let's go through some more examples while reviewing the basic concepts. In the `flights` data frame, the variable `carrier` lists the carrier code for the different flights. While the corresponding airline names for `"UA"` and `"AA"` might be somewhat easy to guess (United and American Airlines), what airlines have codes `"VX"`, `"HA"`, and `"B6"`? This information is provided in a separate data frame `airlines`.
+
+```{r eval=FALSE}
+View(airlines)
+```
+
+We see that in `airports`, `carrier` is the carrier code, while `name` is the full name of the airline company. Using this table, we can see that `"VX"`, `"HA"`, and `"B6"` correspond to Virgin America, Hawaiian Airlines, and JetBlue, respectively. However, wouldn't it be nice to have all this information in a single data frame instead of two separate data frames? We can do this by "joining" the `flights` and `airlines` data frames.
+
+Note that the values in the variable `carrier` in the `flights` data frame match the values in the variable `carrier` in the `airlines` data frame. In this case, we can use the variable `carrier` as a *key variable* to match the rows of the two data frames. Key variables are almost always *identification variables* that uniquely identify the observational units. This ensures that rows in both data frames are appropriately matched during the join. @rds2016 created the following diagram to help us understand how the different data frames in the `nycflights13` package are linked by various key variables:
+
+```{r, echo=FALSE, fig.cap="Relationships among nycflights tables", out.width="70%", fig.align='center'}
+knitr::include_graphics("02-wrangling/images/relational-nycflights.png")
+```
+
+#### Matching "key" variable names
+
+In both the `flights` and `airlines` data frames, the key variable we want to join/merge/match the rows by has the same name: `carrier`. Let's use the `inner_join()`  function to join the two data frames, where the rows will be matched by the variable `carrier`, and then compare the resulting data frames:
+
+```{r eval=FALSE}
+flights_joined <- flights %>% 
+  inner_join(airlines, by = "carrier")
+View(flights)
+View(flights_joined)
+```
+
+Observe that the `flights` and `flights_joined` data frames are identical except that `flights_joined` has an additional variable `name`. The values of `name` correspond to the airline companies' names as indicated in the `airlines` data frame. 
+
+Say instead you are interested in the destinations of all domestic flights departing NYC in 2013, and you ask yourself questions like: "What cities are these airports in?", or "Is `"ORD"` Orlando?", or "Where is `"FLL"`?".
+
+The `airports` data frame contains the airport codes for each airport:
+
+```{r eval=FALSE}
+View(airports)
+```
+
+However, if you look at both the `airports` and `flights` data frames, you'll find that the airport codes are in variables that have different names. In `airports` the airport code is in `faa`, whereas in `flights` the airport codes are in `origin` and `dest`. 
+
+In order to join these two data frames by airport code, our `inner_join()` operation will use the `by = c("dest" = "faa")` argument with modified code syntax allowing us to join two data frames where the key variable has a different name:
+
+```{r, eval=FALSE}
+flights_with_airport_names <- flights %>% 
+  inner_join(airports, by = c("dest" = "faa"))
+View(flights_with_airport_names)
+```
+
+Let's construct the chain of pipe operators `%>%` that computes the number of flights from NYC to each destination, but also includes information about each destination airport:
+
+```{r}
+named_dests <- flights %>%
+  group_by(dest) %>%
+  summarize(num_flights = n(),
+            .groups = "drop") %>%
+  arrange(desc(num_flights)) %>%
+  inner_join(airports, by = c("dest" = "faa")) %>%
+  rename(airport_name = name)
+named_dests
+```
+
+In case you didn't know, `"ORD"` is the airport code of Chicago O'Hare airport and `"FLL"` is the main airport in Fort Lauderdale, Florida, which can be seen in the `airport_name` variable.
+
+#### Multiple "key" variables
+
+Say instead we want to join two data frames by *multiple key variables*. For example, we see that in order to join the `flights` and `weather` data frames, we need more than one key variable: `year`, `month`, `day`, `hour`, and `origin`. This is because the combination of these 5 variables act to uniquely identify each observational unit in the `weather` data frame: hourly weather recordings at each of the 3 NYC airports.
+
+We achieve this by specifying a *vector* of key variables to join by using the `c()` function. Recall that `c()` is short for "combine" or "concatenate."
+
+```{r, eval=FALSE}
+flights_weather_joined <- flights %>%
+  inner_join(weather, by = c("year", "month", "day", "hour", "origin"))
+View(flights_weather_joined)
+```
+
+## "Tidy" data
+
+Now, we will explore the topic of "tidy" data, a manner of data formatting particularly suited to the creation of graphics and the manipulation of the dataframe. You will see that having data stored in "tidy" format is about more than just what the everyday definition of the term "tidy" might suggest: having your data "neatly organized." Instead, we define the term "tidy" as it's used by data scientists who use R, outlining a set of rules by which data is saved.
+
+Knowledge of this type of data formatting was not necessary for our treatment of data visualization in Chapter 1 and in previous data wrangling topics. This is because all the data used were already in "tidy" format. In this chapter, we'll now see that this format is essential to using the tools we covered up until now. Furthermore, it will also be useful for all subsequent chapters in this book when we cover regression and statistical inference.
+
+Let's switch gears and learn about the concept of "tidy" data format with a motivating example from the `fivethirtyeight` package. The `fivethirtyeight` package provides access to the datasets used in many articles published by the data journalism website, [FiveThirtyEight.com](https://fivethirtyeight.com/).
+
+Let's focus our attention on the `drinks` data frame and look at its first 5 rows:
+
+```{r, echo=FALSE}
+drinks %>%  
+  head(5)
+```
+
+After reading the help file by running `?drinks`, you'll see that `drinks` is a data frame containing results from a survey of the average number of servings of beer, spirits, and wine consumed in 193 countries. This data was originally reported on FiveThirtyEight.com in Mona Chalabi's article: ["Dear Mona Followup: Where Do People Drink The Most Beer, Wine And Spirits?"](https://fivethirtyeight.com/features/dear-mona-followup-where-do-people-drink-the-most-beer-wine-and-spirits/).
+
+Let's apply some of the data wrangling verbs on the `drinks` data frame:
+
+1. `filter()` the `drinks` data frame to only consider 4 countries: the United States, China, Italy, and Saudi Arabia, *then*
+1. `select()` all columns except `total_litres_of_pure_alcohol` by using the `-` sign, *then*
+1. `rename()` the variables `beer_servings`, `spirit_servings`, and `wine_servings` to `beer`, `spirit`, and `wine`, respectively.
+
+and save the resulting data frame in `drinks_smaller`:
+
+```{r}
+drinks_smaller <- drinks %>%
+  filter(country %in% c("USA", "China", "Italy", "Saudi Arabia")) %>%
+  select(-total_litres_of_pure_alcohol) %>%
+  rename(beer = beer_servings, spirit = spirit_servings, wine = wine_servings)
+drinks_smaller
+```
+
+Let's now ask ourselves a question: "Using the `drinks_smaller` data frame, how would we create the side-by-side barplot below. 
+
+```{r, fig.cap="Comparing alcohol consumption in 4 countries."}
+drinks_smaller_tidy <- drinks_smaller %>% 
+  pivot_longer(cols = -country, names_to = "type", values_to = "servings")
+
+drinks_smaller_tidy_plot <- ggplot(drinks_smaller_tidy, 
+                                   aes(x = country, y = servings, fill = type)) + geom_col(position = "dodge") + 
+                              labs(x = "country", y = "servings")
+```
+
+Let's break down the graphic:
+
+1. The categorical variable `country` with four levels (China, Italy, Saudi Arabia, USA) would have to be mapped to the `x`-position of the bars.
+1. The numerical variable `servings` would have to be mapped to the `y`-position of the bars (the height of the bars).
+1. The categorical variable `type` with three levels (beer, spirit, wine) would have to be mapped to the `fill` color of the bars.
+
+Observe, however, that `drinks_smaller` has three separate variables `beer`, `spirit`, and `wine`. In order to use the `ggplot()` function to recreate the barplot we need a single variable `type` with three possible values: `beer`, `spirit`, and `wine`.  We could then map this `type` variable to the `fill` aesthetic of our plot.  In other words, to recreate the barplot, our data frame would have to look like this:
+
+```{r}
+drinks_smaller_tidy
+```
+
+Observe that while `drinks_smaller` and `drinks_smaller_tidy` are both rectangular in shape and contain the same 12 numerical values (3 alcohol types by 4 countries), they are formatted differently. `drinks_smaller` is formatted in what's known as  ["wide"](https://en.wikipedia.org/wiki/Wide_and_narrow_data) format, whereas `drinks_smaller_tidy` is formatted in what's known as ["long/narrow"](https://en.wikipedia.org/wiki/Wide_and_narrow_data#Narrow) format.
+
+In the context of doing data science in R, long/narrow format is also known as "tidy" format. In order to use the **ggplot2** and **dplyr** packages for data visualization and data wrangling, your input data frames must be in "tidy" format. Thus, all non-"tidy" data must be converted to "tidy" format first. Before we convert non-"tidy" data frames like `drinks_smaller` to "tidy" data frames like `drinks_smaller_tidy`, let's define "tidy" data.
+
+### Definition of "tidy" data 
+
+
+What does it mean for your data to be "tidy"? While "tidy" has a clear English meaning of "organized," the word "tidy" in data science using R means that your data follows a standardized format. We will follow Hadley Wickham's  definition of "tidy" data:
+
+
+A *dataset* is a collection of values, usually either numbers (if quantitative) or strings AKA text data (if qualitative/categorical). Values are organised in two ways. Every value belongs to a variable and an observation. A variable contains all values that measure the same underlying attribute (like height, temperature, duration) across units. An observation contains all values measured on the same unit (like a person, or a day, or a city) across attributes.
+
+"Tidy" data is a standard way of mapping the meaning of a dataset to its structure. A dataset is messy or tidy depending on how rows, columns and tables are matched up with observations, variables and types. In *tidy data*:
+
+1. Each variable forms a column.
+2. Each observation forms a row.
+3. Each type of observational unit forms a table.
+
+
+```{r, echo=FALSE, out.width="100%"}
+knitr::include_graphics("02-wrangling/images/tidy-1.png")
+```
+
+
+### Converting to "tidy" data
+
+In this book so far, you've only seen data frames that were already in "tidy" format. Furthermore, for the rest of this book, you'll mostly only see data frames that are already in "tidy" format as well. This is not always the case however with all datasets in the world. If your original data frame is in wide (non-"tidy") format and you would like to use the **ggplot2** or **dplyr** packages, you will first have to convert it to "tidy" format. To do so, we recommend using the `pivot_longer()` function in the **tidyr** package [@R-tidyr]. 
+
+Going back to our `drinks_smaller` data frame from earlier:
+
+```{r}
+drinks_smaller
+```
+
+We convert it to "tidy" format by using the `pivot_longer()` function from the **tidyr** package as follows:
+
+```{r}
+drinks_smaller_tidy <- drinks_smaller %>% 
+  pivot_longer(names_to = "type", 
+               values_to = "servings", 
+               cols = -country)
+drinks_smaller_tidy
+```
+
+We set the arguments to `pivot_longer()` as follows:
+
+1. `names_to` here corresponds to the name of the variable in the new "tidy"/long data frame that will contain the *column names* of the original data. Observe how we set `names_to = "type"`. In the resulting `drinks_smaller_tidy`, the column `type` contains the three types of alcohol `beer`, `spirit`, and `wine`. Since `type` is a variable name that doesn't appear in `drinks_smaller`, we use quotation marks around it. You'll receive an error if you just use `names_to = type` here.
+1. `values_to` here is the name of the variable in the new "tidy" data frame that will contain the *values* of the original data. Observe how we set `values_to = "servings"` since each of the numeric values in each of the `beer`, `wine`, and `spirit` columns of the `drinks_smaller` data corresponds to a value of `servings`. In the resulting `drinks_smaller_tidy`, the column `servings` contains the 4 $\times$ 3 = 12 numerical values. Note again that `servings` doesn't appear as a variable in `drinks_smaller` so it again needs quotation marks around it for the `values_to` argument.
+1. The third argument `cols` is the columns in the `drinks_smaller` data frame you either want to or don't want to "tidy." Observe how we set this to `-country` indicating that we don't want to "tidy" the `country` variable in `drinks_smaller` and rather only `beer`, `spirit`, and `wine`. Since `country` is a column that appears in `drinks_smaller` we don't put quotation marks around it.
+
+The third argument here of `cols` is a little nuanced, so let's consider code that's written slightly differently but that produces the same output: 
+
+```{r, eval=FALSE}
+drinks_smaller %>% 
+  pivot_longer(names_to = "type", 
+               values_to = "servings", 
+               cols = c(beer, spirit, wine))
+```
+
+Note that the third argument now specifies which columns we want to "tidy" with `c(beer, spirit, wine)`, instead of the columns we don't want to "tidy" using `-country`. We use the `c()` function to create a vector of the columns in `drinks_smaller` that we'd like to "tidy." Note that since these three columns appear one after another in the `drinks_smaller` data frame, we could also do the following for the `cols` argument:
+
+```{r, eval=FALSE}
+drinks_smaller %>% 
+  pivot_longer(names_to = "type", 
+               values_to = "servings", 
+               cols = beer:wine)
+```
+
+With our `drinks_smaller_tidy` "tidy" formatted data frame, we can now produce the barplot you saw previously using `geom_col()`. Recall from the previous chapter that we use `geom_col()` and not `geom_bar()`, since we would like to map the "pre-counted" `servings` variable to the `y`-aesthetic of the bars.
+
+```{r eval=FALSE}
+ggplot(drinks_smaller_tidy, aes(x = country, y = servings, fill = type)) +
+  geom_col(position = "dodge")
+```
+
+(ref:drinks-col) Comparing alcohol consumption in 4 countries using geom_col().
+
+```{r, echo=FALSE, fig.cap='(ref:drinks-col)'}
+drinks_smaller_tidy_plot
+```
+
+Converting "wide" format data to "tidy" format often confuses new R users. The only way to learn to get comfortable with the `pivot_longer()` function is with practice, practice, and more practice using different datasets. For example, run `?pivot_longer` and look at the examples in the bottom of the help file.
+
+If however you want to convert a "tidy" data frame to "wide" format, you will need to use the `pivot_wider()` function instead. Run `?pivot_wider` and look at the examples in the bottom of the help file for examples.
+
+You can also view examples of both `pivot_longer()` and `pivot_wider()` on the [tidyverse.org](https://tidyr.tidyverse.org/dev/articles/pivot.html#pew) webpage. There's a nice example to check out the different functions available for data tidying and a case study using data from the World Health Organization on that webpage. Furthermore, each week the R4DS Online Learning Community posts a dataset in the weekly [`#`TidyTuesday event](https://github.com/rfordatascience/tidytuesday) that might serve as a nice place for you to find other data to explore and transform. 
+
+## Other Commands
+
+Here are some commands which will prove useful for the rest of the book.
+
+### NA Values 
+
+When importing datasets that have not already been extensively wrangled, there may be some observations in the dataframe that are blank. These are called missing values, and they are often marked as `NA`. The presence of `NA` values in a dataframe can be problematic. Recall from the previous chapter that without setting `na.rm = TRUE`, the following code gives a very different results. 
+
+```{r}
+flights %>% 
+  mutate(gain = arr_delay - dep_delay) %>% 
+  summarize(mean = mean(gain))
+
+flights %>% 
+  mutate(gain = arr_delay - dep_delay) %>% 
+  summarize(mean = mean(gain, na.rm = TRUE))
+```
+
+Suppose we wanted to simply remove all missing values from the `gain` column. We can filter and remove missing values using the helper function `is.na()`. `is.na()` is a boolean function that takes in an observation in a dataframe and returns TRUE if the observation is a missing value and FALSE otherwise. In this case, we will have to use `!is.na()`, as the `!` operator means "not". Thus, we can filter observations that are NOT missing values.
+
+```{r}
+flights %>%
+  mutate(gain = arr_delay - dep_delay) %>%
+  filter(!is.na(gain)) %>%
+  summarize(mean = mean(gain))
+```
+
+We can also remove the missing values from the dataset instead of merely filtering them out using the `drop_na()` function. The `flights` dataset contains 336,776 rows. And when 
+
+```{r}
+flights %>%
+  mutate(gain = arr_delay - dep_delay) %>%
+  filter(is.na(gain))
+```
+As we see here, there are 9,430 rows of the `flights` dataset that contain missing values in the gain column. So using `drop_na()`, we get:
+
+```{r}
+flights %>%
+  mutate(gain = arr_delay - dep_delay) %>%
+  drop_na(gain)
+```
+
+Note that 336,776 - 9,430 = 327346, so `drop_na()` seems to check out. Be careful with `drop_na()`, however, because you may be removing rows with valuable data in other columns. 
+
+Suppose you did not want to remove the missing values but instead replace them with a number. We can use `replace_na()` as a helper function to `mutate()`. Here we replace each missing value in the gain column with a value of 0. 
+
+```{r}
+flights %>%
+  mutate(gain = arr_delay - dep_delay) %>%
+  mutate(gain = replace_na(data = gain, replace = 0))
+```
+
+You must be careful with this, though. Replacing missing values will affect any statistical result, such as the mean or standard deviation. Below we computer the mean: 
+
+```{r}
+flights %>%
+  mutate(gain = arr_delay - dep_delay) %>%
+  mutate(gain = replace_na(data = gain, replace = 0)) %>%
+  summarize(mean = mean(gain))
+```
+
+Comparing it with the previous mean variable we see that the computed value is different. 
+
+There are many additional ways to manipulate missing values, but these three functions cover most of the ways you will need to work with such observations in your data.   
+
+### `clean_names()`
+
+Another useful function is the `clean_names()` function, which is included in the **janitor** package. This function allows you to standardize the column names of a dataset. This can be particularly useful when reading in a dataset from the web. Look at the `flights` dataset, again. 
+```{r}
+glimpse(flights)
+```
+
+As you can see the column names are in all lowercase, and each space in between words is represented by an underscore character. This is the default result of `clean_names()`, so running `clean_names(flights)` will have no effect. 
+
+Suppose, instead, we wanted to change the column names to camel case, where word boundaries are demarcated by an upper case letter.  
+
+```{r}
+flights %>% clean_names("small_camel")
+```
+
+Nonetheless, you will likely only ever be required to use `clean_names()` with the default snake case. 
+
+### `skim()`
+
+The `skim()` function from the **skimr** package is a useful summary function that offers an overview of a dataframe.  It offers users the abilities to see potential trends and outliers for each of the variables in a dataframe. The function creates a report of the dataframe according to variable type. We'll run skim on the `flights` dataset. 
+
+```{r out.width="100%"}
+skim(flights)
+```
+
+
+Take a quick look at the section containing numeric variables. This is of particular interest because the rightmost column offers insight into the potential distribution of the data, something that will be discussed in later depth below. 
+
+## Distribution 
+
+What is a distribution? The distribution of a variable shows how frequently different values of a variable occur. Looking at the visualization of a distribution can show where the values are centered, show how the values vary, and give some information about where a typical value might fall. It can also alert you to the presence of outliers. 
+
+Before we examine distributions in greater depth, let's first explore the `sample()` function. `sample()` takes a sample of some size from some vector either with replacement or without replacement. This might seem very abstract, so consider a six-sided dice represented as a vector. 
+
+```{r}
+dice <- c(1, 2, 3, 4, 5, 6)
+```
+
+Suppose we wanted to simulate rolling this dice once. We can use the `sample()` function to achieve this. 
+```{r}
+sample(x = dice, size = 1)
+```
+
+Now, suppose we wanted to roll this dice 10 times. One of the arguments of the `sample()` function is replace. We must specify if a certain value can be rolled more than once. In this case, should replace be TRUE or FALSE. 
+
+```{r}
+sample(x = dice, size = 10, replace = TRUE)
+```
+
+Here replace should be TRUE. In other words, rolling a 1 on the first roll should not preclude you from rolling a one on a later roll. 
+
+The final argument of the `sample()` function is the prob argument. It takes a vector (of the same length as the initial vector x) that contains all of the probabilities of "landing on" one of the elements of x. Suppose that the probability of rolling a 1 was 0.5, and the probability of rolling any other value is 0.1. Note, these probabilities should sum to 1. 
+
+```{r}
+probs = c(0.5, 0.1, 0.1, 0.1, 0.1, 0.1)
+
+sample(x = dice, size = 10, replace = TRUE, prob = probs)
+
+```
+
+Now, let's return to our discussion of distributions. 
+
+### `runif()`
+
+Consider Uniform distribution. This is the case in which every outcome has the same chance of occurring. A Uniform distribution you might encounter everyday is rolling a fair dice. For example, you are as likely to roll a 2 as you are to roll a 6. In R, the function `runif()` (read as "r-unif") corresponds to a Uniform contribution. In other words, this function generates random values (within a specified range).
+
+The `runif()` function has three arguments: `n`, `min`, and `max`. Note that in R, `runif()` returns a continuous uniform distribution, not a discrete one. This means that if we tried to simulate our die-rolling example, we would get decimal values.
+
+Let's press on with our die-rolling example now that we have cautioned you about the difference between discrete and continuous uniform distributions. There are three arguments to `runif()`: `n`, `min`, and `max`. `n` is the number of observations, or `n = 1` since we are rolling the die once. The default value for `min` is `0` and the default value of `max` is 1. In our die-rolling example, these two values would be `min = 1` and `max = 6`, respectively. Let's plug these arguments into the function and see what we get.
+
+```{r}
+runif(n = 1,min = 1,max = 6)
+```
+Nice! We just made our first uniform distribution. Again, note that the output contains decimal numbers.
+
+### `rbinom()`
+
+Now consider Binomial distribution, the case in which the probability of some boolean variable (for instance success or failure) is calculated for repeated, independent trials. One common example would be the probability of flipping a coin and landing on heads. In R, the function `rbinom()` simulates such a distribution. This function takes three arguments, `n`, `size`, and `prob`. `n` is the number of observations, the `size` is the number of trials, and `prob` is the probability of success on each trial. Suppose we wanted to flip a fair coin one time, and let landing on hands represent success. Let `n=1` and `size = 1`, as we only want to flip the coin once. Then, since the coin is a fair coin, let `prob = 0.5`.
+
+```{r}
+rbinom(n = 1 , size = 1, prob = 0.5)
+```
+
+```{r}
+coin_flip <- tibble(heads = rbinom(n = 100, size = 1, prob = 0.5))
+
+ggplot(data = coin_flip, aes(x = heads)) +
+  geom_bar() +
+  labs(title = "Flipping a Fair Coin 100 Times") +
+  xlab(label = "Flips") +
+  ylab(label = "Count")
+
+```
+
+As you can see there is a pretty even distribution of Heads (1s) and Tails (0s). An even larger sample size would result in a more even spread of Heads and Tails values. 
+
+Suppose instead we wanted to simulate an unfair cin, where the probability of landing on Heads was 0.75 instead of 0.25. 
+
+```{r}
+coin_flip_2 <- tibble(heads = rbinom(n = 100, size = 1, prob = 0.75))
+
+ggplot(data = coin_flip_2, aes(x = heads)) +
+  geom_bar() +
+  labs(title = "Flipping a Fair Coin 100 Times") +
+  xlab(label = "Flips") +
+  ylab(label = "Count")
+```
+
+### Normal distribution {#normal}
+
+Let's next discuss one particular kind of distribution: *normal distributions*. Such bell-shaped distributions are defined by two values: (1) the *mean* $\mu$ ("mu") which locates the center of the distribution and (2) the *standard deviation* $\sigma$ ("sigma") which determines the variation of the distribution. In the figure below, we plot three normal distributions where:
+
+1. The solid normal curve has mean $\mu = 5$ \& standard deviation $\sigma = 2$.
+1. The dotted normal curve has mean $\mu = 5$ \& standard deviation $\sigma = 5$.
+1. The dashed normal curve has mean $\mu = 15$ \& standard deviation $\sigma = 2$.
+
+```{r, echo=FALSE, fig.cap="Three normal distributions."}
+all_points <- tibble(
+  domain = seq(from = -10, to = 25, by = 0.01),
+  `mu = 5, sigma = 2` = dnorm(x = domain, mean = 5, sd = 2),
+  `mu = 5, sigma = 5` = dnorm(x = domain, mean = 5, sd = 5),
+  `mu = 15, sigma = 2` = dnorm(x = domain, mean = 15, sd = 2)
+)  %>% 
+  pivot_longer(- domain, names_to = "Distribution", values_to = "value", ) %>% 
+  mutate(
+    Distribution = factor(
+      Distribution, 
+      levels = c("mu = 5, sigma = 2", 
+                 "mu = 5, sigma = 5", 
+                 "mu = 15, sigma = 2")
+    )
+  )
+for_labels <- all_points %>% 
+  filter(between(domain, 3.795, 3.805) & Distribution == "mu = 5, sigma = 2" |
+           between(domain, 0.005, 0.0105) & Distribution == "mu = 5, sigma = 5" |
+           between(domain, 16.005, 16.015) & Distribution == "mu = 15, sigma = 2")
+all_points %>% 
+  ggplot(aes(x = domain, y = value, linetype = Distribution)) +
+  geom_line() +
+  geom_label_repel(data = for_labels, aes(label = Distribution),
+                            nudge_x = c(-1, -2.1, 1)) +
+  theme_light() +
+  scale_linetype_manual(values=c("solid", "dotted", "longdash")) + 
+  theme(
+    axis.title.y = element_blank(),
+    axis.title.x = element_blank(),
+    axis.text.y = element_blank(),
+    axis.ticks.y = element_blank(),
+    legend.position = "none"
+  )
+```
+
+Notice how the solid and dotted line normal curves have the same center due to their common mean $\mu$ = 5. However, the dotted line normal curve is wider due to its larger standard deviation of $\sigma$ = 5. On the other hand, the solid and dashed line normal curves have the same variation due to their common standard deviation $\sigma$ = 2. However, they are centered at different locations. 
+
+When the mean $\mu$ = 0 and the standard deviation $\sigma$ = 1, the normal distribution has a special name. It's called the *standard normal distribution* or the *$z$-curve*.
+
+Furthermore, if a variable follows a normal curve, there are *three rules of thumb* we can use:
+
+1. 68% of values will lie within $\pm$ 1 standard deviation of the mean.
+1. 95% of values will lie within $\pm$ 1.96 $\approx$ 2 standard deviations of the mean.
+1. 99.7% of values will lie within $\pm$ 3 standard deviations of the mean.
+
+Let's illustrate this on a standard normal curve. The dashed lines are at -3, -1.96, -1, 0, 1, 1.96, and 3. These 7 lines cut up the x-axis into 8 segments. The areas under the normal curve for each of the 8 segments are marked and add up to 100%. For example:
+
+1. The middle two segments represent the interval -1 to 1. The shaded area above this interval represents 34% + 34% = 68% of the area under the curve. In other words, 68% of values. 
+1. The middle four segments represent the interval -1.96 to 1.96. The shaded area above this interval represents 13.5% + 34% + 34% + 13.5% = 95% of the area under the curve. In other words, 95% of values. 
+1. The middle six segments represent the interval -3 to 3. The shaded area above this interval represents 2.35% + 13.5% + 34% + 34% + 13.5% + 2.35% = 99.7% of the area under the curve. In other words, 99.7% of values. 
+
+```{r, echo=FALSE, fig.cap="Rules of thumb about areas under normal curves."}
+shade_3_sd <- function(x) {
+  y <- dnorm(x, mean = 0, sd = 1)
+  y[x <= -3 | x >= 3] <- NA
+  return(y)
+}
+shade_2_sd <- function(x) {
+  y <- dnorm(x, mean = 0, sd = 1)
+  y[x <= -1.96 | x >= 1.96] <- NA
+  return(y)
+}
+shade_1_sd <- function(x) {
+  y <- dnorm(x, mean = 0, sd = 1)
+  y[x <= -1 | x >= 1] <- NA
+  return(y)
+}
+labels <- tibble(
+  x = c(-3.5, -2.5, -1.5, -0.5, 0.5, 1.5, 2.5, 3.5),
+  label = c("0.15%", "2.35%", "13.5%", "34%", "34%", "13.5%", "2.35%", "0.15%")
+) %>% 
+  mutate(y = rep(0.3, times = n()))
+ggplot(data = tibble(x = c(-4, 4)), aes(x)) +
+  geom_text(data = labels, aes(y=y, label = label)) + 
+  # Trace normal curve
+  stat_function(fun = dnorm, args = list(mean = 0, sd = 1), n = 1000) + 
+  # Shade and delineate +/- 3 SD
+  stat_function(fun = shade_3_sd, geom = "area", fill = "black", alpha = 0.25, n = 1000) +
+  # annotate(geom = "segment", x = c(3, -3), xend = c(3, -3), y = 0, yend = dnorm(3, mean = 0, sd = 1)) +
+  # Shade and delineate +/- 2 SD
+  stat_function(fun = shade_2_sd, geom = "area", fill = "black", alpha = 0.25, n = 1000) +
+  # annotate(geom = "segment", x = c(1.96, -1.96), xend = c(1.96, -1.96), y = 0, yend = dnorm(1.96, mean = 0, sd = 1)) +
+  # Shade and delineate +/- 1 SD
+  stat_function(fun = shade_1_sd, geom = "area", fill = "black", alpha = 0.25, n = 1000) +
+  # annotate(geom = "segment", x = c(1, -1), xend = c(1, -1), y = 0, yend = dnorm(1, mean = 0, sd = 1)) + 
+  geom_vline(xintercept = c(-3, -1.96, -1, 0, 1, 1.96, 3), linetype = "dashed", alpha = 0.5) +
+  # Axes
+  scale_x_continuous(breaks = seq(from = -3, to = 3, by = 1)) +
+  labs(x = "z", y = "") +
+  theme(axis.title.y = element_blank(), axis.text.y = element_blank(), axis.ticks.y = element_blank())
+```
+
+
+### `rnorm()`
+
+```{r, echo = FALSE}
+set.seed(5)
+```
+
+The function `rnorm()` can be read as "r-norm". It corresponds to a Normal distribution.
+
+`rnorm()` has three arguments: `n`, `mean`, and `sd`. `n` corresponds to the number of observations, `mean` corresponds to the average as a whole, and `sd` corresponds to the size of the standard deviation from the mean. We will go further in depth in future chapters on what the statistical mechanics are behind these distributions, but for now, let's focus on creating a Normal distribution.
+
+If we run the following:
+```{r}
+rnorm(10)
+```
+
+We get 10 observations centered around a default `mean` of 0 with a default `sd` of 1. What if we create a histogram of the values?
+
+```{r}
+distrib <- tibble(value = rnorm(10))
+
+ggplot(distrib, aes(x = value)) + 
+  geom_histogram(bins = 10)
+```
+As you can see, it's not as symmetrical as the one displayed before. Now what if we try taking 100 observations, then 1000?
+
+```{r}
+distrib_2 <- tibble(value = rnorm(100))
+
+ggplot(distrib_2, aes(x = value)) +
+  geom_histogram(bins = 10)
+```
+
+```{r}
+distrib_3 <- tibble(value = rnorm(1000))
+
+ggplot(distrib_2, aes(x = value)) +
+  geom_histogram(bins = 10)
+```
+
+Now it's looking a lot more similar (although imperfect)! As you just discovered, the more observations a normal distribution has, the closer it looks to a symmetrical bell curve.
+
+Now, let's compare normal distributions with varying means and standard deviations, which can be set using the mean and sd arguments included with the function. 
+
+```{r}
+normal_distrib <- tibble(rnorm_5_1 = rnorm(n = 1000, mean = 5, sd = 1), 
+                        rnorm_0_3 = rnorm(n = 1000, mean = 0, sd = 3),
+                        rnorm_0_1 = rnorm(n = 1000, mean = 0, sd = 1)) %>%
+  pivot_longer(cols = everything(), 
+               names_to = "distribution", 
+               values_to = "samples")
+
+ggplot(normal_distrib, aes(x = samples, fill = distribution)) +
+  geom_density(alpha = 0.5) +
+  labs(title = "Comparison of Normal Distributions with Differing Mean and Standard Deviation Values", 
+       fill = "Distribution") +
+  xlab("X") + 
+  ylab("Density")
+
+```
+
+<!-- DK: We want to show and explain rnorm(), runif() and rbinom(), with a clear explanation of coin-tossing as an example. Like how many heads might appear of you flip a coin with p = 0.6 20 times. (Use that exact example.) -->

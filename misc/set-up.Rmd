@@ -1,0 +1,132 @@
+---
+title: "Set Up"
+author: "David Kane"
+output: html_document
+---
+
+This document provides a guide in setting up R/RStudio to work on *The Primer*, both the book itself (davidkane/PPDBS) and the associated data/tutorials package (davidkane9/PPBDS.data). The first part ensures that you have the knowledge and computer settings to be successful. With luck, you will only need to do this once. The second part involves making a connection between the true repos on davidkane9 and your Github account and your computer. You may end up doing this dozen of times since, whenever something gets messed up, the easiest solution is often to just "nuke it from orbit" and start again.
+
+
+## Basic Set up and Knowledge
+
+1) Install the latest released versions of R and RStudio. 
+
+https://happygitwithr.com/install-r-rstudio.html
+
+If you have not taken Gov 50, Read the Shopping Weeek section of The Primer and make sure your Git/Github is working. Read and watch the videos from [*Getting Used to R, RStudio, and R Markdown*](https://ismayc.github.io/rbasics-book/) by Chester Ismay and Patrick C. Kennedy. Also, check out [RStudio Essentials Videos](https://resources.rstudio.com/wistia-rstudio-essentials-2). Most relevant for us are ["Writing code in RStudio"](https://resources.rstudio.com/wistia-rstudio-essentials-2/rstudioessentialsprogrammingpart1-2), ["Projects in RStudio"](https://resources.rstudio.com/wistia-rstudio-essentials-2/rstudioessentialsmanagingpart1-2) and ["Github and RStudio"](https://resources.rstudio.com/wistia-rstudio-essentials-2/rstudioessentialsmanagingpart2-2).
+
+2) Make sure that your Git/Github connections are good. If you have gone through https://happygitwithr.com/ --- as you should have --- then these may already be OK. If not (or, even if you have), then you need to run `git_sitrep().` 
+
+> install.packages("usethis")
+> library(usethis)
+> git_sitrep()
+Git config (global)* 
+Name: 'David Kane'* 
+Email: 'dave.kane@gmail.com'* 
+Vaccinated: FALSE
+...
+GitHub* 
+Personal access token: '<found in env var>'* 
+User: 'davidkane9'* 
+Name: 'David Kane'* 
+Email(s): '<unknown>'
+...
+
+I left out some of the output.
+
+If the first part --- Git config --- seems messed up, execute:
+
+> use_git_config(user.name = "David Kane", user.email = "dave.kane@gmail.com")
+
+If the second part seems messed up, try:
+
+> usethis::browse_github_pat()
+
+and follow the instructions. You must put the PAT you generate into your .Renviron file. Restart R and then run git_sitrep() again to make sure that things look like mine, more or less.
+
+3) Install the renv package:
+
+install.packages("renv")
+
+You can read about the renv package here: https://rstudio.github.io/renv/articles/renv.html
+
+It is not critical to understand all the details of how renv works. The big picture is that it creates a set of libraries which will be used just for this project and whose versions are kept in sync between you and me.
+
+4) At this point, you should have all the tools you need to contribute. If you have never done a pull request, however, you will need to learn more. Start by reading the help page:
+
+https://usethis.r-lib.org/articles/articles/pr-functions.html
+
+Read the whole thing! Don't just skim it. These are important concepts for professional-level workflow. The **usethis** package is mostly providing wrappers around the underlying git commands. If you want to understand what is happening at a lower level, read the next link, but doing so is optional.
+
+https://git-scm.com/book/en/v2/GitHub-Contributing-to-a-Project
+
+Again, with luck, you will only have to do all the above steps once.
+
+## Make Connection and Submit Work
+
+You will need to do the below steps at least one time. It is more likely, however, that you will do them dozens of times. Every time after the first you are in a "nuke it from orbit" situation, which means that you start by deleting the current version of the package from two places: your computer (just put the R Studio project directory in the trash) and your Github account (just delete the repo by going to Settings and going to the bottom of the page).
+
+The key steps, which closely follow the **usethis** help page:
+
+1) Fork/download the target repo:  
+
+library(usethis)
+create_from_github("davidkane9/PPBDS", 
+                    fork = TRUE, 
+                    destdir = "/Users/dkane/Desktop/projects/", 
+                    protocol = "https")
+                    
+That is the repo for working on the book. If you are working on data/tutorials, you need to fork/download "davidkane9/PPBDS.data" instead. You must change destdir to be a location on your computer.                     
+                    
+For your education, it is worth reading the help page for `create_from_github()`. The `fork`  and `protocal` arguments may not really be necessary and, obviously, you should place the project in the location on your computer in which other projects live. The command first forks a copy of PPBDS to your repo and then clone/downloads that fork to your computer. Note that `create_from_github()` can be used with whatever repo you'd like to fork, clone, and download locally.
+
+This may seem like overkill, but, as the SCM book explains, it is how (essentially) all large projects are organized. With luck, you only have to issue this command once. After that, you are always connected, both to your fork and to the main repo. Also, note that, if something ever gets totally messed up on your computer, you can just delete the project folder on your computer and the repo on Github and then start again. (If you have made changes that you don't want to lose, just save those files to one side and then move them back after you have recreated the project.)
+
+Note that this command should automatically put you in a new RStudio session with the PPBDS or PPBDS.data project.
+
+2) The next step is to get **renv** setup so that you are running the same package versions as everyone else. Run `renv::restore()` to install all the packages used in the book and ensure all your packages are the same version as everyone else. Restart your R session.
+
+3) Create a branch to work from:
+
+> pr_init(branch = "chapter-9")
+
+Make sure the branch name is sensible. Again, this is a command that you only need to issue once, at least for our current worflow. (In more professional settings, you will often work on several different branches at once.) You should always be "on" this branch, never on "master". You can check this in the upper right corner of the git panel on R Studio.
+
+4) Now you can work like you usually do. Make changes in your file. Knit to make sure they work. Commit with a message. And so on. Now, when working on your own repos, you would also be pushing and pulling regularly as well. Because you are part of a larger project, these commands are slightly different than what you have done before, which has usually just been clicking on the pull/push buttons.
+
+5) Pull regularly:
+
+> pr_pull_upstream()
+
+Issue this command all the time. This is how you make sure that your repo and your computer is updated with the latest changes that have been made in the book. The word "upstream" is associated with the repo on davidkane9. The word "origin" is associated with the fork at your_github_id. But, in general, you don't need to worry about this. Just pull every time you sit down. (Just clicking the pull button is not enough. That only pulls from your repo, to which no changes have been made. It does not pull from davidkane9.) You issue this command multiple times a day.
+
+6) Issue pull requests every few days, depending on how much work you have done and/or whether other people are waiting for something you have done.
+
+> pr_push().
+
+Again, these commands bundle up a bunch of git commands (which you could do "by hand") into one handy step. This command does everything needed to create a "pull request" --- a request from you to me that I accept the changes you are proposing into the repo at davidkane9 --- and then opens up the webpage to show you. BUT YOU ARE NOT DONE! You must PRESS the green button, sometimes twice. Until then, the PR has not actually been created. `pr_push()` just does everything before that. The "pr" in `pr_push()` stands for pull request.
+
+7) I will leave aside for now issues associated with the back-and-forth discussions we might have around your pull request. I will probably just accept it. Your changes will go into the repo at davidkane9 and then be distributed to everyone else when they run `pr_pull_upstream()`.
+
+8) You can now continue on. There is no need to wait for me to deal with your pull request. There is no need to create another branch, much less to fork/clone/download again. You just keep editing your files, knitting, and committing. When you feel you have completed another chunk of work, just run `pr_push()` again.
+
+
+
+## Some Common Problems
+
+0) In the immediate aftermath of this creation process, the blue/green arrows (in the Git panel) for pulling/pushing may be grayed out. This is a sign that the connection between your computer and your forked repo has not "settled in." (I am not sure of the cause or even if this is the right terminology.) I think that just issuing your first `pr_pull_upstream()` fixes it. If not, it always goes away. Until it does, however, you can't pull/push to your repo. That doesn't really matter, however, since the key commands you need are `pr_pull_upstream()` and `pr_push()`, both of which always work immediately.
+
+1) After running `pr_pull_upstream()`, *you will often see a bunch of files in your Git tab in the top right corner of Rstudio* marked with an M (for Modified), including files which you know you did not edit. These are the files that have been updated on the "truth" --- on davidkane9 --- since your last `pr_pull_upstream()`. Since you pulled them directly from the my repo, your forked repo sees all the changes other people have made and thinks that YOU MADE THEM. This is easily fixed, however — just commit all the changes to your forked repo. (Strangely, this seems to not always happen. If you don't see this effect, don't worry.)
+
+2) Always run `pr_pull_upstream()` before committing a file you have not edited. Otherwise, you will create lots of merge conflicts. If this happens, save a copy of the file(s) you personally were editing off to the side. Then, "nuke it from orbit," following the instructions above. Repeat the set up process. Then move in your file(s) by hand, and commit/push them as normal.
+
+3) When you submit a pull request to merge your work with the original repo, it won't always be smiles and sunshine — every once in a while, you'll run into *merge conflicts*. When these arise, it is because two parties work on a file separately and submit conflicting changes. This makes it hard for GitHub to "merge" your version with the other version. When this happens, find multiple adjacent ">", "<", and "=" signs in your document — these will show you where the conflicts occur. 
+
+If you see the above-mentioned conflicts in your document, DO NOT SUBMIT A PULL REQUEST. This will mess things up. First, go through your document, and make sure all the weird conflict indicators (<, >, and =) are removed. The decide what goes in that space. It might be the stuff you write. It might be the other stuff. It might be some combination of the two which you decide on. Whatever happens, you are making an affirmative choice about what should appear in the file at that location. Then, run `pr_push()` again.
+
+4) `pr_push()` can be tricky. First, note that, if Preceptor has not accepted a (p)ull (r)equest which you have submitted, then your PR is still open. You can see it here: https://github.com/davidkane9/PPBDS/pulls. In fact, you can see all the closed/completed pull requests as well. If, while one PR is still open, you submit another `pr_push()`, then this will just be added to your current PR. And that is OK! We don't need it to be separate. 
+
+But even if there is not an open PR, `pr_push()` can be tricky. The key thing to remember is that *you must press a green button on Github* for a new PR to be created. Normally, this is easy. Running pr_push() automatically (or perhaps after you run pr_view()) puts you in a browser and brings you to the correct Github page. Press the button and -- presto! -- you have created a PR. But, sometimes, the webpage is different. It actually sends you back to an old pull request. When this happens, you need to click on the "Pull Request" tab above. This will take you to a new page, with a green button labeled "Compare & Pull Request". Press that button.
+
+5) If you end up needing to install a new package --- which should be rare --- just install it and then type `renv::snapshot()`. This will update the renv.lock file with the new package. You just commit and push the bew version of renv.lock, and that shares the information with everyone else on the project.
+
