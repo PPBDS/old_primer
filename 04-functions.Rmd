@@ -1,0 +1,1037 @@
+---
+output_yaml:
+  - _output.yml
+---
+
+# Functions
+
+
+<!-- * This will now be week 3. Need to focus more on functions which actually do something useful, something that teaches concepts which will be valuable later.  -->
+
+
+<!-- * Teach standard error. This is something we can do before probability. Calculating mean and sd is easy. Divide the first by the second times root n and --- voila! That is much more productive than crooked casinos. -->
+
+<!-- * Teach confidence intervals. Again, we can do this before probability, I think. Think of it as, roughly, plus/minus 2 times the standard error. Then, show what coverege is of confidence intervals. -->
+
+<!-- * Teach random draws. We introduce random variables at the end of chapter 2. Do more with them here. For example, with a data set, calculated a mean and sd. Then do 1,000 draws form that. Then, plot the densities of the raw data and the simulated data on top of one another.  -->
+
+<!-- * Maybe cut of lot of the extra stuff? -->
+
+<!-- 4) Add group_nest()? -->
+
+
+<!-- Useful reference, maybe -->
+
+<!-- https://aosmith.rbind.io/2018/08/29/getting-started-simulating-data/ -->
+<!-- https://aosmith.rbind.io/2018/06/05/a-closer-look-at-replicate-and-purrr/ -->
+
+
+
+The goal of this chapter is to reveal the __process__ a long-time useR employs for writing functions. We also want to illustrate why the process is the way it is. Merely looking at the finished product, e.g. source code for R packages, can be extremely deceiving. Reality is generally much uglier ... but more interesting! Powerful packages like **dplyr** and **purrr** are ready and waiting to apply your purpose-built functions to various bits of your data. If you can express your analytic wishes in a function, these tools will give you great power.
+
+## Introduction to Functions
+
+First, let's introduce the concept of functions. A function is a piece of code that is packaged in a way that makes it easy to reuse. Functions make it easy for you to `filter()`, `arrange()`, `select()`, and create a `tibble()`, as you have seen in the last few chapters. Functions also allow you to transform variables and perform a bunch of useful mathematical calculations, such as finding the `min()`, `max()`, and `quantile()`s of a dataset. Functions are also important in generating data and values, such as using `rnorm()` to randomly generate a normal distribution.
+
+Note that every time we mention a function, we include the parentheses. This is because you call a function by including its parentheses and any necessary arguments in those parentheses. If you run the function name without its parentheses, R will return the code that makes up the function. 
+
+```{r}
+rnorm(1)
+```
+
+If you run the function name without its parentheses, R will return the code that makes up the function. 
+
+```{r}
+rnorm
+```
+
+Functions can do all sorts of things. Below, `sample()` takes a vector of values and spits out a number of random values from that vector. You can specify the number of random values with the argument `size`. Let's take it for a spin. This is the equivalent of rolling a die!
+
+```{r}
+sample(x = 1:6, size = 1)
+```
+
+Functions can also take in other functions as arguments. For example, `replicate()` takes an expression and repeats it for `n` specified times. This is really useful when you want to generate many iterations of data. What if we replicated the rolling of a die ten times?
+
+```{r}
+replicate(10, sample(1:6, 1))
+```
+
+An especially useful type of function is the family of `map_*` functions. `map_*` functions come from the **purrr** package, which you will have loaded if you have loaded **tidyverse**. These functions apply the same function to every row in a tibble.
+
+Let's create a tibble with 3 values: 3, 7, and 2.
+
+```{r}
+library(tidyverse)
+tibble(x = c(3, 7, 2))
+```
+
+What if we wanted to take the square root of each value?
+
+```{r}
+tibble(x = c(3, 7, 2)) %>% 
+  mutate(new = map_dbl(x, sqrt))
+```
+
+`map_dbl()` (pronounced "map-double") took the function `sqrt()` and applied it to each element of `x`. Note that, when we passed the function `sqrt()` to `map_dbl()`, we passed in just its name, without the closing parentheses. This code fails:
+
+```{r error=TRUE}
+tibble(x = c(3, 7, 2)) %>% 
+  mutate(new = map_dbl(x, sqrt()))
+```
+
+`sqrt()` with the parentheses is a call to the function. So, the first thing R tries to do is to run the function. Doing so fails because `sqrt()` requires an argument `x`, which is empty. 
+
+
+*Lesson*: When passing a function in to `map_*` functions, pass just the name.
+
+
+We called these `map_*` *functions* (plural) before.  If you know the expected output of your function, you can specify that kind of vector:
+
+- `map()`: list  
+- `map_lgl()`: logical
+- `map_int()`: integer
+- `map_dbl()`: double (numeric)
+- `map_chr()`: character
+- `map_df()`: data frame
+
+So, since our example produces numeric output, we use `map_dbl()` instead of `map()`.
+
+Now, you may be wondering, what's the difference between using `mutate()` and `map_*` functions? The answer lies in iteration, which is the specialization of the **purrr** package. `map_*` functions are powerful because of their ability to apply functions to every single element of a list, which `mutate()` cannot handle.
+
+Speaking of lists, `map_*` functions are known to take in list inputs, and sometimes even create list-columns depending on the specific `map_*` function.
+
+```{r}
+tibble(x = c(3, 7, 2)) %>% 
+  mutate(new = map(x, sqrt))
+```
+
+Notice that we changed the `map_dbl()` to `map()`, which returns a list-column. You can use `str` to easily view the contents of a list-column.
+
+```{r}
+tibble(x = c(3, 7, 2)) %>% 
+  mutate(new = map(x, sqrt)) %>%
+  str()
+```
+
+Only... what exactly is a list-column? Our next section will give you a quick refresher on lists, then dive into how lists, list-columns, and `map_*` functions relate.
+
+## Lists and List-columns
+
+Let's quickly refresh on what lists are and functions that commonly deal with lists. Recall that a list is different from an atomic vector. Atomic vectors are familiar to us: each element of the vector has one value, and thus if an atomic vector is a column in your dataset, each observation gets a single value.  Lists, however, can contain vectors as elements.
+
+```{r}
+x <- list(c(3, 7, 2))
+x
+```
+
+The above object, x, contains a numeric vector as an element. How do we extract the first element of the list?
+
+```{r}
+x[[1]][1]
+```
+
+Right! Recall the example from Chapter 2 in which lists are a pepper jar that contain more pepper packets. Don't forget the square brackets!
+
+Let's index through more lists to make sure it works. Remember that lists can contain a multitude of data types. First, let's create a few new lists. Pay attention to the placement of `list()`.
+
+```{r}
+list_1 <- list("Three", 7, "Two")
+list_2 <- c(list(3), list("7"), list(2))
+
+list_1 %>% str()
+list_2 %>% str()
+x %>% str()
+```
+
+As you can see, the two objects defined above are lists. It also displays the data type of each element. `list_1` is a list of length 3, with a character, a numeric, and a character. `list_2` is also a list of length 3, with a numeric, a character, and a numeric. Note that the `[1:3]` denotes a numeric vector of length 3 for `x`.
+
+Now, let's extract the first element of each of the new lists.
+
+```{r}
+list_1[[1]][1]
+list_2[[1]][1]
+```
+
+You might be wondering, how is the list `x` different from the lists `list_1` and `list_2`? Besides the contents of the lists, we wanted to demonstrate how there are various ways to create lists. You can directly input values inside `list()`, or wrap the values in `c()` first to create a vector element.
+
+There are a number of built-in R functions that output lists. For example, the ***ggplot***s you have been making store all of the graph information in lists.
+
+<!-- EC: Keep thing about ggplot? -->
+
+```{r}
+y <- ggplot(mtcars, aes(x = cyl, y = mpg)) +
+  geom_col()
+y %>% str()
+```
+
+Any function that returns multiple values can be used to create a list output.  For example, consider the following list `x` again:
+
+```{r}
+x
+```
+
+If we take the `range()` of `x`, we expect two values to be returned: the minimum value and the maximum value in the numeric vector.
+
+```{r}
+range(x)
+class(range(x))
+```
+
+The output of `range(x)` is a numeric vector with two values, 2 and 7. To turn the output into a list, simply wrap the line of code with `list()`. 
+
+```{r}
+list(range(x))
+class(list(range(x)))
+```
+
+What if we want to create a tibble with the values of `range(x)`?
+
+```{r}
+tibble(col_1 = list(range(x)))
+```
+
+Notice this is a 1x1 tibble with one observation, which is a list of one element. The element is a vector of the integers 2 and 7. Voila! You have just created a *list-column**.
+
+```{marginfigure}
+Lesson: If a function returns multiple values as a vector, like `range()` does, you can't use it directly to obtain a list-column, but you can wrap `list()` around it in order to get the same behavior.
+```
+
+<!-- EC: Commenting out this sentence for now. We are now going to learn about [**list columns**](https://r4ds.had.co.nz/many-models.html#list-columns-1).^[If I were going to give a lecture on these topics, it would look like [this one](https://resources.rstudio.com/webinars/how-to-work-with-list-columns-garrett-grolemund).] -->
+
+A list column is a column of your data which is a [list](https://adv-r.hadley.nz/vectors-chap.html#lists) rather than an atomic vector.  Like with lists, you can pipe in `str()` to read the column more easily.
+
+```{r message=FALSE}
+tibble(col_1 = list(range(x))) %>%
+  str()
+```
+
+Note that this is a case where it is crucial to use `tibble()`, not `data.frame()`!  If we had used `data.frame()` in the last example, it wouldn't have worked how we wanted:
+
+```{r error=TRUE}
+data.frame(col_1 = list(range(x)))
+```
+
+Note that the output is a 2 x 1 dataframe with double observations, not one singular list. 
+
+Wrapping a function with `list()` is often how we will go about creating list columns.  Let's practice with the `kenya` dataset. How could we add a column to the dataset that included the quantiles of the `poverty` variable?
+
+First, we load the necessary `PPBDS.data` library, select the relevant variables, and group by `block`. We are grouping because we are curious as to how the poverty rates look when aggregated by block, rather than as individual observations.
+
+```{r}
+library(PPBDS.data)
+kenya %>%
+  select(block, poverty) %>%
+  group_by(block)
+```
+
+Next, we will create a list-column by wrapping `quantile()` with `list()`. `quantile()` naturally produces a numeric vector of the quantiles of `poverty`, and wrapping with `list()` will capture this numeric vector as a list.
+
+```{r}
+library(PPBDS.data)
+kenya %>%
+  select(block, poverty) %>%
+  group_by(block) %>%
+  mutate(povertyQuantile = list(quantile(poverty)))
+```
+
+Or let's say that we wanted 1) to subset the dataset to the those with `treatment == "control"`, 2) group by `block`, and 3) get a `summary()` of the `distance` variable by continent:
+
+```{r}
+kenya %>%
+  select(treatment, block, distance) %>%
+  filter(treatment == "control") %>%
+  group_by(block) %>%
+  summarize(distSummary = list(summary(distance)))
+```
+
+### Using `map_*` functions to create list-columns
+
+For this example, we will use the `nhanes` dataset from the `PPBDS.data` package to demonstrate how to use `map_*` functions to create list columns.
+
+First, let's wrangle the data so each observation is grouped by age and gender.  We'll create a list column `all_weights` that consists of every subject's weight, grouped by age and gender.
+
+```{r eval=FALSE, message=FALSE}
+nhanes %>%
+  group_by(age, gender) %>%
+  summarize(all_weights = list(weight))
+```
+
+Now that we have a list column, we can use it as the input to `map()`, outputting another list column.  Let's say we wanted a new list column, `log_weights`, which takes the logarithmic value of each weight observation.
+
+```{r eval=FALSE, message=FALSE}
+nhanes %>%
+  group_by(age, gender) %>%
+  summarize(all_weights = list(weight)) %>%
+  mutate(log_weights = map(all_weights, log))
+```
+
+Note that we took the list column `all_weights` and, by applying an anonymous function to it with `map()`, created another list column `log_weights`.  This is a very common process.  It is similar to taking a tibble and piping it into a `dplyr` function (such as `mutate()`) which gives you a new tibble that you can work with.
+
+If we try to replace the `map()` function in the last line with a simple `mutate()`, we will get an error.
+
+```{r echo=FALSE, error=TRUE}
+nhanes %>%
+  group_by(age, gender) %>%
+  summarize(all_weights = list(weight)) %>%
+  mutate(log_weights = log(all_weights))
+```
+
+Again, this is because the `mutate()` function is ill-equipped to handle lists. We could have avoided creating the list-columns in the first place and found the log weight of each observation, but then we would be losing out on the grouping ability of lists. Do you see how `map_*` functions are equipped to handle inputs different from `mutate()`?
+
+You can also use `map_*` functions to take a list column as an input and return an atomic vector -- a column with a single value per observation -- as an output.  For instance, let's say we now wanted the mean of the log weights:
+
+```{r eval=FALSE, message=FALSE}
+nhanes %>%
+  group_by(age, gender) %>%
+  summarize(all_weights = list(weight)) %>%
+  mutate(log_weights = map(all_weights, log),
+         mean_log_weights = map_dbl(log_weights, mean, na.rm = TRUE))
+```
+
+Here, we also see that the `map_*` functions have the `...` argument, which allows `na.rm = TRUE` to be passed along to `mean()`.
+What if we wanted to extract the top five log weights per row?
+
+```{r eval=FALSE}
+nhanes %>%
+  group_by(age, gender) %>%
+  summarize(all_weights = list(weight)) %>%
+  mutate(log_weights = map(all_weights, log),
+         sorted_log_weights = map(log_weights, ~ sort(., decreasing = TRUE)),
+         top5_log_weights = map(sorted_log_weights, ~ .[1:5]))
+```
+
+See how we chained the `map_*` functions:
+
+1) `all_weights` was used as the input to `map()` to create `log_weights`
+2) `log_weights` was used as the input to `map()` to create `sorted_log_weights`
+3) `sorted_log_weights` was used as the input to `map()` to create `top5_log_weights`
+
+Until now, we have practiced using map functions and built-in R functions such as `log()` and `sort()` to create list columns. Next, we will show you how to write your very own functions!
+
+## Custom Functions
+
+### Anonymous functions with `map_*` functions
+
+We can create functions that do operations "on the fly" without bothering to give them a name. These nameless functions are called [anonymous functions.](https://coolbutuseless.github.io/2019/03/13/anonymous-functions-in-r-part-1/)
+
+You can use anonymous functions in conjunction with the `map_*` family of functions. They're commonly used to conduct mathematical operations repeatedly.
+
+You can call an anonymous function using a `~` operator and then using a `.` to represent the current element.
+
+```{r}
+tibble(old = c(3, 7, 2)) %>% 
+  mutate(new = map_dbl(old, ~ (. + 1)))
+```
+
+Note that the parentheses are not necessary. As long as everything after the `~` works as R code, the anonymous function should work, each time replace the `.` with the value of the `.x` variable --- which is `old` in this case --- with its value in that row.
+
+```{r}
+tibble(old = c(3, 7, 2)) %>% 
+  mutate(new = map_dbl(old, ~ . + 1))
+```
+
+The `~ ` shorthand is very convenient once you get used to it.  Let's see it in an example. We'll use the `weather` dataset in the `nycflights13` package. Let's say that we want to return a list-column with all the recorded temperatures in a day in Celsius and basic summary statistics.
+
+First, let's wrangle the data so each observation is a day rather than an hour. We will do so by selecting for the necessary variables and grouping by `origin`, `year`, `month`, and `day`.
+
+```{r echo=FALSE}
+library(nycflights13)
+```
+
+```{r eval=FALSE}
+weather %>%
+  select(origin, year, month, day, temp) %>%
+  group_by(origin, year, month, day)
+```
+
+Next, we'll create a list column `temps_F` that consists of all the temperatures recorded that day at a particular origin. Note that the temperatures are Fahrenheit by default.
+
+```{r}
+weather %>%
+  select(origin, year, month, day, temp) %>%
+  group_by(origin, year, month, day) %>%
+  summarize(temps_F = list(c(temp)))
+```
+
+Now that we have a list-column, we can use it as the input to `map()`, outputting another list-column.  Let's say we wanted a new list-column, `temps_C`, which records the temperature in Celsius.
+
+The formula to convert from Fahrenheit to Celsius is $\frac{(F-32)*5}{9}$. Let's "eyeball" the results using `str()`.
+
+```{r}
+weather %>%
+  select(origin, year, month, day, temp) %>%
+  group_by(origin, year, month, day) %>%
+  summarize(temps_F = list(c(temp))) %>%
+  mutate(temps_C = map(temps_F, ~ (. - 32) * 5/9))
+```
+
+Let's "eyeball" the first few results using `str()`.
+
+```{r}
+weather %>%
+  select(origin, year, month, day, temp) %>%
+  group_by(origin, year, month, day) %>%
+  summarize(temps_F = list(c(temp))) %>%
+  mutate(temps_C = map(temps_F, ~ (. - 32) * 5/9)) %>%
+  ungroup() %>%
+  slice(1:5) %>%
+  str()
+```
+
+That was an anonymous function! As you can see, anonymous functions used in a `map_*` function context cannot get too complex. The next section will teach you how to write your own custom functions with flexibility.
+
+### Creating your own functions
+
+There are plenty of built-in functions in R, such as the ones mentioned above. You can also create your own custom functions, which may look something like this:
+
+```{r eval=FALSE}
+add_one_and_one <- function() {
+  1 + 1
+}
+add_one_and_one()
+```
+
+You just created a function! This function will return `1+1` whenever called. 
+
+Now what if we wanted to leave some mystery in the function? That is to say, we want to add the number 6 to a value `x`, that the user provides for us. 
+
+```{r}
+add_six_to_something <- function(x){
+  x + 6
+}
+add_six_to_something(1)
+```
+
+Congratulations! You have incorporated your first **formal argument**. Formal arguments in functions are additional parameters that allow the user to customize the use of your function. Instead of adding 1+1 over and over again, your function takes in a number `x` that the user defines and adds 6. Now let's drive it home and make a function with *two* formal arguments.
+
+```{r}
+add_x_to_y <- function(x,y) {
+  x + y
+}
+
+add_x_to_y(1,2)
+add_x_to_y(4,3)
+```
+
+Great work! Now let's create an example that we will apply to the `kenya` dataset.
+
+What if we were interested in taking the difference between the highest poverty rate and the lowest poverty rate? First, develop some working code for interactive use, using a representative input. Use the `poverty` variable. Built-in R functions that will be useful: `min()`, `max()`, `range()`.
+
+```{r}
+min(kenya$poverty)
+max(kenya$poverty)
+range(kenya$poverty)
+
+max(kenya$poverty) - min(kenya$poverty)
+range(kenya$poverty)[2] - range(kenya$poverty)[1]
+diff(range(kenya$poverty))
+```
+
+Internalize this "answer" because our informal testing relies on you noticing departures from this.
+
+### Skateboard >> perfectly formed rear-view mirror
+
+This image --- widely attributed to the Spotify development team --- conveys an important point.
+
+```{r echo = FALSE, out.width = "60%", fig.cap = "From [Your ultimate guide to Minimum Viable Product (+great examples)](https://blog.fastmonkeys.com/2014/06/18/minimum-viable-product-your-ultimate-guide-to-mvp-great-examples/)"}
+knitr::include_graphics("04-functions/images/mvp.jpg")
+```
+
+Build that skateboard before you build the car or some fancy car part. A limited-but-functioning thing is very useful. It also keeps the spirits high.
+
+This is related to the valuable Telescope Rule:
+
+> It is faster to make a four-inch mirror and then a six-inch mirror than it is to make a six-inch mirror.
+
+### Turn the working interactive code into a function
+
+Add NO new functionality! Just write your very first R function.
+
+```{r}
+max_minus_min <- function(x) max(x) - min(x)
+max_minus_min(kenya$poverty)
+```
+
+Check that you're getting the same answer as you did with your interactive code. Test it eyeball-o-metrically at this point.
+
+One thing to note about functions is that functions have selective memory. In fact, functions only "remember" what happens within the function itself.
+
+For example, I have saved value `x` as 1.
+
+```{r}
+x <- 1
+```
+
+Defining `x` inside a function will not change its value outside of the function.
+
+```{r}
+function(x) x <- 2
+
+x
+```
+
+### Test your function
+
+#### Test on new inputs
+
+Pick some new artificial inputs where you know (at least approximately) what your function should return.
+
+```{r}
+max_minus_min(1:10)
+max_minus_min(runif(1000))
+```
+
+I know that 10 minus 1 is 9. I know that random uniform [0, 1] variates will be between 0 and 1. Therefore max - min should be less than 1. If I take LOTS of them, max - min should be pretty close to 1.
+
+It is intentional that I tested on integer input as well as floating point. Likewise, I like to use valid-but-random data for this sort of check.
+
+#### Test on real data but *different* real data
+
+Back to the real world now. Two additional quantitative variables are lying around: `distance` and `rv13`. Let's have a go.
+
+```{r}
+max_minus_min(kenya$distance)
+max_minus_min(kenya$rv13)
+```
+
+Either check these results "by hand" or apply the "does that even make sense?" test.
+
+#### Test on weird stuff
+
+Now we try to break our function. Don't get truly diabolical (yet). Just make the kind of mistakes you can imagine making at 2am when, 3 years from now, you rediscover this useful function you wrote. Give your function inputs it's not expecting.
+
+```{r error=TRUE}
+max_minus_min(kenya)
+
+# Hey, sometimes things "just work" on data.frames!
+
+max_minus_min(kenya$treatment)
+
+# Factors are kind of like integer vectors, no?
+
+max_minus_min("eggplants are purple")
+
+# I have no excuse for this one
+```
+
+How happy are you with those error messages? You must imagine that some entire __script__ has failed and that you were hoping to just `source()` it without re-reading it. If a colleague or future you encountered these errors, do you run screaming from the room? How hard is it to pinpoint the usage problem?
+
+
+#### I will scare you now
+
+Here are some great examples where the function __should break but it does not.__
+
+```{r}
+max_minus_min(kenya[c('poverty', 'distance', 'rv13')])
+max_minus_min(c(TRUE, TRUE, FALSE, TRUE, TRUE))
+```
+
+In both cases, R's eagerness to make sense of our requests is unfortunately successful. In the first case, a tibble containing just the quantitative variables is eventually coerced into numeric vector. We can compute max minus min, even though it makes absolutely no sense at all. In the second case, a logical vector is converted to zeroes and ones, which might merit an error or at least a warning.
+
+### Check the validity of arguments
+
+For functions that will be used again -- which is not all of them! -- it is good to check the validity of arguments. This implements a rule from the Unix philosophy:
+
+> Rule of Repair: When you must fail, fail noisily and as soon as possible.
+
+#### stop if not
+
+`stopifnot()` is the entry level solution. We use it here to make sure the input `x` is a numeric vector.
+
+```{r error=TRUE}
+mmm <- function(x) {
+  stopifnot(is.numeric(x))
+  max(x) - min(x)
+}
+mmm(kenya)
+mmm(kenya$treatment)
+mmm("eggplants are purple")
+mmm(kenya[c('poverty', 'distance', 'rv13')])
+mmm(c(TRUE, TRUE, FALSE, TRUE, TRUE))
+```
+
+And we see that it catches all of the self-inflicted damage we would like to avoid.
+
+#### if then stop
+
+`stopifnot()` doesn't provide a very good error message. The next approach is very widely used. Put your validity check inside an `if()` statement and call `stop()` yourself, with a custom error message, in the body.
+
+```{r error=TRUE}
+mmm2 <- function(x) {
+  if(!is.numeric(x)) {
+    stop('I am so sorry, but this function only works for numeric input!\n',
+         'You have provided an object of class: ', class(x)[1])
+  }
+  max(x) - min(x)
+}
+mmm2(kenya)
+```
+
+```{marginfigure}
+**Non-programming uses for assertions**
+
+Another good use of this pattern is to leave checks behind in data analytical scripts. If we were loading from file (vs. a stable data package), we might want to formalize our expectations about the number of rows and columns, the names and flavors of the variables, etc. This would alert us if the data suddenly changed, which can be a useful wake-up call in scripts that you re-run *ad nauseam* on auto-pilot or non-interactively.
+```
+
+In addition to a gratuitous apology, the error also contains two more pieces of helpful info:
+
+* *Which* function threw the error.
+* Hints on how to fix things: expected class of input vs actual class.
+
+If it is easy to do so, we highly recommend this template: "you gave me THIS, but I need THAT".
+
+The tidyverse style guide has a very useful [chapter on how to construct error messages](https://style.tidyverse.org/error-messages.html).
+
+### Wrap-up and what's next?
+
+Here's the function we've written as an introduction to built-in and custom functions:
+
+```{r}
+mmm2
+```
+
+What we've accomplished:
+
+* We've written our first function.
+* We are checking the validity of its input, argument `x`.
+* We've done a good amount of informal testing.
+  
+## Argument Specifications and Default Values
+
+In this section, we create a new function, generalize it, and learn more technical details about R functions.
+
+Our goal is to write a function that simulates throwing dice.
+
+We will begin by creating a minimally viable function, `starter_die()`, which throws one die one time. 
+
+```{r}
+starter_die <- function() {
+  sample(1:6, 1)
+}
+```
+
+From here, we can add a formal argument `n`, which requires the number of dice to be specified. However, if more than one dice is thrown, we want to make sure that any number from `1-6` has the chance of being returned. To do so, make sure the `replace` argument in `sample()` is set to `TRUE`. Now we have generalized the function `starter_dice()`!
+
+```{r}
+starter_die <- function(n) {
+  sample(1:6, n, replace = TRUE)
+}
+```
+
+What if we wanted to add a formal argument, `n`, that would be passed into `sample()`'s n specification? Now let's create an intermediate function `add_dice()` which throws n dice and adds the results.
+
+```{r}
+add_dice <- function(n) {
+  sum(sample(1:6, n, replace = TRUE))
+}
+```
+
+Congratulations! We have just generalized our function to take in any number of dice. But wait... is it really *any* value? Let's add in a few checks that make sure no weird inputs break our function.
+
+```{r}
+add_dice <- function(n) {
+  stopifnot(is.numeric(n))
+  sum(sample(1:6, n, replace = TRUE))
+}
+```
+
+```{r error=TRUE}
+add_dice(-1)
+```
+
+Oops! As you can see, we tried to use a negative number of dice, which will not fly. Let's alter the informal checks to stop the function if `n` is negative.
+
+```{r}
+add_dice <- function(n) {
+  stopifnot(is.numeric(n))
+  stopifnot(n >= 0)
+  sum(sample(1:6, n, replace = TRUE))
+}
+```
+
+As you can see, we have a function that works and takes in sensible arguments. Next, let's talk about about argument specifications and conventions.
+
+### Argument names: freedom and conventions
+
+Understand the importance of argument names. We can name my arguments almost anything we like. Proof:
+
+```{r}
+add_dice <- function(bob_ross) {
+  stopifnot(is.numeric(bob_ross))
+  stopifnot(bob_ross >= 0)
+  sum(sample(1:6, bob_ross, replace = TRUE))
+}
+
+add_dice(bob_ross = 3)
+```
+
+While we can name my argument after a famous painter, it's usually a bad idea. Take all opportunities to make things more self-explanatory via meaningful names.
+
+If you are going to pass the arguments of your function as arguments of a built-in function, consider copying the argument names. Unless you have a good reason to do your own thing (some argument names are bad!), be consistent with the existing function. Again, the reason is to reduce your cognitive load. 
+
+We took this detour so you could see there is no *structural* relationship between our argument (`n`) and that of `sample()` (which also includes `n`). The similarity or equivalence of the names __accomplishes nothing__ as far as R is concerned; it is solely for the benefit of humans reading, writing, and using the code. Which is very important!
+
+### Default values: freedom to NOT specify the arguments
+
+What happens if we call our function but neglect to specify the probabilities?
+
+```{r error=TRUE}
+add_dice()
+```
+
+Oops! At the moment, this causes a fatal error. It can be nice to provide some reasonable default values for certain arguments. Setting `n = 1` is a reasonable default value.
+
+```{r}
+add_dice <- function(n = 1) {
+  stopifnot(is.numeric(n))
+  stopifnot(n >= 0)
+  sum(sample(1:6, n, replace = TRUE))
+}
+```
+
+Again we check how the function works by specifying `n` and not specifying `n`.
+
+```{r}
+add_dice()
+add_dice(10)
+```
+
+Note that you do not necessarily need to supply the argument name. R tries its best to understand you based on the order you provide your argument values in. However, it is usually best practice to specify the argument name.
+
+### Wrap-up and what's next?
+
+Here's the function we've written so far:
+
+```{r}
+add_dice
+```
+
+What we've accomplished:
+
+* We've generalized our dice throwing function to take in a custom value for `n`
+* We've specified a default value: `n=2`
+  
+## Formal Testing
+
+In this section, we tackle `NA`s, the special argument `...` and formal testing.
+
+### Use testthat for formal unit tests
+
+Until now, we've relied on informal tests such as trying to break our function with silly inputs. If you are going to use a function a lot, especially if it is part of a package, it is wise to use formal unit tests.
+
+The [testthat][testthat-web] package ([CRAN][testthat-cran]; [GitHub][testthat-github]) provides excellent facilities for this, with a distinct emphasis on automated unit testing of entire packages. However, we can take it out for a test drive even with our one measly function.
+
+We will construct a test with `test_that()` and, within it, we put one or more *expectations* that check actual against expected results. You simply harden your informal, interactive tests into formal unit tests. Here are some examples of tests and indicative expectations.
+
+Let's keep our very first function around as a baseline.
+
+```{r}
+add_dice <- function(n = 1) {
+  stopifnot(is.numeric(n))
+  stopifnot(n >= 0)
+  sum(sample(1:6, n, replace = TRUE))
+}
+```
+
+```{r}
+library(testthat)
+
+test_that('invalid args are detected', {
+  expect_error(add_dice("desserts are great!"))
+  expect_error(add_dice(kenya))
+})
+```
+
+No news is good news! Let's see what test failure would look like. Let's revert to a version of our function that does not check for a positive `n` value and test it. We can watch it fail.
+
+```{r error=TRUE}
+add_dice <- function(n = 2) {
+  stopifnot(is.numeric(n))
+  sum(sample(1:6, n, replace = TRUE))
+}
+
+show_failure(add_dice(-1))
+```
+
+Similar to the advice to use assertions in data analytical scripts, I recommend you use unit tests to monitor the behavior of functions you (or others) will use often. If your tests cover the function's important behavior, then you can edit the internals freely. You'll rest easy in the knowledge that, if you broke anything important, the tests will fail and alert you to the problem. A function that is important enough for unit tests probably also belongs in a package, where there are obvious mechanisms for running the tests as part of overall package checks.
+
+### What a function returns
+
+By default, a function returns the result of the last line of the body. We are just letting that happen with the line `sum(sample(1:6, n, replace = TRUE))`. However, there is an explicit function for this: `return()`. We could just as easily make this the last line of my function's body:
+
+```{r echo = FALSE}
+add_dice <- function(n = 2) {
+  stopifnot(is.numeric(n))
+  stopifnot(n >= 0)
+  sum(sample(1:6, n, replace = TRUE))
+}
+```
+
+```{r eval=FALSE}
+return(sum(sample(1:6, n, replace = TRUE)))
+```
+
+You absolutely must use `return()` if you want to return early based on some condition, i.e. before execution gets to the last line of the body. Otherwise, you can decide your own conventions about when you use `return()` and when you don't.
+
+Right now, running `add_dice(5)` gives us an integer. What if we want the output to be a list of each roll outcome?
+
+```{r}
+show_dice <- function(n = 2) {
+  stopifnot(is.numeric(n))
+  stopifnot(n >= 0)
+  return(list(sample(1:6, n, replace = TRUE)))
+}
+```
+
+```{r}
+show_dice(5)
+```
+
+Note that to achieve the above, we took out `sum()` and swapped it with `list()`. The new function, `show_dice()`, returns a list of `n` dice thrown.
+
+### Handling `NA`s
+
+The upside to creating our own dice-rolling function is that there have been no missing values. In real life, missing data will make your life a living hell. If you are lucky, it will be properly indicated by the special value `NA`, but don't hold your breath. Many built-in R functions have an `na.rm =` argument through which you can specify how you want to handle `NA`s. Typically the default value is `na.rm = FALSE` and typical default behavior is to either let `NA`s propagate or to raise an error. Let's see how `quantile()` handles `NA`s:
+
+```{r error=TRUE}
+z <- kenya$poverty
+z[3] <- NA
+quantile(kenya$poverty)
+quantile(z)
+quantile(z, na.rm = TRUE)
+```
+
+So `quantile()` simply will not operate in the presence of `NA`s unless `na.rm = TRUE`. How shall we modify our function?
+
+If we wanted to hardwire `na.rm = TRUE`, we could. Focus on our call to `quantile()` inside our definition of a new function, `quantile_diff()`.
+
+```{r}
+quantile_diff <- function(x, probs = c(0, 1)) {
+  stopifnot(is.numeric(x))
+  the_quantiles <- quantile(x, probs, na.rm = TRUE)
+  max(the_quantiles) - min(the_quantiles)
+}
+quantile_diff(kenya$poverty)
+quantile_diff(z)
+```
+
+This works but it is dangerous to invert the default behavior of a well-known built-in function and to provide the user with no way to override this.
+
+We could add an `na.rm =` argument to our own function. We might even enforce our preferred default -- but at least we're giving the user a way to control the behavior around `NA`s.
+
+```{r error=TRUE}
+quantile_diff <- function(x, probs = c(0, 1), na.rm = TRUE) {
+  stopifnot(is.numeric(x))
+  the_quantiles <- quantile(x, probs, na.rm = na.rm)
+  max(the_quantiles) - min(the_quantiles)
+}
+quantile_diff(kenya$poverty)
+quantile_diff(z)
+quantile_diff(z, na.rm = FALSE)
+```
+
+### The useful but mysterious `...` argument
+
+You probably could have lived a long and happy life without knowing there are at least 9 different algorithms for computing quantiles. [Go read about the `type` argument][rdocs-quantile] of `quantile()`. TLDR: If a quantile is not unambiguously equal to an observed data point, you must somehow average two data points. You can weight this average different ways, depending on the rest of the data, and `type =` controls this.
+
+Let's say we want to give the user of our function the ability to specify how the quantiles are computed, but we want to accomplish with as little fuss as possible. In fact, we don't even want to clutter our function's interface with this! This calls for the very special `...` argument. In English, this set of three dots is frequently called an "ellipsis".
+
+```{r}
+quantile_diff <- function(x, probs = c(0, 1), na.rm = TRUE, ...) {
+  the_quantiles <- quantile(x = x, probs = probs, na.rm = na.rm, ...)
+  max(the_quantiles) - min(the_quantiles)
+}
+```
+
+Thanks to [\@wrathematics][twitter-wrathematics], here's a small example where we can (barely) detect a difference due to `type`.
+
+```{r}
+set.seed(1234)
+z <- rnorm(10)
+quantile(z, type = 1)
+quantile(z, type = 4)
+all.equal(quantile(z, type = 1), quantile(z, type = 4))
+```
+
+Now we can call our function, requesting that quantiles be computed in different ways.
+
+```{r}
+quantile_diff(z, probs = c(0.25, 0.75), type = 1)
+quantile_diff(z, probs = c(0.25, 0.75), type = 4)
+```
+
+While the difference may be subtle, __it's there__. Marvel at the fact that we have passed `type = 1` through to `quantile()` *even though it was not a formal argument of our own function*.
+
+The special argument `...` is very useful when you want the ability to pass arbitrary arguments down to another function, but without constantly expanding the formal arguments to your function. This leaves you with a less cluttered function definition and gives you future flexibility to specify these arguments only when you need to. This is why the `...` argument is used in conjunction with `map_*` functions.
+
+There are also downsides to `...`, so use it with intention. In a package, you will have to work harder to create truly informative documentation for your user. Also, the quiet, absorbent properties of `...` mean it can sometimes silently swallow other named arguments, when the user has a typo in the name. Depending on whether or how this fails, it can be a little tricky to find out what went wrong.
+
+The [ellipsis package](https://ellipsis.r-lib.org) provides tools that help package developers use `...` more safely. The in-progress tidyverse principles guide provides further guidance on the design of functions that take `...` in [Data, dots, details](https://principles.tidyverse.org/dots-position.html).
+
+## The Crooked Casino
+
+### Restoring `add_dice()`
+
+In this section, we will be tieing in concepts on `map_*` functions, list-columns, and function writing. We'll also be introducing some important conditional functions (`ifelse()`, `any()`, `all()`, and `case_when()`). 
+
+Let’s return to our dice-throwing function, `add_dice()`. 
+
+```{r}
+add_dice <- function(n = 1) {
+  stopifnot(is.numeric(n))
+  stopifnot(n >= 0)
+  sum(sample(1:6, n, replace = TRUE))
+}
+```
+
+Next, we will create `roll_dice()`, which calls `add_dice(n = 2)` as many times as the user specifies. To do so, we will be combining the `rep()` function with `map_int()`.
+
+```{r}
+roll_dice <- function(n = 1) {
+  stopifnot(is.numeric(n))
+  map_int(rep(2, n), add_dice)
+}
+roll_dice(1)
+roll_dice(5)
+```
+
+`rep()` is a useful input to `map_*` when you want to call a function with the same input multiple times. `rep(2, n)` creates a vector of length n where every element is 2. We use that as the input to `map_int()` because we want the input to `add_dice()` to be 2 every time (we are always throwing a pair of dice) and we want to perform the operation n times, chosen by the user.
+
+Create a tibble named `x` with one variable: `throws`. `throws` is a list column, each element of which is three throws of the dice pair, i.e., the result of calling `roll_dice(n = 3)`.  Thus, our tibble will have ten rows and two columns.
+
+```{r}
+x <- tibble(throws = map(rep(3, 10), roll_dice))
+x
+```
+
+Add a variable to `x` called `first_seven` which is TRUE if the first roll in `throws` is a 7.
+
+```{r message=FALSE}
+library(magrittr)
+
+# The magrittr package allows us to use %<>%, the compound assignment pipe
+# operator, which (as its name suggests) both assigns and pipes
+
+x %<>% 
+  mutate(first_seven = map_lgl(throws, ~ ifelse(.[[1]] == 7, TRUE, FALSE)))
+```
+
+We see here that `[[1]]` is how we extract the first element of a list, just like `[1]` extracts the first element of an atomic vector.  `ifelse()` takes as its first argument a condition; if it is TRUE it returns the second argument (here TRUE) and if not the third (here FALSE).
+
+Add a variable to `x` called `a_winner` which is TRUE if at least one of the three throws is a 7 or an 11 and is FALSE otherwise.
+
+```{r}
+x %<>% 
+  mutate(a_winner = map_lgl(throws, ~ ifelse(any(c(7, 11) %in% .), TRUE, FALSE)))
+```
+
+Here we use `any()`: `any()` checks if any element in its input is TRUE. So, let's say a particular throw was 4, 6, and 7: `c(7, 11) %in% c(4, 6, 7)` returns the vector `TRUE FALSE` (since 7 is in the vector but 11 isn't); then, `any(c(7, 11) %in% c(4, 6, 7))` returns TRUE because one of the conditions is TRUE.
+
+Run `str()` on `x` and show the results.
+
+```{r}
+str(x)
+```
+
+### Running Simulations
+
+Calculate how “surprised” you should be if someone rolls three winners in a row. First, create a tibble with 10,000 rows. Include a `throws` list column with three throws of our dice, just as in part a). Second, create a column called `perfection` which is TRUE if all three of the throws are either 7 or 11.
+
+```{r}
+surprised <- tibble(throws = map(rep(3, 10000), roll_dice)) %>% 
+  mutate(perfection = map_lgl(throws, ~ ifelse(all(. %in% c(7, 11)), TRUE, FALSE)))
+
+surprised %>%
+  pull(perfection) %>%
+  mean()
+```
+
+Here, we use `all()`, which has the same structure as `any()`, but checks whether *all* the elements in the input are TRUE.
+
+Approximately 1.1% of three rolls of a pair of fair dice are all equal to either 7 or 11.
+
+Your friend proposes the following bet. You will roll a pair of fair dice 10 times. Side A gets the second highest of the first 4 rolls. Side B gets 1 plus the the median of the remaining 6 rolls. Which side is more likely to win?  What's the chance of a tie?
+
+```{r}
+bet <- tibble(throws = map(rep(10, 10000), roll_dice)) %>% 
+  mutate(A = map_dbl(throws, ~ sort(.[1:4])[3]),
+         B = map_dbl(throws, ~ 1 + median(.[5:10])),
+         winner = case_when(A > B ~ "A",
+                            B > A ~ "B",
+                            TRUE ~ "tie"))
+
+case_when(sum(bet$winner == "A") > sum(bet$winner == "B") ~ "A",
+          sum(bet$winner == "B") > sum(bet$winner == "A") ~ "B",
+          TRUE ~ "Same # Victories")
+
+sum(bet$winner == "tie")/length(bet$winner)
+```
+
+You can think of `case_when()` as a generalized `ifelse()`.  The syntax is a little more complicated.  Each expression is followed by `~` and what should be returned if that expression is TRUE.  The final expression, TRUE, is always true, and thus is the residual category if none of the above expression are TRUE.  Thus, the second `case_when()` in our above code will print "A" if A is the winner in more replications than B, "B" if B is the winner more than A, and "Same # Victories" otherwise.
+
+Side B is more likely to win.
+
+The chance of a tie is approximately 11%.
+
+### Making a Crooked Function
+
+Say we are at an establishment known as the Crooked Casino. In a game of craps, you win if you roll 7 or 11 as the sum of a pair of dice. The Crooked Casino is infamous for rigging its games so that it is more difficult to obtain 7 or 11 as a sum. Our job is to write a function that mimics this behavior.
+
+First, let's use what we have. We will add a line of code in `add_dice()` that assigns `sum(sample(1:6, n, replace = TRUE))` to a variable, `roll`, and returns `roll`.
+
+```{r}
+crooked_dice <- function(n = 1) {
+  stopifnot(is.numeric(n))
+  stopifnot(n >= 0)
+  roll <- sum(sample(1:6, n, replace = TRUE))
+  return(roll)
+}
+
+crooked_dice(2)
+```
+
+How is this any different from `add_dice()`, you may ask? It is not. We are merely assigning the outcome of the roll of a pair of dice to a variable `roll`, which will be useful in a moment. Recall that functions only "remember" what takes place within themselves. This means that each call of `crooked_dice()` creates a new variable `roll` that takes place inside the function.
+
+Now, let's use `ifelse()` to check whether a 7 or 11 was rolled, and if so, to assign a roll of `2` instead.
+
+```{r}
+crooked_dice <- function(n = 1) {
+  stopifnot(is.numeric(n))
+  stopifnot(n >= 0)
+  roll <- sum(sample(1:6, n, replace = TRUE))
+  ifelse(roll == 7 | roll == 11, 2, roll)
+}
+```
+
+The Crooked Casino is a bit more sly, however. They know if they have an overtly crooked game of craps that never returned 7 or 11, that no one would play. They want to be a little more subtle about their crookedness, so they determine that only half of the time a 7 or 11 is rolled will the outcome be altered.
+
+We can simulate this decision by generating a random variable using `runif()` and checking whether the result is greater than or equal to 0.5.
+
+```{r}
+crooked_dice <- function(n = 1) {
+  stopifnot(is.numeric(n))
+  stopifnot(n >= 0)
+  roll <- sum(sample(1:6, n, replace = TRUE))
+  ifelse((roll == 7 | roll == 11) && runif(1) >= 0.5, 2, roll)
+}
+```
+
+Now we can create a function named `crooked_craps()` that calls `crooked_dice()` as many times as specified.
+
+```{r}
+crooked_craps <- function(n = 1) {
+  stopifnot(is.numeric(n))
+  map_dbl(rep(2, n), crooked_dice)
+}
+crooked_craps(1)
+crooked_craps(5)
+```
+
+It's hard to tell whether `crooked_craps()` is working properly by rolling just once, or even ten times. Let's follow the steps we took above to create a tibble of 10 observations each of 10 rolls named `crooked_x`.
+
+```{r}
+crooked_x <- tibble(throws = map(rep(10, 10), crooked_craps))
+crooked_x %>%
+  str()
+```
