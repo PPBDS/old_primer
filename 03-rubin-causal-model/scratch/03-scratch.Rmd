@@ -1,0 +1,225 @@
+---
+title: "scratch"
+author: "Cassidy Bargell"
+date: "7/21/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(gt)
+library(PPBDS.data)
+library(randomNames)
+library(rsample)
+```
+
+<!-- CB: This is me trying to figure out simple permutation code without the package. I am struggling and have asked a lot of people. I don't want to get rid of this but don't want it in the book code right now because its obviously not done and doesn't make sense.--> 
+
+```{r permutation, include = FALSE}
+
+# First make a tibble with the data we collected (focus on treatment
+# effect for this example)
+
+y <- tibble(subject = c("Joe", "Mary", "Sally", "Bob"),
+       attitude = c("13", "11", "10", "12"),
+       status = c("T", "T", "C", "C"))
+
+# They aren't all unique samples with the rep_sample_n
+
+sample_reps <- rep_sample_n(y, size = 4, replace = FALSE, reps = 20)
+
+slice_sample(y, n = 4, replace = FALSE, with_ties = TRUE)
+
+# Use expand() and nesting() to find all combinations of this data
+
+combo <- expand(y, nesting(subject, attitude), status)
+
+# This is a very inefficient way to go about it
+
+com <- tibble(T1 = c(13, 11, 10, 12),
+       T2 = c(13, 11, 10, 12),
+       C1 = c(13, 11, 10, 12), 
+       C2 = c(13, 11, 10, 12)) %>%
+  expand(T1, T2, C1, C2)
+
+
+
+no_same_combo <- expand(c, T1, T2, C1, C2) %>%
+  mutate(notcombo = ifelse((C1 - C2 == 0) | 
+                             (T1 - T2 == 0) | 
+                             (C2 - T1 == 0) | 
+                             (C1- T1 == 0) | 
+                             (T2 - C1 == 0) | 
+                             (T2 - C2 == 0), 0, "yes")) %>%
+  filter(notcombo == "yes")
+```
+
+
+basically resample with no replacement to get all the unique combos. 
+
+```{r}
+x <-
+
+  ## Takes one iteration of 4 names and replicates it 6 times
+  tibble(subject = rep(c("Joe", "Mary", "Sally", "Bob"),6),
+
+         ## Takes one iteration of att_end and replicates it 6 times
+         att_end = rep(c(13,11,10,12),6),
+
+         ## Saves initial configuration of Treatment and Control, then randomly generates new configuration 5 times
+         control = c(c("Treat", "Treat", "Control", "Control"), replicate(5,sample(c("Treat", "Treat", "Control", "Control")))),
+
+         ## Each permutation is a new trial
+         trial = rep(1:6, each=4))
+```
+
+```{r}
+w <- tibble(status = c("C1", "C2", "T1", "T2"),
+       subject = c("Joe", "Mary", "Sally", "Bob"),
+       attitude = c("13", "11", "10", "12"))
+
+combo2 <- expand(w, nesting(subject, attitude), status)
+
+slice_sample(combo2, n = 4, replace = FALSE, with_ties = TRUE)
+```
+
+### Permutation tests
+
+<!-- Do we keep this section? I think Yes. Permutation tests are cool! And we have room to do them. And they provide a nice excuse to do some R coding! But we can't do any uncertainty here. Need to show Preceptor Table for it, with the null hypothesis filling in all equal (in each row) potential outcomes, and then showing what we observe depending on the assignment mechanism. -->
+
+In this chapter we don't have very much code, as a lot of what we have discussed is very conceptual. Permutation tests however are an example of a time when we need fortitide to create code that will allow us to better understand the accuracy of our model. 
+
+Even with randomized assignment, when the sample size is small, our estimate $\widehat{ATE}$ may deviate considerably from the actual ATE.  For example, we've considered just one possible random assignment in our train example, where Yao, Emma and Diego receive the treatment.  Here's another possible random assignment, where Yao, Emma and Cassidy receive the treatment:
+
+```{r, echo = FALSE}
+# First, we create a tibble with the values we want for the table
+
+tibble(subject = c("Yao", "Emma", "Cassidy", "Tahmid", "Diego"),
+       ytreat = c("13", "11", "11", "?", "?"),
+       ycontrol = c("?", "?", "?", "12", "4"),
+       ydiff = c("?", "?", "?", "?", "?")) %>%
+  
+  # Then, we use the gt function to make it pretty
+  
+  gt() %>%
+  cols_label(subject = md("ID"),
+                ytreat = md("$$Y_t(u)$$"),
+                ycontrol = md("$$Y_c(u)$$"),
+                ydiff = md("$$Y_t(u) - Y_c(u)$$")) %>%
+  cols_move(columns = vars(ytreat, ycontrol), after = vars(subject)) %>%
+  tab_style(cell_borders(sides = "right"),
+            location = cells_body(columns = vars(subject))) %>%
+  tab_style(style = cell_text(align = "left"), 
+            locations = cells_column_labels(columns = vars(subject))) %>%
+  cols_align(align = "center", columns = TRUE) %>%
+  cols_align(align = "left", columns = vars(subject)) %>%
+  tab_spanner(label = "$$Outcomes$$", vars(ytreat, ycontrol)) %>%
+  tab_spanner(label = "$$Estimand$$", vars(ydiff)) %>%
+  fmt_markdown(columns = TRUE)
+```
+
+Note that with one assignment, $\widehat{ATE} = -1.33$, while with another $\widehat{ATE} = +3.67$.  Assume that these data are the truth: 
+
+```{r, echo = FALSE}
+# First, we create a tibble with the values we want for the table
+
+tibble(subject = c("Yao", "Emma", "Cassidy", "Tahmid", "Diego"),
+       ytreat = c("13", "11", "11", "9", "5"),
+       ycontrol = c("9", "11", "10", "12", "4"),
+       ydiff = c("+4", "0", "+1", "-3", "+1")) %>%
+  
+  # Then, we use the gt function to make it pretty
+  
+  gt() %>%
+  cols_label(subject = md("ID"),
+                ytreat = md("$$Y_t(u)$$"),
+                ycontrol = md("$$Y_c(u)$$"),
+                ydiff = md("$$Y_t(u) - Y_c(u)$$")) %>%
+  cols_move(columns = vars(ytreat, ycontrol), after = vars(subject)) %>%
+  tab_style(cell_borders(sides = "right"),
+            location = cells_body(columns = vars(subject))) %>%
+  tab_style(style = cell_text(align = "left"), 
+            locations = cells_column_labels(columns = vars(subject))) %>%
+  cols_align(align = "center", columns = TRUE) %>%
+  cols_align(align = "left", columns = vars(subject)) %>%
+  tab_spanner(label = "$$Outcomes$$", vars(ytreat, ycontrol)) %>%
+  tab_spanner(label = "$$Estimand$$", vars(ydiff)) %>%
+  fmt_markdown(columns = TRUE)
+```
+
+Thus, the true average treatment effect is $+0.6$.  However, our estimates of the average treatment effect vary because our sample is small and the responses have a large variance. If the sample were larger and the variance were less, the average treatment effect would be closer to the true average treatment effect regardless of the specific units randomly assigned to treatment.
+
+<!-- AR: This section attempts to describe permutation tests in a non-frequentist
+way; thus, there are no references to a "test statistic" or to the "sharp null." Worth keeping?
+-->
+
+How can we estimate this uncertainty?  To make things simple, we'll consider a dataset with four subjects.  Let's say we observed the following results, which we know came from a random treatment assignment:
+
+```{r, echo = FALSE}
+# First, we create a tibble with the values we want for the table
+
+tibble(subject = c("Yao", "Emma", "Cassidy", "Tahmid"),
+       ytreat = c("13", "11", "?", "?"),
+       ycontrol = c("?", "?", "10", "12"),
+       ydiff = c("?", "?", "?", "?")) %>%
+  
+  # Then, we use the gt function to make it pretty
+  
+  gt() %>%
+  cols_label(subject = md("ID"),
+                ytreat = md("$$Y_t(u)$$"),
+                ycontrol = md("$$Y_c(u)$$"),
+                ydiff = md("$$Y_t(u) - Y_c(u)$$")) %>%
+  cols_move(columns = vars(ytreat, ycontrol), after = vars(subject)) %>%
+  tab_style(cell_borders(sides = "right"),
+            location = cells_body(columns = vars(subject))) %>%
+  tab_style(style = cell_text(align = "left"), 
+            locations = cells_column_labels(columns = vars(subject))) %>%
+  cols_align(align = "center", columns = TRUE) %>%
+  cols_align(align = "left", columns = vars(subject)) %>%
+  tab_spanner(label = "$$Outcomes$$", vars(ytreat, ycontrol)) %>%
+  tab_spanner(label = "$$Estimand$$", vars(ydiff)) %>%
+  fmt_markdown(columns = TRUE)
+```
+
+`r margin_note("The estimated ATE in this example is +1.")`
+The average treatment effect in this case is positive!  However, how likely is it that we would observe these results if the actual ATE is 0?  That is, how confident should we be that the $\widehat{ATE}$ is actually positive?
+
+To answer this question, we can use a **permutation test**.^[See [this post](https://www.r-bloggers.com/what-is-a-permutation-test/) for a longer discussion.]  The intuition behind a permutation test is simple.  We observed four units, two of which were assigned to treatment and two that were assigned to control.  To conduct a permutation test, we calculate our quantity of interest (here, the difference in means between treated and control) for every possible arrangement of the labels "treatment" and "control" across the four numbers we actually saw.
+
+This is easiest to understand visually:
+
+```{r, echo = FALSE}
+# First, we create a tibble with the values we want for the table
+
+tibble(Permutation = c("#1", "#2", "#3", "#4", "#5", "#6"),
+       `13` = c("T", "T", "T", "C", "C", "C"),
+       `11` = c("T", "C", "C", "T", "T", "C"),
+       `10` = c("C", "T", "C", "T", "C", "T"),
+       `12 ` = c("C", "C", "T", "C", "T", "T"),
+       ATE = c("+1", "0", "+2", "-2", "0", "-1")) %>%
+       
+  # Then, we use the gt function to make it pretty
+  
+  gt() %>%
+  cols_label(Permutation = md("Permutation")) %>%
+  tab_style(cell_borders(sides = "right"),
+            location = cells_body(columns = vars(Permutation))) %>%
+  cols_align(align = "center", columns = TRUE)
+```
+
+Here, permutation #1 is what we actually observed, and permutations #2-6 are all the possible rearrangement of the two "treatment" labels and the two "control" labels.  What do we see?  4/6 (67%) of the permutations produce calculated ATEs are smaller than the effect we actually observed ($+1$), and two of them are the opposite sign!  We therefore should not have much confidence from this data alone that the treatment effect on attitude of being on a platform with Spanish speakers is actually positive.  The moral of the story?  Don't conduct an experiment on only four people!
+
+```{r, echo = FALSE, fig.fullwidth = TRUE}
+knitr::include_graphics("03-rubin-causal-model/animations/permutation_4.gif")
+```
+
+Let's say that we had a larger experiment.  We can no longer calculate the results of the permutation test by hand, since the number of possible permutations will quickly become very large.  However, you can use R to calculate far more permutations than you can do by hand.  Furthermore, if the number of permutations becomes too much even for your computer, you can take a random sample of all the possible permutations instead; if the random sample is large enough, this will give you a result very close to what you would get if you considered all the permutations
+
+From the permutations, or a random sample of permutations, you can construct a *confidence interval*.  Note that this confidence interval only takes into account the uncertainty from the assignment process---some people being randomly assigned to treatment and others to control.  This necessarily uses only data from your sample.  If you want to make inferences about a larger population, you have to assume that your sample is representative of the larger population.
+
+```{r, echo = FALSE, fig.fullwidth = TRUE}
+knitr::include_graphics("03-rubin-causal-model/animations/permutation_gif.gif")
+```
+
