@@ -1,8 +1,3 @@
----
-output_yaml:
-  - _output.yml
----
-
 
 <!-- New Plan: -->
 
@@ -141,13 +136,13 @@ library(rstanarm)
 Try to imagine all the pennies used in the United States in 2019. That's a lot of pennies! Now, say we're interested in the average year of minting of *all* these pennies. One way to compute this value would be to gather up all pennies being used in the US, record the year, and compute the average. However, this would be nearly impossible! So instead, let's collect a *sample* of 50 pennies from a local bank in downtown Northampton, Massachusetts, USA as seen in the photo below.
 
 
-```{r, echo=FALSE, fig.cap="Collecting a sample of 50 US pennies from a local bank."}
+```{r, echo=FALSE, out.width="100%", fig.cap="Collecting a sample of 50 US pennies from a local bank."}
 knitr::include_graphics(c("07-two-parameters/images/bank.jpg", "07-two-parameters/images/roll.jpg"))
 ```
 
 An image of these 50 pennies can be seen below. For each of the 50 pennies starting in the top left, progressing row-by-row, and ending in the bottom right, note there is an "ID" identification variable printed in black and the year of minting printed in white.
 
-```{r, echo=FALSE, fig.cap="50 US pennies labelled."}
+```{r, echo=FALSE, out.width="100%", fig.cap="50 US pennies labelled."}
 knitr::include_graphics("07-two-parameters/images/3.jpg")
 ```
 
@@ -156,14 +151,15 @@ Run the `pennies_sample` code below to create our 50 sampled pennies.
 ```{r}
 
 pennies_sample <- tibble(ID = c(1:50), 
-                         year = c(2002, 1986, 2017, 1988, 2008, 1983, 2008, 
-                                  1996, 2004, 2000, 1994, 1995, 2015, 1978, 
-                                  1974, 2015, 2016, 1996, 1983, 1971, 1981, 
-                                  1976, 1998, 2017, 1979, 1979, 1993, 2006, 
-                                  1988, 1978, 2013, 1976, 1979, 1985, 1985, 
-                                  2015, 1962, 1999, 2015, 1990, 1992, 1997, 
-                                  2018, 2015, 1997, 2017, 1982, 1988, 2006, 
-                                  2017))
+                         year = c(2002, 1986, 2017, 1988, 2008, 1983, 
+                                  2008, 1996, 2004, 2000, 1994, 1995, 
+                                  2015, 1978, 1974, 2015, 2016, 1996, 
+                                  1983, 1971, 1981, 1976, 1998, 2017, 
+                                  1979, 1979, 1993, 2006, 1988, 1978, 
+                                  2013, 1976, 1979, 1985, 1985, 2015, 
+                                  1962, 1999, 2015, 1990, 1992, 1997,
+                                  2018, 2015, 1997, 2017, 1982, 1988, 
+                                  2006, 2017))
 pennies_sample
 
 ```
@@ -176,7 +172,7 @@ The `pennies_sample` data frame has 50 rows corresponding to each penny with two
 
 Based on these 50 sampled pennies, what can we say about *all* US pennies in 2019? Let's study some properties of our sample by performing an exploratory data analysis. Let's first visualize the distribution of the year of these 50 pennies using our data visualization tools from before. Since `year` is a numerical variable, we use a histogram to visualize its distribution.
 
-```{r, fig.cap="Distribution of year on 50 US pennies."}
+```{r, out.width="100%", fig.cap="Distribution of year on 50 US pennies."}
 pennies_sample %>%
   ggplot(aes(x = year)) +
   geom_histogram(binwidth = 10, color = "white")
@@ -210,9 +206,6 @@ Recall that we also saw in Chapter \@ref(one-parameter) that such estimates are 
 
 So what do we do about this sampling variation? One solution is that we create bootstrap samples! Bootstrapping repeatedly draws independent samples from our data set with replacement. By sampling with replacement, the same observation can be sampled multiple times and each bootstrap sample will have the same number of observations as the original data set. 
 
-`r margin_note("To conduct bootstraps, make sure you install both the rsample and tidyverse libraries")`
-
-
 The intuition with bootstrapping is that we can model an inference about the population from resampling our sample data and then performing an inference about a sample from each resample. It will look something like this: resampled → sample → population. 
 
 The first thing we want to do when bootstrapping is to create our bootstrap samples. Since we are concerned with the `year` of pennies in 2019, let's select `year` in our data set before we create our bootstraps. Let's now perform the virtual analog for 1,000 resamples. Using these results, we'll be able to study the variability in the sample means from 1,000 resamples of size 50. Let's first add a `times = 1000` argument to `bootstraps()` to indicate we would like 1,000 replicates. Remember that we must use the `rsample` library to use bootstraps. 
@@ -227,10 +220,6 @@ virtual_resamples
 
 Our bootstrap samples are stored in a tibble-like object, with each bootstrap sample nested in the `splits` column. Each row is a different bootstrap sample and the `id` column is used to identify each bootstrap sample. 
 
-<!-- DK: Can we use `id` with the backticks in a margin note? -->
-
-`r margin_note("It is annoying that bootstraps() requires the use of an id column even though we have used ID in the past to identify specific observations. Here, instead, it is used to mean a specific bootstrapped tibble.")`
-
 To view a specific bootstrap sample, use the `analysis()` function from the `rsample` package, which basically allows you to view a specific bootstrap sample as a data frame. Consider the first bootstrap sample: 
 
 ```{r}
@@ -241,8 +230,6 @@ analysis(virtual_resamples$splits[[1]]) %>%
 Replace `1` with some other number to see a later bootstrap sample.
 
 Notice that it has 50 rows, which is the same as the number of rows in our `pennies_sample`. Now that we know how to create bootstrap samples and view them, we can apply more code to our bootstraps to find our desired statistic, which is the average year of pennies in 2019. 
-
-`r margin_note("In this chapter, bootstrap samples and resamples mean the same thing")`
 
 To compute our desired statistics, we now create the column `boot`. 
 
@@ -349,7 +336,7 @@ Be on the lookout for anything suspicious. Are there any NA's in your data set? 
 
 In addition to `glimpse()`, we can run `skim()`, from the **skimr** package, to calculate some summary statistics. 
 
-```{r}
+```{r, out.width="100%"}
 ch7 %>% 
   skim()
 ```
@@ -440,8 +427,6 @@ We use the `quantile()` function to calculate the confidence interval. Note that
 
 ## Probability to bootstrap to Bayesian models
 
-`r margin_note(" In this sense, the bootstrap distribution represents an (approximate) nonparametric, noninformative posterior distribution for our parameter. But this bootstrap distribution is obtained painlessly --- without having to formally specify a prior and without having to sample from the posterior distribution. Hence we might think of the bootstrap distribution as a “poor man’s” Bayes posterior. By perturbing the data, the bootstrap approximates the Bayesian effect of perturbing the parameters, and is typically much simpler to carry out. --- Elements of Statistical Learning, 2nd edition, by Hastie et al, page 271.")`
-
 Most textbooks would, at this stage, provide a more mathematical explanation of the transition we are making from Chapter \@ref(probability) to this chapter. In both Chapters \@ref(probability) and \@ref(one-parameter) we dealt with a discrete set of possible models. We began with examples in which there were only two or three possible "true" states of the world. You were either infected or not infected. There were either zero, one or two white marbles in the bag. These examples grew more and more complex, both by increasing the number of models under consideration and by increasing the number of possible outcomes of the experiment. In the case of the urn, there were 2,401 possible models: either zero or one or two or . . . 2,400 red beads in the urn. 
 
 The transition from a discrete set of possible models to an infinite set of possible models is mathematically complex but easy on the intuition. Just wave you hands, imagine lots more models, and invoke the aesthetic appeal of smoothness. In the case of height, there are an infinite number of possible models: average height of adult American men in 2009 could be 175, 175.1, 175.14, 175.148, 175.1482, and so on. There are an infinite number of possible values since height is continuous. Yet, almost miraculously, the same intuition applies. 
@@ -457,7 +442,7 @@ Data science is ultimately a moral act, so we will use the four [Cardinal Virtue
 
 ### Wisdom
 
-```{r echo=FALSE, fig.margin=TRUE}
+```{r echo=FALSE, out.width="100%"}
 knitr::include_graphics("other/images/Wisdom.jpg")
 ```
 
@@ -486,7 +471,7 @@ The other aspect of Wisdom is ethics. Just because we *can* make a model does no
 
 ### Justice
 
-```{r, echo=FALSE, fig.margin=TRUE}
+```{r, echo=FALSE, out.width="100%"}
 knitr::include_graphics("other/images/Justice.jpg")
 ```
 
@@ -539,11 +524,13 @@ tibble(ID = c("1", "2", "...", "473", "474",
   tab_spanner(label = "Outcome", columns = vars(Heights))
 ```
 
+&nbsp;
+
 Since this is not a causal model, there is only one potential outcome --- which is to say, only one outcome: an individual's height. 
 
 ### Courage
 
-```{r echo=FALSE, fig.margin=TRUE}
+```{r echo=FALSE, out.width="100%"}
 knitr::include_graphics("other/images/Courage.jpg")
 ```
 
@@ -723,7 +710,7 @@ outcome + fitted + res +
 
 ### Temperance
 
-```{r echo=FALSE, fig.margin=TRUE}
+```{r echo=FALSE, out.width="100%"}
 knitr::include_graphics("other/images/Temperance.jpg")
 ```
 
@@ -862,3 +849,5 @@ Having set up the model framework, we need *Courage* to implement the model in c
 
 Let's practice this process another dozen or so times.
 
+
+## References {-}
