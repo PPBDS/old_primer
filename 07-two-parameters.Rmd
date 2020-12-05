@@ -1,0 +1,864 @@
+---
+output_yaml:
+  - _output.yml
+---
+
+
+<!-- New Plan: -->
+
+<!-- * Delete the bootstrap. It is unnecessary. -->
+
+<!-- * Start by saying: Wow. What a bother it was to do everything by hand in chapter 6! There must be an easier way. And, indeed, there is! Use stan_glm. Show how it produces the same answers, with family binomial, as we got at end of chapter 6. Interpret the meaning of the porameter? Show the math?  -->
+
+<!-- Good reference: https://cran.r-project.org/web/packages/rstanarm/vignettes/binomial.html -->
+
+<!-- * You can pass seed as an argument to stan_glm! -->
+
+
+
+```{r, message=FALSE}
+library(tidyverse)
+library(rstanarm)
+
+shovel <- tibble(red = c(rep(1, 17), rep(0, 33))) %>% 
+  sample_frac()
+  
+
+fit_3 <- stan_glm(red ~ 1, 
+                  data = shovel,
+                  family = binomial(),
+                  refresh = 0,
+                  seed = 9)
+
+```
+
+
+<!-- * Then, EDA of nhanes.  -->
+
+
+<!-- TO-DO: --> 
+
+<!-- Use \mu everywhere. -->
+
+<!-- We should reframe the chapter. Start with the big picture involving the connection between this chapter and the other chapters. Then, invoke the bootstrap as being the equivalent of all the sampling tricks we did in previous chapters. Then, make some graphics which look a lot like the graphics from chapter 6. (Make one graphic for a fixed value of sigma and then, I hope, make a 3-D graphic which shows what we do with two unknowns.) Then, explain that this is a total pain in the butt. Then introduce stan_glm() as the solution. Then show that stan_glm() "works" by doing the repeated sampling exercise which we had previously suggested for bootstrapping.  -->
+
+<!-- Connect the discussion to chapter 6 directly. The 2,400 beads in the Urn is like the 100,000,000 pennies in the US. The sample of 50 beads from the paddle is like the sample of 50 pennies we have. The big difference is that chapter 6 just wants a proportion (or a count). We want a mean. -->
+
+<!-- Key differences: First, chapter 6 deals with a limited set of specific models: 2401 possible models. The procedure is just what we saw in chapter 5.  We, on the other hand, have a continuous parameter.  (Average year is continuous. Number of beads is discrete.) Second, chapter 5 dealt with one parameter: the number of read beads, which we can also define as $p$, defined as the number of read beads divided by 2,400.  The  model in chapter 6 was binomial, and there is only one unknown parameter p. We have two unknown parameters: the mean mu of height in the US and the standard deviation sigma, of the normally distributed error term. -->
+
+
+<!-- Remaining Outline of the Chapter -->
+
+
+<!-- Prove that the bootstrap works, that our 95% confidence intervals provide correct coverage. We make a game and I give you a sample of like 40. Here's the 40, and you give me a 95% CI using the bootstrap tools we learned. Then I give you another 40. And another. If we do this 1,00 times, and we use the same procedure for calculating a confidence interval each time, then 950 should include the truth. That's how we know bootstraps is correct and I could only demonstrate this to you if we know what the truth is.  
+
+Plan: create function called create_ci(), which takes a tibble with a single variable called height and returns the 95% confidence interval --- i.e., a numeric vector of length 2 --- for the 75th percentile.  Note that you get to hard code everything.
+
+Then, create a tibble, first column is ID. Second column is height_sample, which is created by running sample(ch7$height, size = 40, replace = FALSE). Third column is ci, which is result mutate(ci = map(height_sample, ~ create_ci(.)). Fourth column is within_ci, which is TRUE if ci includes the TRUE value and FALSE otherwise. (If you want to have two columns, one for each limit, that is fine.)
+-->
+
+
+
+<!-- c) Discuss how this exercise is still useful even if we begin with all our data. That is, don't sample. Just use all 5,000 people. Then, do the bootstrap to get a confidence interval. Note that the interval will be --- how much? --- smaller than the ones we got above, because we are using 116 times as much data. But it is also weird. I know exactly what the mean is! I have the entire Rubin Table! I don't need a confidence interval for the mean.  -->
+
+<!-- d) That is both true, and false. If all you truly care about is the mean these 5,000 people then, it is true, you are done. But that is generally not the case! The true Rubin Table is often bigger than you might initially think. You might also be interested in data from another time period (which has occurred but which may not be available to you) or from 2021, which has not even happened yet. Your Rubin Table includes rows for all those people. They are just missing. You also care about the millions of people who are not in the 5,000. You really want the mean for the country. (Or the world?) So, you use the model that you have to estimate stuff for the data that you don't. What is your best guess for the mean in 2011 (which you can check) or in 2021 (which you can't)? How confident are you are that estimate? What is your 50/50 prediction interval? -->
+
+<!-- e) Relatedly, what if I told you that your 2009 data I gave you did not include one person (or ten people or 100), which was (were) dropped at random from the data by mistake. What is your guess as to the height of that single person, or the height of the average of the 10 people or the tallest of the 10 classes? What is your confidence interval for that? Want to bet? These are all different estimands. -->
+
+<!-- 4) Recall how the probability chapter goes farther than this. It gets all the way to posterior predictions. What will be the mint year of the next penny we get from the bank? What will be the average of the next five pennies we pull? What is a reasonable uncertainty for these forecasts?  Do a posterior predictive checks. Note that we should use all the same "tools" as in that probability chapter. That is, our bootstraps has built a posterior distribution, just like the posterior distribution we built with the coin tosses. Do we then sample from this posterior to answer other questions? Or is that too hard. -->
+
+<!-- 4a) Key issue: How to we transition from this crazy bootstrap approach to using R functions to make the same calculations. Bootstraps take too long, and they are a bother. We need to show how they give the same answer as the built in R functions and then transition away from the bootstrap. Indeed, there is an argument that this chapter (or last chapter?) is the last Bayes Scatterplot we show. That was all about intuition. Once we have that, we can just go to doing things the right way. -->
+
+<!-- 4b) Key issue two: Do we go straight from the bootstrap to rstanarm functions? That would be pretty aggressive. But also pretty cool! -->
+
+<!-- 5) Need to build a Rubin Table. (Read chapter 3 for background and discussion.) We want to have the year for every penny in the world. Sadly, we don't have that! But we do have 50 pennies. Show an RT, which shows both pennies we know the year of and pennies we don't know the year of. If we knew all the pennies, we could just calculate our estimand directly. We would know exactly the mean, the median, the 3rd oldest and so on. No uncertainty. But, we don't have all the years. The question marks mock us! So, we need to infer what is in the missing rows. (And then we . . . not sure I have thought this through.) Also, we can discuss lots of possible biases in the sampling mechanism. Indeed, the sampling mechanism is the key thing to discuss in this section. -->
+
+
+<!-- Other Notes -->
+
+<!-- This is probably too hard for the chapter itself but might make for a good problem set: Estimating who is going to win an election as the votes come in. After one vote, don't know anything. After 5 votes, maybe a little. After 10 votes, more. And so on. Show how the best estimate evolves over time, as information comes in. Do this as a contest. What procedure is best? Show that some shrinkage is a very good idea. Each stage is, potentially, a new contest. See which approach wins the most contests. In the end, of course, they converge.   -->
+
+
+<!-- Show updating as each vote comes in. Then show that you get the same answer if you just include all the votes at once. -->
+
+<!-- First, look at competing models. Who is ahead, D or R? -->
+<!-- Second, add another model. D or R or tied? -->
+<!-- Third, what is D percentage of support? -->
+
+<!-- Assuming this is correct, we get to bring in prediction and betting. Then, we have the motivating question: What is a good estimate for the percentage of Democrats in this bucket? How do we combine information from the overall population and from our sample to come up with a good estimate, and confidence interval, for the percentage Democratic in that bucket? Perhaps this multi-level model is one of the last things we do. Even Mr P??  -->
+
+<!-- Workshop Statistics:  Discovery with Data, A Bayesian Approach by James H. Albert and Allan J. Rossman --- Topic 16 has some interesting stuff about how we learn a proportion.  -->
+
+<!-- DK: Add this: "an estimate for the standard deviation of the errors (i.e. variability in height after accounting for the mean)" is pretty intuitive. You can show students the sample estimate of that with something like this (or sd(resid(fit_obj)) -->
+
+# Two Parameters {#two-parameters}
+
+
+What is the average height of an American male? What is the 90th percentile of the distribution of height for American men? How certain are you of your estimates? If we pass 5 men walking down the street, what are the odds that the tallest will be at least 5 centimeters taller than the shortest?
+
+
+## Pennies example {#resampling-tactile}
+
+In Chapter \@ref(one-parameter), we studied sampling. We started with a "tactile" exercise where we wanted to know the proportion of beads in the urn that are red. While we could have performed an exhaustive count, this would have been a tedious process. So instead, we used a shovel to extract a sample of 50 beads and used the resulting proportion that were red as an *estimate*. Furthermore, we made sure to mix the urn's contents before every use of the shovel. Because of the randomness created by the mixing, different uses of the shovel yielded different proportions red and hence different estimates of the proportion of the urn's beads that are red. 
+
+Remember: There is a *truth* here. There is an urn. It has red and white beads in it. An exact, but unknown, number of the beads are red. An exact, but unknown, number of the beads are white. An exact, but unknown, percentage of the beads are red -- defined as the number red divided by the sum of the number red and the number white. Our goal was to estimate that unknown percentage. We wanted to make statements about the world, even if we can never be certain that those statements are *true*. We will never have the time or inclination to actually count all the balls. We use the term *parameter* for things that exist but which are unknown. We use statistics to estimate the true values of parameters.
+
+We then mimicked this *physical* sampling exercise with an equivalent *virtual* sampling exercise using the computer. In Subsection \@ref(different-shovels), we repeated this sampling procedure 1,000 times, using three different virtual shovels with 25, 50, and 100 slots. We visualized these three sets of 1,000 estimates in Chapter \@ref(one-parameter) and saw that as the sample size increased, the variation in the estimates decreased.  We then expanded this for all sample sizes from 1 to 100.
+
+In doing so, we constructed *sampling distributions*. The motivation for taking a 1,000 repeated samples and visualizing the resulting estimates was to study how these estimates varied from one sample to another; in other words, we wanted to study the effect of *sampling variation*. We quantified the variation of these estimates using their standard deviation, which has a special name: the *standard error*. In particular, we saw that as the sample size increased from 1 to 100, the standard error decreased and thus the sampling distributions narrowed. Larger sample sizes led to more *precise* estimates that varied less around the center. 
+
+<!-- Distinguish further the difference between standard deviation and standard error in the above paragraph. Readers can confuse the two. -->
+
+
+We then tied these sampling exercises to terminology and mathematical notation related to sampling in Subsection \@ref(terminology-and-notation). Our *study population* was the large urn with $N$ = 2,400 balls, while the *population parameter*, the unknown quantity of interest, was the population proportion $p$ of the urn's beads that were red. Since performing a *census* would be expensive in terms of time and energy, we instead extracted a *sample* of size $n$ = 50. The *point estimate*, also known as a *sample statistic*, used to estimate $p$ was the sample proportion $\hat{p}$ of these 50 sampled beads that were red. Furthermore, since the sample was obtained at *random*, it can be considered as *unbiased* and as *representative* of the population. Thus any results based on the sample could be *generalized* to the population. Therefore, the proportion of the shovel's balls that were red was a "good guess" of the proportion of the urn's balls that are red. In other words, we used the sample to draw *inferences* about the population.
+
+However, as described in Section \@ref(sampling-simulation), both the physical and virtual sampling exercises are not what one would do in real life. This was merely an activity used to study the effects of sampling variation. In a real life situation, we would not take 1,000 samples of size $n$, but rather take a *single* representative sample that's as large as possible. Additionally, we knew that the true proportion of the urn's beads that were red was 37.5%. In a real-life situation, we will not know what this true value is. Because if we did, then why would we take a sample to estimate it? 
+
+An example of a realistic sampling situation would be a poll, like the [Obama poll](https://www.npr.org/sections/itsallpolitics/2013/12/04/248793753/poll-support-for-obama-among-young-americans-eroding) you saw in Section \@ref(sampling-case-study). Pollsters did not know the true proportion of *all* young Americans who supported President Obama in 2013, and thus they took a single sample of size $n$ = 2,089 young Americans to estimate this value.
+
+So how does one quantify the effects of sampling variation when you only have a *single sample* to work with? You cannot directly study the effects of sampling variation when you only have one sample. One common method to study this is *bootstrap resampling*, or simply *bootstrapping*.
+
+What if we want, not only a single estimate of the unknown population parameter, but also a *range of highly plausible* values? Going back to the Obama poll article, it stated that the pollsters' estimate of the proportion of all young Americans who supported President Obama was 41%. But in addition it stated that the poll's "margin of error was plus or minus 2.1 percentage points." This "plausible range" was [41% - 2.1%, 41% + 2.1%] = [38.9%, 43.1%]. This range of plausible values is what's known as a *confidence interval*, which will be the focus of the later sections of this chapter. In Bayesian terms, we want the posterior distribution of the unknown parameter $p$, the proportion of young Americans who supported Obama.
+
+
+### To the Bank
+
+As we did in Chapter \@ref(one-parameter), we'll begin with a hands-on tactile activity. We almost always need the **tidyverse** package.
+
+
+```{r, message=FALSE}
+library(PPBDS.data)
+library(rsample)
+library(tidyverse)
+library(skimr)
+library(rstanarm)
+```
+
+**PPBDS.data** includes the data sets for this book. **rsample** includes functions for bootstrapping. **rstanarm** makes it easy to create and display Bayesian models.
+
+### What was the average year of US pennies in 2019?
+
+Try to imagine all the pennies used in the United States in 2019. That's a lot of pennies! Now, say we're interested in the average year of minting of *all* these pennies. One way to compute this value would be to gather up all pennies being used in the US, record the year, and compute the average. However, this would be nearly impossible! So instead, let's collect a *sample* of 50 pennies from a local bank in downtown Northampton, Massachusetts, USA as seen in the photo below.
+
+
+```{r, echo=FALSE, fig.cap="Collecting a sample of 50 US pennies from a local bank."}
+knitr::include_graphics(c("07-two-parameters/images/bank.jpg", "07-two-parameters/images/roll.jpg"))
+```
+
+An image of these 50 pennies can be seen below. For each of the 50 pennies starting in the top left, progressing row-by-row, and ending in the bottom right, note there is an "ID" identification variable printed in black and the year of minting printed in white.
+
+```{r, echo=FALSE, fig.cap="50 US pennies labelled."}
+knitr::include_graphics("07-two-parameters/images/3.jpg")
+```
+
+Run the `pennies_sample` code below to create our 50 sampled pennies.
+
+```{r}
+
+pennies_sample <- tibble(ID = c(1:50), 
+                         year = c(2002, 1986, 2017, 1988, 2008, 1983, 2008, 
+                                  1996, 2004, 2000, 1994, 1995, 2015, 1978, 
+                                  1974, 2015, 2016, 1996, 1983, 1971, 1981, 
+                                  1976, 1998, 2017, 1979, 1979, 1993, 2006, 
+                                  1988, 1978, 2013, 1976, 1979, 1985, 1985, 
+                                  2015, 1962, 1999, 2015, 1990, 1992, 1997, 
+                                  2018, 2015, 1997, 2017, 1982, 1988, 2006, 
+                                  2017))
+pennies_sample
+
+```
+
+The `pennies_sample` data frame has 50 rows corresponding to each penny with two variables. The first variable `ID` corresponds to the ID labels in our table above, whereas the second variable `year` corresponds to the year of minting saved as a numeric variable, also known as a double (`dbl`).
+
+<!-- DK: Shouldn't the year be an int? Should it be ID or id? Need to standardize this across the book. -->
+
+
+
+Based on these 50 sampled pennies, what can we say about *all* US pennies in 2019? Let's study some properties of our sample by performing an exploratory data analysis. Let's first visualize the distribution of the year of these 50 pennies using our data visualization tools from before. Since `year` is a numerical variable, we use a histogram to visualize its distribution.
+
+```{r, fig.cap="Distribution of year on 50 US pennies."}
+pennies_sample %>%
+  ggplot(aes(x = year)) +
+  geom_histogram(binwidth = 10, color = "white")
+```
+
+Observe a slightly left-skewed distribution, since most pennies fall between 1980 and 2010 with only a few pennies older than 1970. What is the average year for the 50 sampled pennies? Eyeballing the histogram, it appears to be around 1990. Let's now compute this value exactly using our data wrangling tools from Chapter \@ref(wrangling).
+
+<!-- DK: In the book, this shows up as "1994." Why is that? This happens in other chapters. Need to figure out decimal display issues. -->
+
+```{r}
+pennies_sample %>% 
+  summarize(mean_year = mean(year))
+```
+
+```{r, echo=FALSE}
+x_bar <- pennies_sample %>% 
+  summarize(mean_year = mean(year)) 
+```
+
+
+Thus, if we're willing to assume that `pennies_sample` is a representative sample from *all* US pennies, a "good guess" of the average year of minting of all US pennies would be `r x_bar %>% dplyr::pull(mean_year) %>% round(2)`. In other words, around `r x_bar %>% pull(mean_year) %>% round()`. This should start sounding similar to what we did previously in Chapter \@ref(one-parameter)!
+
+In Chapter \@ref(one-parameter), our *study population* was the urn of $N = 2400$ balls. Our *population parameter* was the *population proportion* of these balls that were red, denoted by $p$. In order to estimate $p$, we extracted a sample of 50 balls using the shovel. We then computed the relevant *point estimate*: the *sample proportion* of these 50 balls that were red, denoted mathematically by $\hat{p}$. We also calculated a posterior probability distribution for $p$.
+
+Here, our population is $N$ -- whatever the number of pennies are being used in the US, a value which we don't know and probably never will. The population parameter of interest is now the *population mean* year of all these pennies, a value denoted mathematically by the Greek letter $\mu$, pronounced "mu". In order to estimate $\mu$, we went to the bank and obtained a sample of 50 pennies and computed the relevant point estimate: the *sample mean* year of these 50 pennies, denoted mathematically by $\overline{x}$ (pronounced "x-bar"). 
+
+
+Going back to our 50 sampled pennies, the point estimate of interest is the sample mean $\overline{x}$ of `r x_bar %>% pull(mean_year) %>% round(2)`. This quantity is an *estimate* of the population mean year of *all* US pennies $\mu$.
+
+Recall that we also saw in Chapter \@ref(one-parameter) that such estimates are prone to *sampling variation*. For example, in this particular sample, we observed three pennies with the year 1999. If we sampled another 50 pennies, would we observe exactly three pennies with the year 1999 again? More than likely not. We might observe none, one, two, or maybe even all 50! The same can be said for the other 26 unique years that are represented in our sample of 50 pennies.
+
+So what do we do about this sampling variation? One solution is that we create bootstrap samples! Bootstrapping repeatedly draws independent samples from our data set with replacement. By sampling with replacement, the same observation can be sampled multiple times and each bootstrap sample will have the same number of observations as the original data set. 
+
+`r margin_note("To conduct bootstraps, make sure you install both the rsample and tidyverse libraries")`
+
+
+The intuition with bootstrapping is that we can model an inference about the population from resampling our sample data and then performing an inference about a sample from each resample. It will look something like this: resampled → sample → population. 
+
+The first thing we want to do when bootstrapping is to create our bootstrap samples. Since we are concerned with the `year` of pennies in 2019, let's select `year` in our data set before we create our bootstraps. Let's now perform the virtual analog for 1,000 resamples. Using these results, we'll be able to study the variability in the sample means from 1,000 resamples of size 50. Let's first add a `times = 1000` argument to `bootstraps()` to indicate we would like 1,000 replicates. Remember that we must use the `rsample` library to use bootstraps. 
+
+```{r}
+set.seed(9)
+virtual_resamples <- pennies_sample %>%
+  select(year) %>%
+  bootstraps(times = 1000)
+virtual_resamples
+```
+
+Our bootstrap samples are stored in a tibble-like object, with each bootstrap sample nested in the `splits` column. Each row is a different bootstrap sample and the `id` column is used to identify each bootstrap sample. 
+
+<!-- DK: Can we use `id` with the backticks in a margin note? -->
+
+`r margin_note("It is annoying that bootstraps() requires the use of an id column even though we have used ID in the past to identify specific observations. Here, instead, it is used to mean a specific bootstrapped tibble.")`
+
+To view a specific bootstrap sample, use the `analysis()` function from the `rsample` package, which basically allows you to view a specific bootstrap sample as a data frame. Consider the first bootstrap sample: 
+
+```{r}
+analysis(virtual_resamples$splits[[1]]) %>% 
+  as_tibble()
+```
+
+Replace `1` with some other number to see a later bootstrap sample.
+
+Notice that it has 50 rows, which is the same as the number of rows in our `pennies_sample`. Now that we know how to create bootstrap samples and view them, we can apply more code to our bootstraps to find our desired statistic, which is the average year of pennies in 2019. 
+
+`r margin_note("In this chapter, bootstrap samples and resamples mean the same thing")`
+
+To compute our desired statistics, we now create the column `boot`. 
+
+```{r}
+virtual_resamples <- pennies_sample %>%
+  select(year) %>%
+  bootstraps(times = 1000) %>%
+  mutate(boot = map(splits, ~ analysis(.)))
+virtual_resamples
+```
+
+We are iterating over each bootstrap sample, applying `analysis()` to each row.  `boot` is now a list-column in the tibble, which we can use if we want to find a specific characteristic of each sample like the average year. Given that `boot` is a list column and we want to pull out the mean year as we are interested in this, we can create two more columns:
+
+```{r}
+set.seed(9)
+virtual_resamples <- pennies_sample %>%
+  select(year) %>%
+  bootstraps(times = 1000) %>%
+  mutate(boot = map(splits, ~ analysis(.))) %>%
+  mutate(years = map(boot, ~ pull(., year))) %>% 
+  mutate(year_mean = map_dbl(years, ~ mean(.)))
+virtual_resamples
+```
+
+Voila! We were able to create a thousand bootstrap samples and calculate the mean year for each resample. Let's now create a plot to visualizes the posterior distribution for the mean year of American pennies in 2019.
+
+<!-- DK: Need to explain the .. syntax or replace it with the new stat_density trick. -->
+
+```{r}
+virtual_resamples %>% 
+  ggplot() +
+    geom_histogram(aes(x = year_mean, 
+                       y = after_stat(count/sum(count))), 
+                       binwidth = .5) +
+    labs(x = "Mean Year", 
+         y = "Probability",
+         title = "Posterior Distribution for the Mean Year of American Pennies in 2019") 
+```
+
+How did we sneak in the word "posterior" into this discussion? Recall in Chapter \@ref(probability) that we defined a posterior distribution as our beliefs about an unknown number: either a number which we don't know now but which we will know, like Biden's electoral vote total or a number which we can never know, like the average year for all pennies.  In the case of the bootstrap samples we made, the posterior distribution represents our beliefs about $\mu$, the mean year of American pennies in 2019 after taking into account the information from our bootstrap sample means. As demonstrated in the plot above, we can see that $\mu$ --- an unknown parameter, the true value of which we will never know --- is most likely between 1992 and 1998. 
+
+Have we proved how the bootstrap, almost magically, can create a reasonable posterior? Not at all! The mathematics of that proof are beyond the scope of this book.
+
+<!-- In the "resampling with replacement" scenario we are illustrating here, this histogram has a special name: the *bootstrap distribution of the sample mean*. Furthermore, recall it is an approximation to the *sampling distribution* of the sample mean, a concept you saw before. This distribution allows us to study the effect of sampling variation on our estimates of the true population mean, in this case the true mean year for *all* US pennies. However, unlike in Chapter \@ref(one-parameter) where we took multiple samples (something one would never do in practice), bootstrap distributions are constructed by taking multiple resamples from a *single* sample: in this case, the 50 original pennies from the bank.  -->
+
+<!-- Congratulations! You've just constructed your first bootstrap distribution!  -->
+
+
+<!-- ### Measuring uncertainty with confidence intervals {#ci-build-up} -->
+
+<!-- Let's start this section with an analogy involving fishing. Say you are trying to catch a fish. On the one hand, you could use a spear, while on the other you could use a net. Using the net will probably allow you to catch more fish! -->
+
+<!-- Now think back to our pennies exercise< where you are trying to estimate the true population mean year $\mu$ of *all* US pennies. Think of the value of $\mu$ as a fish. -->
+
+<!-- On the one hand, we could use the appropriate *point estimate/sample statistic* to estimate $\mu$, which we saw in the table in the previous section, is the sample mean $\overline{x}$. Based on our sample of 50 pennies from the bank, the sample mean was `r x_bar %>% pull(mean_year) %>% round(2)`. Think of using this value as "fishing with a spear." -->
+
+<!-- What would "fishing with a net" correspond to? Look at the bootstrap distribution we created once more. Between which two years would you say that "most" sample means lie?  While this question is somewhat subjective, saying that most sample means lie between 1992 and 2000 would not be unreasonable. Think of this interval as the "net." -->
+
+<!-- What we've just illustrated is the concept of a *confidence interval*, which we'll abbreviate with "CI" throughout this book. As opposed to a point estimate/sample statistic that estimates the value of an unknown population parameter with a single value, a *confidence interval* \index{confidence interval} gives what can be interpreted as a range of plausible values. Going back to our analogy, point estimates/sample statistics can be thought of as spears, whereas confidence intervals can be thought of as nets. -->
+
+
+<!-- ```{r, echo=FALSE, fig.align='center', fig.cap="Analogy of difference between point estimates and confidence intervals."} -->
+<!-- knitr::include_graphics("07-two-parameters/images/point_estimate_vs_conf_int.png") -->
+<!-- ``` -->
+
+<!-- Our proposed interval of 1992 to 2000 was constructed by eye and was thus somewhat subjective. We now introduce two methods for constructing such intervals in a more exact fashion: the *lm method* and the *quantile method*. -->
+
+<!-- Second, they both require you to specify the *confidence level*. Commonly used confidence levels include 90%, 95%, and 99%.  All other things being equal, higher confidence levels correspond to wider confidence intervals, and lower confidence levels correspond to narrower confidence intervals. In this book, we'll be mostly using 95% and hence constructing "95% confidence intervals for $\mu$" for our pennies activity. -->
+
+## EDA for `nhanes`
+
+
+Shifting away from dealing with pennies, let's look at bootstrap modeling with the `nhanes` dataset from National Health and Nutrition Examination Survey conducted by the Centers for Disease Control and Prevention and covering children and adults in America. It is located in the **PPBDS.data** package which we loaded above.
+
+
+```{r}
+glimpse(nhanes)
+```
+
+`nhanes` has data on a diverse array of things like physical attributes, education, and sleep. Let's restrict our attention to a subset, focusing on gender, height and the year of the survey. 
+
+```{r}
+ch7 <- nhanes %>% 
+  select(age, gender, height, survey)
+```
+
+Look at a random sample of our data:
+
+```{r}
+ch7 %>% 
+  sample_n(5)
+```
+
+Notice how there is a decimal in the `height` column of `ch7`. This is because `height` is a `<dbl>` and not an `<int>`.
+
+Let's also run `glimpse()` on our new data.
+
+```{r}
+ch7 %>%
+  glimpse()
+```
+
+Be on the lookout for anything suspicious. Are there any NA's in your data set? What types of data are the columns, i.e. why is `survey` characterized as integer instead of double? Was most of the data collected in 2009? Are there more females than males? You can never look at your data too closely.
+
+In addition to `glimpse()`, we can run `skim()`, from the **skimr** package, to calculate some summary statistics. 
+
+```{r}
+ch7 %>% 
+  skim()
+```
+
+Interesting! There are 353 missing values of height in our subset of data. Just using `glimpse()` does not show us that.  Let's filter out the NA's using `drop_na`. This we will delete the rows in which the value of any variable is missing. For simplicity, let's only consider adults.
+
+```{r}
+ch7 <- nhanes %>% 
+  select(age, gender, height, survey) %>%
+  filter(age >= 18) %>% 
+  drop_na()
+```
+
+Plot your data. `geom_density()` is a smooth version of `geom_histogram()`. With `geom_density()`, the y-axis is scaled so that the area under the curve equals 1. 
+
+```{r}
+ch7 %>%
+  ggplot(aes(x = height, color = gender)) + 
+  geom_density() + 
+  labs(x = "Height",
+       title = "Height by Gender in NHANES Dataset")
+```
+
+We can see the the most probable heights for both genders and that men are generally taller than women. 
+
+<!-- ## Using Bootstraps with `nhanes` -->
+
+<!-- 4. Prove that the bootstrap works, that our 95% confidence intervals provide correct coverage. We make a game and I give you a sample of like 40. Here's the 40, and you give me a 95% CI using the bootstrap tools we learned. Then I give you another 40. And another. If we do this 1,00 times, and we use the same procedure for calculating a confidence interval each time, then 950 should include the truth. That's how we know bootstraps is correct and I could only demonstrate this to you if we know what the truth is.   -->
+
+<!-- Plan: create function called create_ci(), which takes a tibble with a single variable called height and returns the 95% confidence interval --- i.e., a numeric vector of length 2 --- for the 75th percentile.  Note that you get to hard code everything. -->
+
+<!-- Then, create a tibble, first column is ID. Second column is height_sample, which is created by running sample(ch7$height, size = 40, replace = FALSE). Third column is ci, which is result mutate(ci = map(height_sample, ~ create_ci(.)). Fourth column is within_ci, which is TRUE if ci includes the TRUE value and FALSE otherwise. (If you want to have two columns, one for each limit, that is fine.) -->
+
+## Bootstrap to estimate average height
+
+We have shown you how to use bootstrap sampling to create a posterior distribution for an unknown parameter. Let's use a similar approach to estimate the value of a different unknown parameter: the average height of an adult American male in 2009. Let's also name this parameter $\mu$. Is it confusing that we are using the same parameter? Yes! But, sadly, there are only so many Greek letters. We have no choice but to reuse them. By convention, $\mu$ is often used as the parameter name for an unknown mean. But we could have used a different letter, Greek or otherwise. And, symbols besides $\mu$ are often used for unknown means. It is up to you, but, in general, following the conventions in your field is wise. 
+
+First, filter the data set:
+
+
+```{r}
+ch7_male <- nhanes %>%
+  filter(survey == 2009, gender == "Male", age >= 18) %>%
+  select(height) %>%
+  drop_na()
+```
+
+Dropping missing values can be dangerous, depending on their origin and the goals of our analysis. *Never drop lightly.* 
+
+Second, use (almost) the same code as before:
+
+```{r}
+set.seed(9)
+virtual_resamples <- ch7_male %>%
+  bootstraps(times = 1000) %>%
+  mutate(boot = map(splits, ~ analysis(.))) %>%
+  mutate(heights = map(boot, ~ pull(., height))) %>% 
+  mutate(height_mean = map_dbl(heights, ~ mean(.)))
+virtual_resamples
+```
+
+Plot the results:
+
+<!-- DK: No decimals show up on the x-axis when this is knit, just 176, 176, 176.  -->
+
+```{r}
+virtual_resamples %>% 
+  ggplot() +
+    geom_histogram(aes(x = height_mean, 
+                       y = after_stat(count/sum(count))), 
+                       binwidth = 0.02) +
+    labs(x = "Mean Height", 
+         y = "Probability",
+         title = "Posterior Distribution for the Mean Height of American Males in 2009") 
+```
+
+The posterior distribution includes all the information we have about the unknown parameter --- mean height of American males --- which we have used our data to estimate. But we don't always want the entire object. Instead, we might want to know the:
+
+* Mean: `r mean(virtual_resamples$height_mean)`
+
+* Median: `r median(virtual_resamples$height_mean)`
+
+* 95% confidence interval: `r quantile(virtual_resamples$height_mean, probs = c(0.025, 0.975))`
+
+We use the `quantile()` function to calculate the confidence interval. Note that, in this book, we use the Bayesian interpretation of a confidence interval. There is a truth out there. The average height in our population is a specific number. We don't know what that number is. But we are 95% sure that it lies within the 95% confidence interval.
+
+
+
+## Probability to bootstrap to Bayesian models
+
+`r margin_note(" In this sense, the bootstrap distribution represents an (approximate) nonparametric, noninformative posterior distribution for our parameter. But this bootstrap distribution is obtained painlessly --- without having to formally specify a prior and without having to sample from the posterior distribution. Hence we might think of the bootstrap distribution as a “poor man’s” Bayes posterior. By perturbing the data, the bootstrap approximates the Bayesian effect of perturbing the parameters, and is typically much simpler to carry out. --- Elements of Statistical Learning, 2nd edition, by Hastie et al, page 271.")`
+
+Most textbooks would, at this stage, provide a more mathematical explanation of the transition we are making from Chapter \@ref(probability) to this chapter. In both Chapters \@ref(probability) and \@ref(one-parameter) we dealt with a discrete set of possible models. We began with examples in which there were only two or three possible "true" states of the world. You were either infected or not infected. There were either zero, one or two white marbles in the bag. These examples grew more and more complex, both by increasing the number of models under consideration and by increasing the number of possible outcomes of the experiment. In the case of the urn, there were 2,401 possible models: either zero or one or two or . . . 2,400 red beads in the urn. 
+
+The transition from a discrete set of possible models to an infinite set of possible models is mathematically complex but easy on the intuition. Just wave you hands, imagine lots more models, and invoke the aesthetic appeal of smoothness. In the case of height, there are an infinite number of possible models: average height of adult American men in 2009 could be 175, 175.1, 175.14, 175.148, 175.1482, and so on. There are an infinite number of possible values since height is continuous. Yet, almost miraculously, the same intuition applies. 
+
+Let's use $\mu$ as the parameter for the unknown average height of all the adult men in America in 2009. This is exactly analogous to the parameter $p$ from Chapter \@ref(one-parameter), the proportion of red beans in the urn. The only difference is that there are an infinite number of values which $\mu$ might take. We restricted $p$ to only 2,401 possible values: $0$, $1/2400$, $2/2400$, ..., $2399/2400$, $1$. 
+
+Although a bootstrap can create a posterior distribution, as above, there are much simpler ways to do so. The most common involves the function `stan_glm()` from the **rstanarm** library. Halfway through the book, we are now ready for our first full scale data science project. Let us be guided by the cardinal virtues.
+
+
+## Cardinal Virtues
+
+Data science is ultimately a moral act, so we will use the four [Cardinal Virtues](https://en.wikipedia.org/wiki/Cardinal_virtues) --- Wisdom, Justice, Courage and Temperance --- to organize our approach. The purpose of this section is two-fold. First, we will show you that a more formal Bayesian approach results in, more or less, the same answer as the bootstrap above, but with much less code. Second, we will show how the Cardinal Virtues guide good data science.  
+
+### Wisdom
+
+```{r echo=FALSE, fig.margin=TRUE}
+knitr::include_graphics("other/images/Wisdom.jpg")
+```
+
+What decision do we face? The reason for making models is not, primarily that making models is fun, although it is! The reason is that we face a decision. We must decide between X or Y. We must choose from A, B or C. We must set D to a specific numeric value. Given that decision, we should make a model of the world to help us.
+
+In any textbook, it will be tough to avoid the "toy problem" trap. The real world is complex. Any substantive decision problem includes a great deal of complexity and requires a great deal of context. We do not have the time to get into that level of detail. So, we simplify. We are going to create a model of height for adult men. We will then use that model to answer three questions:
+
+* What is the probability that the next adult male we meet will be taller than 180 centimeters?
+
+* What is the probability that, among the next 4 men we meet, the tallest is at least 10 cm taller than the shortest?
+
+* What is our posterior probability distribution for the height of the 3rd tallest man out of the next 100 we meet?
+
+The first two questions have a single number, a single probability, as their answer. The third question requires a full scale posterior probability distribution.
+
+But before starting that process, we need to check that the data we have --- which is only for a sample of adult American men in 2009 --- will allow us to answer these questions, however roughly. 
+
+That is where Wisdom comes in. In the social sciences, *there is never a perfect relationship between the data you have and the question you are trying to answer.* Data for American males in 2009 is not the same thing as data for American males today. Nor is it the same as the data for men in France or Mexico. Moreover, the problem hasn't specified where on Earth we are, nor who we are near. Walking near a basketball tournament will generate different answers than walking around Times Square. 
+
+Yet, this data is relevant. Right? It is certainly better than nothing. That is, using not-perfect data is better than using no data at all.
+
+
+Is not-perfect data always better? No! If your problem is estimating the median height of 5th grade girls in Toyko, we doubt that our data is at all relevant. Wisdom recognizes the danger of using non-relevant data to build a model and then mistakenly using that model in a way which will only make the situation worse. If the data won't help, don't use the data, don't build a model. Better to just use your common sense and experience. Or find better data.
+
+The other aspect of Wisdom is ethics. Just because we *can* make a model does not mean we *should* make that model. Models can be used for evil and, if at all possible, we should do no evil. Fortunately, it is hard to generate many ethical worries about height models. If, instead, we were modeling criminality, the ethics become much more complex . . .
+
+### Justice
+
+```{r, echo=FALSE, fig.margin=TRUE}
+knitr::include_graphics("other/images/Justice.jpg")
+```
+
+Mathematical knowledge is the least important skill for a data scientist. 
+
+However, a little mathematical notation will make our modeling assumptions clear, will bring some precision to our approach. In this case:
+
+$$ y_i =  \mu + \epsilon_i $$
+with $\epsilon_i \sim N(0, \sigma^2)$. $y_i$ is the height of male $i$. $\mu$ is the average height of all males in the population. $\epsilon_i$ is the "error term," the difference between the height of male $i$ and the average height of all males.  $\epsilon_i$ is normally distributed with a mean of 0 and a standard deviation of $\sigma$. 
+
+This is the simplest model we can construct. Note: 
+
+* The model has two unknown parameters: $\mu$ and $\sigma$. Before we can do anything else we need to estimate the values of these parameters. Can we ever know their exact value? No! Perfection lies only in God's own R code. But, by using a Bayesian approach similar to what we used in Chapters \@ref(probability) and \@ref(one-parameter), we will be able to create *posterior probability distributions* for each parameter.
+
+<!-- DK: Box quote. -->
+
+* The model is wrong, as are all models. 
+
+* The parameter we most care about is $\mu$. That is the parameter with a substantively meaningful interpretation. Not only is the meaning of $\sigma$ difficult to describe, we also don't particular care about its value. Parameters like $\sigma$ in this context are *nuisance* or *auxiliary* parameters. We still have to estimate their posterior distributions, but we don't really care what those posteriors look like.
+
+* $\mu$ is not the average height of the men in the sample. We can calculate that directly. It is `r mean(ch7_male$height)`. No estimation required! Instead, $\mu$ is the average height of men in the *population*. Recall from the discussions in Chapter \@ref(one-parameter) that the population is the universe of people/units/whatever about which we seek to draw conclusions. On some level, this seems simple. On a deeper level, it is very subtle. For example, if we are walking around Copenhagen, then the population we really care about, in order to answer our three questions, is the set of adult men into which we might run today. This is not the same as the population of adult men in the US in 2009. But is it close enough? Is it better than nothing? Each case is a different and the details matter.
+
+<!-- DK: Should we discuss what a superpopulation is? -->
+
+Consider:
+
+$$outcome = model + what\ is\ not\ in\ the\ model$$
+In this case, the *outcome* is the height of an individual male. This, also called the "response," is what we are trying to understand and/or explain and/or predict. The *model* is our creation, a mixture of data and parameters, an attempt to capture the underlying structure in the world which generates the outcome. 
+
+What is the difference between the *outcome* and the *model*? By definition, it is *what is not in the model*, all the blooming and buzzing complexity of the real world. The model will always be incomplete in that it won't capture everything. Whatever the model misses is thrown into the error term. 
+
+The Preceptor Table for this problem is almost identical to the one we saw in Chapter \@ref(rubin-causal-model):
+
+```{r echo = FALSE}
+tibble(ID = c("1", "2", "...", "473", "474",
+              "...", "3,258", "3,259", "...", "N"),
+       Heights = c("?", "?", "...", "172", "?", "...", "?", "162", "...", "?")) %>%
+  
+  # Then, we use the gt function to make it pretty
+  
+  gt() %>%
+  cols_label(ID = md("ID"),
+                Heights = "Heights (cm)") %>%
+  tab_style(cell_borders(sides = "right"),
+            location = cells_body(columns = vars(ID))) %>%
+  tab_style(style = cell_text(align = "left", v_align = "middle"), 
+            locations = cells_column_labels(columns = vars(ID))) %>%
+  cols_align(align = "center", columns = TRUE) %>%
+  cols_align(align = "left", columns = vars(ID)) %>%
+  tab_spanner(label = "Outcome", columns = vars(Heights))
+```
+
+Since this is not a causal model, there is only one potential outcome --- which is to say, only one outcome: an individual's height. 
+
+### Courage
+
+```{r echo=FALSE, fig.margin=TRUE}
+knitr::include_graphics("other/images/Courage.jpg")
+```
+
+In data science, we deal with math, words, and code, but the most important of these is code. We need Courage to create the model, to take the leap of faith that we can make our ideas real. 
+
+#### stan_glm
+
+Bayesian models are not hard to create in R. Sticking to the same filtered adult male 2009 data, we can reduce all the work we did for the bootstrap approach to the `stan_glm()` function which, when fed the correct inputs, creates a Bayesian generalized linear model of height. This function comes from the **rstanarm** package, which is very useful for Bayesian models in general.
+
+The first argument in the `stan_glm()` function is `data`, which in our case is the filtered `ch7_male` tibble we used in the bootstrap example. The only other mandatory argument is the formula that we want to build a model around. In this case, since we have no predictor variables, our equation will be `height ~ 1`. 
+
+
+```{r, cache = TRUE}
+set.seed(9)
+fit_obj <- stan_glm(data = ch7_male, 
+                    height ~ 1, 
+                    family = gaussian(), 
+                    refresh = 0)
+```
+
+Details:
+
+* This may take time. Bayesian models, especially ones with large amounts of data, can take longer than we might like. Indeed, computational limits were the main reason why Bayesian approaches were --- and, to some extent, still are --- little used. When creating your own models, you will often want to use the `cache = TRUE` code chunk option. This saves the result of the model so that you don't recalculate it every time you knit.
+
+* The `data` argument, like all such usage in R, is used for the input data for the model.
+
+* If you don't set `refresh = 0`, the model will puke out many lines of confusing output. You can learn more about that output by reading the help page for `stan_glm()`. The output provides details on the fitting process as it runs as well as diagnostics about the final result. All of those details are beyond the scope of this book.
+
+* You should always assign the result of the call of `stan_glm()` to an object, as we do above. By convention, the name of that object will often included the word "fit" to indicate that it is a *fitted* model object.
+
+* There is a direct connection between the mathematical form of the model created under Justice and the code we use to fit the model under Courage. `height ~ 1` is the code equivalent of $y_i =  \mu$. 
+
+* The default value for `family` is `gaussian()`, so we did not need to include it in the call above. From the Justice section, the assumption that $\epsilon_i \sim N(0, \sigma^2)$ is equivalent to using `gaussian()`. If $\epsilon_i$ has a different distribution, we would need to use a different `family`.
+
+
+##### Printed model
+
+There are several ways to examine the fitted model. The simplest is to print it:
+
+```{r}
+fit_obj
+```
+
+
+The first line is telling us which model we used, in our case a `stan_glm()`. 
+
+The second line tells us this model is using a Gaussian, or normal, distribution. We discussed this distribution in Section \@ref(normal). The normal is a probability distribution that is symmetric about the mean and unimodal. For that reason, we typically leave it as the default unless we are working with a lefthand variable that is extremely non-normal, e.g., something which only takes two values like 0/1 or TRUE/FALSE. Since height is (very roughly) normally distributed, the Gaussian distribution is a good choice.
+
+The third line gives us back the formula we provided. We are creating a model predicting height with a constant --- which is just about the simplest model you can create. Formulas in R are constructed in two parts. First, on the left side of the tilde (the "~" symbol) is the "response" or "dependent" variable, the thing which we are trying to explain. Since this is a model about `height`, `height` goes on the lefthand side. Second, we have the "explanatory" or "independent"  variables on the righthand side of the tilde. There will often be many such variables but in this, the simplest possible model, there is only one, a single constant.  (The number `1` indicates that constant. It does not mean that we think that everyone is height `1`.) 
+
+The fourth and fifth lines of the output tell us that we have `r nobs(fit_obj)`  observations and that we only have one predictor (the constant). Again, the terminology is a bit confusing. What does it mean to suggest that $\mu$ is "constant?" It means that, although $\mu$'s value is unknown, it is *fixed*. It does not change from person to person. The `1` in the formula corresponds to the parameter $\mu$ in our mathematical definition of the model. 
+
+We knew all this information before we fit the model. R records it in the `fit_obj` because we don't want to forget what we did. The second half of the display gives a summary of the parameter values.
+
+We see the output for the two parameters of the model: intercept and sigma. This can be confusing! Recall that the thing we care most about is $\mu$, the average height in the population. If we had the ideal Preceptor Table --- with a row for every adult male in the population we care about and no missing data --- $\mu$ would be trivial to calculate, and with no uncertainty. But only we know that we named that parameter $\mu$. All that R sees is the `1` in the formula. In most fields of statistics, this constant term is called the "intercept." So, now we have three things --- $\mu$ (from the math), `1` (from the code), and "intercept" (from the output) --- all of which refer to the exact same concept. This will not be the last time that terminology will be confusing.
+
+At this point, `stan_glm()` --- or rather the `print()` method for rstan objects --- has a problem. We have full posteriors for both $\mu$ and $\sigma$. But this is a simple printed summary. We can't show the entire distribution. So, what are the best few numbers to provide? There is no right answer to this question! Here, the choice is to provide the median of the posterior and the "MAD_SD." 
+
+* Anytime you have a distribution, whether posterior probability or otherwise, the most important single number associated with it is some measure of its *location*. Where is the data? The two most common choices for this measure are the mean and median. We use the median here because posterior distributions can often be quite skewed, making the mean a less stable measure.
+
+* The second most important number for summarizing a distribution concerns its *spread*. How far is the data spread around its center? The most common measure used for this is the standard deviation. MAD SD, the scaled standard deviations of the absolute difference between each observation and the median of all observations, is another. If the variable has a normal distribution, then the standard deviation and the MAD SD will be very similar. But the MAD SD is much more robust to outliers, which is why it is used here.
+
+
+Instead of printing the whole model, we can just print out the parameter values:
+
+```{r}
+print(fit_obj, detail = FALSE)
+```
+
+<!-- DK: Are we sure that coef() and sigma() give us the median values? -->
+
+Now that we understand the meaning of Median and MAD_SD in the above display, we can interpret the actual numbers. The median of the intercept, `r coef(fit_obj)`, is the median of our posterior distribution for $\mu$, the average height of all American men in 2009. The median of sigma, `r sigma(fit_obj)`, is the median of our posterior distribution for the true $\sigma$, which can be roughly understood as the variability in the height of men, once we account for our estimate of $\mu$.
+
+The MAD_SD for each parameter is a measure of the variability of our posterior distributions. How spread out are they? Speaking roughly, 95% of the mass of a posterior distribution is located within +/- 2 MAD SDs from the median. For example, we would be about 95% confident that the true value of $\mu$ is somewhere between 175.6 and 176.3. 
+
+##### Plotting the posterior distributions
+
+Instead of doing this math in our heads, we can display both posterior distributions. *Pictures speak where math mumbles.* Fortunately, getting draws from those posteriors is easy:
+
+<!-- DK: Why don't we see decimals for the intercept in this print out? -->
+
+```{r}
+fit_obj %>% 
+  as_tibble()
+```
+
+These 4,000 rows are "draws" from the estimated posteriors, each in its own column. These are like the vectors which result from calling functions like `rnorm()` or `rbinom()`. We can create the plot in a similar way:
+
+
+```{r}
+fit_obj %>% 
+  as_tibble() %>% 
+  rename(mu = `(Intercept)`) %>% 
+  ggplot(aes(x = mu)) +
+    geom_histogram(aes(y = after_stat(count/sum(count))), 
+                   bins = 100) +
+    labs(title = "Posterior Probability Distribution",
+         subtitle = "Average height among American adult men in 2009",
+         x = "Height in Centimeters",
+         y = "Probability") +
+    theme_classic()
+```
+
+Although it is possible to have variable names like "(Intercept)", it is not recommended. Avoid weird names! When you are stuck with them, place them in backticks. Even better, rename them, as we do above.
+
+```{r}
+fit_obj %>% 
+  as_tibble() %>% 
+  ggplot(aes(x = sigma)) +
+    geom_histogram(aes(y = after_stat(count/sum(count))), binwidth = 0.01, 
+                   color = "white") +
+    labs(title = "Posterior Probability Distribution",
+         subtitle = "Height standard deviation among American adult men in 2009",
+         x = "Sigma in Centimeters",
+         y = "Probability") +
+    theme_classic()
+```
+
+Again, $\sigma$ is usually a nuisance parameter. We don't really care what its value us, so we rarely plot it.
+
+<!-- DK: Discuss the meaning in more detail. -->
+
+<!-- DK: Fun problem set exercise is to pull this data, pivot it, and then create one graphic with all distributions showing. -->
+
+#### Decomposing the outcome
+
+Two other important concepts in model creation are "fitted" values and residuals. 
+
+
+
+```{r}
+ch7_male %>% 
+  mutate(fitted_value = fitted(fit_obj)) %>% 
+  mutate(residual = residuals(fit_obj)) %>% 
+  sample_n(5)
+```
+
+The fitted value represents the model's best guess at to what the true value of the outcome should be for that individual, given information about any covariates. This is a tricky concept since, after all, we already know what the actual value is. The residual is the difference between the outcome and the fitted value. These definitions lead to a natural decomposition of the outcome data:
+
+
+```{r, echo = FALSE}
+# These are tough to create! Why does scale_x_continuous(limits = c(140, 210))
+# cause some weird warnings in the first graphic? Seems like it would be nice to
+# have similar axes across the first two plots at least. I suspect I should be
+# using posterior_linpred rather than hard-coding the fitted value. Want to make
+# this easier to do in later chapters and standardize the approach/code.
+
+outcome <- ch7_male %>% 
+  ggplot(aes(height)) +
+    geom_histogram(bins = 100) +
+    labs(x = "Height (cm)",
+         y = "Count") 
+
+fitted <- tibble(height = fitted(fit_obj)) %>% 
+  ggplot(aes(height)) +
+    geom_bar() +
+    labs(x = "Fitted Values",
+         y = NULL) +
+    scale_x_continuous(limits = c(150, 200)) 
+
+res <- tibble(resids = residuals(fit_obj)) %>% 
+  ggplot(aes(resids)) +
+    geom_histogram(bins = 100) +
+    labs(x = "Residuals",
+         y = NULL) 
+  
+
+outcome + fitted + res +
+  plot_annotation(title = "Decomposition of Height into Fitted Values and Residuals")
+```
+
+
+
+<!-- DK: More details. And don't forget to compare this confidence interval to the bootstrapped one. And do a posterior predictive check! -->
+
+
+
+### Temperance
+
+```{r echo=FALSE, fig.margin=TRUE}
+knitr::include_graphics("other/images/Temperance.jpg")
+```
+
+<!-- DK: Should introduce matrices in chapter 2. -->
+
+Recall that a "matrix" in R is a rectangular array of data, shaped like a data frame or tibble, but containing only one type of data, e.g., numeric. Large matrices also print out ugly. (There are other differences, none of which we care about here.) Example:
+
+```{r}
+m <- matrix(c(3, 4, 8, 9, 12, 13), ncol = 2)
+m
+```
+
+The easiest way to pull information from a matrix is to use `[]`, the subset operator. Here is how we grab the second column of `m`:
+
+```{r}
+m[, 2]
+```
+
+Note how matrices with just one dimension "collapse" into single vectors. Tibbles, on the other hand, always maintain their rectangular shapes, even with only one column or row. Matrices are important because `posterior_predict()` and other functions from **rstanarm** return matrices.
+
+<!-- DK: Teach about rowwise, c_across, and ungroup? Or do that earlier? -->
+
+<!-- DK: Need better explanations about what a draw is, why it is not the same thing as the posterior, but why graphing the draws gives you the posterior. -->
+
+We have a model. What can we do with it? Let's answer the three questions with which we started this section.
+
+* What is the probability that the next adult male we meet will be taller than 180 centimeters?
+
+We have a model of American male height from 2009, `fit_obj`, which we can use for this purpose.
+
+
+```{r}
+set.seed(11)
+pp <- posterior_predict(fit_obj)
+
+```
+
+Unfortunately, `posterior_predict()` returns a weird object with class "ppd", which stands for posterior probability distribution. There are some advanced use cases in which this is a useful class of object to work with. But, for the purposes of this book, the "ppd" class is too complex. So, whenever we call `posterior_predict()`, we will always transform it into a tibble like so:
+
+```{r}
+set.seed(11)
+pp <- posterior_predict(fit_obj) %>%
+    as_tibble() %>%
+    mutate_all(as.numeric)
+```
+
+Doing so requires two steps. First, use `as_tibble()`, just as you might expect. In R, we often transform one thing into another thing with functions which begin with `as_`. Unfortunately, that does not solve our problem because each column is still of class `ppd`. So, second, we use the `mutate_all(as.numeric)` incantation to transform each column. The resulting object, `pp`, is still not easy to work with, both because the variable names are all numbers and because of how big it is.
+
+```{r}
+dim(pp)
+```
+
+There are `r nrow(pp)` rows because, by default, `stan_glm()` gives us `r nrow(pp)` draws from the posterior distribution, both for the distribution of the parameters (which we looked at above under Courage) and for the predicted values. There 
+are `r ncol(pp)` because the matrix provides draws from the same posterior predictive distribution for each of the input data rows. (In this case, they are all the same --- all draws from the same posterior predictive distribution --- because the model does not use any covariates. In more complex models, the columns in the `pp` tibble can be draws from very different distributions.) 
+
+Why do we want a posterior prediction for each observation? After all, we already know the value for each observation! We know everyone's height in our data set. No prediction is necessary.
+
+The reason is that, in order to confirm that our model is consistent with the data, *we should compare the posterior probability distribution for each observation to the actual value for that observation.* They should be consistent. That is, if the model is sensible, about 95% of the true observations should lie within the 95% confidence interval of their respective posterior probability distributions. The process of doing this comparison is a *posterior predictive check.*
+
+<!-- DK: Do this now or save for later? -->
+
+In the meantime, we can still use any column in `pp` to answer our question. (We will use the first column for convenience.) Consider:
+
+```{r}
+tibble(pred = pp$`1`) %>% 
+  mutate(gt_180 = ifelse(pred > 180, TRUE, FALSE))
+```
+
+We don't have to put the posterior predictions in a tibble, but doing so makes everything easier. What are the odds that the next adult male will be taller than 180 centimeters?
+
+```{r}
+tibble(pred = pp$`1`) %>% 
+  mutate(gt_180 = ifelse(pred > 180, TRUE, FALSE)) %>% 
+  summarize(answer = sum(gt_180) / n())
+```
+
+Somewhere around 29% or so. 
+
+Again, the key difficulty is the population. The problem we actually have involves walking around London, or wherever, today. The data we have involve America in 2009. Those are not the same things! But they are not totally different. Knowing whether the data we have is "close enough" to the problem we want to solve is at the heart of Wisdom. Yet that was the decision we made at the start of the process, the decision to create a model in the first place. Now that we have created a model, we look to the virtue of Temperance for guidance in using that model. The data we have is never a perfect match for the world we face. We need to temper our confidence and act with humility. Our forecasts will never be as good as a naive use of the model might suggest. Reality will surprise us. We need to take the model's claims with a family-sized portion of salt.
+
+<!-- DK: More on temperance and the many ways that we should be less confident. -->
+
+* What is the probability that, among the next 4 men we meet, the tallest is at least 10 cm taller than the shortest?
+
+Bayesian models are beautiful because, via the magic of simulation, we can answer (almost!) any question. With simulation, we just need to answer this step by step.
+
+```{r}
+tibble(pred_1 = pp$`1`,
+       pred_2 = pp$`2`,
+       pred_3 = pp$`3`,
+       pred_4 = pp$`4`) %>% 
+  rowwise() %>% 
+  mutate(tallest = max(c_across(pred_1:pred_4))) %>% 
+  mutate(shortest = min(c_across(pred_1:pred_4))) %>% 
+  mutate(diff = tallest - shortest) %>% 
+  mutate(gt_10 = ifelse(diff >= 10, TRUE, FALSE)) %>% 
+  ungroup() %>% 
+  summarize(answer = sum(gt_10) / n())
+```
+
+There is about a 75% chance that, when meeting 4 random men, the tallest will be at least 10 cm taller than the shortest.
+
+<!-- DK: Discuss all the reasons why this might not be true. -->
+
+* What is our posterior probability of the height of the 3rd tallest man out of the next 100 we meet?
+
+The same approach will work for almost any question.
+
+```{r}
+pp[, 1:100] %>% 
+  rowwise() %>% 
+  mutate(third_tallest = sort(c_across(`1`:`100`), decreasing = TRUE)[3]) %>% 
+  ungroup() %>% 
+  ggplot(aes(x = third_tallest, y = after_stat(count / sum(count)))) +
+    geom_histogram(bins = 100) +
+    labs(title = "Posterior Probability of the Height",
+         subtitle = "of the 3rd Tallest from One Hundred Random Men",
+         x = "Height (cm)",
+         y = "Probability")
+    
+```
+
+
+<!-- DK: Need more text. Explain all the things that could be wrong with the model. Explain what is going on in different columns. Explain all the cool R code tricks.  -->
+
+
+## Summary
+
+The next five chapters will follow the same process we have just completed here. We start with a decision we have to make. With luck, we will have some data to guide us. (Without data, even the best data scientist will struggle to make progress.) *Wisdom* asks us: "Is the data we have close enough to the decision we face to make using that data likely to be helpful?" Often times, the answer is "No." Even if we do have data, and the ability to make a model, Wisdom will tap us on the shoulder and say, "Even if you can make a model, don't forget to ask yourself if you should." Ethics matter.
+
+Once we start to build the model, *Justice* will guide us. Is the model descriptive or causal? What is the mathematical relationship between the dependent variable we are trying to explain and the independent variables we can use to explain it? What assumptions are we making about distributions, especially with regard to the error term?
+
+Having set up the model framework, we need *Courage* to implement the model in code. Without code, all the math in the world is useless. Once we have created the model, we need to understand it. What are the posterior distributions of the unknown parameters? Do they seem sensible? How should we interpret them?
+
+*Temperance* guides the final step. With a model, we can finally get back to the decision which motivated the exercise in the first place. We can use the model to make statements about the world, both to confirm that the model is consistent with the world and to use the model to make predictions about numbers which we do not know. 
+
+Let's practice this process another dozen or so times.
+
