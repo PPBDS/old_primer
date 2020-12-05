@@ -1,0 +1,1204 @@
+---
+title: "final_visuals"
+author: "Maria Burzillo"
+date: "5/31/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+# plot 3d has the hist3d function
+library(plot3D)
+# the animaiton package allows you to make gifs from individual plots
+library(animation)
+# for interactive plotting
+library(plot3Drgl)
+```
+
+# Basic Examples 
+
+```{r create_data_as_in_original_prob_chapter, echo = FALSE}
+
+# This is an example of full-scale Bayes scatterplot creation. We would want
+# earlier examples to be much simpler and to not use advanced tricks like
+# crossing(). We might build those "by hand," actually typing out the vector of
+# variables. 
+
+
+# The full range of models was originally from 0 to 1, but I only use range .1 to .9 for visuals because 0 and 1 have no variation and mess up scales of other models so you can't seem them in the visual - just note this in any writing and move on...
+
+
+# list of models
+
+mod <- seq(.1, .9, 0.1)
+
+
+# number of repetitions 
+
+rep <- 1:1000
+
+
+# number of tosses within each repetition
+
+tosses <- 20
+
+# create dataframe of all possible combinations of values
+
+x <- crossing(mod, rep) %>% 
+  mutate(result = rbinom(n = nrow(.), size = tosses, prob = mod))
+
+```
+
+```{r basic_bayes_scatter_plot, echo = FALSE}
+
+# create a scatter plot of all the combinations of values
+
+bayes_scatter <- ggplot(x, aes(result, mod, alpha = 0.01)) +
+  geom_jitter(color = "#0000FF") +
+  labs(x = "Data",
+       y = "Model") +
+  theme_bw() +
+  theme(legend.position = "none",
+        # I messed with the margins here to use this in a later visual so it
+        # would look better with the other plots in the animation
+        plot.margin = unit(c(2.1, 2.1, 2.1, 2.1), "cm")) #top, right, bottom, left
+
+```
+
+
+```{r prepare_data_for_3dhist_plotting, echo = FALSE}
+
+##  Make the mod and result values factors so they will each be in their own
+##  "box" and not continuous
+
+result_factor <- as.factor(mydata$number_die1)
+mod_factor <- as.factor(mydata$number_die2)
+
+# create a table of result_factor and mod_factor data. table() builds a
+# contingency table of the counts at each combination of factor levels needed to
+# be able to plot using hist3D()
+
+z_factor <- table(result_factor, mod_factor)
+
+# assign NA values to all groups with 0 -> this will make it so that the "boxes"
+# corresponding to these value combos in the 3d plot are blank/white space and
+# not colored
+
+z_factor[z_factor == "0"] <- NA
+
+##################
+
+result_factor <- as.factor(x$rep)
+mod_factor <- as.factor(x$mod)
+
+# create a table of result_factor and mod_factor data. table() builds a
+# contingency table of the counts at each combination of factor levels needed to
+# be able to plot using hist3D()
+
+z_factor <- table(result_factor, mod_factor)
+
+# assign NA values to all groups with 0 -> this will make it so that the "boxes"
+# corresponding to these value combos in the 3d plot are blank/white space and
+# not colored
+
+z_factor[z_factor == "0"] <- NA
+
+
+```
+
+```{r basic_hist3d, echo = FALSE}
+
+# the following create basic hist 3D plots
+
+# basic plot
+
+hist3D(z = z_factor, border = "black", main = "Basic 3d Hist")
+
+
+# get rid of color key with colkey = FALSE
+
+hist3D(z = z_factor, border = "black", main = "No Color Key",
+       colkey = FALSE)
+
+# change the color scheme
+
+hist3D(z = z_factor, border = "black",
+       curtain = F, col = "blue", main = "One Color",
+       colkey = FALSE)
+
+
+# create space between the histogram bars with space = x argument. I liked
+# setting it to .25, but you can play around with it
+
+hist3D(z = z_factor, border = "black",
+       curtain = F, col = "blue", main = "Add Space Between Bars",
+       colkey = FALSE,
+       space = .5)
+
+######### change angle with phi and theta ##########
+
+# front view
+
+hist3D(z = z_factor, border = "black",
+       curtain = F, main = "Change Angle: Front View",
+       colkey = FALSE,
+       phi = 0, theta = 0,
+       space = .25)
+
+# top view
+hist3D(z = z_factor, border = "black",
+       curtain = F, main = "Change Angle: Top View",
+       colkey = FALSE,
+       phi = 90, theta = 90,
+       space = .25)
+
+```
+
+```{r make_still_plot_interactive, echo = FALSE}
+
+# need pacakge: library(plot3Drgl)
+
+# call basic plot
+
+hist3D(z = z_factor, border = "black", main = "Interactive Ad-In?", space = .25)
+
+# plot it as an rgl
+
+plotrgl()
+
+
+# I'll leave it up to you guys to decide if you want to try to use these
+# interactive versions in the html and to figure out how to embedd them, but its
+# definitely possible!
+
+```
+
+## Color by Model Number
+
+```{r set_color_to_variable, echo = FALSE}
+
+# create a color matrix named colvar filled with NAs with the same dimensions
+# and names as the z_facor table
+
+colvar <- structure(rep(NA, prod(dim(z_factor))), .Dim =dim(z_factor), .Dimnames = dimnames(z_factor))
+
+# assign column id for each column to give unique variable for color assignment
+
+
+# for each mod_factor (column)...
+
+for (i in 1:9) {
+  
+  # assign a unique column value to all values in the table from column i
+  
+  colvar[, i] <- i - 1
+}
+
+# check that this worked: each col. has a unique value
+
+colvar
+
+# assign colvar = colvar so tha tour new colvar variable determines the color
+# mapping. The default color is rainbow and you can specify how many separate
+# colors to have between blue and red by setting col = jet.col(num_colors) or
+# find a different color scheme you like
+
+hist3D(z = z_factor, border = "black",
+       curtain = F, 
+       colvar = colvar,col = jet.col(21),
+       theta = 0, phi = 90,
+       space = .25)
+
+
+```
+
+## basic_quick.gif
+
+```{r basic_gif_quick, echo = FALSE}
+
+# basic gif using the animation package
+
+# we will create a gif that changes between a basic bayes scatter where the
+# color changes just as an example of how to make the gif
+
+# plot 1: color is blue
+
+bayes_scatter_1 <- ggplot(x, aes(result, mod, alpha = 0.01)) +
+  geom_jitter(color = "#0000FF") +
+  labs(x = "Data",
+       y = "Model") +
+  theme_bw() +
+  theme(legend.position = "none",
+        plot.margin = unit(c(2.1, 2.1, 2.1, 2.1), "cm")) #top, right, bottom, left
+
+
+# plot 2: color is black
+
+bayes_scatter_2 <- ggplot(x, aes(result, mod, alpha = 0.01)) +
+  geom_jitter(color = "black") +
+  labs(x = "Data",
+       y = "Model") +
+  theme_bw() +
+  theme(legend.position = "none",
+        plot.margin = unit(c(2.1, 2.1, 2.1, 2.1), "cm")) #top, right, bottom, left
+
+
+# create the basic gif
+
+animation::saveGIF(
+  expr = {
+    plot(bayes_scatter_1)
+    plot(bayes_scatter_2)
+  },
+  
+    # change the interval between the images. Default is 1 I believe
+  
+  interval = .2,
+  
+  # name the gif. You can change where it goes by putting the file path before
+  # it. E.g. "./folder/3d_hist_1.gf" where the "." is a stand in for the current
+  # directory. This would create a gif called "3d_hist_1.gf" and put it inside a
+  # folder called "folder" in the current directory. The folder must already
+  # exist.
+  
+  movie.name = "basic_quick.gif"
+)
+
+
+```
+<!-- This is how you embedd the gif in your html so it is there when you knit -->
+
+![](basic_quick.gif)
+
+
+## basic_slow.gif
+
+```{r basic_slow_gif, echo = FALSE}
+# create the basic gif but slowed down: interval = 2
+
+animation::saveGIF(
+  expr = {
+    plot(bayes_scatter_1)
+    plot(bayes_scatter_2)
+  },
+  
+    # change the interval between the images. Default is 1 I believe
+  
+  interval = 2,
+  
+  # name the gif. You can change where it goes by putting the file path before
+  # it. E.g. "./folder/3d_hist_1.gf" where the "." is a stand in for the current
+  # directory. This would create a gif called "3d_hist_1.gf" and put it inside a
+  # folder called "folder" in the current directory. The folder must already
+  # exist.
+  
+  movie.name = "basic_slow.gif"
+)
+
+```
+
+
+![](basic_slow.gif)
+
+## data_from_above.gif
+
+```{r create_gif_looking_from_above, echo = FALSE}
+
+# create a gif with ggplot and then plot 3d
+
+saveGIF(
+  expr = {
+    
+    # ggplot of bayes plot
+    
+    plot(heads_plot)
+    
+    # blue hist3d from above
+    
+    hist3D(z = z_factor, border = "black",
+       curtain = F, 
+       col = "blue",
+       theta = 0, phi = 90,
+       space = .25)
+    
+    # hist3d from above colored by model
+    
+    hist3D(z = z_factor, border = "black",
+       curtain = F, 
+       colvar = colvar, col = jet.col(21),
+       theta = 0, phi = 90,
+       space = .25,
+       colkey = FALSE)
+
+    
+  },
+  
+    # change the interval between the images. Default is 1 I believe
+  
+  interval = 1,
+  
+  # name the gif. You can change where it goes by putting the file path before
+  # it. E.g. "./folder/3d_hist_1.gf" where the "." is a stand in for the current
+  # directory. This would create a gif called "3d_hist_1.gf" and put it inside a
+  # folder called "folder" in the current directory. The folder must already
+  # exist.
+  
+  movie.name = "data_from_above.gif"
+)
+
+
+```
+![](data_from_above.gif)
+
+## changing_angles.gif
+
+```{r gif_changing_angles, echo = FALSE}
+
+saveGIF(
+  expr = {
+    
+    # initialize angle
+    
+    angle = 90
+    
+    # loop 9 times to create 9 separate plots
+    
+    for (i in 1:9) {
+      # from above
+      hist3D(z = z_factor, border = "black",
+       curtain = F, col = jet.col(21), 
+       colvar = colvar,
+       theta = 0, phi = angle,
+       colkey = FALSE,
+       space = .25)
+      
+      #  decreasing angle by 10 after each loop
+      
+      angle = angle - 10
+    }
+
+  },
+    # change the interval between the images
+  
+  interval = .2,
+  movie.name = "changing_angles.gif"
+)
+```
+
+![](changing_angles.gif)
+
+## changing_angle_final.gif
+
+```{r changing_angles_final_gif_creation, echo = FALSE}
+
+# Now, we can build much more complicated gifs
+
+# In order to keep the visual of the angle change moving quickly (meaning the
+# interval is set to a low number) and still have time to look at the static
+# visuals, loop through the static parts however many times you want to give
+# them multiple frames
+
+saveGIF(
+  expr = {
+    
+    # plot bayescatter plot 7 times
+    
+    for (i in 1:7){
+     plot(bayes_scatter_1) 
+    }
+    
+    # initialize angle for phi
+    
+    angle = 90
+    
+    # plot bayes scatterplot as a 3D histogram looking from aboce 3 times
+    
+    for (i in 1:3) {
+      hist3D(z = z_factor, border = "black",
+       curtain = F, col = "blue", 
+       colvar = colvar,
+       theta = 0, phi = angle,
+       colkey = FALSE,
+       space = .25)
+    }
+    
+    # color the 3d histogram by model
+    
+    for (i in 1:2) {
+      hist3D(z = z_factor, border = "black",
+       curtain = F, col = jet.col(21), 
+       colvar = colvar,
+       theta = 0, phi = angle,
+       colkey = FALSE,
+       space = .25)
+    }
+      
+    # plot the same image 18 more times but reduce the angle by 5 degrees each time
+    
+    for (i in 1:18) {
+      # from above
+      hist3D(z = z_factor, border = "black",
+       curtain = F, col = jet.col(21), 
+       colvar = colvar,
+       theta = 0, phi = angle,
+       colkey = FALSE,
+       space = .25)
+      angle = angle - 5
+    }
+    
+    # plot the end visual 3 more times
+    
+    for (i in 1:3) {
+      # from above
+      hist3D(z = z_factor, border = "black",
+       curtain = F, col = jet.col(21), 
+       colvar = colvar,
+       theta = 0, phi = 0,
+       colkey = FALSE,
+       space = .25)
+    }
+    
+
+  },
+    # change the interval between the images
+  
+  interval = .2,
+  movie.name = "changing_angle_final.gif"
+)
+```
+
+
+![](changing_angle_final.gif)
+
+
+# Select one Mod to Color Red
+
+```{r create_color_variable, echo = FALSE}
+
+# create colvar such that only mod = .4 gets turned red
+
+# create colvar matrix of same shape as z_factor but with 1s 
+
+colvar <- structure(rep(1, prod(dim(z_factor))), .Dim =dim(z_factor), .Dimnames = dimnames(z_factor))
+
+
+# change the 1s in the column corresponding to mod = .4 to 2s
+
+colvar[ ,5] <- 2
+
+
+```
+
+```{r color_one_red, echo = FALSE}
+
+# Create
+
+saveGIF(
+  expr = {
+    
+    # initialize angle
+    
+    angle = 45
+    
+    # creat 10 pngs of starting position
+    
+    for (i in 1:10) {
+     hist3D(z = z_factor, border = "black",
+       curtain = F, col = "blue", colvar = colvar,
+       colkey = FALSE,
+       phi = angle, theta = angle,
+       space = .25) 
+    }
+    
+    # creat 10 pngs of starting position but with mod = 0.4 turned red
+    
+    for (i in 1:10){
+     hist3D(z = z_factor, border = "black",
+       curtain = F, col = c("blue", "red"), colvar = colvar,
+       colkey = FALSE,
+       phi = angle, theta = angle,
+       space = .25) 
+    }
+    
+    # now create 10 images where each time the angle is decreased by 5
+    
+    for (i in 1:9) {
+      hist3D(z = z_factor, border = "black",
+       curtain = F, col = c("blue", "red"), colvar = colvar, 
+       colkey = FALSE,
+       phi = angle, theta = angle,
+       space = .25)
+      angle = angle - 5
+    }
+    
+    # create 10 final images of the final position
+    
+    for (i in 1:9) {
+      hist3D(z = z_factor, border = "black",
+       curtain = F, col = c("blue", "red"), colvar = colvar,
+       colkey = FALSE,
+       phi = 0, theta = 0,
+       space = .25)
+    }
+  },
+    # change the interval between the images
+  
+  interval = .1,
+  movie.name = "color_red.gif"
+)
+
+```
+
+![](color_red.gif)
+
+
+### color_red_turn.gif
+
+```{r create_data_with_only_mod_5, echo = FALSE}
+
+# now, just show distribution where it is red
+
+# make a copy of z_factor 
+
+only_point_5 <- z_factor
+
+# change all non-missing values to 0
+
+only_point_5[!(is.na(z_factor))] <- 0
+
+# change the 0.4 mod column back to match z_factor's
+
+only_point_5[,5] <- z_factor[,5]
+
+```
+
+
+```{r create_gif_of_point_5_dist_turning, echo = FALSE}
+
+
+saveGIF(expr = {
+  angle = 45
+  
+  # create 10 images in which the angle decreases by five for each image
+  
+      for (i in 1:10) {
+      hist3D(z = only_point_5, border = "black",
+       curtain = F, col = c("blue", "red"), colvar = colvar, 
+       colkey = FALSE,
+       phi = angle, theta = angle,
+       space = .25)
+      angle = angle - 5
+      }
+  
+    # create 10 images of the final position
+  
+    for (i in 1:9) {
+      hist3D(z = only_point_5, border = "black",
+       curtain = F, col = c("blue", "red"), colvar = colvar,
+       colkey = FALSE,
+       phi = 0, theta = 0,
+       space = .25)
+  
+    }
+},
+  interval = .1,
+  movie.name = "color_red_turn.gif"
+)
+
+```
+
+![](color_red_turn.gif)
+
+## color_red_combo.gif
+
+```{r combine_last_two_gifs, echo = FALSE}
+
+saveGIF(
+  expr = {
+    
+    # initialize angle
+    
+    angle = 45
+    
+    # create 10 initial images of everything blue
+    
+    for (i in 1:10) {
+     hist3D(z = z_factor, border = "black",
+       curtain = F, col = "blue", colvar = colvar,
+       colkey = FALSE,
+       space = .25,
+       zlim = c(0, 303)) 
+    }
+    
+    # create 10 images with the .4 mod turned red
+    
+    for (i in 1:10){
+     hist3D(z = z_factor, border = "black",
+       curtain = F, col = c("blue", "red"), colvar = colvar,
+       colkey = FALSE,
+       space = .25,
+       zlim = c(0, 303)) 
+    }
+    
+    # now create 10 images with only the .4 mod turned red and only the .4 mod
+    # distribution showed
+    
+    for (i in 1:10) {
+      hist3D(z = only_point_5, border = "black",
+       curtain = F, col = c("blue", "red"), colvar = colvar, 
+       colkey = FALSE,
+       phi = angle, theta = angle,
+       space = .25,
+       zlim = c(0, 303))
+    }
+    
+    # now create 10 images with only the .4 mod turned red and only the .4 mod
+    # distribution showed and decrease angle by 5 with each new image
+    
+    for (i in 1:9) {
+      hist3D(z = only_point_5, border = "black",
+       curtain = F, col = c("blue", "red"), colvar = colvar, 
+       colkey = FALSE,
+       phi = angle, theta = angle,
+       space = .25,
+       zlim = c(0, 303))
+      angle = angle - 5
+    }
+    
+    #  show 9 final frames of the last image
+    
+    for (i in 1:9) {
+      hist3D(z = only_point_5, border = "black",
+       curtain = F, col = c("blue", "red"), colvar = colvar,
+       colkey = FALSE,
+       phi = 0, theta = 0,
+       space = .25,
+       zlim = c(0, 303))
+  
+    }
+  },
+    # change the interval between the images
+  
+  interval = .1,
+  movie.name = "color_red_combo.gif"
+)
+
+```
+
+
+![](color_red_combo.gif)
+
+# Sample from the Distribution
+
+```{r create_sample_dist_for_point_5, echo = FALSE}
+
+
+# list of models
+
+mod <- seq(.1, .9, 0.1)
+
+
+# number of repetitions 
+
+rep <- 1:200
+
+
+# number of tosses within each repetition
+
+tosses <- 20
+
+# create dataframe of all possible combinations of values
+
+x <- crossing(mod, rep) %>% 
+  mutate(result = rbinom(n = nrow(.), size = tosses, prob = mod))
+
+##  Make the mod and result values factors so they will each be in their own
+##  "box" and not continuous
+
+result_factor <- as.factor(x$result)
+mod_factor <- as.factor(x$mod)
+
+# create a table of result_factor and mod_factor data. table() builds a
+# contingency table of the counts at each combination of factor levels needed to
+# be able to plot using hist3D()
+
+z_factor <- table(result_factor, mod_factor)
+
+
+z_factor_0s <- table(result_factor, mod_factor)
+
+# assign NA values to all groups with 0 -> this will make it so that the "boxes"
+# corresponding to these value combos in the 3d plot are blank/white space and
+# not colored
+
+z_factor[z_factor == "0"] <- NA
+
+# 1000 samples for each model, randomly select one row (number of flips), if it hasn't hit its max yet, add one there, etc. etc.
+
+current_matrix <- z_factor
+
+current_matrix[!(is.na(z_factor))] <- 0
+
+count = 0
+
+vectorOfTables <- vector(mode = "list")
+vectorOfTables[[1]] <- current_matrix
+
+
+# make a copy of z_factor 
+
+only_point_5 <- z_factor
+
+# change all non-missing values to 0
+
+only_point_5[!(is.na(z_factor))] <- 0
+
+# change the 0.5 mod column back to match z_factor's
+
+only_point_5[,5] <- z_factor[,5]
+
+
+# how can we make this more efficient? If row is done or completed, don't allow it to be sampled...???
+
+# only go up to 200 because 1000 takes too long, but could change this later. Didn't want to do 100 because distributions weren't looking great
+
+while (count < 200) {
+  
+  # only randomly sample from the rows that have real numbers
+  
+  row = sample(1:21, 1)
+  
+  #print(paste("count", count, "row", row))
+
+  # make sure we haven't sampled an NA value (if we don't do this, get an error)
+  
+  if (is.na(current_matrix)[row,5]) {
+    current_matrix[row, 5] = z_factor[row, 5]
+  }
+  # if not NA and the number in the current matrix is less than the final matrix, add one
+  
+  else if (current_matrix[row, 5] < z_factor_0s[row, 5]){
+    current_matrix[row,5] <- current_matrix[row,5] + 1
+    count = count + 1
+    
+    # add the new matrix to the list of matrices 
+    
+    vectorOfTables[[count + 1]] <- current_matrix
+  }
+}
+
+
+# vectorOfTables
+```
+
+# 3d_hist_build_up_point_5.gif
+
+```{r gif_building_histogram, echo = FALSE}
+
+# create gif building up histogram 
+
+saveGIF(
+  expr = {
+    
+    # for each matrix that we created in the previous for loop, create the 3D histogram
+    
+    for (i in 1:201) {
+     hist3D(z = vectorOfTables[[i]] , border = "black",
+       curtain = F, col = c("blue", "red"), colvar = colvar,
+       colkey = FALSE,
+       space = .25,
+       
+       # it's important to keep the zlim constant here since you don't want it
+       # to rescale with each addition
+       
+       zlim = c(0, 50),
+       theta = 0, phi = 0) 
+    }
+  },
+    # change the interval between the images
+  
+  interval = .05,
+  movie.name = "3d_hist_build_up_point_5.gif"
+)
+```
+
+![](3d_hist_build_up_point_5.gif)
+
+## color_red_combo_plus_build.gif
+
+```{r combine_last_three_gifs, echo = FALSE}
+
+saveGIF(
+  expr = {
+    
+    # initialize angle
+    
+    angle = 45
+    
+    # create 10 initial images of everything blue
+    
+    for (i in 1:10) {
+     hist3D(z = z_factor, border = "black",
+       curtain = F, col = "blue", colvar = colvar,
+       colkey = FALSE,
+       space = .25,
+       zlim = c(0, 75)) 
+    }
+    
+    # create 10 images with the .5 mod turned red
+    
+    for (i in 1:10){
+     hist3D(z = z_factor, border = "black",
+       curtain = F, col = c("blue", "red"), colvar = colvar,
+       colkey = FALSE,
+       space = .25,
+       zlim = c(0, 75)) 
+    }
+    
+    # now create 10 images with only the .5 mod turned red and only the .4 mod
+    # distribution showed
+    
+    for (i in 1:10) {
+      hist3D(z = only_point_5, border = "black",
+       curtain = F, col = c("blue", "red"), colvar = colvar, 
+       colkey = FALSE,
+       phi = angle, theta = angle,
+       space = .25,
+       zlim = c(0, 75))
+    }
+    
+    # now create 10 images with only the .5 mod turned red and only the .4 mod
+    # distribution showed and decrease angle by 5 with each new image
+    
+    for (i in 1:9) {
+      hist3D(z = only_point_5, border = "black",
+       curtain = F, col = c("blue", "red"), colvar = colvar, 
+       colkey = FALSE,
+       phi = angle, theta = angle,
+       space = .25,
+       zlim = c(0, 75))
+      angle = angle - 5
+    }
+    
+    #  show 9 final frames of the last image
+    
+    for (i in 1:9) {
+      hist3D(z = only_point_5, border = "black",
+       curtain = F, col = c("blue", "red"), colvar = colvar,
+       colkey = FALSE,
+       phi = 0, theta = 0,
+       space = .25,
+       zlim = c(0, 75))
+  
+    }
+    
+    # build the histogram
+    
+    for (i in 1:201) {
+     hist3D(z = vectorOfTables[[i]] , border = "black",
+       curtain = F, col = c("blue", "red"), colvar = colvar,
+       colkey = FALSE,
+       space = .25,
+       
+       # it's important to keep the zlim constant here since you
+       
+       zlim = c(0, 75),
+       theta = 0, phi = 0) 
+    }
+  },
+    # change the interval between the images
+  
+  interval = .05,
+  movie.name = "color_red_combo_plus_build.gif"
+)
+
+```
+
+![](color_red_combo_plus_build.gif)
+
+```{r create_data_to_also_build_point_4, echo = FALSE}
+
+####### now, build up the vector of tables to also build up point 4
+
+# take the final matrix from building up the previous distribution
+
+# make a copy of z_factor 
+
+current_point_4 <- only_point_5
+
+point_4_and_5 <- current_point_4
+
+# change the 0.4 mod column back to match z_factor's
+
+point_4_and_5[,4] <- z_factor[,4]
+
+vectorOfTables_4_5 <- vectorOfTables
+
+# how can we make this more efficient? If row is done or completed, don't allow it to be sampled...???
+
+# only go up to 200 because 1000 takes too long, but could change this later. Didn't want to do 100 because distributions weren't looking great
+
+count = 0
+
+while (count < 200) {
+  
+  # only randomly sample from the rows that have real numbers
+  
+  row = sample(1:21, 1)
+  
+  #print(paste("count", count, "row", row))
+
+  # make sure we haven't sampled an NA value (if we don't do this, get an error)
+  
+  if (is.na(current_point_4)[row,4]) {
+    current_point_4[row, 4] = z_factor[row, 4]
+  }
+  # if not NA and the number in the current matrix is less than the final matrix, add one
+  
+  else if (current_point_4[row, 4] < z_factor_0s[row, 4]){
+    #print(TRUE)
+    current_point_4[row, 4] <- current_point_4[row, 4] + 1
+    count = count + 1
+    
+    # add the new matrix to the list of matrices 
+    
+    vectorOfTables_4_5[[count + 201]] <- current_point_4
+  }
+}
+
+
+```
+
+## color_red_combo_plus_build_4_5.gif
+
+```{r color_red_combo_plus_build_4_5.gif, echo = FALSE}
+saveGIF(
+  expr = {
+    
+    # initialize angle
+    
+    angle = 45
+    
+    # create 10 initial images of everything blue
+    
+    for (i in 1:10) {
+     hist3D(z = z_factor, border = "black",
+       curtain = F, col = "blue", colvar = colvar,
+       colkey = FALSE,
+       space = .25,
+       zlim = c(0, 75)) 
+    }
+    
+    # create 10 images with the .4 mod turned red
+    
+    for (i in 1:10){
+     hist3D(z = z_factor, border = "black",
+       curtain = F, col = c("blue", "red"), colvar = colvar,
+       colkey = FALSE,
+       space = .25,
+       zlim = c(0, 75)) 
+    }
+    
+    # now create 10 images with only the .4 mod turned red and only the .4 mod
+    # distribution showed
+    
+    for (i in 1:10) {
+      hist3D(z = only_point_5, border = "black",
+       curtain = F, col = c("blue", "red"), colvar = colvar, 
+       colkey = FALSE,
+       phi = angle, theta = angle,
+       space = .25,
+       zlim = c(0, 75))
+    }
+    
+    # now create 10 images with only the .4 mod turned red and only the .4 mod
+    # distribution showed and decrease angle by 5 with each new image
+    
+    for (i in 1:9) {
+      hist3D(z = only_point_5, border = "black",
+       curtain = F, col = c("blue", "red"), colvar = colvar, 
+       colkey = FALSE,
+       phi = angle, theta = angle,
+       space = .25,
+       zlim = c(0, 75))
+      angle = angle - 5
+    }
+    
+    #  show 9 final frames of the last image
+    
+    for (i in 1:9) {
+      hist3D(z = only_point_5, border = "black",
+       curtain = F, col = c("blue", "red"), colvar = colvar,
+       colkey = FALSE,
+       phi = 0, theta = 0,
+       space = .25,
+       zlim = c(0, 75))
+  
+    }
+    
+    # build the histogram
+    
+    for (i in 1:length(vectorOfTables_4_5)) {
+     hist3D(z = vectorOfTables_4_5[[i]] , border = "black",
+       curtain = F, col = c("blue", "red"), colvar = colvar,
+       colkey = FALSE,
+       space = .25,
+       
+       # it's important to keep the zlim constant here since you
+       
+       zlim = c(0, 75),
+       theta = 0, phi = 0) 
+    }
+  },
+    # change the interval between the images
+  
+  interval = .05,
+  movie.name = "color_red_combo_plus_build_4_5.gif"
+)
+
+```
+
+![](color_red_combo_plus_build_4_5.gif)
+
+
+# Now Add the Remaining Distributions to the Visual 1 by 1
+
+```{r add_remaining_dists, echo = FALSE}
+
+# start with vectorOfTables_4_5
+
+# take final matrix from building up the .4 distribution
+
+current_matrix <- current_point_4
+
+# create a new list of matrices that contains all from the previous list as the first 400
+
+vectorOfTables_all_build <- vectorOfTables_4_5
+
+
+# initialize the count at 401 since we will be creating the 401st table to start
+
+count = 401
+
+# for each of the models...
+
+for (i in 1:9) {
+  
+  # do the following 10 times for each to create 10 identical tables for each..
+  
+  for (x in 1:10) {
+    
+    # as long as i is not 5 or 6 (wich correspond to models .4 and .5 which are
+    # already fully in the table)...
+    
+    if (!(i %in% c(5,6))){
+      
+      # starting from the final column, add the full distribution to the current matrix
+      
+      #print(9+1-i)
+      current_matrix[ , 9 + 1 - i] <- z_factor[, 9 + 1 - i]
+      #print(current_matrix)
+      
+      # add the current matrix to the list of all the matrices/tables and increment the count
+      
+      vectorOfTables_all_build[[count]] <- current_matrix
+      count = count + 1 
+    }
+
+  }
+}
+
+```
+
+## color_red_combo_plus_build_all.gif
+
+```{r color_red_combo_plus_build_all.gif, echo = FALSE}
+
+saveGIF(
+  expr = {
+    
+    # initialize angle
+    
+    angle = 45
+    
+    # create 10 initial images of everything blue
+    
+    for (i in 1:10) {
+     hist3D(z = z_factor, border = "black",
+       curtain = F, col = "blue", colvar = colvar,
+       colkey = FALSE,
+       space = .3,
+       zlim = c(0, 75)) 
+    }
+    
+    # create 10 images with the .4 mod turned red
+    
+    for (i in 1:10){
+     hist3D(z = z_factor, border = "black",
+       curtain = F, col = c("blue", "red"), colvar = colvar,
+       colkey = FALSE,
+       space = .3,
+       zlim = c(0, 75)) 
+    }
+    
+    # now create 10 images with only the .4 mod turned red and only the .4 mod
+    # distribution showed
+    
+    for (i in 1:10) {
+      hist3D(z = only_point_5, border = "black",
+       curtain = F, col = c("blue", "red"), colvar = colvar, 
+       colkey = FALSE,
+       phi = angle, theta = angle,
+       space = .3,
+       zlim = c(0, 75))
+    }
+    
+    # now create 10 images with only the .4 mod turned red and only the .4 mod
+    # distribution showed and decrease angle by 5 with each new image
+    
+    for (i in 1:9) {
+      hist3D(z = only_point_5, border = "black",
+       curtain = F, col = c("blue", "red"), colvar = colvar, 
+       colkey = FALSE,
+       phi = angle, theta = angle,
+       space = .3,
+       zlim = c(0, 75))
+      angle = angle - 5
+    }
+    
+    #  show 9 final frames of the last image
+    
+    for (i in 1:9) {
+      hist3D(z = only_point_5, border = "black",
+       curtain = F, col = c("blue", "red"), colvar = colvar,
+       colkey = FALSE,
+       phi = 0, theta = 0,
+       space = .3,
+       zlim = c(0, 75))
+  
+    }
+    
+    # build the histogram
+    
+    for (i in 1:length(vectorOfTables_all_build)) {
+     hist3D(z = vectorOfTables_all_build[[i]] , border = "black",
+       curtain = F, col = c("blue", "red"), colvar = colvar,
+       colkey = FALSE,
+       space = .3,
+
+       # it's important to keep the zlim constant here since you
+
+       zlim = c(0, 75),
+       theta = 0, phi = 0)
+    }
+  },
+    # change the interval between the images
+  
+  interval = .05,
+  movie.name = "color_red_combo_plus_build_all.gif"
+)
+
+```
+
+![](color_red_combo_plus_build_all.gif)
