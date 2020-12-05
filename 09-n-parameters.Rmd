@@ -1,0 +1,1365 @@
+---
+output_yaml:
+  - _output.yml
+---
+
+# N Parameters {#n-parameters}
+
+Having created models with one parameter in Chapter \@ref(one-parameter), two parameters in Chapter \@ref(two-parameters) and three parameters in Chapter \@ref(three-parameters), you are now ready to make the jump to $N$ parameters. 
+
+In this chapter, we will consider models with multiple parameters and the complexities that arise therefrom. 
+
+<!-- DK: Add some more. What are the key lessons? What do we carry over from previous chapters? What is new? Hit the data science research cycle. -->
+
+
+## EDA of `governors`
+
+Packages:
+
+```{r, message=FALSE}
+library(PPBDS.data)
+library(skimr)
+library(tidyverse)
+library(rstanarm)
+```
+
+<!-- DK: Perhaps we need more detail in this EDA?  Explain how we only have data for people who are already dead. That is an interesting restriction, and effects the Preceptor Table in interesting ways. Or is such a discussion too advanced? -->
+
+<!-- DK: Don't keep around variables other than the ones we end up using. -->
+
+<!-- DK: Provide proper citation to Barfort et al. -->
+
+<!-- DK: Go and change governors data to use better variable names than the ones we have here. Maybe switch to years instead of days. Or maybe just clean them up here. -->
+
+We will use the `governors` data set from the **PPBDS.data** package. This data set features the demographic information about the candidates for governor in the US. It comes from the paper "Longevity Returns to Political Office" by Barfort, Klemmensen and Larsen (2019), which concludes that winning a gubernatorial election increases a candidate's lifespan.
+
+
+```{r}
+glimpse(governors)
+```
+
+There are `r ncol(governors)` variables and `r scales::comma(nrow(governors))` observations. In this Chapter, we will only be looking at the variables `last_name`, `year`, `state`, `sex`, `alive_post`, and `alive_pre`. 
+
+```{r}
+ch9_gov <- governors %>% 
+  select(last_name, year, state, sex, alive_post, alive_pre)
+```
+
+`alive_pre` and `alive_post` are how many days a candidate lived before the election and how many days a candidate lived after the election, respectively. As a consequence, only politicians who are already deceased are included in this data set. This means that there are only a handful of observations from elections in the last 20 years. Most candidates from that time period are still alive and are, therefore, excluded.
+
+```{r, echo=FALSE}
+# Bit of a cheat to ensure that one of the sampled candidates is female.
+
+set.seed(14)
+```
+
+```{r}
+sample_n(ch9_gov, 5)
+```
+
+`sex` is most often "Male", as we might expect.
+
+<!-- DK: Weird that this automagically creates a "TABLE 9.1: Data summary" side margin note. -->
+
+```{r}
+skim(ch9_gov)
+```
+
+`skim()` groups the variables together by type.  We are given histograms of the numeric data. In looking at the histogram for `year`, we see that it is skewed right --- meaning that most of the data is bunched to the left and that there is a smaller tail to the right --- with half of the observations from election years between 1945 and 1962. This makes sense logically, because we are only looking at deceased candidates, and candidates from more recent elections are more likely to still be alive.
+
+In using this data set, our left-side variable will be `alive_post`. We are trying to understand/predict how many days a candidate will live after the election. 
+
+
+```{r}
+ch9_gov %>%
+  ggplot(aes(x = year, y = alive_post)) +
+  geom_point() +
+  labs(title = "US Gubernatorial Candidate Lifespans",
+       subtitle = "Candidates who died more recently can't have lived for long post-election",
+       caption = "Data: Barfort, Klemmensen and Larsen (2019)",
+       x = "Year",
+       y = "Days Lived After Election") +
+  scale_y_continuous(labels = scales::label_number()) +
+  theme_classic() 
+```
+
+Starting with the relationship between `alive_post` and `year`, we can see that there is a rough line above which there are no observations. There are no data points in the top right portion of the graph because it is not possible to have run in 2011 and then lived 20,000 days (about 55 years) after the election took place. This edge of the data represents, approximately, the most days a candidate could have possibly lived, and still have died, given the year of the election. The reason the data is slanted downward is because the maximum value for this scenario is greater in earlier years. That is, those candidates who ran for governor in earlier years could live a long time after the election and still have died prior to the data set creation, giving them higher `alive_post` values than those who ran for office in more recent years. 
+
+<!-- DK: Explain why the line isn't perfect? (Because not everyone had the decency to die on the day directly before data set creation.) -->
+
+There are fewer observations in later years because fewer recent candidates have died. 
+
+
+```{r}
+ch9_gov %>%
+  ggplot(aes(x = sex, y = alive_post)) +
+  geom_boxplot() +
+  labs(title = "US Gubernatorial Candidate Lifespans",
+       subtitle = "Male candidates live much longer after the election",
+       caption = "Data: Barfort, Klemmensen and Larsen (2019)",
+       x = "Gender",
+       y = "Days Lived After Election") +
+  scale_y_continuous(labels = scales::label_number()) +
+  theme_classic() 
+```
+
+This plot shows that men live much longer, on average, than women after the election. Does that make sense to you?
+
+
+
+## Wisdom
+
+```{r echo=FALSE, fig.margin=TRUE, fig.cap="Wisdom"}
+knitr::include_graphics("other/images/Wisdom.jpg")
+```
+
+The concept of the "population" is subtle and important. *The population is not the set of candidates for which we have data.* That is the data set. The population is the larger --- potentially much larger --- set of individuals about whom we want to make inferences. *The parameters in our models refer to the population, not to the data set.*
+
+Consider a simple example. Define $\mu$ as the average number of days lived by candidates for governor after Election Day. Can we calculate $\mu$ from our data? No! There are many candidates for governor who are still alive, who are not included in our data even though they are part of the "population" we want to study. $\mu$ can not be *calculated.* It can only be *estimated.*
+
+Note, also, that there are many different populations, each with its own $\mu$, in which we might be interested. 
+
+<!-- DK: Are these dates correct? -->
+
+* The population of all candidates for governor in the US from 1945 to 2012. This is the period covered in the paper. 
+
+* The population of all candidates for governor in the US from 1900 to 2012. A priori, we would not expect a major difference between candidates who run in 1946 and those who run in 1942. How different could they be? It is therefore not unreasonable to extend the population of interest back in time, even if we have no data for earlier periods.
+
+* The population of all candidates for governor in the US from 1945 to 2030. We are often interested in the future. We want to make predictions about what will happen to candidates, even to candidates who have not yet run for office.
+
+* The population of candidates for governor around the world. Other countries have governors also! We want to understand their longevity as well.
+
+* The population of candidates for all political offices in the US. We might expect candidates for Senator to have similar lifespans to candidates for Governor.
+
+* And so on. There are as many possible populations as there are questions we might ask.
+
+All of these populations are different, so each has a different $\mu$. Which $\mu$ we are interested in depends on the problem we are trying to solve. It is a judgment call, a matter of Wisdom, as to whether or not that data we have is "close enough" to the population we are interested in to justify making a model.
+
+<!-- DK: Add more? Talk about ethics? Connect to ideal Preceptor Table? -->
+
+
+## Justice and Courage
+
+```{r echo=FALSE, fig.margin=TRUE, fig.cap="Justice"}
+knitr::include_graphics("other/images/Justice.jpg")
+```
+
+```{r echo=FALSE, fig.margin=TRUE, fig.cap="Courage"}
+knitr::include_graphics("other/images/Courage.jpg")
+```
+
+Because we will be going through a series of models in this chapter, it is useful to combine the virtues of Justice and Courage. 
+
+
+### alive_pre
+
+To begin, let's model candidate lifespan after the election as a function of candidate lifespan prior to the election. The data:
+
+
+```{r}
+ch9_gov %>% 
+  ggplot(aes(x = alive_pre, y = alive_post)) +
+    geom_point() +
+    labs(title = "Longevity of Gubernatorial Candidates",
+         subtitle = "Younger candidates live longer", 
+         caption = "Data Source: Barfort, Klemmensen and Larsen (2019)",
+         x = "Age in Days",
+         y = "Days Lived After Election") +
+    scale_x_continuous(labels = scales::label_number()) +
+    scale_y_continuous(labels = scales::label_number()) +
+    theme_classic()
+```
+
+
+The math is fairly simple:
+
+$$ alive\_post_i =  \beta_0 + \beta_1 alive\_pre_i + \epsilon_i $$
+
+
+with $\epsilon_i \sim N(0, \sigma^2)$. $alive\_post_i$ is the number of days lived after the election for candidate $i$. $alive\_pre_i$ is the number of days lived before the election for candidate $i$. $\epsilon_i$ is the "error term," the difference between the actual days-lived for candidate $i$ and the modeled days-lived.  $\epsilon_i$ is normally distributed with a mean of 0 and a standard deviation of $\sigma$. The key distinction is between:
+
+* *Variables*, always subscripted with $i$, whose values (potentially) vary across individuals.
+
+* *Parameters*, never subscripted with $i$, whose values are constant across individuals.
+
+<!-- DK: Better words needed. -->
+
+$\beta_0$ is the "intercept" of the regression, the average value for the population of $alive\_post$, among those for whom $alive\_pre = 0$. $\beta_1$ is the "coefficient" of  $alive\_pre$. Each one day increase in $alive\_pre$ is associated with a $\beta_1$ change in $alive\_post$. Again, this is the value for the population from which our data is drawn.  
+
+
+There are three unknown parameters --- $\beta_0$, $\beta_1$ and $\sigma$ --- just as with the models we used in Chapter \@ref(three-parameters).
+
+You may recall from middle school algebra that the equation of a line is $y = m x + b$. There are two parameters: $m$ and $b$. The intercept $b$ is the value of $y$ when $x = 0$. The slope coefficient $m$ for $x$ is the increase in $y$ for every increase of one in $x$. When defining a regression line, we use slightly different notation but the fundamental relationship is the same. 
+
+We can use `geom_smooth()` to create the fitted regression line:
+
+```{r}
+ch9_gov %>% 
+  ggplot(aes(x = alive_pre, y = alive_post)) +
+    geom_point() +
+    geom_smooth(formula = y ~ x, method = "lm", se = FALSE) +
+    labs(title = "Longevity of Gubernatorial Candidates",
+         subtitle = "Younger candidates live longer", 
+         caption = "Data Source: Barfort, Klemmensen and Larsen (2019)",
+         x = "Age in Days",
+         y = "Days Lived After Election") +
+    scale_x_continuous(labels = scales::label_number()) +
+    scale_y_continuous(labels = scales::label_number()) +
+    theme_classic() 
+```
+
+Consider someone who is about 15,000 days old on Election Day. We have a score or more data points for candidates around that age. Two died soon after the election. Some of them lived for about 5,000 days after the election. Others lived for around 20,000 days. Variation fills the world. But the fitted line tells us that, on average, we would expect a candidate that age to live for a little less than 15,000 days after the election. 
+
+<!-- DK: Add a red circle to the graphic to show how we figured that out? -->
+
+This model, with a continuous independent (or "predictor") variable, has an infinite number of fitted values, one for each possible value of `alive_pre`. This is very different from the models we saw in Chapter \@ref(three-parameters). Those models only had two possible fitted values because the predictor variable only took two possible values.
+
+<!-- DK: I am nervous that alive_pre, as used here, is a different variable that alive_pre when, later, we transform it.  -->
+
+We can implement this model with `stan_glm()`. 
+
+```{r, echo=FALSE}
+# Set seed hack to ensure similar results for fit_gov_1.
+
+set.seed(9)
+```
+
+
+```{r}
+fit_gov_1 <- stan_glm(data = ch9_gov,
+                      formula = alive_post ~ alive_pre,
+                      refresh = 0)
+```
+
+As we discussed in Chapter \@ref(three-parameters), the most common term for a model like this is a "regression." We have "regressed" `alive_post`, our dependent variable, on `alive_pre`, our (only) independent variable.
+
+The parameter values:
+
+```{r}
+print(fit_gov_1, detail = FALSE)
+```
+
+As is almost always the case, $\sigma$ is a nuisance parameter, somethings whose value we are not interested in. This is why `stan_glm()` refers to it as an "Auxiliary" parameter.
+
+The posterior distributions of $\beta_0$ (the intercept) and $\beta_1$ (the coefficient of $alive\_pre_i$), on the other hand, are important. Before looking at the posteriors themselves, let's examine the fitted values:
+
+<!-- DK: Use this trick to create parallel and non-parallel line plots later. -->
+
+```{r}
+ch9_gov %>% 
+  ggplot(aes(x = alive_pre, y = alive_post)) +
+    geom_point() +
+    geom_line(aes(y = fitted(fit_gov_1)), color = "blue") +
+    labs(title = "Longevity of Gubernatorial Candidates",
+         subtitle = "Blue line shows fitted values", 
+         caption = "Data Source: Barfort, Klemmensen and Larsen (2019)",
+         x = "Age in Days",
+         y = "Days Lived After Election") +
+    scale_x_continuous(labels = scales::label_number()) +
+    scale_y_continuous(labels = scales::label_number()) +
+    theme_classic()
+```
+
+This code is the same as the code we used above, except that we have replaced `geom_smooth()` with `geom_line()`. Calling `fitted()` on a model returns the set of fitted values, which we have here plotted by hand.
+
+
+<!-- DK: Does this section work? If it does, we ought to do it in every chapter. If not, then why bother? It is certainly confusing to understand why sticking in the median is a good idea . . . Need to connected math to fitted values more clearly. But that might be difficult since I am hazy on how fitted values fit in a Bayesian context . . .-->
+
+We can create a formula for the fitted values by placing the median values of the parameters into the model:
+
+
+$$ alive\_post_i =  26,500 - 0.9 alive\_pre_i$$
+
+Consider the intercept. Since our independent variable is $alive\_pre_i$, the intercept is the $alive\_post_i$ value when $alive\_pre_i$ is zero. Here, we would interpret this intercept as the average lifespan of a gubernatorial candidate after the election, if the candidate was alive for zero days prior to the election. 
+
+This is, of course, substantively nonsense. No one runs for office on the day they are born. In the next model, we will explore ways of making the intercept more interpretable. In the meantime, the math is the math. 
+
+Consider the coefficient for $alive\_pre_i$, $\beta_1$. The median of the posterior, -0.9, represents the slope of the model. For every unit increase in our independent variable, our dependent variable will change by this amount. For every additional day a candidate is alive before an election, their lifespan after the election will be 0.9 days lower, on average. If we are given the number of days a candidate lived before the election and want to estimate how long they will live for after, we will multiply the days they were alive prior by this beta of -0.9, and then combine that with the intercept. 
+
+This is a descriptive model, not a causal model. Remember our motto from Chapter \@ref(rubin-causal-model): *No causation without manipulation.* There is no way, for person $i$, to change the days that she has been alive on Election Day. On the day of this election, she is X days old. There is no way to change that. So, there are not two (or more) potential outcomes. Without more than one potential outcome, there can not be a causal effect.
+
+Given that, it is important to monitor our language. We do not believe that that changes in `alive_pre` "cause" changes in `alive_post`. That is obvious. But there are some words and phrases --- like "associated with" and "change by" --- which are too close to causal. (And which we are guilty of using just a few paragraphs ago!) Be wary of their use. *Always think in terms of comparisons* when using a predictive model. We can't change `alive_pre` from X to Y for an individual candidate. We can only compare two candidates (or two groups of candidates), one with `alive_pre` equal to X and the other with `alive_pre` equal to Y. If our model is correct, such candidates will, on average, differ in `alive_post` by $\beta_1$ times the difference between X and Y.
+
+<!-- DK: THis is a critical point. Maybe give a precise example? Go through the math slowly, like ModernDive does? Highlight this somehow? At the very least, we should emphasize the point for each model going forward. -->
+
+Let's look at the posterior of $\beta_1$, the coefficient of $alive\_pre_i$:
+
+<!-- DK: We should standardize what these plots look like, both in this chapter and throughout the book. -->
+
+```{r}
+fit_gov_1 %>% 
+  as_tibble() %>% 
+  ggplot(aes(alive_pre)) + 
+    geom_histogram(aes(y = after_stat(count/sum(count))),
+                   bins = 100) +
+    labs(title = "Posterior Distribution of the Coefficient of `alive_pre`",
+         y = "Probability",
+         x = "Coefficient of `alive_pre`") + 
+    scale_y_continuous(labels = scales::percent_format()) +
+    theme_classic()
+```
+
+<!-- DK: Add some interpretation. Need to explain how the uncertainty in beta_1 is connected to the uncertainty we will see in alive_post, for a given difference (not "change") in alive_pre. -->
+
+<!-- DK: Priority is to add a graphic which shows the "cloud" of possible regression lines, consistent with the posterior for beta_1.  -->
+
+<!-- DK: Need a smoother transition back to centering. Or get rid of centering all together? -->
+
+<!-- DK: Would using 50-year-old be better? -->
+
+We center variables when the model's intercept does not make substantive sense. To center a model, we pick a constant value, usually the mean of the independent variable, and subtract that constant from every value of the independent variable. Another option would be to pick a reasonable reference value, like 18,262 -- the number of days that a someone who is 50 years-old has lived. Either way, the meaning of `alive_pre` changes from the raw number of days a candidate has been alive to the number of days relative to that reference value. 
+
+In this example, we want to center the value for `alive_pre`, the independent variable. First, we must pick the value that we will center by. Here, we will use the mean of `alive_pre`, which is about 52 years old.  Once we find this value, we will subtract it from every `alive_pre` value. We have, thereby, changed the meaning of `alive_pre`. It now means the number of days a candidate has been alive, as of Election Day, relative to the average days alive of all candidates on their respective election days.
+
+```{r}
+ch9_gov$alive_pre <- ch9_gov$alive_pre - mean(ch9_gov$alive_pre)
+```
+
+
+
+```{r, cache = TRUE}
+fit_gov_1.centered <- stan_glm(data = ch9_gov,
+                      formula = alive_post ~ alive_pre,
+                      refresh = 0)
+
+print(fit_gov_1.centered, detail = FALSE)
+```
+
+<!-- DK: If we are doing centering, then we ought to do it correctly, by showing side-by-side scatterplots with fitted lines, the better to show that we have just slid things over. -->
+
+We can see that the intercept has decreased while the slope has stayed the same. When we interpret this model, we only have to change the definition of the intercept. Rather than the intercept representing the lifespan of a candidate who was alive for zero days before running for governor, it now represents the post-election lifespan of a gubernatorial candidate who was alive for the mean number of days (about 52 years) before running. If a candidate was alive for about 52 years before running for governor, they are expected to live about 10,300 days (about 28 years) after the election, on average. 
+
+<!-- DK: Really need the ideal and actual Preceptor Table for this example. And should probably present it earlier. -->
+
+Think hard about your parameters. What do they mean? Which population do they represent? What ideal Preceptor Table would make their calculation easy? In this case, $\beta_0$ is the average number of days which gubernatorial candidates live after election day, but just for the subset of candidates who are the average age on Election Day. If we had the ideal Preceptor Table, this would be trivial to calculate. Just take the average for that subset! No estimation required. But, our actual Preceptor Table has lots of missing values. In particular, many gubernatorial candidates have not . . . uh . . . died. (How inconsiderate!) So, we can't know how many days they will live. All we can do is, first, define  $\beta_0$ and, second, estimate a posterior probability distribution for it. 
+
+### sex
+
+Let's now regress `alive_post` on `sex` to see how candidates' post-election lifespans differ by sex. 
+
+```{r, cache = TRUE}
+fit_gov_2 <- stan_glm(data = ch9_gov,
+                      formula = alive_post ~ sex - 1,
+                      refresh = 0)
+```
+
+Note this workflow. Try one model. Interpret it. Try another model. And then another. There is no one "true" model. There is an infinite space of possible models. Good data science involves an intelligent tour of that space.
+
+
+```{r}
+print(fit_gov_2, detail = FALSE)
+```
+
+
+In this regression, we use the -1 in the formula to make the output more straightforward, with no intercept to interpret. The math of this model is the same as those we saw in Chapter \@ref(three-parameters):
+
+$$ alive\_post_i = \beta_1 x_{f,i} + \beta_2 x_{m,i} + \epsilon_i$$
+
+where \n
+$$x_{f,i}, x_{m,i} \in \{0,1\}$$ \n
+$$x_{f,i} +  x_{m,i} = 1$$ \n
+$$\epsilon_i \sim N(0, \sigma^2)$$  
+
+<!-- DK: Provide more details on what each of the items in the formula means, even though this is a repeat of what we did in chapter 8. Don't use "where" with line skips. Just one paragrpah, like elsewhere. -->
+
+The meanings of $alive\_post_i$ and $\epsilon_i$ are the same as in the first model. Indeed, they are the same throughout these exercises.  $x_{f,i}$ and $x_{m,i}$ are 0/1 variables, just like last chapter. They are *variables* whose values vary across individuals.
+
+The important parameters are $\beta_1$ and $\beta_2$. They are the average days-lived post-election for, respectively, women and men. Again, this is not the "average" for the data we have. That is easy to calculate! No estimation required. $\beta_1$ and $\beta_2$ are averages for the entire "population," however we have chosen to define that term. Those averages can not be calculated directly. They can only be estimated, by creating a posterior probability distribution.
+
+
+Looking back to the regression model we just created, we see that there is no intercept. Instead of having a $\beta_0$ value, we have $\beta_1$ and $\beta_2$ for female and male. This makes things easier to interpret. Without having to add or subtract anything from an intercept, this regression tells us that, on average, women are expected to live about 6,000 days after running for governor, and men are expected to live 10,000 days.
+
+This is a strange result. Why would men live twice as long as women after the election? One explanation for this might be that women don't run for governor until later in life, and therefore are not expected to live as long.
+
+<!-- DK: Weird result, huh? Men live twice as long as women! Useful to discuss why that might be the case in more detail. -->
+
+Now that we have interpreted the model using a -1 in the formula to estimate $\beta_1$ and $\beta_2$, let's take away the -1 and regress `alive_post` on an intercept and  `sex` to see how our equation changes.
+
+```{r, echo=FALSE}
+set.seed(9)
+```
+
+
+```{r}
+fit_gov_2a <- stan_glm(data = ch9_gov,
+                       formula = alive_post ~ sex,
+                       refresh = 0)
+```
+
+```{r}
+print(fit_gov_2a, detail = FALSE)
+```
+
+We no longer have a value for female. However we do have an intercept. In this regression our mathematical formula is:
+
+$$ alive\_post_i = \beta_0  + \beta_1 x_{m,i} + \epsilon_i$$
+
+$\beta_0$ is our intercept, around 5,850. This result is very similar to the female value from before. In this type of model, our intercept represents the the variable which is not represented in the model.  $\beta_1$ only affects the outcome when the candidate is male. (If the candidate is female, then $x_{m,i} = 0$. Therefore, the intercept value represents those who are not male, i.e., females.)
+
+<!-- DK: This explanation should be better. -->
+
+When the candidate is a male, we add the coefficient for male to the intercept value, which gives us the average lifespan of a male gubernatorial candidate after an election. As we can see from adding $\beta_0$ and $\beta_1$, this value is the same as what we got for males in the previous model.
+
+Be careful with notation! $\beta_1$ in the no-intercept model is different from $\beta_1$  in the model with an intercept! Notation varies. We must pay attention each time we make a model.
+
+
+The posterior distribution for $\beta_0 + \beta_1$ can be constructed via simple addition.
+
+
+```{r}
+fit_gov_2a %>% 
+  as_tibble() %>% 
+  mutate(male_intercept = `(Intercept)` + sexMale) %>% 
+  ggplot(aes(male_intercept)) + 
+    geom_histogram(aes(y = after_stat(count/sum(count))),
+                   bins = 100) +
+    labs(title = "Posterior Distribution of Average Male Candidate Days Left`",
+         y = "Probability",
+         x = "Male Days To Live After the Election") + 
+    scale_x_continuous(labels = scales::number_format()) +
+    scale_y_continuous(labels = scales::percent_format()) +
+    theme_classic()
+```
+
+
+The interpretation of this parameter is the same as we have seen before. There is a true average, across the entire population, of the number of days that male candidates live after the election. We can never know what that true average is. But, it seems highly likely that the true average is somewhere between 10,000 and 10,750 days.
+
+
+### alive_pre and sex
+
+
+We are going to transition to working with a model that has more than one explanatory variable. Our outcome variable will be `alive_post`, but now we will have two different explanatory variables: `alive_pre` and `sex`. Note that `sex` is a categorical explanatory variable and `alive_pre` is a continuous explanatory variable.
+
+
+
+Here is the math we will be using: 
+
+$$ alive\_post_i =  \beta_0 + \beta_1 male_i + \beta_2 alive\_pre_i + \epsilon_i $$
+
+* The outcome variable is $alive\_post_i$, the number of days a person is alive after the election. $male_i$ is one of our explanatory variables. If we are predicting the amount of days a male candidate lives after the election, this value will be 1. When we are making this prediction for female candidates, this value will be 0. $alive\_pre_i$ is our other explanatory variable. It is the number of days a candidate has lived before the election. 
+
+
+* $\beta_0$ is the average number of days lived after the election for women, who on the day of election, have been alive the average number of days of all candidates (i.e. both male and female). $\beta_0$ is also the intercept of the equation. In other words, $\beta_0$ is the expected value of $alive\_post_i$, if $male_i = 0$ and $alive\_pre_i = 0$. 
+
+* $\beta_1$ is almost meaningless by itself. The only time it has meaning is when its value is connected to our intercept (i.e. $\beta_0 + \beta_1$). When the two are added together, you get the average number of days lived after the election for men, who on the day of election, have been alive the average number of days for all candidates.
+
+* $\beta_2$ is, for the entire population, the average difference in $alive\_post_i$ between two individuals, one of whom has an $alive\_pre_i$ value of 1 greater than the other. 
+
+
+
+Now that we understand our model, let's translate the following model into code. 
+
+```{r, cache = TRUE}
+fit_gov_3 <- stan_glm(data = ch9_gov,
+                      formula = alive_post ~ sex + alive_pre,
+                      refresh = 0)
+```
+
+```{r}
+print(fit_gov_3, detail = FALSE)
+```
+
+
+Looking at our results, you can see that our intercept value is around 8,100. (The exact values for the median of the posterior will vary because of the random sampling inherent in fitting the model.) This means that the average female candidate, who had been alive the average number of days of all candidates, would live another 8,100 days or so after the election. 
+
+
+Note that `sexMale` is around 2,250. This is our coefficient, $\beta_1$. We need to connect this value to our intercept value to get something meaningful. Using the formula $\beta_0$ + $\beta_1$, we find out that the number of days the average male candidate ---  who, on the day of election, had been alive the average number of days of all candidate --- would live is around 10,300,.  
+
+
+Now take a look at the coefficient for $alive\_pre_i$, $\beta_2$. The median of the posterior, -0.8, represents the slope of the model. For every unit increase in our independent variable, our dependent variable will change by this coefficient. It makes sense that this value is negative. Think about it: the more days a candidate has lived, the fewer days the candidate has left to live. So, for every extra day a candidate is alive before an election, their lifespan after the election will be 0.8 days lower, on average.
+
+
+Let’s now look at some posteriors.
+
+```{r}
+fit_gov_3 %>% 
+  as_tibble() %>% 
+  mutate(male_days = `(Intercept)` + sexMale) %>% 
+  rename(female_days = `(Intercept)`) %>% 
+  select(female_days, male_days) %>% 
+  pivot_longer(cols = female_days:male_days, 
+               names_to = "parameters",
+               values_to = "days") %>% 
+  ggplot(aes(days, fill = parameters)) +
+    geom_histogram(aes(y = after_stat(count/sum(count))),
+                   alpha = 0.5, 
+                   bins = 100, 
+                   position = "identity") +
+     labs(title = "Posterior Probability Distribution",
+         subtitle = "Men live longer",
+         x = "Average Days Lived Post Election",
+         y = "Probability") + 
+    scale_x_continuous(labels = scales::number_format()) +
+    scale_y_continuous(labels = scales::percent_format()) +
+    theme_classic()
+```
+
+<!-- DK: Much more to say here, and say it clearly! -->
+
+The graph above displays the posterior probability distributions for $\beta_0$ and for $\beta_0 + \beta_1 $. The two distributions are fairly different; the distribution for females is more spread out than that for males. There were a greater number of men than women in the data. The more data we have, the more precise we can be.
+
+
+Let's now take a look at a posterior distribution for $\beta_2$, the coefficient of $alive\_pre_i$. 
+
+```{r fit_gov3-p1, exercise = TRUE}
+fit_gov_3 %>% 
+  as_tibble() %>% 
+  ggplot(aes(alive_pre)) + 
+    geom_histogram(aes(y = after_stat(count/sum(count))),
+                   bins = 100) +
+    labs(title = "Posterior Distribution of the Coefficient of `alive_pre`",
+         y = "Probability",
+         x = "Coefficient of `alive_pre`") + 
+    scale_y_continuous(labels = scales::percent_format()) +
+    theme_classic()
+
+```
+
+
+
+<!-- DK: Need some commentary here. -->
+
+<!-- DK: Show three posterior plots: one for beta_2, one for beta_0 (intercept) and one for beta_0 + beta_1.  Interpret them. This is a parallel slopes model. Can we show a parallel slopes graph by hand? Skip this for now. -->
+
+
+<!-- DK: Cool, eh? It is (mostly?) an age effect! Controlling for age at the election, women live about as long as men, but they are much more likely be candidates as an older age. Again, what we are doing is slowly building more complex models, understanding what they mean. -->
+
+<!-- Also, note that this is a "parallel slopes" model. Explain slowly what that means.  Create a plot. -->
+
+<!-- Side note: I would have thought that overlapping CIs for male/female would equate to insignificance of sex dummy when the regression includes a intercept. But that does not seem to be the case. Am I missing something? -->
+
+<!-- Make the graphic which shows two parallel lines, by calling two layers of geom_smooth().  -->
+
+<!-- With this as warm-up, we are now in a position to explore interactions. -->
+
+### alive_pre, sex and alive_pre*sex
+
+Let's create another model. This time, however, the numeric outcome variable of alive_post as a function of the two explanatory variables we used above, `alive_pre` and `sex`, and of their interaction.
+
+Math:
+
+$$ alive\_post_i =  \beta_0 + \beta_1 male_i + \beta_2 alive\_pre_i + \\ \beta_3 male_i *  alive\_pre_i + \epsilon_i$$
+<!-- DK: Need to make these interpretations clearer and more consistent across the examples. -->
+
+* Our outcome variable is still $alive\_post_i$. We want to know how many days a candidate will live after an election. 
+
+* $male_i$ is still one of our explanatory variables. If we are predicting the amount of days a male candidate lives after the election, this will be 1. When we are making this prediction for female candidate, this will be 0. $alive\_pre_i$ is still our other explanatory variable, representing the number of days a candidate has lived before the election, relative to the average value for all candidates. 
+
+* $\beta_0$ is the average number of days lived after the election for women, who on the day of election, have been alive the average number of days of all candidates. In a sense, this is the same meaning as in the previous model, without an interaction term. But, always remember that the meaning of a parameter is conditional on the model in which it is embedded. Even if a parameter is called $\beta_0$ in two different regressions does necessitate that it means the same thing in both regressions. Parameter names are arbitrary, or at least simply a matter of convention.
+
+* $\beta_1$ does not have a simple interpretation as a stand-alone parameter. It is a measure of how different women are from men. However, $\beta_0 + \beta_1$ has a straightforward meaning exactly analogous to the meaning of $\beta_0$. The sum  is the average number of days lived after the election for *men*, who on the day of election, have been alive the average number of days of all candidates.
+
+* $\beta_2$ is the coefficient of $alive\_pre_i$. It it just the slope for women. It is the average difference in $alive\_post_i$ between two women, one of whom has an $alive\_pre_i$ value of 1 greater than the other. In our last example,  $\beta_2$ was the slope for the whole population. Now we are different slopes for different genders. 
+
+* $\beta_3$ alone is difficult to interpret. However, when it is added to $\beta_2$, the result in the slope for men.
+
+Code:
+
+```{r, cache = TRUE}
+fit_gov_4 <- stan_glm(data = ch9_gov,
+                      formula = alive_post ~ sex*alive_pre,
+                      refresh = 0)
+```
+
+```{r}
+print(fit_gov_4, detail = FALSE)
+```
+
+<!-- DK: Take your time explaining what this means! It is not trivial. Note that this is a non-parallel slopes model. -->
+
+The intercept has increased. $\beta_0$ is around 6,000. This is the intercept for females. It still means the average number of days lived after the election for women is 6,000 or so. Our `sexMale` coefficient, $\beta_1$, refers to the value that must be added to the intercept in order to get the intercept for males. When calculated, the result is 10,000. Keep in mind, however, that these values only apply if $alive\_pre_i = 0$, if, that is, candidate $i$ is around 52 years old. 
+
+The coefficient for $alive\_pre_i$, $\beta_2$, is -0.1. What does this mean? It is the slope for females. So for every extra day a female candidate is alive before an election, their lifespan after the election will be 0.1 days lower, on average. Now direct your attention below at the coefficient of `sexMale:alive_pre`, $\beta_3$, which is -.8. This is the value that must be added to the coefficient of $alive\_pre_i$ (recall $\beta_2$ + $\beta_3$) in order to find the slope for males. When the two are added together, this value, or slope, is about -0.9. For every extra day a male candidate is alive before an election, their lifespan after the election will be 0.9 days lower, on average. 
+
+*Key point*: The interpretation of the intercepts only apply to candidates for whom $alive\_pre_i = 0$. Candidates who are not 52 years-old will have different expected number of days to live. The interpretation of the slope applies to everyone. In other words, the relationship between $alive\_post_i$ and $alive\_pre_i$ is the same, regardless of your gender or how old you are.
+
+
+The posterior:
+
+
+```{r}
+fit_gov_4 %>% 
+  as_tibble() %>% 
+  mutate(male_days = `(Intercept)` + sexMale) %>% 
+  rename(female_days = `(Intercept)`) %>% 
+  select(female_days, male_days) %>% 
+  pivot_longer(cols = female_days:male_days, 
+               names_to = "parameters",
+               values_to = "days") %>% 
+  ggplot(aes(days, fill = parameters)) +
+    geom_histogram(aes(y = after_stat(count/sum(count))),
+                   alpha = 0.5, 
+                   bins = 100, 
+                   position = "identity") +
+    labs(title = "Posterior Probability Distribution",
+         subtitle = "Men live longer",
+         x = "Average Days Lived Post Election",
+         y = "Probability") + 
+    scale_x_continuous(labels = scales::number_format()) +
+    scale_y_continuous(labels = scales::percent_format()) +
+    theme_classic()
+```
+
+Male candidates live longer on average than female candidates. Note, also, that the average days to live after the election for females is about 6,000 with this model. With the previous model, it was 8,000. Why the difference? The interpretation of "average" is different! In the previous model, it was the average for all women. In this model, it is the average for all 52 years-old women. Those are different things, so we should hardly be surprised by different posteriors.
+
+<!-- DK: Is the above right? -->
+ 
+
+Slope posteriors:
+
+```{r}
+fit_gov_4 %>% 
+  as_tibble() %>% 
+  mutate(slope_men = alive_pre + `sexMale:alive_pre`) %>% 
+  rename(slope_women = alive_pre) %>% 
+  select(slope_women, slope_men) %>% 
+  pivot_longer(cols = slope_women:slope_men, 
+               names_to = "parameters",
+               values_to = "slope") %>% 
+  ggplot(aes(slope, fill = parameters)) +
+    geom_histogram(aes(y = after_stat(count/sum(count))),
+                   alpha = 0.5, 
+                   bins = 100, 
+                   position = "identity") +
+    labs(title = "Posterior Probability Distribution",
+         subtitle = "Men have a steeper slope",
+         x = "slope",
+         y = "Probability") + 
+    scale_y_continuous(labels = scales::percent_format()) +
+    theme_classic() 
+```
+
+This posterior distribution shows the average slope values for men and women. You can see that men have a steeper slope, while the slope for women is practically 0! *If you are trying to forecast the number of days that a women will live after the election, you may ignore the number of days that she has already lived.* This is definitely not true for men. Why the difference?
+ 
+<!-- DK: Answer this question!  -->
+
+### What is $\beta_0$?
+
+Attentive readers will have noticed that the meaning of $\beta_0$ is identical for the last two models and, at the same time, our estimate for its posterior are very different. How can that be?
+
+Recall the math:
+
+$$ alive\_post_i =  \beta_0 + \beta_1 male_i + \beta_2 alive\_pre_i + \epsilon_i $$
+
+$$ alive\_post_i =  \beta_0 + \beta_1 male_i + \beta_2 alive\_pre_i + \\ \beta_3 male_i *  alive\_pre_i + \epsilon_i$$
+In both cases, $\beta_0$ has the same meaning. It is the average number of days lived after the election for women, who on the day of election, have been alive the average number of days of all candidates. Plug in 0 for $male_i$ and 0 for $alive\_pre_i$ and both equations simplify to:
+
+$$ alive\_post_i =  \beta_0 + \epsilon_i $$
+So far, so good. But, despite the fact that we are using the same data, the posterior probability distributions for $\beta_0$ are meaningfully different between the two models:
+
+```{r}
+m_3 <- fit_gov_3 %>% 
+  as_tibble() %>%
+  select(`(Intercept)`) %>% 
+  rename(`No Interaction Term` = `(Intercept)`)
+
+m_4 <- fit_gov_4 %>% 
+  as_tibble() %>%
+  select(`(Intercept)`) %>% 
+  rename(`With Interaction Term` = `(Intercept)`)
+
+bind_cols(m_3, m_4) %>% 
+  select(`No Interaction Term`, `With Interaction Term`) %>% 
+  pivot_longer(cols = `No Interaction Term`:`With Interaction Term`, 
+               names_to = "Model",
+               values_to = "days") %>% 
+  ggplot(aes(days, fill = Model)) +
+    geom_histogram(aes(y = after_stat(count/sum(count))),
+                   alpha = 0.5, 
+                   bins = 100, 
+                   position = "identity") +
+    labs(title = "Posterior Probability Distributions",
+         subtitle = "For intercept in two different models",
+         x = "Additional Days Lived Post Election",
+         y = "Probability") + 
+    scale_x_continuous(labels = scales::number_format()) +
+    scale_y_continuous(labels = scales::percent_format()) +
+    theme_classic()
+```
+
+There is enough overlap between the two distributions that they aren't completely incompatible. If, in truth, $\beta_0 = 7000$, neither posterior distribution is "wrong."
+
+The meaning of any parameter, including $\beta_0$, is conditional on two assumptions: the population for which we seek to make inferences and the structure of the model. In this case, we assume that the population of interest is the same. But the models are different, albeit only by one interaction term. But that is enough of a difference to make $\beta_0$ in the first model a different "thing" that $\beta_0$ in the second model, even if one "interpretation" of what they mean is the same.
+
+The trick is that an individual interpretation of the meaning of a parameter just captures one characteristic of the meaning of that parameter. It is just a single view of the "thing." That view is fine, as far as it goes, but it can't show us all aspects of the parameter. A picture of the full moon tells us little about what appears on its dark side.
+
+Consider a different question: What is the expected value for male candidates who are 1 year older than average:
+
+* Without an interaction term: $\beta_0 + \beta_1 + \beta_2 365$.
+
+* With an interaction term: $\beta_0 + \beta_1 + \beta_2 365 + \beta_3 365$. 
+
+We shouldn't be surprised that different models generate different formulas for this question. Yet note how $\beta_0$ appears in both. In other words, $\beta_0$ is not *only* the average number of days lived after the election for women, who on the day of election, have been alive the average number of days of all candidates. It is also part of a multitude of other estimates. 
+
+*The only way to understand all of what is wrapped up in $\beta_0$ is to see it in the context of the full mathematical formula.* Since we have two different models, defined by two different formulas, it is hardly surprising that the posterior probability distributions for $beta_0$ will differ, even though one specific interpretation --- one out of many --- is the same.
+
+Our advice: Spend less time thinking about what parameters *mean* and more time using `posterior_epred()` and `posterior_predict()` to examine the implications of your models. Those posteriors are the real substance of your model.
+
+
+### state, alive_pre, sex and alive_pre*sex
+
+Let's leave aside subtleties of parameter interpretation and consider one more model, one very similar to the one we just created. We are now adding "state", which will give us 55 different intercepts! 
+
+Math:
+
+
+$$ alive\_post_i =  \beta_0 +  \beta_1 x_{AK,i} + \beta_2 x_{AR,i} + ... \beta_{49} x_{WY,i} + \\
+\beta_{50} male_i + \beta_{51} alive\_pre_i+ \beta_{52} male_i *  alive\_pre_i + \epsilon_i$$
+
+<!-- DK: Clean this up. Explain meaning of intercept more clearly. -->
+
+*  $alive\_post_i$ is the outcome variable. $\beta_1$, $\beta_2$, $\beta_3$... all the way to $\beta_{49}$ correspond to different parameters. These values are specific to each state. In order to find the female intercept (i.e. alive_post for females) for a specific state, you must add that state's beta value to the value of $\beta_0$ to find intercept for the `alive_post` outcome for females candidates in that specific state. For example, if you look at the model above, $\beta_1$ is the intercept value for Arkansas (note the AK subscript). You would take the appropriate value, which appears next to Arkansas in the printed model, and add it to the value for $\beta_0$.
+
+* $\beta_0$ will be the intercept for one state alone. When the model is printed, you will see that (Intercept) takes on the alive_post value for female candidates in Alabama. 
+
+* $\beta_{50}$ is the coefficient for the explanatory variable $male_i$. When we are trying to find the intercepts for female candidates, the explanatory variable will take on the value of 0. However,  $male_i$ = 1 when we are trying to find intercept values for male candidates. Therefore, you add the $\beta_{50}$ value to the female intercept value to find the value of alive_post for male candidates. $\beta_{51}$ is the coefficient for the explanatory variable $alive\_pre_i$. It it just the slope for women. $\beta_{52}$ is difficult to interpret. However, it gains meaning when it is added to $\beta_{51}$, which results in the slope for men.
+ 
+
+```{r, cache = TRUE}
+fit_gov_5 <- stan_glm(data = ch9_gov,
+                      formula = alive_post ~ state + sex*alive_pre,
+                      refresh = 0,
+                      iter = 10000)
+```
+
+Note it takes awhile to run. We are dealing with 55 parameters here.
+
+```{r}
+print(fit_gov_5, detail = FALSE)
+```
+
+The (Intercept) refers to the average number of days lived after the election for women, who on the day of election, have been alive the average number of days of all female candidates in Alabama! That's a mouthful. It really is not different than what we have been doing all along, however. You can see here that (Intercept) value is around 4,900. 
+
+
+However, we have only talked about women. What about for the men? Well, if you look at the bottom of the list, you will see the `sexMale` value of around 4,400. When you wish to find alive_post for a specific state, you must add this value to the intercept, about 4,900, and then also add the intercept of the desired state. 
+
+$\beta_{51}$, our coefficient value for $alive\_pre_i$, is 0. This means women have a slope of 0.
+
+<!-- DK: Conflict between $alive\_pre_i$ and `sexMale:alive_pre`. Which is better? Should be consistent. -->
+
+$\beta_{51}$ + $\beta_{52}$, our coefficients for $alive\_pre_i$ and `sexMale:alive_pre`, results in the value of around -0.8. This value is our slope for men.
+
+
+
+Posterior distribution for female candidates in Washington and South Dakota. 
+
+<!-- DK: Clean up math here. No hard coding numbers!-->
+
+```{r}
+fit_gov_5 %>% 
+  as_tibble() %>% 
+  mutate(Washington_females = `(Intercept)` + stateWashington) %>% 
+  mutate (SD_females = `(Intercept)` + `stateSouth Dakota`) %>% 
+  select(Washington_females, SD_females) %>% 
+  pivot_longer(cols = Washington_females:SD_females, 
+               names_to = "parameters",
+               values_to = "days") %>% 
+  ggplot(aes(days, fill = parameters)) +
+    geom_histogram(aes(y = after_stat(count/sum(count))),
+                   alpha = 0.5, 
+                   bins = 100, 
+                   position = "identity") +
+    labs(title = "Posterior Probability Distribution",
+         subtitle = "for women that live in Washington and South Dakota",
+         x = "Average Days Lived Post Election",
+         y = "Probability") + 
+    scale_x_continuous(labels = scales::number_format()) +
+    scale_y_continuous(labels = scales::percent_format()) +
+    theme_classic()
+```
+
+
+The posterior above shows that female candidates in Washington live longer after the election than female candidates in South Dakota. Interesting huh? Our knowledge about averages is always more precise than our knowledge about individuals. 
+
+
+
+<!-- DK: Need to modify this to only show one of the more interesting state coefficients. (Although we might show all the state pdfs in the graphic.) This a good place to discuss shrinkage, which is what is happening here. And that is probably enough models. -->
+
+## Temperance
+
+```{r echo=FALSE, fig.margin=TRUE, fig.cap="Temperance"}
+knitr::include_graphics("other/images/Temperance.jpg")
+```
+
+Consider:
+
+* How long will two male political candidates --- one from South Dakota and one from Washington, both 10 years older than the average candidate --- live after the election? How different will their lifespans be?
+
+These questions are, purposely, less precise than the ones we tackled in Chapters \@ref(two-parameters) and \@ref(three-parameters), written more in a conversational style. This is how normal people talk.
+
+However, as data scientists, our job is to bring precision to these questions. There are two commonsense interpretations. First, we could be curious about the *expected values* for these questions. If we averaged the data for a thousand candidates like these, what would the answer be? Second, we could be curious about two specific individuals. How long will they live? *Averages involve questions about parameters. The fates of individuals require predictions.* Those are general claims, violated too often to be firm rules. Yet, they highlight a key point: *expected values are less variable than individual predictions*.
+
+To calculate expected values, use parameters and algebra. To forecast for individuals, use `posterior_predict()`.
+
+### Expected Values
+
+Consider the "on average" interpretation first. The answer begins with the posterior distributions of the parameters in `fit_gov_5`.
+
+<!-- DK: We need to walk through the math. Start with the original formula. Replace the x's with the values for this person. Simplify. Plug in the parameters, which are distributions. This gives us the answer. It goes too fast to just go straight for the code. -->
+
+```{r}
+fit_gov_5 %>% 
+  as_tibble() %>% 
+  mutate(WA = `(Intercept)` + stateWashington + sexMale + 
+           (`sexMale:alive_pre` + alive_pre) * 10 * 365) %>% 
+  mutate(SD = `(Intercept)` + `stateSouth Dakota` + sexMale + 
+           (`sexMale:alive_pre` + alive_pre) * 10 * 365) %>% 
+  select(WA, SD) %>% 
+  pivot_longer(cols = WA:SD, 
+               names_to = "Parameter",
+               values_to = "days") %>% 
+  ggplot(aes(days, fill = Parameter)) +
+    geom_histogram(aes(y = after_stat(count/sum(count))),
+                   alpha = 0.5, 
+                   bins = 100, 
+                   position = "identity") +
+    labs(title = "Posterior Probability Distribution",
+         subtitle = "For 62 years-old male candidates from South Dakota and Washington",
+         x = "Expected Days Lived Post Election",
+         y = "Probability") + 
+    scale_x_continuous(labels = scales::number_format()) +
+    scale_y_continuous(labels = scales::percent_format()) +
+    theme_classic()
+```
+
+Looking at our posterior probability distributions above, we can see that the candidates from Washington are expected to live longer. But how much longer? As in previous chapters, we can manipulate distributions in, more or less, the same way that we manipulate simple numbers. If we want to know the difference between two posterior distributions, we can simply subtract. But before we do, note that, in many ways, looking at the difference is much easier than considering the individual posteriors.
+
+We don't really need to calculate `WA` using all those complex terms. We already know that we are going to subtract `SD` and that both `WA` and `SD` include the `(Intercept)`, `sexMale`, and so on. All those terms in common will cancel out when we subtract. So, we can go directly to `diff` being equal to the difference between `stateWashington` and `stateSouth Dakota`.
+
+
+```{r}
+fit_gov_5 %>% 
+  as_tibble() %>% 
+  mutate(diff = stateWashington - `stateSouth Dakota`) %>% 
+  select(diff) %>% 
+  ggplot(aes(diff)) +
+    geom_histogram(aes(y = after_stat(count/sum(count))),
+                   alpha = 0.5, 
+                   bins = 100, 
+                   position = "identity") +
+    labs(title = "Posterior Probability Distribution",
+         subtitle = "Candidates from Washington live longer than those from South Dakota",
+         x = "Average Additional Days Lived Post Election",
+         y = "Probability") + 
+    scale_x_continuous(labels = scales::number_format()) +
+    scale_y_continuous(labels = scales::percent_format()) +
+    theme_classic()
+```
+
+The average value of the difference in days-to-live is almost certainly positive, with the most likely value being around 4,500. Notice that there is essentially zero chance that, on average, South Dakota candidates live longer.
+
+One annoyance of the above approach is that it requires us to do everything "by hand," to recall the mathematical structure of the model, and then to insert the relevant values of the data for the individuals we want to predict. What a bother! Fortunately, **rstanarm** provides the `posterior_epred()` function to make this process simpler.
+
+First, we create a tibble with the desired input for our model. In our case the tibble has a variable named `sex` which contains two observations both with the value "Male". There is a `state` variable with the desired states. There is an `alive_pre` variable set to 10 years worth of days.
+
+```{r}
+new_obs <- tibble(sex = c("Male", "Male"),
+                  state = c("South Dakota", "Washington"),
+                  alive_pre = 10 * 365)
+```
+
+Second, we pass the fitted model object and this tibble to `posterior_epred()`.
+
+```{r}
+pe <- posterior_epred(fit_gov_5, 
+                      newdata = new_obs) %>%
+  as_tibble() 
+```
+
+The name `pe` stands for **p**osterior **e**xpectation. This is different from the **p**osterior **p**rediction which `posterior_predict()` produces. Transforming the resulting object into a tibble makes later graphing easier. With `pe`, we can now reproduce our last two plots much more easily.
+
+```{r}
+pe %>% 
+  rename(SD = `1`,
+         WA = `2`) %>% 
+  mutate(Difference = WA - SD) %>% 
+  pivot_longer(cols = SD:Difference, 
+               names_to = "Parameter",
+               values_to = "days") %>% 
+  ggplot(aes(days, fill = Parameter)) +
+    geom_histogram(aes(y = after_stat(count/sum(count))),
+                   alpha = 0.5, 
+                   bins = 100, 
+                   position = "identity") +
+    labs(title = "Posterior Probability Distribution",
+         subtitle = "For 62 years-old candidates from South Dakota and Washington",
+         x = "Expected Days Lived Post Election",
+         y = "Probability") + 
+    scale_x_continuous(labels = scales::number_format()) +
+    scale_y_continuous(labels = scales::percent_format()) +
+    theme_classic()
+```
+
+
+
+
+<!-- What an interesting plot! -->
+
+### Individual Predictions
+
+If, instead, we interpret the question as asking for a prediction for a small number of individuals, then we need to use `posterior_predict()`.
+
+
+<!-- DK: Try again to explain what a posterior prediction is. -->
+
+Use `posterior_predict()` to create draws from the posterior probability distribution for our prediction for these cases. `posterior_predict()` takes two arguments: the model for which the simulations should be run, and a tibble indicating the covariate values for the individual(s) we want to predict. In this case, we are using the `fit_gov_5` model and the tibble is the one we just created above. In other words, the inputs for `posterior_predict()` and `posterior_epred()` are identical. 
+
+```{r}
+pp <- posterior_predict(fit_gov_5, 
+                        newdata = new_obs) %>%
+  as_tibble() %>% 
+  mutate_all(as.numeric)
+  
+head(pp)
+```
+
+The resulting tibble has 2 columns, one for each person. The first column shows the posterior predictions for the candidate from South Dakota. The second column shows the posterior predictions for the candidate from Washington. In both cases, the forecasts depend on the values of all the covariates. That is, we would provide a different forecast if the candidates were female or if they were other ages. 
+
+Why do we need the weird `mutate_all(as.numeric)` incantation? The reason is that `posterior_epred()` returns a simple matrix, which is easy to transform into a tibble. `posterior_predict()`, on the other hand, returns a special sort of matrix which is much harder to work with. So, we need a little hackery to make the next steps easier.
+
+Let's look at the posterior predictive distribution for each candidate.
+
+
+```{r}
+pp %>% 
+  rename(SD = `1`,
+         WA = `2`) %>% 
+  pivot_longer(cols = SD:WA, 
+               names_to = "State",
+               values_to = "days") %>% 
+  ggplot(aes(days, fill = State)) +
+    geom_histogram(aes(y = after_stat(count/sum(count))),
+                   alpha = 0.5, 
+                   bins = 100, 
+                   position = "identity") +
+    labs(title = "Posterior Predictive Distribution",
+         subtitle = "For 62 years-old male candidates from South Dakota and Washington",
+         x = "Days Lived Post Election",
+         y = "Probability") + 
+    scale_x_continuous(labels = scales::number_format()) +
+    scale_y_continuous(labels = scales::percent_format()) +
+    theme_classic()
+```
+
+
+
+There is a big overlap in the predictions for individuals, even though there is almost no overlap in the averages. Random stuff happens to an individual all the time. Random stuff cancels out when you take the average for many individuals. Consider the difference in the posterior predictive distributions for the two individuals.
+
+<!-- DK: Example "Posterior Predictive Distribution" -->
+
+```{r}
+pp %>% 
+  mutate(diff = `2` - `1`) %>% 
+  ggplot(aes(diff)) +
+    geom_histogram(aes(y = after_stat(count/sum(count))),
+                   alpha = 0.5, 
+                   bins = 100, 
+                   position = "identity") +
+    labs(title = "Posterior Predictive Distribution", 
+         subtitle = "How much longer will an individual Washington candidate live?",
+         x = "Days",
+         y = "Probability") + 
+    scale_x_continuous(labels = scales::number_format()) +
+    scale_y_continuous(labels = scales::percent_format()) +
+    theme_classic()
+```
+
+In words, we would predict that the candidate from Washington would live longer than the South Dakota candidate. By how much? Well, that number is an unknown parameter. By looking at our posterior above, our best estimate is about 4,500 days, which is roughly 8 years. However, it is important to note that it is possible that the male from South Dakota could outlive the Washington male. In fact, there is a 1 in 5 chance that he does so.
+
+*Note what is the same and what is different when we move from a question about averages to a question about individuals.* In both cases, the most likely value is about the same, about 4,500 days. That is, the average behavior is the same as our expected value for any given individual. But the uncertainty is much greater for an individual prediction. The chance of the true average for Washington candidates being less than that for South Dakota candidates is essentially zero. Yet, for any individual pair of candidates, it would not even be slightly surprising for the South Dakota candidate to outlive the Washington candidate. Individuals vary. Averages never tell the whole story.
+
+### Expectation versus individual variation
+
+Let's compare the results from `posterior_epred()` and `posterior_predict()` for this scenario directly. Most of this code is the same as what we have shown you above, but we think it is useful to look at everything together.
+
+
+```{r}
+new_obs <- tibble(sex = c("Male", "Male"),
+                  state = c("South Dakota", "Washington"),
+                  alive_pre = 10 * 365)
+
+pe <- posterior_epred(fit_gov_5, 
+                      newdata = new_obs) %>%
+  as_tibble() %>% 
+  mutate(diff = `2` - `1`)
+
+pp <- posterior_predict(fit_gov_5, 
+                        newdata = new_obs) %>% 
+  as_tibble() %>% 
+  mutate_all(as.numeric) %>% 
+  mutate(diff = `2` - `1`)
+
+tibble(Expectation = pe$diff,
+       Prediction = pp$diff) %>% 
+  pivot_longer(cols = Expectation:Prediction, 
+               names_to = "State",
+               values_to = "days") %>% 
+  ggplot(aes(days, fill = State)) +
+    geom_histogram(aes(y = after_stat(count/sum(count))),
+                   alpha = 0.5, 
+                   bins = 100, 
+                   position = "identity") +
+    labs(title = "Posterior Probability Distributions",
+         subtitle = "For 62 years-old male candidates from South Dakota and Washington",
+         x = "Additional Days Lived Post Election",
+         y = "Probability") + 
+    scale_x_continuous(labels = scales::number_format()) +
+    scale_y_continuous(labels = scales::percent_format()) +
+    theme_classic()
+```
+
+Expected values vary much less than predictions. The above chart makes that easy to see. We can be almost certain that the true underlying average for the numbers of days that Washington candidates live longer than South Dakota candidates is positive. But, for any two individual candidates, there is a good chance that that the South Dakota candidate will live longer. We can not ignore $\epsilon$ when predicting the outcome for individuals. When estimating expected values or long-run averages, the  $\epsilon$'s cancel out. 
+
+<!-- DK: Discuss the substantive issue? How can it be that Washington candidates live longer? Also, compare these estimates to what naive lm() would tell us. -->
+
+<!-- DK: Finish with Temperance/population/exchangability discussion. -->
+
+
+## Testing
+
+In a normal statistics book, we would have already discussed the concept of "testing" extensively. The terminology varies by field. "Tests," "testing," "hypothesis tests," "tests of significance," and "null hypothesis significance testing" all refer to the same concept. We will refer to this collection of approaches as NHST, a common abbreviation derived from the initials of the last phrase. Wikpedia provides an [overview](https://en.wikipedia.org/wiki/Statistical_hypothesis_testing). 
+
+*Our view: Amateurs test. Professionals summarize.*
+
+Consider the question of the expected difference in lifespans for our South Dakato and Washington candidates. Is that difference "significant?" Can we "reject the null hypothesis?" The convential answer is Yes. Anytime that zero is outside of the 95% confidence interval, we can declare the result significant. But why should we? What does that gain us? We already have the full posterior probability distribution. That is knowledge. A Yes/No question throws away too much information to (almost) ever be useful. There is no reason to *test* when you can *summarize* by providing the full posterior probability distribution.
+
+The same arguments apply in the case of "insignificant" results, with "$p > 0.5$, when we can't "reject" the null hypothesis. Instead of expected values, consider the case of two candidates, one from South Dakota and one from Washington. Is the difference in their predicted lifespans "significant?" Who cares!? We have the full posterior probability distribution for that prediction --- also known as the posterior predictive distribution --- as graphed above. The 95% confidence interval includes zero. Does that mean we should throw it away? No! That would be nonsense. Yes, there is a 20% chance that the South Dakota candidate lives longer, so we can hardly be surprised when that happens. But we still think that it is much more likely that the Washington candidate lives longer. Indeed, we would consider 4-to-1 odds as fair. The fact that the difference is not "significant" has no relevance to how we use the posterior to make decisions.
+
+The same reasoning applies to every parameter we estimate, to every prediction we make. Never test --- unless your boss demands a test. *Use your judgment, make your models, summarize your knowledge of the world, and use that summary to make decisions.*
+
+## EDA of `shaming`
+
+### GOV 50: STOP HERE! Rest of the chapter is a draft, which we will go over in class. Tutorial 9 only covers material in first part of the chapter.
+
+<!-- Use print(fit_obj, digits = 4) if you need to see more digits. -->
+
+Imagine you are running for Governor and want to do a better job of getting your voters to vote. You recently read about a large-scale experiment showing the effect of sending out a voting reminder that "shames" citizens who do not vote. You are considering sending out a "shaming" voting reminder yourself. What will happen if you do? Will more voters show up to the polls? Additionally, on the day of the election a female citizen is randomly selected. What is the probability she will vote?    
+
+Consider a new data set, `shaming`, corresponding to an experiment carried out by Gerber, Green, and Larimer (2008) titled "Social Pressure and Voter Turnout: Evidence from a Large-Scale Field Experiment". This experiment used several hundred thousand registered voters and a series of mailings to determine the effect of social pressure on voter turnout. 
+
+Let's now do another EDA, starting off by running `glimpse()`.
+
+```{r}
+glimpse(shaming)
+```
+
+Here we see that `glimpse()` gives us a look at the raw data contained within the `shaming` data set. At the very top of the output, we can see the number of rows and columns, or observations and variables respectively. We see that there are 344,084 observations, with each row corresponding to a unique respondent. The "Columns: 10" tells us that there are 10 variables within this data set. Below this, we see a cutoff version of the entire data set that has the variables on the left as rows and the observations as a list separated by commas, as compared to the tibble output that presents with the variables as columns and the observations as rows running horizontally.
+
+From this summary, we get an idea of some of the variables we will be working with. Variables of particular interest to us are `sex`, `hh_size`, and `primary_06`. The variable `hh_size` tells us the size of the respondent's household, `sex` tells us the sex of the respondent, and `primary_06` tells us whether or not the respondent voted in the 2006 Primary election. 
+
+There are a few things to note while exploring this data set. You may -- or may not -- have noticed that the only response to the `general_04` variable is "Yes". In their published article, the authors note that "Only registered voters who voted in November 2004 were selected for our sample" (Gerber, Green, Larimer, 2008). After this, the authors found their history then sent out the mailings.
+
+It is also important to identify the dependent variable and its meaning. In this shaming experiment, the dependent variable is `primary_06`, which is a variable coded either 0 or 1 for whether or not the respondent voted in the 2006 primary election. This is the dependent variable because the authors are trying to measure the effect that the treatments have on the proportion of people who vote in the 2006 general election.
+
+<!-- HV: Should I include discussion of the left-hand variable (treatment?) here? Or wait until we move into the regressions? -->
+
+The voting results from other years, such as 2002 and 2004, are of less interest to us and can be removed from the abbreviated data set. In addition to removing `general_04`, `primary_02`, `general_02`, or `primary_04`, we also will not be taking particular interest in `birth_year`, or `no_of_names` within this chapter.
+
+<!-- HV: should I explain why we are not using any of these variables? why they are not of great use to us? -->
+
+By narrowing down the set of variables we are looking at and investigating, we will find more meaningful relationships among them. However, we have not yet discussed the most important variable of them all: `treatment`. The `treatment` variable is a factor variable with 5 levels, including the control. Since we are curious as to how sending mailings affects voter turnout, the treatment variable will tell us about the impact each type of mailing can make. Let's start off by taking a broad look at the different treatments.
+<!-- HV: Is it okay to say the first sentence of this paragraph? -->
+
+```{r}
+shaming %>%
+  count(treatment)
+```
+
+Four types of treatments were used in the experiment, with voters receiving one of the four types of mailing. All of the mailing treatments carried the message, "DO YOUR CIVIC DUTY - VOTE!". 
+
+The first treatment, Civic Duty, also read, “Remember your rights and responsibilities as a citizen. Remember to vote." This message acted as a baseline for the other treatments, since it carried a message very similar to the one displayed on all the mailings.
+
+In the second treatment, Hawthorne, households received a mailing which told the voters that they were being studied and their voting behavior would be examined through public records. This adds a small amount of social pressure to the households receiving this mailing.
+
+In the third treatment, Self, the mailing includes the recent voting record of each member of the household, placing the word "Voted" next to their name if they did in fact vote in the 2004 election or a blank space next to the name if they did not. In this mailing, the households were also told, “we intend to mail an updated chart" with the voting record of the household members after the 2006 primary. By emphasizing the public nature of voting records, this type of mailing exerts more social pressure on voting than the Hawthorne treatment.
+
+The fourth treatment, Neighbors, provides the household members' voting records, as well as the voting records of those who live nearby. This mailing also told recipients, "we intend to mail an updated chart" of who voted in the 2006 election to the entire neighborhood.
+
+For now, let's focus on a subset of the data. We will sample just 10,000 rows because otherwise `stan_glm()` takes an annoyingly large amount of time to work. Nothing substantive changes.
+
+```{r}
+set.seed(9)
+ch9_sham <- shaming %>% 
+  filter(treatment %in% c("Control", "Neighbors")) %>% 
+  droplevels() %>% 
+  mutate(solo = ifelse(hh_size == 1, TRUE, FALSE)) %>% 
+  mutate(age = 2006 - birth_year) %>% 
+  select(primary_06, treatment, solo, sex, age) %>% 
+  sample_n(10000, replace = FALSE)
+```
+
+We create the variable `solo`, which is TRUE for voters who live alone and FALSE for those that do not. We are curious to see if the treatment effect, if any, is the same for voters who live alone as it is for those who do not. We have also focused in on only two "treatments": Control and Neighbors. This is for the sake of simplification. We want to know if social pressure impacts voting behavior, so it makes sense to look at the treatment that provides the most social pressure. 
+
+```{r}
+ch9_sham %>% 
+  skim()
+```
+
+
+Let's focus on a few observations that may be relevant to our analysis. First, note that each treatment has approximately 38,000 respondents. The control group, denoted by Con, has approximately 190 thousand respondents. For the logical variable `solo`, we see that approximately 47 thousand of the total respondents live alone (TRUE), while approximately 296 thousand live in households greater than 1 (FALSE). It may also be important to note that the average age of the respondents is 49.8 years with a standard deviation of 14.4 years.
+
+<!-- DK: Add discussion of what you see here. No need to drop missing values since there aren't any. I think this next discussion can be dropped. -->
+
+To get a better sense of some respondents' information, let's use `sample_n()` to gather a random sample of *n* observations from the data set.
+
+<!-- HV: Does this belong here? -->
+
+```{r}
+ch9_sham %>% 
+  sample_n(10)
+```
+
+Now we have a table with 5 random observations and the respondents' information in a regular table output. By taking a few random samples, we may start to see some patterns within the data. Do you notice anything in particular about the variable `treatment`?
+
+One other helpful summarizing technique we can use is `skim()`. To make the information it contains simpler, we will only be looking at three variables: `primary_06`, `treatment`, and `sex`. 
+
+```{r}
+shaming %>% 
+  select(primary_06, treatment, sex) %>% 
+  skim()
+```
+
+Running the `skim()` command gives us a summary of the data set as a whole, as well as the types of variables and individual variable summaries. At the top, we see the number of columns and rows within the selected data set. Below this we are given a list with the different types of variables, or columns, and how often they appear within the data we are skimming. The variables are then separated by their column type, and we are given individual summaries based on the type. 
+
+<!-- 2) `primary_06` as a function of `treatment` and `solo` and of their interaction. We will build up this model step-by-step, very similar to how we explored the effect of treatment in chapter 8. But we go deeper because  we are learning about interactions. Key thing is to go through all the themes.Rmd issues, at least until prediction. Note that this situation is different from Chapter 8 in that fitted values and predicted values are not the same thing! The fitted value, for a combination of values for treatment and solo, is something 0.30, meaning that 30% of the people in this bucket votes. But the predicted value must be 0 or 1. Either you voted or you didn't. This example is clearly causal and so you need a Rubin Table with 4 potential outcome columns. The key difference in this chapter is that we are using lots of right hand side variables, both continuous and discrete. -->
+
+
+
+Having created models with one parameter in Chapter \@ref(one-parameter) and two parameters in Chapter \@ref(two-parameters), you are now ready to make the jump to $N$ parameters.  The more parameters we include in our models, the more flexible they can become. But we must be careful of *overfitting*, of making models which are inaccurate because they don't have enough data to accurately estimate those parameters. The tension between overfitting and underfitting is central to the practice of data science.
+
+
+<!-- DK: Note that this situation is different from Chapter 8 in that fitted values and predicted values are not the same thing! The fitted value, for a combination of values for treatment and solo, is something 0.30, meaning that 30% of the people in this bucket votes. But the predicted value must be 0 or 1. Either you voted or you didn't. This example is clearly causal and so you need a Rubin Table with 5 potential outcome columns. The key difference in this chapter is that we are using lots of right hand side variables, both continuous and discrete. -->
+
+## Wisdom
+
+<!-- MF: Where should we discuss that this is modeling for causation? Here in wisdom? Before? DK: Wherever. Everywhere? -->
+
+
+```{r echo=FALSE, fig.margin=TRUE, fig.cap="Wisdom"}
+knitr::include_graphics("other/images/Wisdom.jpg")
+```
+
+Let's consider one of the most important virtues of data science: wisdom. The map from our data to our question. Recall that our mission here is to increase our voter turnout while we are running for Governor. 
+
+To investigate this, we are given a dataset in which respondents were encouraged to vote under four treatments. This was accomplished by sending a letter to citizens that voted in the previous primary election with varying degrees of social pressure. The remainder of the respondents fall under a control group, which received no such mailings. The dataset offers a number of details about each respondent, including their age, sex, treatment type, and voting outcome. 
+
+What we truly want to know is *how to make citizens vote*. One immediate problem with our dataset is that, due to our study population, we are only studying people that voted in the previous primary election. In other words, if someone *did not* vote in the previous primary election, they were not included. This would be a large problem, since that means we can only figure out how to make citizens *that have already voted* vote. Though we can't be sure, it is reasonable to assume that it is easier to encourage citizens to vote in the next primary election if they have a history of recently voting in primary elections. 
+
+Does this mean our data is unhelpful? Of course not! With four treatments (and therefore four different methods of encouraging voting), we can gain quite a bit of knowledge. Mostly, we will know the most effective way to incentivize people with a history of voting to vote again. We will also know if no method of persuasion (the control) is the best option. We will further be able to tell if certain methods of persuasion work better for certain groups of people, according to factors such as age, sex, or household size. This can help tremendously in our election. 
+
+That being said, the map from our question to our data is almost never perfect. In data science, we often have to look at our data, understand its limitations, and try our best to make inferences that help our cause.
+
+## primary_06 and (treatment + age)
+
+<!-- What should the Preceptor tables look like with these models? Like chapter 3. Should each model have its own Preceptor Table? No! Just one preceptor table at the start, with 5 columns under Y, and 4 covariates, where one is treatment assigned. -->
+
+```{r echo=FALSE, fig.margin=TRUE, fig.cap="Justice"}
+knitr::include_graphics("other/images/Justice.jpg")
+```
+
+```{r echo=FALSE, fig.margin=TRUE, fig.cap="Courage"}
+knitr::include_graphics("other/images/Courage.jpg")
+```
+
+Because we will be going through a series of models in this chapter, it is useful to combine the virtues of Justice and Courage. To begin, let's model `primary_06`, which represents whether a citizen voted or not, against age and treatment to see if there is a connection. 
+
+Let's look at the relationship between primary voting and treatment + age. 
+
+
+```{r, cache=TRUE}
+model_3 <- stan_glm(data = ch9_sham, 
+                 formula = primary_06 ~ treatment + age, 
+                 refresh = 0)
+```
+
+```{r}
+print(model_3, digits = 3)
+```
+
+The (Intercept) here has two key details. First, since Control comes alphabetically before Neighbors, the Control group is our baseline for comparison. This holds similarly for age. This is the slope for age of *only* those participants in the Control group. 
+
+Second, remember that for this data, the (Intercept) does have a mathematical interpretation, but it does not have a practical interpretation. Why is this? Because the slope for age starts at zero. This is nonsensical for our purposes, as no voter can be of zero age. 
+
+Therefore, this model shows that, within the control group, the percent voting is 0.084 = 8.4%. How do we then calculate our percent voting in the Neighbors group? Recall that the `treatmentNeighbors` median is not giving a standalone figure for this group, but rather represents the offset between the Control and Neighbors groups. To find the Neighbors value, we must add the offset to the original value: 0.084 + 0.079 = .163 = 16.3%. This is nearly double the rate in the Control group!
+
+Let's turn to our age median. Begin by grouping our observations by `age` and counting by `primary_06`, which gives us counts for 1 (yes) or 0 (no) for number voting in each age category. 
+
+```{r}
+age <- ch9_sham %>% 
+  group_by(age) %>% 
+  count(primary_06) 
+
+age
+```
+
+To explore this relationship visually, let's create a graph. We are coercing `primary_06` into a character variable as it more closely represents "yes" or "no" as opposed to a numeric value. 
+
+```{r}
+age %>% 
+  mutate(primary_06 = as.character(primary_06)) %>% 
+  ggplot(aes(x = age, y = n, color = primary_06)) +
+  geom_point() +
+  labs(
+    title = "Relationship Between Age and Voting",
+    subtitle = "In the 2006 Primary Elections",
+    x = "Age",
+    y = "Count"
+  )
+```
+
+There are some interesting takeaways here. 
+- First, in almost every age bracket (other than above 90), the majority participants did *not* vote. 
+- The spike between ages 40 and 60 illustrates that most participants exist in this age bracket. 
+- The differences between voters and non-voters narrows greatly after age 60.
+
+Let's now look at another graph that aims to show the same phenomena, but also includes a formula using `lm`. This more clearly shows the upward trend in voting as a participants age increases. We can also see that the highest concentrations in the "Voted" row exist from ages 45-50, whereas the highest concentrations for the "Did Not Vote" row exist in the 18-25 and 30-60 age groups. Again, we see that, for almost all ages, the partcipants are more likely to not vote than vote. This is illustrated by the darker concentration of dots in the "Did Not Vote" row. The slope of our regression line, however, shows a clear picture: the older you are, the more likely you are to vote. 
+
+```{r}
+shaming %>% 
+  mutate(age = 2006 - birth_year) %>%  
+  ggplot(aes(age, primary_06)) + 
+  geom_jitter(alpha = 0.005, height = 0.1) + 
+  geom_smooth(formula = y ~ x, method = "lm", se = FALSE) + 
+  scale_y_continuous(breaks = c(0, 1), labels = c("Did Not Vote", "Voted")) + 
+  labs(title = "Age and Voting in 2012 Michigan Primary Election", 
+       subtitle = "Older people are more likely to vote", 
+       x = "Age", 
+       y = NULL, 
+       caption = "Data from Gerber, Green, and Larimer (2008)") 
+```
+
+Note that the median for age is 0.004. Age is therefore positively correlated with voting in the primary election. What does that mean? It means that, for every year that a participant's age increases, their odds of voting in the primary *increases* by 0.004. Now, this might not seem like a huge difference. However, think of it like this: for every decade older that a participant is, their odds of voting increase .04 = 4%! This makes sense considering that we just learned that older citizens are more likely to vote. 
+
+Now, let's return to our voting difference between the Control and Neighbors groups. Let's model the posterior probability distribution for the rates of voting. 
+
+
+```{r}
+
+# In progress. Modify x-axis labels *10. 
+
+model_3 %>% 
+  as_tibble() %>% 
+  mutate(Neighbors = `(Intercept)` + `treatmentNeighbors`) %>% 
+  mutate(Control = `(Intercept)`) %>% 
+  select(Neighbors, Control) %>% 
+  pivot_longer(cols = Neighbors:Control,
+               names_to = "parameters",
+               values_to = "percent_voting") %>% 
+  ggplot(aes(percent_voting, fill = parameters)) +
+  geom_histogram(aes(y = after_stat(count/sum(count))),
+                   alpha = 0.5, 
+                   bins = 100, 
+                   position = "identity") +
+    labs(title = "Posterior Probability Distribution",
+         subtitle = "for Control versus Neighbors voting rates",
+         x = "% of group voting",
+         y = "Probability") + 
+    scale_x_continuous(labels = scales::number_format()) +
+    scale_y_continuous(labels = scales::percent_format()) +
+    theme_classic()
+  
+```
+
+<!-- Add in explanations.
+Obvious difference in Neighbors as more likely to vote. 
+Very few chances that Control votes more (though possible).-->
+
+
+## primary_06 & (age + solo + treatment)
+
+<!-- MF: Thinking about graphs/visualizations for this section: are they necessary? I believe they help students visualize concepts, but most graphs won't show up 'pretty' because of the YES/NO as our main variable. --> 
+
+Now that we have analyzed the impact of our various treatments on voting behavior, let's turn to three different variables together: sex, solo (living alone), and treatment.
+
+```{r, cache=TRUE}
+model_4 <- stan_glm(data = ch9_sham, 
+                 formula = primary_06 ~ treatment + age + solo, 
+                 refresh = 0)
+```
+
+```{r}
+print(model_4, digits = 3)
+```
+
+First, let's look at which variables are included on our left hand side. Besides our (Intercept), we are given treatmentNeighbors, age, and soloTRUE. What does that mean our baseline for comparison, or (Intercept), is? Look to what we are not given: treatmentControl and soloFALSE. Therefore, our baseline for comparison are the participants in the Control group who do *not* live in single person households. As we learned before, age calculates starting at age 0 and is therefore unhelpful practially. For this group, the percentage voting is .085 = 8.5%. From this figure, we will break down what our variables and their respective medians mean. 
+
+- treatmentNeighbors, with a median of 0.078: the offset in the Neighbors treatment is 0.078 compared with the control group. The percent voting for this group is then 0.085 (Control) + 0.078 (Neighbors) = .163 = 16.3%. This illustrates that the Neighbors treatment is positively correlated with voting. 
+- age, with a median of 0.004: as before, the age represents the positively correlated increase with voting as someone ages. For every decade older a participant is, their chance of voting increases by 4%. 
+- soloTRUE, with a median of 0.015: as compared with participants in households exceeding 1 persons, participants who live alone are more likely to vote by a factor of 0.015 = 1.5%. Note that this is only true for our baseline group of Control participants and does not include an analysis for those in Neighbors. 
+
+```{r}
+
+# Modify x scale
+
+model_4 %>% 
+  as_tibble() %>% 
+  mutate(SoloTrue = `(Intercept)` + `soloTRUE`) %>% 
+  mutate(SoloFalse = `(Intercept)`) %>% 
+  select(SoloTrue, SoloFalse) %>% 
+  pivot_longer(cols = SoloTrue:SoloFalse,
+               names_to = "parameters",
+               values_to = "percent_voting") %>% 
+  ggplot(aes(percent_voting, fill = parameters)) +
+  geom_histogram(aes(y = after_stat(count/sum(count))),
+                   alpha = 0.5, 
+                   bins = 100, 
+                   position = "identity") +
+    labs(title = "Posterior Probability Distribution",
+         subtitle = "for those who live alone versus live with other people",
+         x = "% of group voting",
+         y = "Probability") + 
+    scale_x_continuous(labels = scales::number_format()) +
+    scale_y_continuous(labels = scales::percent_format()) +
+    theme_classic()
+  
+```
+
+<!-- Add in explanation. -->
+
+## primary_06 & (age, solo, treatment, + interactions)
+
+<!-- MF: What posterior probability distributions would be interesting for the interactions section? DK: Ones that highlights the fact that the causal effects vary. --> 
+
+Since we've now studied a model with three different variables, it is time to look at interactions! Here, we will look at `primary_06` as a function of age, solo, treatment, and `solo*treatment`. What does `solo*treatment` mean for us? It means we are looking at the `solo` and `treatment` variables as they correspond to one another. 
+
+```{r, cache=TRUE}
+model_5 <- stan_glm(data = ch9_sham, 
+                 formula = primary_06 ~ age + solo + treatment + solo * treatment, 
+                 refresh = 0)
+```
+
+```{r}
+print(model_5, digits = 3)
+```
+
+<!-- There is lots to look at here. Let's narrow our focus a bit to highlight some important takeaways. First, our baseline is again: female participants in multi-person households under treatment Civic Duty. For this group, the (Intercept) is 0.304 = 30.4% voting. Every other variable represents an offset from that baseline value. Let's dig in!
+
+First, note that (as we saw in the last model) sexMale and soloTRUE both *increase* the odds of a participant voting. The median values represent an offset from baseline. Therefore, the true value for sexMale would be the (Intercept) + sexMale = 0.304 + 0.022 = 0.326. The true value for soloTRUE is (Intercept) + soloTRUE = 0.304 + 0.068 = 0.372. 
+
+Note that all treatments increase voter turnout in the female, multi-person household group. The Control group observes a *decrease* in voter turnout. 
+
+Now, we will turn out attention to our interactions. 
+- `soloTRUE: treatmentHawthorne` is showing us the offset in voter turnout (intercept) for female people who live in single voter households under treatmentHawthorne as compared to our baseline of treatment Civic Duty. The median of -0.086 represents an offset from the soloTRUE group. We must take the soloTRUE intercept value previously calculated (0.372) and add this to `soloTRUE:treatmentHawthorne` to show the difference in values: 0.372 + (-0.086) = .286. This number represents that, within the overall `soloTRUE` group under, `treatmentHawthorne` showed *less* voter turnout than the Civic Duty group itself. 
+- `soloTRUE:treatmentControl` looks at the offset from our baseline in female, single person households under the control treatment. With a median of -0.029, this means that our intercept for this group would be 0.372 (`soloTRUE`) + -0.029 (`soloTRUE:treatmentControl`) = 0.343. As compared with the Civic Duty treatment, those participants in single person households voted *less* under the Control group. 
+- `soloTRUE:treatmentSelf` shows the offset from our baseline under the Self treatment. The intercept for this group would be the soloTRUE intercept + the interaction value = 0.372 + 0.003 = 0.375. This shows that, compared with our baseline of soloTRUE under the Civic Duty treatment, the voter turnout for this group is *slightly increased*. 
+- `soloTRUE:treatmentNeighbors` shows the offset from our baseline under the Neighbors treatment. Again, to find the true intercept, we must add this interaction value of 0.006 to our calculated soloTRUE intercept: 0.372 + 0.006 = 0.378. Therefore, compared to the solo group under treatment Civic Duty, the solo group under treatment Neighbors *voted more*. 
+
+What does this tell us? First, we know that (of the various treatments) Neighbors continues to be the most effective, even in those female citizens that are living alone. We also know that, in those females living alone, the control and Hawthorne treatment are less effective as compared with the Civic Duty treatment. And, while the Self and Neighbors treatments *did* increase voter turnout, the rate of increase was less as compared to the soloFALSE group (showed in the previous model). -->
+
+## Temperance
+
+```{r echo=FALSE, fig.margin=TRUE, fig.cap="Temperance"}
+knitr::include_graphics("other/images/Temperance.jpg")
+```
+
+Finally, let's remember the virtue of Temperance. The gist of temperance is: be humble with our inferences, as our inferences are always, certainly, and unfortunately not going to match the real world. How does this apply to our shaming scenario?
+
+Prediction uncertainty is the main culprit. No matter how hard we try, *we cannot predict the future*. Though we now have conclusions about how shaming impacted voters in the 2006 primary elections, we do not have the confidence to say that what worked or didn't work then would work now. 
+
+For instance, perhaps the impact of your neighbors knowing your voting history is greater in the midst of a pandemic, where you may be locked inside with few interactions outside of your immediate proximity. Perhaps the opposite is true. These *unknown unknowns* cannot be accounted for in our models. We cannot predict a pandemic, nor can we predict how this will change the way that people vote or respond to flyers. 
+
+There is also the issue of representitiveness. Do the voters of the 2006 primary election (who have already demonstrated a willingness to vote in the 2004 primary election) truly represent the people voting in **our** gubernatorial election? 
+
+These complications are why we must make inferences with a grain of salt. That is not to say that all data science is unhelpful! On the contrary, acknowledging our deficits will only make our inferences (and the actions we take because of them) stronger. 
+
+<!-- What we need to add: Preceptor table, causal explanation, math before models, posterior_epred. -->
