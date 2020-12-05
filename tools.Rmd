@@ -1,0 +1,723 @@
+
+<!-- Notes: 
+Explain importance of scripting versus click-and-drag and copy-pasting.
+Add section about useful keyboard shortcuts. -->
+
+<!-- Add a section about creating a place, perhaps ~/Desktop/projects, for all your projects and making that the default. -->
+
+<!-- Find a place to mention all the high quality sources listed below, perhaps in sidemargins. Maybe with a webshot of their title pages?  -->
+
+<!-- 1) Don't reinvent the wheel. We should never explain X is X is already explained elsewhere online for free. Our main goal is to curate and organize an excellent list of other references. -->
+
+<!-- 2) Use high quality sources.  -->
+<!--   + For git/Github that is Happy Git for the R User. Maybe also [this](https://emmal73.github.io/github_slides.html). -->
+<!--   + For R/RStudio issues that is anything associated with RStudio.  -->
+<!--   + For command lines, we probably want to write our own, based heavily on  [The UNIX Workbench](https://seankross.com/the-unix-workbench/), but with all the work done form the terminal window in RStudio. (How differently does the RStudio Terminal window behave across operating systems.)  Perhaps the single biggest confusion among students is not understanding how a process can be run from two different places. This causes endless problems when students build their own Shiny App later. -->
+<!--   + For workflow issues, we want [What They Forgot to Teach You About R](https://rstats.wtf/), which is CC so we might use a lot of it. -->
+<!-- + This is another high quality source: https://usethis.r-lib.org/articles/articles/usethis-setup. Might just pull out the key sections of this. We can't just link to it since some of it --- like devtools --- is too confusing. -->
+
+<!-- 3) Point, don't tell. We don't want this to be too long/overwhelming. -->
+
+<!-- 4) Connect the order of the topics to the order in which we use them in class. Maybe the separate subparts are specifically assigned in the syllabus? That is, this is not a reference. -->
+
+<!-- 5) Create some tutorial questions. The only way we can force students to do this stuff is to assign it. Of course, to the extent this stuff is truly important, it (and all the other appendices?!?) belong in the main chapters. -->
+
+
+<!-- gifs of the steps in the tutorial section -->
+
+<!-- 7) Consider making the **fs** package a major part of the presentation. This helps avoid dealing with cross-OS issues ourselves. -->
+
+<!-- 9) Add some optional videos, especially the ones from RStudio which give nice tours of RStudio stuff. -->
+
+
+# Tools {-}
+
+```{r, include=FALSE}
+knitr::opts_chunk$set(echo=TRUE, tidy=FALSE)
+library(knitr) 
+```
+
+The chapter will be broken into the following sections:
+
+* [Working with the terminal](#working-with-the-terminal)
+* [Git, GitHub, and RStudio](#git-github-and-rstudio)
+* [PDF](#pdf)
+* [Style guide](#style-guide)  
+* [How to use Rpubs](#how-to-use-rpubs)  
+* [How to get help](#how-to-get-help)
+* [How to make a table](#how-to-make-a-table)
+
+## Working with the terminal {-}
+
+The terminal is a very powerful window because it allows you to interact with your computer's filesystem directly without having to touch your mouse or trackpad! Learning how to work with the filesystem is important to keep your work organized and quickly allow you to move files across folders.
+
+Now, let's open up the Terminal tab on the left window and start learning how to use the Terminal.
+
+### `pwd`: Working directory {-}
+
+The first question you may have about working in the Terminal might be: If I can't see the folders, how do I know where I am? Well that's a great place to start learning the Terminal. To see what our current folder is, we type `pwd` (preview working directory):
+
+```{r, echo=FALSE, out.width="100%"}
+knitr::include_graphics("other/images/pwd.png")
+```
+
+Here, we can see that I'm currently in my user folder `Yao`.
+
+### `ls`: Seeing items in the directory {-}
+
+Ok, but how does knowing what folder I'm in help me see what's actually in the folder? Well, to see the items in our current folder, we use the command `ls` (long listing):
+
+Type `ls` in the terminal and hit return/enter. You should see something like this:
+
+```{r, echo=FALSE, out.width="100%"}
+knitr::include_graphics("other/images/ls.png")
+```
+
+Notice that this lists exactly the same items as the bottom right window! The terminal is just another way to interact with your computer's filesystem! Anything you can do normally with your mouse/trackpad, like opening a folder, you can also do in the Terminal.
+
+```{r, echo=FALSE, out.width="100%"}
+knitr::include_graphics("other/images/ls_icons.png")
+```
+
+### `cd`: Changing directories {-}
+
+Speaking of opening folders, let's open a few folders to enter a more familiar place. To open and close folders, we use `cd` (change directory). We'll be using `cd` to change into the Desktop folder, a place we should all be familiar with.
+
+To change into the Desktop directory, we type `cd Desktop/`. A helpful hint, after you type the first few letters of a folder or file name, you can hit tab and the computer will auto complete the name. Try it! type `cd Desk` and then hit tab to auto complete the name!
+
+```{r, echo=FALSE, out.width="100%"}
+knitr::include_graphics("other/images/cd_desktop.png")
+```
+
+Now, if you type `ls` again, you can see all the item on your Desktop listed! 
+
+To go back to the previous folder (aka the directory above), we can type `cd ..` The two periods represent one level above. You can see this hierarchy in this view on a Mac:
+
+```{r, echo=FALSE, out.width="100%"}
+knitr::include_graphics("other/images/directory_hierarchy.png")
+```
+
+### `mkdir` and `rmdir`: Make and remove a directory {-}
+
+Now that we're in the Desktop folder, let's get set-up to stay organized for Gov 50. Staying organized is critical when working with many data projects. So, using `mkdir Gov-50` (make directory) we can create a folder exclusively for Gov 50 like so:
+
+```{r, echo=FALSE, out.width="100%"}
+knitr::include_graphics("other/images/mkdir.png")
+```
+
+Now, when we type ls, we can see our new folder created! Note that we used a hyphen between Gov and 50. This is because the Terminal can't recognize spaces unless you put `\` before it, like so: `mkdir Gov\ 50`. You can read more on programming naming convention [here](https://en.wikipedia.org/wiki/Naming_convention_(programming)).
+
+To remove a folder, use `rmdir` (remove directory). We won't be using this right now because we don't need to remove anything.
+
+### `touch:` Creating files {-}
+
+In order to experiment with the next few commands in the Terminal, we'll need a test file. So, let's create a test.txt file to play round with. To create a file, we use `touch`:
+
+```{r, echo=FALSE, out.width="100%"}
+knitr::include_graphics("other/images/touch.png")
+```
+
+And, of course, we can see that the test.txt file has been created using `ls`.
+
+### `mv`: Moving files {-}
+
+Oh no! We created our test.txt file, but it should be in our Gov-50 folder, right now it's on the desktop. This happened because while we created the Gov-50 folder using `mkdir`, we forgot to open it using `cd Gov-50/`. But no worries, we can move the file to that folder using `mv`:
+
+```{r, echo=FALSE, out.width="100%"}
+knitr::include_graphics("other/images/mv.png")
+```
+
+When using `mv` the first thing you type after `mv` is the file you want to move. The next thing is the location where you want to move it to. In our case we want to move test.txt to Gov-50/ so we type `mv test.txt Gov-50/`. After we do this, we can use `cd` to enter the Gov-50 folder and then use `ls` to see that our test.txt file successfully was moved into the Gov-50 folder:
+
+```{r, echo=FALSE, out.width="100%"}
+knitr::include_graphics("other/images/mv_confirm.png")
+```
+
+### `cp`: Copying files {-}
+
+Copying files is very similar to moving files in the Terminal. Using the previous example, if we wanted to copy test.txt into the Gov-50 folder but not delete the original test.txt file, we just replace `mv` with `cp` (copy paste):
+
+```{r eval=FALSE}
+cp test.txt Gov-50/
+```
+
+
+### `rm`: Removing files {-}
+
+Ok, we are at the last Terminal command that this book will be teaching you. So, we're done with this test.txt file. Let's remove it with `rm` (remove):
+
+```{r, echo=FALSE, out.width="100%"}
+knitr::include_graphics("other/images/mv_confirm.png")
+```
+
+Make sure you are the in Gov-50 folder before you type `rm test.txt`! Using `ls`, we can see that our test file is now gone.
+
+Congrats! You are now able to do most basic tasks with the Terminal! If you want to learn more Terminal commands, check out Sean Kross's [The Unix Workbench](https://seankross.com/the-unix-workbench/).
+
+
+## Git, GitHub, and RStudio {-}
+
+This next section focuses on connecting GitHub with RStudio using Git. Why do we care about GitHub? Think of it as a Google Drive for all your R code and projects! If your computer blows up, GitHub will save all your R work just as Google Drive saves your Expos paper.
+
+### Installing Git  {-}
+
+The first step to using GitHub is installing Git on your computer. But first, do you have Git already installed on your computer? To check, go to your Terminal and type `git --version`. If you already have Git, this command will return you the git version you have instlled. If you get an error, you can download and install git [here](https://git-scm.com/downloads).
+
+### GitHub accounts {-}
+
+After installing git, you'll need a [GitHub](https://github.com/join) account. This is like a Google account for your Drive. However, the one difference with GitHub is that your account is visible to the public! So, you want to pick a name carefully. It should be professional as you might be sending potential employers a link to your GitHub account in the near future! Check out some former Gov 50 students' GitHub profiles for inspiration: 
+
+* [Evelyn Cai](https://github.com/caievelyn)
+
+* [Jessica Edwards](https://github.com/jessie9111)
+
+Once you have a GitHub account, you are ready to connect Git and RStudio to this account. Type the following two commands in your terminal window to link the two. Replace `"Your Name"` with your name and `"your@email.com"` with the email you used to sign up for GitHub.
+
+```{eval=FALSE, echo=TRUE}
+git config --global user.name "Your Name"
+git config --global user.mail "your@email.com"
+```
+
+### GitHub repositories {-}
+
+You are now ready to create a GitHub repository (repo). The GitHub repo is similar to a Google Drive folder. To make your first repo, make sure you are signed in and then go to the GitHub [homepage](https://github.com/) and click on the green `new` button on the left.
+
+```{r, echo=FALSE, out.width="80%", fig.align='left'}
+knitr::include_graphics("other/images/new_repo.png")
+```
+
+You will then want to choose a good name for the repo and add a brief description. Here we will use `productivity`. You can choose to make the repo public or private, but we recommend that you only make a repo public if it is important for the world to see. This keeps your public GitHub profile clean and professional. So, this repo should probably be private. Let's also add a REAME file for our repo. This is a document where you can add more deatils about your repo for the public.
+
+```{r, echo=FALSE, out.width="100%"}
+knitr::include_graphics("other/images/repo_details.png")
+```
+
+You now have your first repo on GitHub. The next step will be to _clone it_ on your computer and start editing and syncing using Git. To do this, we'll need to copy the link to the repo and then use it in RStudio. Once again, the green button is your friend. Click on it and then copy the link shown (You can use the clipboard button on the right to auto-copy it).
+
+```{r, echo=FALSE, out.width="100%"}
+knitr::include_graphics("other/images/repo_clone.png")
+```
+
+### Connecting GitHub to RStudio {-}
+
+Alright! We are now ready to connect your `productivity` repo to RStudio! With our repo link copied, we can go back to RStudio and begin with creating a new project. You can do this by going to File then New Project:
+
+```{r, echo=FALSE, out.width="100%"}
+knitr::include_graphics("other/images/new_project.png")
+```
+
+
+Next, you'll need to go through these steps to create the project: Version Control to Git to paste your link from GitHub and click Create Project.
+
+```{r, echo=FALSE, out.width="100%"}
+knitr::include_graphics("other/images/new_project.gif")
+```
+
+Congrats! You've linked your `productivity` repo to RStudio.
+
+### Updating .gitignore {-}
+
+The first time you should always do when working with a new repo is updating the .gitignore file. You can open this file from the bottom right window under the Files tab. This file includes all the files that you don't want to be uploaded to GitHub. This can come in handy when you are working with big datasets or files with private information. In our case, we want to add the .Rproj file to the .gitignore list. You can see that Git currently wants you to upload this file to GitHub:
+
+```{r, echo=FALSE, out.width="100%"}
+knitr::include_graphics("other/images/rproj_git.png")
+```
+
+This file is your private project file and usually you don't want this uploaded to GitHub. So, in .gitignore, you'll want to add `*.Rproj` The * tells your computer that we want to keep all files ending in .Rproj from being uploaded:
+
+```{r, echo=FALSE, out.width="100%"}
+knitr::include_graphics("other/images/rproj.png")
+```
+
+Now, save the .gitignore file and you should see the .Rproj file dissapear from your Git tab in the top right window. If you don't see any changes, click on the refresh button!
+
+```{r, echo=FALSE, out.width="100%"}
+knitr::include_graphics("other/images/updated_gitignore.png")
+```
+
+### Commit and Push {-}
+
+Now that we've updated our .gitignore file, we want to upload this new version to GitHub. To do this, first select the .gitignore file and then click on the `Commit` button in the Git window:
+
+```{r, echo=FALSE, out.width="100%"}
+knitr::include_graphics("other/images/commit.png")
+```
+
+This will open a new window where you will write a Commit message. This message is a small note on what you're adding/changing in the repo. In our case, we've updated the .gitignore so let's write just that:
+
+```{r, echo=FALSE, out.width="100%"}
+knitr::include_graphics("other/images/commit_push.png")
+```
+
+
+Then, you want to press `commit`. This is your way of telling Git "Yes these are the files I want to upload. I'm committed." Next, you want to press `push`. This pushes or uploads the files to GitHub. (You can probably guess what pull does, but we won't be using that yet)
+
+Now, if you go to your GitHub repo and refresh the page, you can see that the .gitignore file has been uploaded with your commit message:
+
+```{r, echo=FALSE, out.width="100%"}
+knitr::include_graphics("other/images/github_updating.gif")
+```
+
+Congrats! You just uploaded your first file to GitHub.
+
+One tricky aspect is the caching of your Github ID and password. Most likely, you had to type these things in when you did your first push. Doing so was not too bad. And, after all, Github needs to know who you are, otherwise other people could mess with your repos. But you will be doing hundreds of commits/pushes this term. You don't want to type in your ID/password each time! Follow the instructions in [*Happy Git and GitHub for the useR*](https://happygitwithr.com/), especially [Chapter 10](https://happygitwithr.com/credential-caching.html).
+
+
+## PDF {-}
+
+Generating PDF files from RStudio is both easy and hard. It is easy because R markdown is designed to produce files in a variety of output formats, [including PDF](https://bookdown.org/yihui/rmarkdown/pdf-document.html). It is hard because, for RStudio to make PDF files, your computer set up must be set up with a [LaTeX](https://en.wikipedia.org/wiki/LaTeX installation. You have four options:
+
+1) Making PDF files may just "work," especially if you are using a Mac. Give it a try!
+
+2) If it doesn't just work, we *strongly* recommend using the **[tinytex](https://yihui.org/tinytex/)** R package. Type these commands:
+
+```{r, eval=FALSE}
+install.packages('tinytex')
+tinytex::install_tinytex()
+```
+
+Restart R and everything should just work. 
+
+3) You can just generate an html file, open it in Chrome, select *Print . . .* from the drop-down menu. You will get a pop-up window. Click the down arrow to the right of *Destination* and choose *Save as PDF* in the drop-down menu. You’ll see a preview. Choose the *Save as PDF* option. This is not a convenient workflow but, if disaster strikes and the problem set is due in 10 minutes, it is a reasonable option.
+
+4) You can install a full LaTeX installation yourself. Good luck! Don't come to us for help.
+
+## Style guide {-}
+
+Much of this material comes from the *[Tidyverse Style Guide](https://style.tidyverse.org/index.html)*.  We will take off points on work submitted which violates these guidelines. *In extremis*, you may go against this advice, if you add a comment in your code explaining your decision to do so.
+
+### Comments {-}
+
+Include comments in your code. It is OK if easy-to-understand chunks of code have no comments. The code is self-explanatory. But other code will merit many, many lines of comments, more lines than the code itself. In a project, you should have about as many lines of comments as you have lines of code.
+
+Make your comments meaningful. They should not be a simple description of what your code does. The best comments are descriptions about why you did what you did and which other approaches you tried or considered. (The code already tells us what you did.) Good comments often have a “Dear Diary” quality: “I did this. Then I tried that. I finally chose this other thing because of reasons X, Y and Z. If I work on this again, I should look into this other approach.” Because of this, the structure is often a several lines of comments followed by several lines of code. 
+
+Each line of a comment should begin with the comment symbol (a "hash") followed by a single space: `# `. Code comments must be separated from code by one empty line on both sides. Format your code comments neatly. Ctrl-Shift-/ is the easiest way to do that. Name your R code chunks. Spelling matters. Comments should be constructed as sentences, with appropriate capitalization and punctuation. 
+
+#### Long Lines {-}
+
+Limit your code to 80 characters per line. This fits comfortably on a printed page with a reasonably sized font.  When calling functions, you can omit the argument names for very common arguments (i.e. for arguments that are used in almost every invocation of the function). Short unnamed arguments  can also go on the same line as the function name, even if the whole function call spans multiple lines.
+
+
+<!-- DK: Missing code chunk. And fix the code chunks below to use modern tidyverse code. -->
+
+#### Whitespace {-}
+
+`%>%` should always have a space before it, and should usually be followed by a new line. After the first step, each line should be indented by two spaces. This structure makes it easier to add new steps (or rearrange existing steps) and harder to overlook a step.
+
+```{r, eval=FALSE}
+# Good
+
+iris %>%
+  group_by(Species) %>%
+  summarize_if(is.numeric, mean) %>%
+  ungroup() %>%
+  gather(measure, value, -Species) %>%
+  arrange(value)
+
+# Bad
+
+iris %>% group_by(Species) %>% summarize_all(mean) %>%
+ungroup %>% gather(measure, value, -Species) %>%
+arrange(value)
+```
+
+
+#### Commas {-}
+
+Always put a space after a comma, never before, just like in regular English.
+
+```{r, eval = FALSE}
+# Good
+
+x[, 1]
+
+# Bad
+
+x[,1]
+x[ ,1]
+x[ , 1]
+```
+
+#### Parentheses {-}
+
+Do not put spaces inside or outside parentheses for regular function calls.
+
+```{r, eval = FALSE}
+# Good
+
+mean(x, na.rm = TRUE)
+
+# Bad
+
+mean (x, na.rm = TRUE)
+mean( x, na.rm = TRUE )
+```
+
+
+#### Infix operators {-}
+
+Most infix operators (`==`, `+`, `-`, `<-`, etc.) should always be surrounded by spaces:
+
+```{r, eval = FALSE}
+
+# Good
+
+height <- (feet * 12) + inches
+mean(x, na.rm = TRUE)
+
+# Bad
+
+height<-feet*12+inches
+mean(x, na.rm=TRUE)
+```
+
+There are a few exceptions, which should never be surrounded by spaces:
+
+* The operators with [high precedence](https://rdrr.io/r/base/Syntax.html): `::`, `:::`, `$`, `@`, `[`, `[[`, `^`, unary `-`, unary `+`,  
+and `:`.
+
+
+```{r, eval = FALSE}
+# Good
+
+sqrt(x^2 + y^2)
+df$z
+x <- 1:10
+
+# Bad
+
+sqrt(x ^ 2 + y ^ 2)
+df $ z
+x <- 1 : 10
+```
+
+* Single-sided formulas when the right-hand side is a single identifier:
+
+```{r, eval=FALSE}
+# Good
+
+~foo
+tribble(~col1, ~col2,
+         "a",   "b")
+
+# Bad
+
+~ foo
+tribble( ~ col1, ~ col2,
+        "a", "b")
+```
+
+Note that single-sided formulas with a complex right-hand side do need a space:
+
+```{r, eval = FALSE}
+# Good
+
+~ .x + .y
+
+# Bad
+
+~.x + .y
+```
+
+* The help operator
+
+```{r, eval=FALSE}
+# Good
+
+package?stats
+?mean
+
+# Bad
+
+package ? stats
+? mean
+```
+
+#### Extra spaces {-}
+
+You may add extra spaces if it improves alignment of `=` or `<-`.
+
+```{r, eval = FALSE}
+list(total = a + b + c,
+     mean = (a + b + c) / n)
+```
+
+Do not add extra spaces to places where space is not usually allowed.
+
+### Messages/Warnings/Errors  {-}
+
+R messages/warnings/errors should never appear in a submitted document. The right way to deal with these issues is to find out their cause and then fix the underlying problem. Students sometimes use “hacks” to make these messages/warnings/errors disappear. The most common hacks involve using code chunk options like `message=FALSE`, `warning=FALSE`, `results="hide"`, `include=FALSE` and others. Don’t do this, in general. A message/warning/error is worth understanding and then fixing. Don’t close your eyes (metaphorically) and pretend that the problem doesn’t exist. There are some situations, however, in which, no matter what you try, you can’t fix the problem. In those few cases, you can use one of these hacks, but you must make a code comment directly below it, explaining the situation. The only exception is the “setup” chunk (included by default in every new Rmd) which comes with `include=FALSE`. In that chunk, no explanation is necessary, by convention.
+
+### Graphics {-}
+
+Use captions, titles, axis labels and so on to make it clear what your tables and graphics mean.
+
+Anytime you make a graphic without a title (explaining what the graphic is), a subtitle (highlighting a key conclusion to draw), a caption (with some information about the source of the data) and axis labels (with information about your variables), you should justify that decision in a code comment. We (try to) always include all four but there are situations in which that makes less sense. Ultimately, these decisions are yours, but we need to understand your reasoning.
+
+Use your best judgment. For example, sometimes axis labels are unnecessary. Read *[Data Visualization: A practical introduction](https://socviz.co/)* by Kieran Healy for guidance on making high quality graphics.
+
+## How to use Rpubs {-}
+
+[Rpubs](https://rpubs.com/) provides a free hosting service for your R work. To use it:
+
+1. Begin by creating a new repository on GitHub. Then clone it to your computer. We are calling the repository "rpubs_example." As before, put *Rproj in your .gitignore file. This is to prevent your private project file from being uploaded to GitHub.
+
+```{r, echo=FALSE, out.width="100%"}
+knitr::include_graphics("other/images/rpubs-1.png")
+```
+
+2. Start a new R Markdown file. Go to File --> New File --> R Markdown. For simplicity, leave the name "Untitled" and hit "OK." 
+
+```{r, echo=FALSE, out.width="100%"}
+knitr::include_graphics("other/images/rpubs-2.png")
+```
+
+3. Save this file, again, as "Untitled" in your project directory. 
+
+```{r, echo=FALSE, out.width="100%"}
+knitr::include_graphics("other/images/rpubs-3.png")
+```
+
+4. Knit. You should see the following. 
+
+```{r, echo=FALSE, out.width="100%"}
+knitr::include_graphics("other/images/rpubs-4.png")
+```
+
+5. Notice a blue icon in the upper right-hand corner that reads "Publish." Click it. 
+
+```{r, echo=FALSE, out.width="100%"}
+knitr::include_graphics("other/images/rpubs-5.png")
+```
+
+
+6. You will be asked whether you want to publish to RPubs or RStudio Connect. Choose RPubs. You will get a reminder that all documents you publish on RPubs are publicly visible. Click "Publish." 
+
+```{r, echo=FALSE, out.width="100%"}
+knitr::include_graphics("other/images/rpubs-6.png")
+```
+
+7. This will take you to the RPubs website. You will need to create an account. Follow the steps as prompted. 
+
+```{r, echo=FALSE, out.width="100%"}
+knitr::include_graphics("other/images/rpubs-7.png")
+```
+
+8. Add document details. Name your document. Add a meaningful slug -- otherwise you will end up with an ugly, long address you didn't choose and can't remember. You can leave the Description blank for simplicity of the exercise. 
+
+```{r, echo=FALSE, out.width="100%"}
+knitr::include_graphics("other/images/rpubs-8.png")
+```
+
+9. Hit "Continue", et voilá! You have published your first document to Rpubs! 
+
+```{r, echo=FALSE, out.width="100%"}
+knitr::include_graphics("other/images/rpubs-9.png")
+```
+
+10. There is one more important step. "rsconnect" contains  files specific to your computer that you do not want to push to GitHub. Therefore, as with .Rproj files before, we want to add the rsconnect folder to the .gitignore file. Click on .gitignore, add it there and hit "Save." You will see it disappear from your GitHub in the top right window. If you don't see any changes, hit the Refresh button in the top right corner. Since you've updated your .gitignore file, now is a good time to commit and push your changes to your GitHub repository. 
+
+```{r, echo=FALSE, out.width="100%"}
+knitr::include_graphics("other/images/rpubs-10.png")
+```
+
+
+## How to get help {-}
+
+*The best data science superpower is knowing how to ask a question.* -- Mara Averick
+
+
+### Searching for Help with R {-}
+
+Google is your best friend. If you have a question about doing something in R, someone has probably had the same question and someone else has probably answered it online. [Stack Overflow](stackoverflow.com/) and [RStudio Community](https://community.rstudio.com/) are two of the best forums for finding and asking questions/solutions. Adding "R" and/or "tidyverse" in your keyword search helps find more relevant results to your exact question. Be as specific as possible in wording your question!
+
+### Reproducible Examples {-}
+
+If you don't find an answer to your question and you're still stuck, then you should ask your own question on these forums! In order to get the best response, sharing a reproducible example with the community allows others to easily start where you left off. The **reprex** package allows you to do this easily.
+
+First, install the **reprex** package. Then, load the package.
+
+```{r, eval=FALSE}
+install.packages("reprex")
+library(reprex)
+```
+
+<!-- DK: Switch this to use a built in data set. -->
+
+Let's now look at some problematic code. The data set "murders" from the package "dslabs" provides murder statistics, as well as population counts, for all states. Suppose we want to calculate the rate of murders in each state per 100k residents (number of murders/population * 10^6). However, in the code below we have misspelled "population", resulting in this error: 
+
+```{r, echo=FALSE, out.width="110%"}
+knitr::include_graphics("other/images/reprex-2.gif")
+```
+
+To use **reprex**, highlight the code *and* the necessary packages. Then copy the highlighted code by pressing Ctrl/Cmd + c. The code is now in the clipboard. In the Console, type reprex() and hit Enter/Return. **reprex** then automatically creates a reproducible example and places it in your clipboard. 
+
+```{r, echo=FALSE, out.width="110%"}
+knitr::include_graphics("other/images/reprex-3.gif")
+```
+
+Now all you have to do now is go to your favorite R forum and paste your reproducible example into your question! Here is an example of how you would post it into Slack. 
+
+```{r, echo=FALSE, out.width="110%"}
+knitr::include_graphics("other/images/reprex-4.gif")
+```
+
+And here is how you would post it to RStudio community. 
+
+```{r, echo=FALSE, out.width="110%"}
+knitr::include_graphics("other/images/reprex-5.gif")
+```
+
+## How to make a table {-}
+
+**gt** is an R package for creating elegant tables. First, we'll create a **gt** summary table of some observations from the data. Second, we'll run a regression and display the outcome using **gtsummary**, a companion package to **gt** which specializes in presenting the results of statistical models.
+
+If you want to learn more about **gt** check [this](https://themockup.blog/posts/2020-05-16-gt-a-grammer-of-tables/) fantastic guide. Go [here](https://gt.rstudio.com) for the official **gt** package website. See [here](https://www.danieldsjoberg.com/gtsummary/articles/tbl_summary.html) for an extensive guide to **gtsummary**.
+
+Load the necessary libraries.
+
+```{r setup, message=FALSE}
+library(tidyverse)
+library(PPBDS.data)
+library(gt)
+```
+
+We set `message=FALSE` in the above code chunk to avoid showing all the ugly notes when these libraries are loaded.
+
+Let's pull some data which we will use in our table: 
+
+```{r}
+x <- trains %>%
+  select(gender, income, att_end) %>%
+  slice(1:5)
+x
+```
+
+Create the simplest table with `gt()`, the key command:
+
+```{r}
+x %>% 
+  gt()
+```
+
+&nbsp;
+
+Now let's make this more professional. **gt** offers a variety of functions to add features like these^[source: https://gt.rstudio.com]: 
+
+```{r, echo = FALSE, out.width="100%"}
+knitr::include_graphics("other/images/gt_features.png")
+```
+
+You can add a title and subtitle using `tab_header()`: 
+
+```{r}
+x %>% 
+  gt() %>%
+   tab_header(title = "Enos Data Observations", 
+              subtitle = "Gender, Income, and End Attitude from the Trains Data")
+```
+
+&nbsp;
+
+By default, titles and other text can not be formatted. If you want formatting, you must wrap the character string in a call to `md()`, where *md* stands for (M)ark(d)own. For example, here is a bolded title.
+
+```{r}
+x %>% 
+  gt()%>%
+   tab_header(title = md("**Enos Data Observations**"), 
+              subtitle = "Gender, Income, and End Attitude from the Trains Data")
+```
+
+&nbsp;
+
+You can change the column names using `cols_label()`:
+
+```{r}
+x %>% 
+  gt()%>%
+    tab_header(title = md("**Enos Data Observations**"), 
+               subtitle = "Gender, Income, and End Attitude from the Trains Data") %>%
+    cols_label(gender = "Gender",
+               income = "Income", 
+               att_end = "End Attitude")
+```
+
+&nbsp;
+
+Use `tab_source_note()` to cite the source of the data or to create a caption. This function is not exclusively for providing a source --- though it's a handy way to do so --- and can be used to display any text you'd like:
+
+```{r}
+x %>% 
+  gt()%>%
+   tab_header(title = md("**Enos Data Observations**"), 
+              subtitle = "Gender, Income, and End Attitude from the Trains Data") %>%
+  cols_label(gender = "Gender",
+             income = "Income", 
+             att_end = "End Attitude") %>% 
+  tab_source_note("Source: Ryan Enos")
+```
+
+&nbsp;
+
+Using `md()` again, we can italicize the name of the Enos study in the caption:
+
+```{r}
+x %>% 
+  gt()%>%
+   tab_header(title = md("**Enos Data Observations**"), 
+              subtitle = "Gender, Income, and End Attitude from the Trains Data") %>%
+  cols_label(gender = "Gender",
+             income = "Income", 
+             att_end = "End Attitude") %>% 
+  tab_source_note(md("Source: Ryan Enos, *Causal Effect of Intergroup Contact on Exclusionary Attitudes*"))
+```
+
+&nbsp;
+
+Now that the table structure looks good, we want to format the numbers themselves. Let's add some dollar signs to the income column using `fmt_currency()`. This function also adds commas (if you want commas without dollar signs use `fmt_number()`). The `vars()` within `fmt_currency()` denotes the variable being formatted as a currency:
+
+
+```{r}
+x %>% 
+  gt() %>%
+    tab_header(title = md("**Enos Data Observations**"), 
+               subtitle = "Gender, Income, and End Attitude from the Trains Data")%>%
+    cols_label(gender = "Gender",
+               income = "Income", 
+               att_end = "End Attitude") %>% 
+    tab_source_note(md("Source: Ryan Enos, *Causal Effect of Intergroup 
+                       Contact on Exclusionary Attitudes*")) %>%
+    fmt_currency(columns = vars(income), 
+                 decimals = 0) 
+```
+
+&nbsp;
+
+Note that the line return in the title between "Intergroup" and "Contact" does not effect or break up the title displayed by `md()`.
+
+### Regression tables {-}
+
+We can making a **gt** table with a `stan_glm()` regression object. Key to this is the **gtsummary** package and its `tbl_regression()` function.
+
+```{r, message=FALSE}
+library(rstanarm)
+library(broom.mixed)
+library(gtsummary)
+
+fit2 <- stan_glm(att_end ~ party, data = trains, refresh = 0)
+
+tbl_regression(fit2, intercept = TRUE) %>%
+  as_gt() %>%
+    tab_header(title = "Regression of Attitudes about Immigration", 
+               subtitle = "The Effect of Party on End Attitude") %>%
+    tab_source_note(md("Source: Ryan Enos, *Causal Effect of Intergroup 
+                        Contact on Exclusionary Attitudes*"))
+```
+
+&nbsp;
+
+## References {-}
+
+
+
