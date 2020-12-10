@@ -421,82 +421,8 @@ What if you flipped 2 coins? You know that the probability of getting heads once
 
 Notice how regardless of what we get the first time we flip the coin, the probability of getting heads is 0.5 throughout. This suggests that the coin flips are **independent**. The result of one coin flip does not impact the likelihood of getting the same result next time. Take a look at the tree diagram. $p_{H given H}$ represents the probability of getting heads *given* that we got heads the first time. $p_{H given T}$ represents the probability of getting heads *given* that we got tails the first time. $p_{H given H}$ = $p_{H given T}$.
 
-```{r, echo=FALSE, eval=FALSE}
-
-# Probability of a
-
-a <- 0.5
-
-# Probability of (b | a)
-
-bGivena <- 0.5
-
-# Probability of (b | not a)
-
-bGivenNota <- 0.5
-
-# Calculate the rest of the values based upon the 3 variables above
-notbGivena<-1-bGivena
-notA<-1-a
-notbGivenNota<-1-bGivenNota
- 
-#Joint Probabilities of a and B, a and notb, nota and b, nota and notb
-aANDb<-a*bGivena
-aANDnotb<-a*notbGivena
-notaANDb <- notA*bGivenNota
-notaANDnotb <- notA*notbGivenNota
- 
-# Probability of B
-b <- aANDb + notaANDb
-notB <- 1-b
- 
-# Bayes theorum - probability of A | B
-# (a | b) = Prob (a AND b) / prob (b)
-aGivenb <- aANDb / b
- 
-# These are the labels of the nodes on the graph
-# To signify "Not A" - we use A' or A prime 
- 
-node1<-"p"
-node2<-"p(H)"
-node3<-"p(T)"
-node4<-"p(H given H)"
-node5<-"p(T given H)"
-node6<-"p(H given T)"
-node7<-"p(T given T)"
-nodeNames<-c(node1,node2,node3,node4,node5,node6,node7)
-
-rEG <- new("graphNEL", nodes=nodeNames, edgemode="directed")
- 
-# Draw the "lines" or "branches" of the probability Tree
-rEG <- addEdge(nodeNames[1], nodeNames[2], rEG, 1)
-rEG <- addEdge(nodeNames[1], nodeNames[3], rEG, 1)
-rEG <- addEdge(nodeNames[2], nodeNames[4], rEG, 1)
-rEG <- addEdge(nodeNames[2], nodeNames[5], rEG, 1)
-rEG <- addEdge(nodeNames[3], nodeNames[6], rEG, 1)
-rEG <- addEdge(nodeNames[3], nodeNames[7], rEG, 10)
- 
-eAttrs <- list()
- 
-q <- edgeNames(rEG)
- 
-# Add the probability values to the the branch lines
- 
-eAttrs$label <- c(toString(a),toString(notA),
- toString(bGivena), toString(notbGivena),
- toString(bGivenNota), toString(notbGivenNota))
-names(eAttrs$label) <- c(q[1],q[2], q[3], q[4], q[5], q[6])
-edgeAttrs<-eAttrs
- 
-# Set the color, etc, of the tree
-
-attributes<-list(node=list(label="foo", fillcolor="light blue", fontsize="12"),
- edge=list(color="blue"),graph=list(rankdir="LR"))
- 
-#Plot the probability tree using Rgraphviz
-
-plot(rEG, edgeAttrs=eAttrs, attrs=attributes)
-
+```{r out.width="100%", echo=FALSE}
+knitr::include_graphics("05-probability/images/tree-1.png")
 ```
 
 ### Conditional probability
@@ -514,211 +440,36 @@ We decide to go down the top branch *if* our random person has the disease. We g
 
 How would you express this in statistical notation? $p(A|B)$ is the same thing as the probability of A *given* B. $p(A|B)$ essentially means the probability of A *if* we know for sure the value of B. You should also remember that $p(A|B)$ is not the same thing as $p(B|A)$.
 
-```{r, echo=FALSE, eval=FALSE}
-
-# Probability of a
-
-a <- 0.6
-
-# Probability of (b | a)
-
-bGivena <- 0.8
-
-# Probability of (b | not a)
-
-bGivenNota <- 0.1
-
-# Calculate the rest of the values based upon the 3 variables above
-notbGivena<-1-bGivena
-notA<-1-a
-notbGivenNota<-1-bGivenNota
- 
-#Joint Probabilities of a and B, a and notb, nota and b, nota and notb
-aANDb<-a*bGivena
-aANDnotb<-a*notbGivena
-notaANDb <- notA*bGivenNota
-notaANDnotb <- notA*notbGivenNota
- 
-# Probability of B
-b <- aANDb + notaANDb
-notB <- 1-b
- 
-# Bayes theorum - probabiliyt of A | B
-# (a | b) = Prob (a AND b) / prob (b)
-aGivenb <- aANDb / b
- 
-# These are the labels of the nodes on the graph
-# To signify "Not A" - we use A' or A prime 
- 
-node1<-"P"
-node2<-"Disease"
-node3<-"No Disease"
-node4<-"Positive"
-node5<-"False Negative"
-node6<-"False Positive"
-node7<-"Negative"
-nodeNames<-c(node1,node2,node3,node4,node5,node6,node7)
- 
-rEG <- new("graphNEL", nodes=nodeNames, edgemode="directed")
- 
-# Draw the "lines" or "branches" of the probability Tree
-rEG <- addEdge(nodeNames[1], nodeNames[2], rEG, 1)
-rEG <- addEdge(nodeNames[1], nodeNames[3], rEG, 1)
-rEG <- addEdge(nodeNames[2], nodeNames[4], rEG, 1)
-rEG <- addEdge(nodeNames[2], nodeNames[5], rEG, 1)
-rEG <- addEdge(nodeNames[3], nodeNames[6], rEG, 1)
-rEG <- addEdge(nodeNames[3], nodeNames[7], rEG, 10)
- 
-eAttrs <- list()
- 
-q <- edgeNames(rEG)
- 
-# Add the probability values to the the branch lines
- 
-eAttrs$label <- c(toString(a),toString(notA),
- toString(bGivena), toString(notbGivena),
- toString(bGivenNota), toString(notbGivenNota))
-names(eAttrs$label) <- c(q[1],q[2], q[3], q[4], q[5], q[6])
-edgeAttrs<-eAttrs
- 
-# Set the color, etc, of the tree
-
-attributes<-list(node=list(label="foo", fillcolor="light blue", fontsize="14"),
- edge=list(color="blue"),graph=list(rankdir="LR"))
- 
-#Plot the probability tree using Rgraphviz
-
-plot(rEG, edgeAttrs=eAttrs, attrs=attributes)
-
+```{r out.width="100%", echo=FALSE}
+knitr::include_graphics("05-probability/images/tree-2.png")
 ```
 
-This concept of conditional probability is relevant in our everyday lives. For example, the probability of Trump's re-election might be different than the probability of Trump's re-election *given* that we are in a recession. The probability of you reading a textbook might vary, *depending* on the likelihood of your instructor cold-calling you in class. Whenever you encounter a question involving conditional probability, drawing a tree diagram is a very useful approach to visualization.
+<!--TW: Need to find another up-to-date example for conditional probabality.
+
+This concept of conditional probability is relevant in our everyday lives. For example, the probability of Trump’s re-election might be different than the probability of Trump’s re-election given that we are in a recession. The probability of you reading a textbook might vary, depending on the likelihood of your instructor cold-calling you in class. Whenever you encounter a question involving conditional probability, drawing a tree diagram is a very useful approach to visualization. -->
+
+
+<!-- TW: Do we need this section? 
+
 
 ### Two diagrams for one set of coin flips
 
-In our histogram probability distribution, we didn't care what combinations of numbers made each sum. We only cared about the outcome. There are two ways of thinking about a coin toss as well. Your tree diagram should look different depending on whether the order of the results matters.
+In our histogram probability distribution, we didn’t care what combinations of numbers made each sum. We only cared about the outcome. There are two ways of thinking about a coin toss as well. Your tree diagram should look different depending on whether the order of the results matters.
 
-To understand tree diagrams a little better, imagine you're flipping 2 coins. Your tree diagram may look different depending what you're interested in measuring. In this figure, the order of your coin toss results does not matter. We can imagine that you are rolling two coins together, or that you only care about the sum of the two dice values.
+To understand tree diagrams a little better, imagine you’re flipping 2 coins. Your tree diagram may look different depending what you’re interested in measuring. In the following figure, the order of your coin toss results does not matter. We can imagine that you are rolling two coins together, or that you only care about the sum of the two dice values.
 
-```{r, echo=FALSE, eval=FALSE}
-
-# These are the labels of the nodes on the graph
- 
-node1<-"p"
-node2<-"p(0 Heads, 2 Tails)"
-node3<-"p(1 Head, 1 Tail)"
-node4<-"p(2 Heads, 0 Tails)"
-nodeNames<-c(node1,node2,node3,node4)
- 
-rEG <- new("graphNEL", nodes=nodeNames, edgemode="directed")
- 
-# Draw the "lines" or "branches" of the probability Tree
-
-rEG <- addEdge(nodeNames[1], nodeNames[2], rEG, 1)
-rEG <- addEdge(nodeNames[1], nodeNames[3], rEG, 1)
-rEG <- addEdge(nodeNames[1], nodeNames[4], rEG, 1)
- 
-eAttrs <- list()
- 
-q <- edgeNames(rEG)
-
-edgeAttrs<-eAttrs
- 
-# Set the color, etc, of the tree
-
-eAttrs$label <- c(toString(0.25),toString(0.5),
- toString(0.25))
-names(eAttrs$label) <- c(q[1],q[2], q[3])
-edgeAttrs<-eAttrs
-
-attributes<-list(node=list(label="foo", fillcolor="light blue", fontsize="14"),
- edge=list(color="blue"),graph=list(rankdir="LR"))
- 
-#Plot the probability tree using Rgraphviz
-
-plot(rEG, edgeAttrs=eAttrs, attrs=attributes)
-
+```{r out.width="100%", echo=FALSE}
+knitr::include_graphics("05-probability/images/tree-3.png")
 ```
 
-In following figure, the order of your coin toss results does matter. Depending on your first result, you go down a different branch.
+In the next figure figure below, the order of your coin toss results does matter. Depending on your first result, you go down a different branch.
 
-```{r, echo=FALSE, eval=FALSE}
-
-# Probability of a
-
-a <- 0.5
-
-# Probability of (b | a)
-
-bGivena <- 0.5
-
-# Probability of (b | not a)
-
-bGivenNota <- 0.5
-
-# Calculate the rest of the values based upon the 3 variables above
-notbGivena<-1-bGivena
-notA<-1-a
-notbGivenNota<-1-bGivenNota
- 
-#Joint Probabilities of a and B, a and notb, nota and b, nota and notb
-aANDb<-a*bGivena
-aANDnotb<-a*notbGivena
-notaANDb <- notA*bGivenNota
-notaANDnotb <- notA*notbGivenNota
- 
-# Probability of B
-b <- aANDb + notaANDb
-notB <- 1-b
- 
-# Bayes theorum - probability of A | B
-# (a | b) = Prob (a AND b) / prob (b)
-aGivenb <- aANDb / b
- 
-# These are the labels of the nodes on the graph
-# To signify "Not A" - we use A' or A prime 
- 
-node1<-"p"
-node2<-"p(H)"
-node3<-"p(T)"
-node4<-"p(H given H)"
-node5<-"p(T given H)"
-node6<-"p(H given T)"
-node7<-"p(T given T)"
-nodeNames<-c(node1,node2,node3,node4,node5,node6,node7)
-
-rEG <- new("graphNEL", nodes=nodeNames, edgemode="directed")
- 
-# Draw the "lines" or "branches" of the probability Tree
-rEG <- addEdge(nodeNames[1], nodeNames[2], rEG, 1)
-rEG <- addEdge(nodeNames[1], nodeNames[3], rEG, 1)
-rEG <- addEdge(nodeNames[2], nodeNames[4], rEG, 1)
-rEG <- addEdge(nodeNames[2], nodeNames[5], rEG, 1)
-rEG <- addEdge(nodeNames[3], nodeNames[6], rEG, 1)
-rEG <- addEdge(nodeNames[3], nodeNames[7], rEG, 10)
- 
-eAttrs <- list()
- 
-q <- edgeNames(rEG)
- 
-# Add the probability values to the the branch lines
- 
-eAttrs$label <- c(toString(a),toString(notA),
- toString(bGivena), toString(notbGivena),
- toString(bGivenNota), toString(notbGivenNota))
-names(eAttrs$label) <- c(q[1],q[2], q[3], q[4], q[5], q[6])
-edgeAttrs<-eAttrs
- 
-# Set the color, etc, of the tree
-
-attributes<-list(node=list(label="foo", fillcolor="light blue", fontsize="12"),
- edge=list(color="blue"),graph=list(rankdir="LR"))
- 
-#Plot the probability tree using Rgraphviz
-
-plot(rEG, edgeAttrs=eAttrs, attrs=attributes)
-
+```{r out.width="100%", echo=FALSE}
+knitr::include_graphics("05-probability/images/tree-4.png")
 ```
+
+-->
+
 
 <!-- 2 b) Another coding session, but this time with list-columns and map_functions. These do not have to be long. We just want to re-iterate the points we made in words. Maybe we don't need list-columns. Maybe just show map functions here. Again, the point of this section is ONLY to understand the key probabity concepts: joint, total, conditional and marginal. -->
 
