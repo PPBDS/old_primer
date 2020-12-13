@@ -546,8 +546,10 @@ ggplot(data = gapminder, mapping = aes(x = lifeExp)) +
 
 <!-- 2) Purpose of Advanced plotting is to show the tools for making the plots that appear in socviz.co, chapters 3 and 4.  -->
 
-```{r, echo=FALSE, fig.cap="Data Visualization with ggplot2 Cheat Sheet", out.width="100%"}
+```{r, echo = FALSE, fig.cap = "Data Visualization with ggplot2 Cheat Sheet", out.width = "100%"}
+
 knitr::include_graphics("01-visualization/images/ggplot2-cheatsheet.jpg")
+
 ```
 
 In the previous section we have seen the three components that every plot must include: data, data mappings, and a geom. You may have found that the graphics from before look a bit boring. Luckily, the Grammar of Graphics allows us to add more layers on our own in order to customize our plots. We will go over some of the additional layers here, but the [Data Visualization with ggplot2 Cheat Sheet](https://rstudio.com/wp-content/uploads/2015/03/ggplot2-cheatsheet.pdf) is a great resource to refer to as your ggplot visualizations get more complicated.
@@ -791,31 +793,37 @@ You can see that while some things are not *necessary* to create a plot, they ca
 
 Let's go over some important points about specifying the arguments (i.e., inputs) to functions. Run the following two segments of code:
 
-```{r, eval=FALSE}
-ggplot(data = flights, mapping = aes(x = carrier)) +
-  geom_bar()
+```{r, eval = FALSE}
+ggplot(data = gapminder, mapping = aes(x = lifeExp)) +
+geom_histogram(color = "white")
+ 
 ```
 
 ```{r, eval=FALSE}
-ggplot(flights, aes(x = carrier)) +
-  geom_bar()
+ggplot(data = gapminder, mapping = aes(x = lifeExp)) +
+geom_histogram(color = "white")
 ```
 
-You'll notice that both code segments create the same barplot, even though in the second segment we omitted the `data = ` and `mapping = ` code argument names. This is because the `ggplot()` function by default assumes that the `data` argument comes first and the `mapping` argument comes second. As long as you specify the data frame in question first and the `aes()` mapping second, you can omit the explicit statement of the argument names `data = ` and `mapping = `. 
+You'll notice that both code segments create the same barplot, even though in the second segment we omitted the `data = ` and `mapping = ` code argument names. This is because the `ggplot()` function by default assumes that the `data` argument comes first and the `mapping` argument comes second. As long as you specify the data frame in question first and the `aes()` mapping second, you do not need to include the explicit statement of the argument names `data = ` and `mapping = `. 
 
 Going forward for the rest of this book, all `ggplot()` code will be like the second segment: with the `data = ` and `mapping = ` explicit naming of the argument omitted with the default ordering of arguments respected. We'll do this for brevity's sake; it's common to see this style when reviewing other R users' code.
 
 Data "in the wild" is never ready for visualization. We can't use all the beautiful plots that we learned in the previous chapter until we have "wrangled" the data into a convenient shape. In this chapter, we'll introduce a series of functions from the **tidyverse** collection of packages which help with wrangling, and everything else we need to do to work with data. Such functions include:
 
-1. `filter()` a data frame's existing rows to only pick out a subset of them. For example, the `alaska_flights` data frame.
-1. `select()` specific variable columns in a data set. For example, choose the `dep_delay` and `arr_delay` variables to more easily view the relationship between the two. Additional functions like `slice()` can further subset the data.
-1. `arrange()` its rows. For example, sort the rows of `weather` in ascending or descending order of `temp`.
-1. `group_by()` its rows. In other words, assign different rows to be part of the same *group*. We can then combine `group_by()` with `summarize()` to report summary statistics for each group *separately*. For example, say you don't want a single overall average departure delay `dep_delay` for all three `origin` airports combined, but rather three separate average departure delays, one computed for each of the three `origin` airports.
-1. `mutate()` its existing columns/variables to create new ones. For example, convert hourly temperature recordings from degrees Fahrenheit to degrees Celsius.
+* `filter()`the data frame's existing rows to only pick out a subset of them.
 
-<!-- DK: Mention summarize() -->
+* `select()` specific variable columns in a data set. 
 
-Notice how we used `computer_code` font to describe the actions we want to take on our data frames. This is because the **dplyr** package, one of the packages in the **tidyverse**, has intuitively verb-named functions that are easy to remember. 
+* `arrange()` its rows. You can organize your data in ascending or descending order. 
+
+* `group_by()` its rows. This function assigns different rows to be part of the same *group*. This allows data statistics to be calculated for each group *separately*. You will see this function used with `summarize()`.
+
+*`mutate()` its existing columns/variables to create new ones.
+
+*`summarize()` the data. It creates a new data frame comprised of summary statistics for one (or more) rows for each grouped variable. 
+
+
+%>% Notice how we used `computer_code` font to describe the actions we want to take on our data frames. This is because the **dplyr** package, one of the packages in the **tidyverse**, has intuitively verb-named functions that are easy to remember. 
 
 There is a further benefit to learning to use the **dplyr** package for data wrangling: its similarity to the database querying language [SQL](https://en.wikipedia.org/wiki/SQL) (pronounced "sequel" or spelled out as "S", "Q", "L"). SQL (which stands for "Structured Query Language") is used to manage large databases quickly and efficiently and is widely used by many institutions with a lot of data. While SQL is a topic left for a book or a course on database management, keep in mind that once you learn **dplyr**, you can learn SQL easily. 
 
@@ -826,41 +834,36 @@ Before we start data wrangling, let's first introduce a nifty tool that gets loa
 Recall from chapter 1 that to add the `geom` layer to your ggplot you had format your code as:
 
 ```{r, eval = FALSE}
-ggplot(data = flights, mapping = aes(x = carrier, fill = origin)) +
-  geom_bar(position = "dodge")
+ggplot(data = gapminder, mapping = aes(x = gdpPercap, y = lifeExp)) + 
+  geom_point()
 ```
 
-Without the `+` at the end of the first row, your computer would not know to continue onto the second. The same would occur without a pipe operator. For instance, take a look at the following code. You can run it in your own Rstudio console. What happens? 
+Without the `+` at the end of the first row, your computer would not know to continue onto the second. The same would occur without a pipe operator.
 
-```{r, eval = FALSE}
-alaska_flights <- flights 
-  filter(carrier == "AS")
-```
 
-Without the pipe operator, the `filter()` function cannot work because the computer does not know to use the flights dataset for the operation within the parentheses. This will become clearer with more practice using **dplyr** functions.  
 <!-- EF: How do I use the index. It might be nice to define argument within the index -->
 
-```{r, eval=FALSE}
-alaska_flights <- flights %>% 
-  filter(carrier == "AS")
-```
+The code below filters the `gapminder` dataset to only show about Asia, opposed to having data on all continents. 
 
-The result will be the transformed/modified data frame that you want. In our example, we'll save the result in a new data frame by using the `<-` assignment operator with the name `alaska_flights` via `alaska_flights <-`. Because we assigned this modified data frame to `alaska_flights`, it is a separate entity from the initial `flights` data frame. If, however, we had written the code as `flights <- flights` you would have overwritten the previous data frame, and the original `flights` data from the **nycflights13* package would have to be re-installed to access it again.
+```{r, eval = FALSE}
+gapminder_Asia <- gapminder %>% 
+  filter(continent == "Asia")
+```
 
 Much like when adding layers to a `ggplot()` using the `+` sign, you form a single *chain* of data wrangling operations by combining verb-named functions into a single sequence using the pipe operator `%>%`. Furthermore, much like how the `+` sign has to come at the end of lines when constructing plots, the pipe operator `%>%` has to come at the end of lines as well. Note also that the pipe operator can be used multiple times sequentially. Simply include it at the end of your line, and the following function will be immediately linked to the output of the previous line containing the operator. We call the text within the parentheses the argument(s) of a function.
 
 It is worth noting that most **dplyr** verbs, as well as most functions in the larger **tidyverse**, achieve this effect by always having their first argument be an input tibble. For example, look at `?dplyr::filter` to see that, for example, the first argument of `filter()` is a tibble named `.data`. So, we can rewrite the above code snippet as:
 
-```{r, eval=FALSE}
-alaska_flights <- flights %>% 
-  filter(.data = ., carrier == "AS")
+```{r, eval = FALSE}
+gapminder_Asia <- gapminder %>% 
+  filter(.data= ., continent == "Asia")
 ```
 
-The "." serves as special role when using pipes. It represents the tibble which was "passed down" from the previous step in the pipe. Here, we are telling R that "." --- which is `flights` in this case --- is the first argument to `filter()`. Since argument names do not have to be used, we can rewrite this as:
+The "." serves as special role when using pipes. It represents the tibble which was "passed down" from the previous step in the pipe. Here, we are telling R that "." --- which is `gapminder` in this case --- is the first argument to `filter()`. Since argument names do not have to be used, we can rewrite this as:
 
-```{r, eval=FALSE}
-alaska_flights <- flights %>% 
-  filter(., carrier == "AS")
+```{r, eval = FALSE}
+gapminder_Asia <- gapminder %>% 
+  filter(.,  continent == "Asia")
 ```
 
 You will almost never write code that looks like this, at least with simple **dplyr** verbs like `filter()`. But, behind the scenes, this is what is going on. And, in more advanced cases, we will need to use "." to refer to the passed-in tibble.
@@ -870,21 +873,22 @@ Keep in mind, there are many more advanced data wrangling functions than just th
 
 ### `filter()` rows
 
-```{r filter, echo=FALSE, fig.cap="Diagram of filter() rows operation."}
+```{r filter, echo = FALSE, fig.cap="Diagram of filter() rows operation."}
 knitr::include_graphics("01-visualization/images/filter.png")
 ```
 
 The `filter()` function here works much like the "Filter" option in Microsoft Excel; it allows you to specify criteria about the values of a variable in your dataset and then filters out only the rows that match that criteria.
 
-We begin by focusing only on flights from New York City to Portland, Oregon.  The `dest` destination code (or airport code) for Portland, Oregon is `"PDX"`. Run the following and look at the results in RStudio's spreadsheet viewer to ensure that only flights heading to Portland are chosen here:
+Let's revisit our code from the previous section.
 
-```{r, eval=FALSE}
-portland_flights <- flights %>% 
-  filter(dest == "PDX")
-View(portland_flights)
+```{r, eval = FALSE}
+gapminder_Asia <- gapminder %>% 
+  filter(continent == "Asia")
 ```
 
-Note the order of the code. First, take the `flights` data frame `flights` *then* `filter()` the data frame so that only those where the `dest` equals `"PDX"` are included. We test for equality using the double equal sign `==` and not a single equal sign `=`. In other words `filter(dest = "PDX")` will yield an error. This is a convention across many programming languages. If you are new to coding, you'll probably forget to use the double equal sign `==` a few times before you get the hang of it.
+The result of using `filter()` will be a transformed/modified data frame that you want, in this case, only data from Asia. In our example, we'll save the result in a new data frame by using the `<-` assignment operator with the name `gapminder_Asia` via `gapminder_Asia <-`. Because we assigned this modified data frame to `gapminder_Asia`, it is a separate entity from the initial `gapminder` data frame. If, however, we had written the code as `gapminder <- gapminder` you would have overwritten the previous data frame, and the original `gapminder` data from the **gapminder* package would have to be re-installed to access it again.
+
+Note the order of the code. First, take the `flights` data frame `flights` *then* `filter()` the data frame so that only those where the `continent` equals `"Asia"` are included. We test for equality using the double equal sign `==` and not a single equal sign `=`. In other words `filter(continent = "Asia")` will yield an error. This is a convention across many programming languages. If you are new to coding, you'll probably forget to use the double equal sign `==` a few times before you get the hang of it.
 
 You can use other operators beyond just the `==` operator that tests for equality:
 
@@ -899,129 +903,128 @@ Furthermore, you can combine multiple criteria using operators that make compari
 - `|` corresponds to "or"
 - `&` corresponds to "and"
 
-To see many of these in action, let's filter `flights` for all rows that departed from JFK *and* were heading to Burlington, Vermont (`"BTV"`) or Seattle, Washington (`"SEA"`) *and* departed in the months of October, November, or December. Run the following:
 
-```{r, eval=FALSE}
-btv_sea_flights_fall <- flights %>% 
-  filter(origin == "JFK" & 
-           (dest == "BTV" | dest == "SEA") & 
-           month >= 10)
-View(btv_sea_flights_fall)
+
+Let's see see some of these in action. First, let's filter `airquality` for all rows that contain data from months May to December. We can do this by using `>=` operator. Run the following code in your console:
+
+
+```{r, eval = FALSE}
+airquality_new <-  <- airquality %>% 
+  filter(Month >= 5)
+View(airquality)
 ```
 
-Note that even though colloquially speaking one might say "all flights leaving Burlington, Vermont *and* Seattle, Washington," in terms of computer operations, we really mean "all flights leaving Burlington, Vermont *or* leaving Seattle, Washington." For a given row in the data, `dest` can be `"BTV"`, or `"SEA"`, or something else, but not both `"BTV"` and `"SEA"` at the same time. Furthermore, note the careful use of parentheses around `dest == "BTV" | dest == "SEA"`.
 
-We can often skip the use of `&` and just separate our conditions with a comma. The previous code will return the identical output `btv_sea_flights_fall` as the following code:
 
-```{r, eval=FALSE}
-btv_sea_flights_fall <- flights %>% 
-  filter(origin == "JFK", 
-         (dest == "BTV" | dest == "SEA"), 
-         month >= 10)         
-View(btv_sea_flights_fall)
+Let's now use the `mpg` tibble to explore `&` and `|` operators. Let's say we were interested in cars whose class is compact AND the manufacturer is Audi OR Volkswagen. We would use the following code:
+
+
+```{r}
+mpg %>% 
+  filter(class == "compact" &
+        (manufacturer == "audi" | manufacturer == "volkswagen"))
 ```
 
-Let's present another example that uses the `!` "not" operator to pick rows that *don't* match a criteria. As mentioned earlier, the `!` can be read as "not." Here we are filtering rows corresponding to flights that didn't go to Burlington, VT or Seattle, WA.
+**Note:** We can often skip the use of `&` and just separate our conditions with a comma. The previous code will return the identical output `mpg_new` as the following code:
 
-```{r, eval=FALSE}
-not_BTV_SEA <- flights %>% 
-  filter(!(dest == "BTV" | dest == "SEA"))
-View(not_BTV_SEA)
+```{r, eval = FALSE}
+mpg %>% 
+  filter(class == "compact",
+        (manufacturer == "audi" | manufacturer == "volkswagen"))
 ```
 
-Again, note the careful use of parentheses around the `(dest == "BTV" | dest == "SEA")`. If we didn't use parentheses as follows:
+Let's present another example that uses the `!` "not" operator to pick rows that *don't* match a criteria. As mentioned earlier, the `!` can be read as "not." Here we are filtering rows corresponding to cars that are not manufactured by Audi or Volkswagen.
 
-```{r, eval=FALSE}
-flights %>% filter(!dest == "BTV" | dest == "SEA")
+```{r, eval = FALSE}
+mpg %>% 
+  filter(!(manufacturer == "audi" | manufacturer == "volkswagen"))
 ```
 
-We would be returning all flights not headed to `"BTV"` *or* those headed to `"SEA"`, which is an entirely different resulting data frame. 
+Note the careful use of parentheses around the `(manufacturer == "audi" | manufacturer == "volkswagen")`. If we didn't use parentheses as follows:
 
-Now say we have a larger number of airports we want to filter for, say `"SEA"`, `"SFO"`, `"PDX"`, `"BTV"`, and `"BDL"`. We could continue to use the `|` (*or*) operator:
-
-```{r, eval=FALSE}
-many_airports <- flights %>% 
-  filter(dest == "SEA" | dest == "SFO" | dest == "PDX" | 
-         dest == "BTV" | dest == "BDL")
+```{r, eval = FALSE}
+mpg %>%
+  filter(!manufacturer == "audi" | manufacturer == "volkswagen")
 ```
 
-but as we progressively include more airports, this will get unwieldy to write. A slightly shorter approach uses the `%in%` operator along with the `c()` function. Recall from Subsection \@ref(programming-concepts) that the `c()` function "combines" or "concatenates" values into a single *vector* of values.
+If we decided to include more manufacturers, it would be unwieldy to write. A slightly shorter approach uses the `%in%` operator along with the `c()` function. Recall from Subsection \@ref(programming-concepts) that the `c()` function "combines" or "concatenates" values into a single *vector* of values.
 
-```{r, eval=FALSE}
-many_airports <- flights %>% 
-  filter(dest %in% c("SEA", "SFO", "PDX", "BTV", "BDL"))
-View(many_airports)
+```{r, eval = FALSE}
+mpg_many <- mpg %>% 
+  filter(manufacturer %in% c("audi","volkswagen","toyota"))
+view(mpg_many)
 ```
 
 One of the most common mistakes is to use `==` in this `filter()` rather than `%in%`. This is diabolical since it won't fail and, in certain situations, it might not even issue a warning. Beware!
 
-What this code is doing is filtering `flights` for all flights where `dest` is in the vector of airports `c("BTV", "SEA", "PDX", "SFO", "BDL")`. Both outputs of `many_airports` are the same, but as you can see the latter takes much less energy to code. The `%in%` operator is useful for looking for matches commonly in one vector/variable compared to another.
+What this code is doing is filtering `mpg` for all cars where `manufacturer` is in the vector: `c("audi","volkswagen","toyota")`. Remember we could have used `==` here, but using `%in%` along with `c()` takes much less energy to code.
 
-As a final note, we recommend that `filter()` should often be among the first verbs you consider applying to your data. This cleans your dataset to only those rows you care about, or put differently, it narrows down the scope of your data frame to just the observations you care about. 
+As a final note, we recommend that `filter()` should often be among the first verbs you consider applying to your data. This cleans your dataset to only those rows you care about.
 
 <!-- EF: Should we include something hear about NA values? -->
 
+
 ### `select` variables
 
-```{r, echo=FALSE, fig.cap="Diagram of select() columns."}
+```{r, echo = FALSE, fig.cap = "Diagram of select() columns."}
 knitr::include_graphics("01-visualization/images/select.png")
 ```
 
 Using the `filter()` function we were able to pick out specific *rows* from the dataset. The `select()` function allows R users to pick specific *columns* (or variables) instead.
 
-We've seen that the `flights` data frame in the `nycflights13` package contains 19 different variables. You can identify the names of these 19 variables by running the `glimpse()` function from the **dplyr** package:
+We've seen that the `gapminder` data frame in the `gapminder` package contains 6 different variables. You can identify the names of these 6 variables by running the `glimpse()` function from the **dplyr** package:
 
-```{r, eval=FALSE}
-glimpse(flights)
+```{r, eval = FALSE}
+glimpse(gapminder)
 ```
 
-However, say you only need two of these 19 variables, say `carrier` and `flight`. You can `select()`  these two variables:
+However, say you only need two of these 6 variables, say `continent` and `lifeExp`. You can `select()`  these two variables:
 
 ```{r}
-flights %>% 
-  select(carrier, flight)
+gapminder %>% 
+  select(continent,lifeExp)
 ```
 
 This function makes it easier to explore large datasets since it allows us to limit the scope to only those variables we care most about. For example, if we `select()` only a smaller number of variables, it will make viewing the dataset in RStudio's spreadsheet viewer more digestible. 
 
-Let's say instead you want to drop, or de-select, certain variables. For example, consider the variable `year` in the `flights` data frame. This variable isn't quite a "variable" because it is always `2013` and hence doesn't change. Say you want to remove this variable from the data frame. We can deselect `year` by using the `-` sign:
+Let's say instead you want to drop, or de-select, certain variables. For example, consider the variable `year` in the `gapminder` data frame. Say you want to look at all the variables except year. You can remove this variable from the data frame. We can deselect `year` by using the `-` sign:
 
 ```{r}
-flights %>% 
+gapminder %>% 
   select(-year)
 ```
 
 Another way of selecting columns/variables is by specifying a range of columns:
 
-```{r, eval=FALSE}
-flights %>% 
-  select(year:day, air_time:minute)
+```{r, eval = FALSE}
+gapminder %>% 
+  select(country:lifeExp)
 ```
 
-This will `select()` all 3 columns between `year` and `day`, as well as all 4 columns ebtween  `air_time` and `minute`. 
+This will `select()` all columns between the two specified variables (i.e. the 2 variables `country` and `continent`, as well as all 4 columns between  `country` and `lifeExp`. 
 
-The `select()` function can also be used to rearrange columns when used with the `everything()` helper function.  For example, suppose we want the `hour`, `minute`, and `time_hour` variables to appear immediately after the `year`, `month`, and `day` variables, while not discarding the rest of the variables. In the following code, `everything()` will pick up all remaining variables: 
+The `select()` function can also be used to rearrange columns when used with the `everything()` helper function.  For example, suppose we want the `continent`, `country` variables to appear immediately after the `year` variable, while not discarding the rest of the variables. In the following code, `everything()` will pick up all remaining variables: 
 
 ```{r}
-flights %>% 
-  select(year, month, day, hour, minute, time_hour, everything())
+gapminder %>% 
+  select(year, continent, country, everything())
 ```
 
 Lastly, the helper functions `starts_with()`, `ends_with()`, and `contains()` can be used to select variables/columns that match those conditions. Examples:
 
 ```{r}
-flights %>% 
-  select(starts_with("a"))
+gapminder %>% 
+  select(starts_with("c"))
 ```
 
 ```{r}
-flights %>% 
-  select(ends_with("delay"))
+gapminder %>% 
+  select(ends_with("p"))
 ```
 
 ```{r}
-flights %>% 
-  select(contains("time"))
+gapminder %>% 
+  select(contains("t"))
 ```
 
 
@@ -1029,10 +1032,10 @@ flights %>%
 
 `slice()` and `pull()` are additional functions that you can use to pick out specific rows or columns within a data frame.
 
-Using `slice()` gives us specific rows from the `flights` tibble:
+Using `slice()` gives us specific rows from the `gapminder` tibble:
 
 ```{r}
-slice(flights, 2:5)
+slice(gapminder, 2:5)
 ```
 
 Unlike `filter()`, `slice()` relies on numeric order of the data. 
@@ -1040,60 +1043,64 @@ Unlike `filter()`, `slice()` relies on numeric order of the data.
 `pull()` grabs out a variable as a vector, rather than leaving it within a tibble, as `select()` does:
 
 ```{r}
-slice(flights, 2:5) %>% 
-  pull(dep_time)
+slice(gapminder, 2:5) %>% 
+  pull(lifeExp)
 ```
 
 This is often handy when you want to feed the data into a function, like `mean()` which requires a vector as input:
 
 ```{r}
-slice(flights, 2:5) %>% 
-  pull(dep_time) %>% 
+slice(gapminder, 2:5) %>% 
+  pull(lifeExp) %>% 
   mean()
 ```
 
 The most common way to subset vectors is to use the "bracket" operator `[]`. Example:
 
 ```{r}
-flights$dep_time[2:5]
+gapminder$lifeExp[2:5]
 ```
 
 ### `arrange()` rows
 
 One of the most commonly performed data wrangling tasks is to sort a data frame's rows in the alphanumeric order of one of the variables. Unlike `filter()` or `select()`, `arrange()` does not remove any rows or columns from the data frame. Instead, the **dplyr** package's `arrange()` function allows us to sort/reorder a data frame's rows according to the values of the specified variable.
 
-Suppose we are interested in determining the flight that covers that most distance from all domestic flights departing from New York City in 2013:
+Suppose we are interested in finding which top 5 countries have the highest life expectancy in our dataset.
 
-First, let's `select()` some pertinent variables to make the data more easy to read. 
+
+First, let's `select()` some pertinent variables to make the data more easy to read and use `filter()` to narrow our data to Afganistan.
 
 ```{r, eval}
-flights_dist <- flights %>% 
-  select(origin, dest, air_time, distance)
-flights_dist
+gapminder_le <- gapminder %>% 
+  select(country, year, lifeExp)
+gapminder_le
 ```
 
-The order of this data appears is maintained from the original `flights` data set. Say instead we would like to see the same data, but sorted for the `distance` of each flight (from the farthest to the shortest distance).
+It would be tedious to go through all 1,704 rows trying to find the top 5 years. This is where we can use `arrange()` to organize our data.
 
 ```{r}
-flights_dist %>% 
-  arrange(distance)
+gapminder_le %>% 
+  arrange(lifeExp)
 ```
 
 This is, however, the opposite of what we want. The rows are sorted with the flights covering the least distance displayed first. This is because `arrange()` always returns rows sorted in ascending order by default. To switch the ordering to be in "descending" order instead, we use the `desc()` function like so:
 
 ```{r}
-flights_dist %>% 
-  arrange(desc(distance))
+gapminder_le %>% 
+  arrange(desc(lifeExp))
 ```
  
-Let's try this one more time with a character variable. What happens when we try to sort by the destination (`dest`) variable?
+As you can see, we now have our countries of interest. 
+
+
+Be aware that when you use the `desc()` helper function with a character variable, will sort the destinations reverse alphabetically. 
 
 ```{r}
-flights_dist %>%
-  arrange(dest)
+gapminder %>%
+  arrange(continent)
 ```
 
-As you can see, character variables will be sorted alphabetically. Using the `desc()` helper function with a character variable, will sort the destinations reverse alphabetically. 
+As you can see, character variables will be sorted alphabetically. Using the `desc()` helper function with a character variable, will sort the countries alphabetically. 
 
 
 ### `mutate()` 
@@ -1108,59 +1115,25 @@ $$
 \text{temp in C} = \frac{\text{temp in F} - 32}{1.8}
 $$
 
-We can apply this formula to the `temp` variable using the `mutate()` function from the **dplyr** package, which takes existing variables and mutates them to create new ones. 
+We can using the `mutate()` function from the **dplyr** package, which takes existing variables and mutates them to create new ones. The `airquality` data set contains values for temperature that we can manipulate to Celcius. Let's use `mutate()` to do so. 
 
-```{r, eval=TRUE}
-weather <- weather %>% 
-  mutate(temp_in_C = (temp - 32) / 1.8)
+```{r, eval = TRUE}
+airquality <- airquality %>% 
+  mutate(Temp_in_C = (Temp - 32) / 1.8)
 ```
 
-In this code, we `mutate()` the `weather` data frame by creating a new variable `temp_in_C = (temp - 32) / 1.8` and then *overwrite* the original `weather` data frame. Why did we overwrite the data frame `weather`, instead of assigning the result to a new data frame like `weather_new`? As a rough rule of thumb, as long as you are not losing original information that you might need later, it's acceptable practice to overwrite existing data frames with updated ones, as we did here. On the other hand, why did we not overwrite the variable `temp`, but instead created a new variable called `temp_in_C`?  Because if we did this, we would have erased the original information contained in `temp` of temperatures in Fahrenheit that may still be valuable to us.
+In this code, we `mutate()` the `airquality` data frame by creating a new variable `Temp_in_C = (Temp - 32) / 1.8` and then *overwrite* the original `airquality` data frame. Why did we overwrite the data frame `airquality`, instead of assigning the result to a new data frame like `airquality_new`? As a rough rule of thumb, as long as you are not losing original information that you might need later, it's acceptable practice to overwrite existing data frames with updated ones, as we did here. On the other hand, why did we not overwrite the variable `Temp`, but instead created a new variable called `Temp_in_C`?  Because if we did this, we would have erased the original information contained in `Temp` of temperatures in Fahrenheit that may still be valuable to us.
 
 Let's now compute monthly average temperatures in both &deg;F and &deg;C using the `group_by()` and `summarize()` code we saw in Section \@ref(groupby):
 
 ```{r}
-summary_monthly_temp <- weather %>% 
-  group_by(month) %>% 
-  summarize(mean_temp_in_F = mean(temp, na.rm = TRUE), 
-            mean_temp_in_C = mean(temp_in_C, na.rm = TRUE))
+summary_monthly_temp <- airquality %>% 
+  group_by(Month) %>% 
+  summarize(mean_temp_in_F = mean(Temp, na.rm = TRUE), 
+            mean_temp_in_C = mean(Temp_in_C, na.rm = TRUE))
 summary_monthly_temp
 ```
 
-Let's consider another example. Passengers are often frustrated when their flight departs late, but aren't as annoyed if, in the end, pilots can make up some time during the flight.  This is known in the airline industry as _gain_, and we will create this variable using the `mutate()` function:
-
-```{r}
-flights <- flights %>% 
-  mutate(gain = dep_delay - arr_delay)
-```
-
-Let's take a look at only the `dep_delay`, `arr_delay`, and the resulting `gain` variables for the first 5 rows in our updated `flights` data frame in Table \@ref(tab:first-five-flights).
-
-```{r first-five-flights, echo=FALSE}
-flights %>% 
-  select(dep_delay, arr_delay, gain) %>% 
-  slice(1:5)
-```
-
-The flight in the first row departed 2 minutes late but arrived 11 minutes late, so its "gained time in the air" is a loss of 9 minutes, hence its `gain` is 2 - 11 = -9. On the other hand, the flight in the fourth row departed a minute early (`dep_delay` of -1) but arrived 18 minutes early (`arr_delay` of -18), so its "gained time in the air" is $-1 - (-18) = -1 + 18 = 17$ minutes, hence its `gain` is +17.
-
-Recall from Section \@ref(histograms) that since `gain` is a numerical variable, we can visualize its distribution using a histogram.  
-
-```{r gain-hist, message=FALSE, fig.cap="Histogram of gain variable.", fig.height=3}
-ggplot(data = flights, mapping = aes(x = gain)) +
-  geom_histogram(color = "white", bins = 20)
-```
-
-The resulting histogram in Figure \@ref(fig:gain-hist) provides a different perspective on the `gain` variable than the summary statistics we computed earlier. For example, note that most values of `gain` are right around 0. 
-
-To close out our discussion on the `mutate()` function to create new variables, note that we can create multiple new variables at once in the same `mutate()` code. Furthermore, within the same `mutate()` code we can refer to new variables we just created. As an example, consider this code from @rds2016:
-
-```{r}
-flights <- flights %>% 
-  mutate(gain = dep_delay - arr_delay,
-         hours = air_time / 60,
-         gain_per_hour = gain / hours)
-```
 
 #### `ifelse()`
 
@@ -1168,34 +1141,31 @@ flights <- flights %>%
 
 <!-- DK: Edit these lines from R4DS. Are there other functions which we should mention here? Do something sensible with group_by. To get `_` to work in caption title. Found at https://github.com/rstudio/bookdown/issues/209  -->
 
-`ifelse()` has three arguments. The first argument `test` should be a logical vector. The result will contain the value of the second argument, `yes`, when test is TRUE, and the value of the third argument, `no`, when it is FALSE. Imagine that we want to create a new variable `E`, which is TRUE when the color of the diamond is "E" and FALSE otherwise. 
+`ifelse()` has three arguments. The first argument `test` should be a logical vector. The result will contain the value of the second argument, `yes`, when test is TRUE, and the value of the third argument, `no`, when it is FALSE. 
 
+Imagine that we want to create a new variable `compact`, which is TRUE when the class of the car is "compact" and FALSE otherwise. 
 
 ```{r}
-diamonds %>% 
-  select(carat, color, price) %>% 
-  mutate(E = ifelse(color == "E", TRUE, FALSE))
+mpg %>% 
+  select(manufacturer, model, class) %>% 
+  mutate(compact = ifelse(class == "compact", TRUE, FALSE))
 ```
-
 
 Alternatively to `ifelse()`, use `dplyr::case_when()`. `case_when()` is particularly useful inside mutate when you want to create a new variable that relies on a complex combination of existing variables. Note that there is a more robust version of `ifelse()` in **dplyr**: `if_else()`. This works exactly the same as the standard version but is somewhat more robust. 
 
 <!-- DK: Is this useful? -->
-
-```{r groupsummarize, echo=FALSE, fig.cap="(ref:groupby)", purl=FALSE, fig.height=2.5}
-knitr::include_graphics("01-visualization/images/group_summary.png")
-```
+<!-- BG: I think if we don't put more here, this small section is not very meaningful -->
 
 ### `summarize()`
 
-The next common task when working with data frames is to compute *summary statistics*. Summary statistics are single numerical values that summarize a large number of values. Commonly known examples of summary statistics include the mean (also called the average) and the median (the middle value). Other examples of summary statistics that might not immediately come to mind include the *sum*, the smallest value also called the *minimum*, the largest value also called the *maximum*, and the *standard deviation*.
+The next common task when working with data frames is to compute *summary statistics*. Summary statistics are single numerical values that summarize a large number of values. Commonly known examples of summary statistics include the *mean* (also called the average) and the *median* (the middle value). Other examples of summary statistics that might not immediately come to mind include the *sum*, the smallest value also called the *minimum*, the largest value also called the *maximum*, and the *standard deviation*.
 
-Return to a familiar dataset. Let's calculate two summary statistics of the `temp` temperature variable in the `weather` data frame: the mean and standard deviation. To compute these summary statistics, we need the `mean()` and `sd()` *summary functions* in R. Summary functions in R take in many values and return a single value.
+Return to a the `airquality` dataset. Let's calculate two summary statistics of the `Temp` temperature variable in the `airquality` data frame: the mean and standard deviation. To compute these summary statistics, we need the `mean()` and `sd()` *summary functions* in R. Summary functions in R take in many values and return a single value.
 
 Recall the output of the `summary()` function. 
 
 ```{r, echo = FALSE}
-summary(weather)
+summary(airquality)
 ```
 
 This function offers an array of summary statistics for each of the columns of the dataset, but `summarize()` (or alternatively `summarise()`) allows us to calculate these statistics on individual columns of the dataset. 
@@ -1204,36 +1174,21 @@ More precisely, we'll use the `mean()` and `sd()` summary functions within the `
 
 We'll save the results in a new data frame called `summary_temp` that will have two columns/variables: the `mean` and the `std_dev`:
 
-```{r, eval=TRUE}
-summary_temp <- weather %>% 
-  summarize(mean = mean(temp), std_dev = sd(temp))
+```{r, eval = TRUE}
+summary_temp <- airquality %>% 
+  summarize(mean = mean(Temp), std_dev = sd(Temp))
 summary_temp
 ```
 
-Why are the values returned `NA`?``NA` is how R encodes *missing values*  where `NA` indicates "not available" or "not applicable." If a value for a particular row and a particular column does not exist, `NA` is stored instead. Values can be missing for many reasons. Perhaps the data was collected but someone forgot to enter it? Perhaps the data was not collected at all because it was too difficult to do so? Perhaps there was an erroneous value that someone entered that has been corrected to read as missing? You'll often encounter issues with missing values when working with real data.
 
-Going back to our `summary_temp` output, by default any time you try to calculate a summary statistic of a variable that has one or more `NA` missing values in R, `NA` is returned. To work around this fact, you can set the `na.rm` argument to `TRUE`, where `rm` is short for "remove"; this will ignore any `NA` missing values and only return the summary value for all non-missing values. 
 
-The code that follows computes the mean and standard deviation of all non-missing values of `temp`:
-
-```{r}
-summary_temp <- weather %>% 
-  summarize(mean = mean(temp, na.rm = TRUE), 
-            std_dev = sd(temp, na.rm = TRUE))
-summary_temp
-```
-
-Notice how the `na.rm = TRUE` are used as arguments to the `mean()` and `sd()` summary functions individually, and not to the `summarize()` function. 
-
-However, one needs to be cautious whenever ignoring missing values as we've just done. There are possible ramifications of blindly sweeping rows with missing values "under the rug." This is in fact why the `na.rm` argument to any summary statistic function in R is set to `FALSE` by default. In other words, R does not ignore rows with missing values by default. R is alerting you to the presence of missing data and you should be mindful of this missingness and any potential causes of this missingness throughout your analysis.
-
-### Basic statistical terms
+### Basic Statistical Terms
 
 <!-- DK: Maybe ntile()? Others? Discuss na.rm = TRUE; quantile; is.na(); acting on logical vectors -->
 
 What are other summary functions we can use inside the `summarize()` verb to compute summary statistics? You can use any function in R that takes many values and returns just one. Here are just a few:
 
-* mean(): the average
+* mean(): the the average
 * min() and max(): the minimum and maximum values, respectively
 * sd(): the standard deviation, which is a measure of spread
 * sum(): the total amount when adding multiple numbers
@@ -1250,146 +1205,134 @@ $$Mean = \frac{x_1 + x_2 + \cdots + x_n}{n}$$
 
 **`median()`**
 
-The median is calculated by first sorting a variable's data from smallest to largest.  After sorting the data, the middle element in the list is the *median*.  If the middle falls between two values, then the median is the mean of those two middle values.
+The median is calculated by first sorting a variable's data from smallest to largest. After sorting the data, the middle element in the list is the *median*.  If the middle falls between two values, then the median is the mean of those two middle values.
 
 **`sd()`**
 
-We will next discuss the *standard deviation* ($sd$) of a variable.  The formula can be a little intimidating at first but it is important to remember that it is essentially a measure of how far we expect a given data value will be from its mean:
+The *standard deviation* ($sd$) of a variable is essentially a measure of how far we expect a given data value will be from its mean.  The formula can be a little intimidating at first.
 
 $$sd = \sqrt{\frac{(x_1 - Mean)^2 + (x_2 - Mean)^2 + \cdots + (x_n - Mean)^2}{n - 1}}$$
 
 
-Let's return to the `gain` variable from the previous chapter and look at some summary statistics by considering multiple summary functions at once in the same `summarize()` code:
+We can also run summary statistics `across()` multiple columns at the same time. To get a better understanding of the `across()` helper function, run `?across` in your console and see what arguments it takes. Suppose we wanted to take the `mean()` of both the `Temp` and the `Wind` variables. 
 
 ```{r}
-flights %>% 
-  mutate(gain = arr_delay - dep_delay) %>% 
-  summarize(min = min(gain, na.rm = TRUE),
-            q1 = quantile(gain, 0.25, na.rm = TRUE),
-            median = quantile(gain, 0.5, na.rm = TRUE),
-            q3 = quantile(gain, 0.75, na.rm = TRUE),
-            max = max(gain, na.rm = TRUE),
-            mean = mean(gain, na.rm = TRUE),
-            sd = sd(gain, na.rm = TRUE),
-            missing = sum(is.na(gain)))
+airquality %>%
+  summarize(across(c(Temp, Wind), mean))
 ```
 
-We see for example that the average gain is +5 minutes, while the largest is +109 minutes! However, this code would take some time to type out in practice. 
-
-We can also run summary statistics `across()` multiple columns at the same time. To get a better understanding of the `across()` helper function, run `?across` in your console and see what arguments it takes. Suppose we wanted to take the `mean()` of both the `temp` and the `dewp` variables. 
-
-```{r}
-weather %>%
-  summarize(across(c(temp, dewp), mean))
-```
-
-Again, we encounter `NA` values missing values, and have to set `na.rm = TRUE` as an argument for the `mean()` function. 
-
-<!-- Explain the  ~ and . thoroughly. --> 
-
-```{r}
-weather %>%
-  summarize(across(c(temp, dewp), ~mean(., na.rm = TRUE)))
-```
-
-```{r}
-weather %>%
-  summarize(across(where(is.numeric), ~mean(.x, na.rm = TRUE)))
-```
 
 ### `group_by()`
 
-Say instead of a single mean temperature for the whole year, you would like 12 mean temperatures, one for each of the 12 months separately. In other words, we would like to compute the mean temperature split by month. We can do this by "grouping" temperature observations by the values of another variable, in this case by the 12 values of the variable `month`. Run the following code:
+Say instead of a single mean temperature for the whole year, you would like 12 mean temperatures, one for each of the 12 months separately. In other words, we would like to compute the mean temperature split by month. We can do this by "grouping" temperature observations by the values of another variable, in this case by the 12 values of the variable `Month`. Run the following code:
 
 ```{r}
-weather %>% 
-  group_by(month) %>% 
-  summarize(mean = mean(temp, na.rm = TRUE), 
-            std_dev = sd(temp, na.rm = TRUE))
+airquality %>% 
+  group_by(Month) %>% 
+  summarize(mean = mean(Temp), 
+            std_dev = sd(Temp))
 ```
 
 <!-- DK: This whole section stinks. Please fix! -->
 
-Notice the warning. R is trying to save us from ourselves. The warning means that the tibble which issues forth from the end of the pipe has been ungrouped, meaning that it no longer has any group attribute. This is probably what we want to have happen, which is why it is the default behavior. But there are many cases in which we want to keep the group attribute, i.e., we want the resulting tibble to still be grouped by month. The warning is urging us to be sure what we want. The proper way to handle the situation, here and everywhere else that we use `group_by()` and `summarize()`, is to specify the `.groups` argument.
+Notice the warning R gives us. The warning means that the tibble which issues forth from the end of the pipe has been "ungrouped". This means the group attribute we applied with `group_by()` no longer exists. This behavior is default, but what if we want to keep the group attribute? (i.e., we want the resulting tibble to still be grouped by month) 
+
+The proper way to handle the situation, here and everywhere else that we use `group_by()` and `summarize()`, is to specify the `.groups` argument.
 
 ```{r}
-weather %>% 
-  group_by(month) %>% 
-  summarize(mean = mean(temp, na.rm = TRUE), 
-            std_dev = sd(temp, na.rm = TRUE),
+airquality %>% 
+  group_by(Month) %>% 
+  summarize(mean = mean(Temp), 
+            std_dev = sd(Temp),
             .groups = "drop")
 ```
 
 This code does the same thing as the first version, but does not issue a warning, since we have made an affirmative decision to drop any grouping variables. See `?summarize` for a discussion of other possible values for `.groups`.
 
-This code is identical to the previous code that created `summary_temp`, but with an extra `group_by(month)` added before the `summarize()`. Grouping the `weather` dataset by `month` and then applying the `summarize()` functions yields a data frame that displays the mean and standard deviation temperature split by the 12 months of the year.
 
-It is important to note that the `group_by()` function doesn't change data frames by itself. Rather it changes the *meta-data*, or data about the data, specifically the grouping structure. It is only after we apply the `summarize()` function that the data frame changes. 
+**Note:** The `group_by()` function doesn't change data frames by itself. Rather it changes the *meta-data*, or data about the data, specifically the grouping structure. It is only after we apply the `summarize()` function that the data frame changes.
 
-Run this code (do not forget to load its package `nycflights13` in your console if you have not already):
+Consider the `airquality` data.
 
 ```{r}
-flights
+airquality
 ```
 
-Observe that the first line of the output reads `# A tibble: 336,776 x 20`. This is an example of meta-data, in this case the number of observations/rows and variables/columns in `flights`. The actual data itself are the subsequent table of values. Now let's pipe the `flights` data frame into `group_by(origin)`:
+The first line of the output reads `# A tibble: 153 x 7`. This is an example of meta-data, in this case the number of observations/rows and variables/columns in `airquality`. The actual data itself is the table of values. Now let's pipe the `flights` data frame into `group_by(Month)`:
 
-```{r, eval=TRUE}
-flights %>% 
-  group_by(origin)
+```{r, eval = TRUE}
+airquality %>%
+  group_by(Month)
 ```
 
-Observe that now there is additional meta-data: `# Groups: origin [3]` indicating that the grouping structure meta-data has been set based on the 3 possible levels of the categorical variable `origin`: `"EWR"`, `"JFK"`, and `"LGA"`. On the other hand, observe that the data has not changed: it is still a table of 336,776 $\times$ 19 values.
 
-Only by combining a `group_by()` with another data wrangling operation, in this case `summarize()`, will the data actually be transformed. 
+Only by combining a `group_by()` with another data wrangling operation, in this case `summarize()`, will the data actually be transformed
 
-Let's revisit the `n()` counting summary function we briefly introduced previously. Recall that the `n()` function counts rows. This is opposed to the `sum()` summary function that returns the sum of a numerical variable. For example, suppose we'd like to count how many flights departed each of the three airports in New York City:
-
-```{r, eval=TRUE}
-by_origin <- flights %>% 
-  group_by(origin) %>% 
-  summarize(count = n(), 
+```{r, eval = TRUE}
+airquality %>%
+  group_by(Month) %>% 
+   summarize(mean = mean(Temp), 
+            std_dev = sd(Temp),
             .groups = "drop")
-
-by_origin
+  
 ```
 
-We see that Newark (`"EWR"`) had the most flights departing in 2013 followed by `"JFK"` and lastly by LaGuardia (`"LGA"`). Note there is a subtle but important difference between `sum()` and `n()`; while `sum()` returns the sum of a numerical variable, `n()` returns a count of the number of rows/observations. 
 
-If you would like to remove this grouping structure meta-data, we can pipe the resulting data frame into the `ungroup()` function:
 
-```{r, eval=TRUE}
-flights %>% 
-  group_by(origin) %>% 
-  ungroup()
-```
+<!-- Let's revisit the `n()` here -->
 
-Observe how the `# Groups: origin [3]` meta-data is no longer present. 
 
 #### Grouping by more than one variable
 
-You are not limited to grouping by one variable. Say you want to know the number of flights leaving each of the three New York City airports *for each month*. We can also group by a second variable `month` using `group_by(origin, month)`:
+<!-- You are not limited to grouping by one variable. Say you want to know the number of flights leaving each of the three New York City airports *for each month*. We can also group by a second variable `month` using `group_by(origin, month)`: -->
+
+<!-- ```{r} -->
+<!-- flights %>%  -->
+<!--   group_by(origin, month) %>%  -->
+<!--   summarize(count = n(), -->
+<!--             .groups = "drop") -->
+<!-- ``` -->
+
+<!-- Observe that there are 36 rows to `by_origin_monthly` because there are 12 months for 3 airports (`EWR`, `JFK`, and `LGA`).  -->
+
+<!-- Why do we `group_by(origin, month)` and not `group_by(origin)` and then `group_by(month)`? Let's investigate: -->
+
+<!-- ```{r} -->
+<!-- flights %>%  -->
+<!--   group_by(origin) %>%  -->
+<!--   group_by(month) %>%  -->
+<!--   summarize(count = n(), -->
+<!--             .groups = "drop") -->
+<!-- ``` -->
+
+<!-- What happened here is that the second `group_by(month)` overwrote the grouping structure meta-data of the earlier `group_by(origin)`, so that in the end we are only grouping by `month`. The lesson here is if you want to `group_by()` two or more variables, you should include all the variables at the same time in the same `group_by()` adding a comma between the variable names. -->
+
+## NA values 
+
+In some datasets, some values are returned as `NA`? `NA` is how R encodes *missing values*  where `NA` indicates "not available" or "not applicable." If a value for a particular row and a particular column does not exist, `NA` is stored instead. Values can be missing for many reasons. Perhaps the data was collected but someone forgot to enter it? Perhaps the data was not collected at all because it was too difficult to do so? Who knows! You'll often encounter issues with missing values when working with real data.
+
+
+Recall our dataset `airquality`. The code below selects the two variables `Ozone` and `Month`. Notice the `NA` values in the `Ozone` column.
 
 ```{r}
-flights %>% 
-  group_by(origin, month) %>% 
-  summarize(count = n(),
-            .groups = "drop")
+airquality %>% 
+  select(Ozone, Month)
 ```
 
-Observe that there are 36 rows to `by_origin_monthly` because there are 12 months for 3 airports (`EWR`, `JFK`, and `LGA`). 
-
-Why do we `group_by(origin, month)` and not `group_by(origin)` and then `group_by(month)`? Let's investigate:
+Any time you try to calculate a summary statistic of a variable that has one or more `NA` missing values in R, `NA` is returned. To work around this fact, you can set the `na.rm` argument to `TRUE`, where `rm` is short for "remove"; this will ignore any `NA` missing values and only return the summary value for all non-missing values. 
 
 ```{r}
-flights %>% 
-  group_by(origin) %>% 
-  group_by(month) %>% 
-  summarize(count = n(),
-            .groups = "drop")
+airquality %>% 
+  select(Ozone, Month) %>% 
+  group_by(Month) %>% 
+  summarize(ozone_avg = (mean(Ozone, na.rm = TRUE)))
 ```
 
-What happened here is that the second `group_by(month)` overwrote the grouping structure meta-data of the earlier `group_by(origin)`, so that in the end we are only grouping by `month`. The lesson here is if you want to `group_by()` two or more variables, you should include all the variables at the same time in the same `group_by()` adding a comma between the variable names.
+
+Notice how the `na.rm = TRUE` are used as arguments to the `mean()` and `sd()` summary functions individually, and not to the `summarize()` function.
+
+However, one needs to be cautious whenever ignoring missing values as we've just done. There are possible ramifications of blindly sweeping rows with missing values "under the rug." This is in fact why the `na.rm` argument to any summary statistic function in R is set to `FALSE` by default. In other words, R does not ignore rows with missing values by default. R is alerting you to the presence of missing data and that you should be mindful of its absence.
+
 
 ## Summary
 
