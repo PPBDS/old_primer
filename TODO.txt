@@ -18,7 +18,7 @@
 * Expand the Shiny appendix to highlight those aspects of Shiny that are most used by students for their final projects. Start with panel tabs. And math. And regression tables. Maybe switch the entire focus to the Mastering Shiny book?
 
 
-* Chapter 6 must explain clearly the concept of standard error, p-values and confidence intervals. Need this rock-solid before going into MAD SD complexity in chapter 7.
+* Chapter 6 must explain clearly the concept of standard error, p-values and confidence intervals. Need this rock-solid before going into MAD SD complexity in chapter 7. Actually, all this should start in Chapter 2.
 
 
 * Introduce stan_glm() at the start of chapter 7 as the easier way to solve the bead problem. This will look a lot like the initial use of stan_glm in chapter 7 right now. Nothing wrong with doing that intro twice! Going through each line of that output is useful, as is the use of fitted(), residuals(), and so on.
@@ -37,13 +37,46 @@
 
 * Chapter 7 should introduce, gently, the concept of in-sample and out-of-sample. As well as predictive accuracy as being a good way to judge how good your model is. What are some useful measures of predictive accuracy? Discuss our objective functions; minimize what? when would median be better than mean? Find a skewed data set and show how guessing the median works better than guessing the mean, if you care about absolute difference. (Can we estimate the median with stan_glm()?)
 
-
-
-
 * Chapter 9 should start with  single variable which actually requires lots of parameters? For example, regress presidential support on state and come up with a different average approval for each state. This is cheating in that it is too many paramters. But it would allow us to explain a bunch of stuff! Including Bayesian shrinkage. Saving this till the end of the model causes us to miss stuff.
 
 
 ## To Discuss Later
+
+* Track down these warnings from the end of book-building.
+
+Output created: docs/index.html
+Warning messages:
+1: `group_by_()` is deprecated as of dplyr 0.7.0.
+Please use `group_by()` instead.
+See vignette('programming') for more help
+This warning is displayed once every 8 hours.
+Call `lifecycle::last_warnings()` to see where this warning was generated. 
+2: Removed 2 rows containing missing values (geom_bar). 
+3: Removed 2 rows containing missing values (geom_bar). 
+4: The label(s) other-verbs not found 
+5: The label(s) programming-concepts not found 
+6: The label(s) resampling-tactile not found 
+7: The label(s) normal not found 
+
+* How should we format plots? Should be a standard way. How does R4DS do it? Should we always make it out.width="100%"?
+
+* kenya has some variables, like distance and pop_density, with very skewed distributions. This might be handy for use in chapter 3 when playing the prediction game.
+
+* Use r scales::comma() throughout
+
+* Consider this for entire document:  
+html_document:
+    code_folding: "hide"
+
+* Lots of interesting items: https://holtzy.github.io/Pimp-my-rmd/. I like the hack of making your Rmd an index.Rmd and then the html will appear as a Github pages for free.
+
+* Rationalize the discussion of distributions and draws, moving sensibly through chapters 2, 3, 5 and 6 with more detail discussion. Students understanding should be solid, especially of what the median and MAD SD mean, before they see it for real in Chapter 7.
+
+* Should use summary(fit_1) and discuss at some point. But when? Maybe Chapter 10?
+
+Do we need a cool graphics appendiex, with  brief descriptions, pretty pictures from cool packages like: ggrepel, gghighlights, plotly. Others?
+
+* posterior package useful?
 
 * More discussion of what it means to "control for" something in a regression.
 
@@ -54,7 +87,7 @@
 
 * Need discussion of what it means to "control" for. Right now, we don't mention this until chapter 11. Needs to be covered earlier, especially in chapter 9. That sets the stage for later.
 
-* Standardize notation. What are predicted/fitted values? Use y_i everywhere, instead of using problem specific terms? That seems a bad idea.
+* Standardize notation. What are predicted/fitted values? Use y_i everywhere, instead of using problem specific terms? That seems a bad (good?!) idea.
 
 * Generate some error messages and then show that they can teach you something. Object does not exist. filter only have one equal sign, and so on. Do this all the time. Normalize the generation and processing of error messages.
 
@@ -83,19 +116,18 @@
 
 
 
-## Older Materia
+## Older Material
 
 Everything below needs to be reviewed and organized.
 
-Understand bibliography.
+Interesting resources:
 
  https://fromthebottomoftheheap.net/2020/04/30/rendering-your-readme-with-github-actions/
  https://github.com/itsyaoyu/github_actions/blob/master/.github/workflows/main.yml
  https://www.willandskill.se/en/deleting-your-git-commit-history-without-removing-repo-on-github-bitbucket/
 
-Discuss how to set a stable version of PPBDS.data which we do not touch all semester, and then have a devel branch in which we are fixing all the mistakes.
+Discuss how to set a stable version of primary.data which we do not touch all semester, and then have a devel branch in which we are fixing all the mistakes.
 
-Explore: bookdown::pdf_book(base_format = msmbstyle::msmb_html_book())
 
 Clean up bok repo to test this:
 
@@ -105,8 +137,6 @@ git add .
 git commit -m "Initial commit"
 git remote add origin https://github.com/davidkane9/PPBDS.data.git
 git push -u --force origin master
-
-Set up organization for the book.
 
 Add necessary references to the references.bib and ensure that they are called correctly.
 
@@ -144,16 +174,6 @@ nocite: '@*'
 
 * When adding a new package, you must run renv::snapshot() after installing it in the local renv/library directory. This will update renv.lock, I think. But then how are other people supposed to get that update? We need to document how this is working. Don't forget that new contributors need to run renv::consent(), I think.
 
-* We are using the Stanford example.
-  + Make sure the **msmbstyle** package is installed
-  + `msmbstyle::msmb_html_book` in the _output.yml file outputs to the Stanford format
-  + To set the book color to crimson:
-    + go to docs/libs/msmb-css-0/msmb.css
-    + Find `#1881c2` and replace all with `#c90016`
-    + Find `24,129,194` and replce with `201,0,23`
-    + Save the file. No need to rebuild the book.
-
-
 ## Things That Annoy Us
 
 These are open projects with annoying details that we will revisit.
@@ -176,64 +196,31 @@ These are open projects with annoying details that we will revisit.
 ## Other Items
 
 
-The world confronts us. We must make decisions. The data we want is missing. So, we create models, make estimates, admit to our uncertainty, and then decide.
-
-## Unclassified Items
-
-* Fix "No additional resources" in Chapter 6 and 7. Standardize this section across all chapters. 545 is different. Delete everywhere?
-
 * Take (?) material from: https://chabefer.github.io/STCI/; https://github.com/chabefer/SKY
 
-* Some chapters, like productivity.Rmd have a lot of footnotes. Good or bad?
 
 * Revisit the Prediction Game.
 
-
-````markdown
-`r ''````{r}
-plot(cars)
-```
-````
+* Add discussion of R constants.
 
 ### From the Bookdown book
 
-preview_chapter() and serve_book() as aid to chapter writers.
+preview_chapter() and serve_book() as an aid to chapter writers.
 
 webshot() tool for including images taken from webpages. Everytime we mention how cool source X is, we should provide a webshot of it. (And we should test that it exists.) Make the productivity chapter include way less of our prose.
 
-switch to tufte() style, ask Healy. Or this guy: http://nickchk.com/chapter5.pdf
 
-Kindle book
 
 put the book on bookdown.org, or class assignments
 
 
 Key concepts which need to be put everywhere:
 
-decisions need models
-potential outcomes and causal effects
-units, treatments, outcomes
-randomization is magic: assignment to estimate causal effects, bootstrap to estimate uncertainty
-
 Describe, predict, infer. Description of things you can see, prediction for things you will see and inference about things you will never see.
 
 Prediction checks.
 
-Bias/Variance == Underfitting/Overfitting
-
-Drop all the frequentist nonsense except for a footnote at the first use with a confidence interval and an appendix which walks students through the Kuske arguments.
-
-
-Discuss RCM, assuming that we are estimating a causal effect of some type. And, if we are not estimating causal effects (i.e., all we care about is prediction), then the mechanics of lm are the same, but the interpretation of the regression coefficient has no causal implications.  We want a series of tables illustrating potential outcomes and our estmation of them. Start with a table with ?, just as in the Appendix. We use linear regression to fill in these questions marks. Show table with question marks and then show table with question marks filled in with best guess. Then show table with question marks filled in with a confidence interval for the mean and then for a distribution of predicted values. The closer we can tie RCM to the different parts of a regression, the better. But do this each chapter, not just regression.
-
-
-
-Each chapter should finish with a new section which uses list-columns plus broom to estimate scores of models, and then pull out interesting models. See the gapminder examples from https://r4ds.had.co.nz/many-models.html#gapminder. We need the full tool set: nest, unnest and so on.
-
-Each chapter begins with a real example, a decision we must make (if only the prediction game), and then creates a model which we will use to help us. Bets are always offered. RCM discussed. Bias scenarios demonstrated. The secret weapon --- a model for each state or each year --- used.
-
-
-## Other summer issues
+Bias/Variance == Underfitting/Overfittin
 
 
 https://committedtotape.shinyapps.io/freeR/
@@ -241,15 +228,9 @@ https://committedtotape.shinyapps.io/freeR/
 
 Replace all photos of activities with photos from Harvard, using Tsai.
 
-Chapters 7, 8 and 9
-
-## Approaches to Include?
-
-xgboost: https://www.r-bloggers.com/using-xgboost-with-tidymodels/
 
 I really like the Kruchke and brms combination: https://bookdown.org/content/3686/
 
-https://bookdown.org/content/3686/
 
 
 ### Use of Note Boxes
@@ -264,11 +245,6 @@ http://statprep.org/
 
 missing data
 regresssion towards the mean
-prediction/classification
-map/network/text
-
-"docknitr: Use Docker Images to Process Rmarkdown Blocks" looks promising. Note the vignettes. But maybe this is a) overkill and b) only really useful for Python, which is what is used for the docknitr vignette examples. The methods used by STAT 545 and Modern Dive are probably good enough.
-
 
 # Notes on **bookdown** Book
 

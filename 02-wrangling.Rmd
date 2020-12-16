@@ -1,43 +1,15 @@
 
 # Wrangling {#wrangling}
 
-<!-- TODO: -->
+<!-- TODO: --> 
 
-<!-- Look at the code used in the Temperance section of chapter 7. Explain all the key parts here, including rowwise, ungroup and matrices. -->
-
-<!-- Add sample() to random numbers. -->
-
-<!-- Create vectors of lots of draws from the random numbers. -->
-
-<!-- Make a tibble and then pipe tibble to ggplot -->
-
-<!-- tibble(heads = rbinom . .. .) %>%  -->
-<!--  ggplot() -->
-
-<!-- Include math formulas (sort of?) in the margin. $C ~ binomial(n, p)$, where $C \subset (H,T)$  -->
-
-<!-- Last example might be create two rnorm variables with different means and sd (rnorm_5_1, rnorm_0_3, where the first number is the mean and the second the sd), then add them to make a third. Then, pivot_longer to make it easier for them to be plotted together as overlapping densities.  -->
-
-<!-- Are these commands worth covering? -->
-
-<!-- tidyr::separate_rows() -->
-<!-- dplyr::coalesce() -->
-<!-- expand(data, ...) -->
-<!-- crossing(...) -->
-<!-- nesting(...) -->
-
-
-<!-- Add discussion of allowed variable names, the use of ``, and  early in the book. skimr() also. You can have a variable name be a number, but in order to refer to that variable, you need to use backticks. -->
 
 <!-- Maybe make a big set of FEC data from the 2016 election for use as the practice data? Ought to use something different from airlines . . . which are boring. -->
 
-<!-- Get rid of some of these garbage data packages which we don't really use. Why not use primer.data for everything? -->
+<!-- Get rid of some of these garbage data packages which we don't really use. Why not use primer.data (or built in tidyverse data) for everything? -->
 
 Start by loading the packages which we will need in this chapter.
-```{r message=FALSE, warning=FALSE, echo=FALSE}
-library(ggrepel)
-library(knitr)
-```
+
 
 ```{r, message=FALSE}
 library(tidyverse)
@@ -289,6 +261,44 @@ json
 The file above actually represents a data frame. To read it, we can use the function `fromJSON` from the jsonlite package. Note that JSON files are often made available via the internet. Several organizations provide a JSON API or a web service that you can connect directly to and obtain data. 
 
 You can learn much more by examining tutorials and help files from the jsonlite package. This package is intended for relatively simple tasks such as converging data into tables. For more flexibility, we recommend `rjson`.
+
+## Tibbles
+
+<!-- Add a Tibble section after data gathering. Could include discussion of allowed variable names, the use of ``, and  early in the book. clean_names() and skim() also. You can have a variable name be a number, but in order to refer to that variable, you need to use backticks. -->
+
+
+Tibbles are a kind of data frame, useful for storing data in which we have the same number of observations for each variable. 
+
+### `clean_names()`
+
+Another useful function is the `clean_names()` function, which is included in the **janitor** package. This function allows you to standardize the column names of a dataset. This can be particularly useful when reading in a dataset from the web. Look at the `flights` dataset, again. 
+
+```{r}
+glimpse(flights)
+```
+
+As you can see the column names are in all lowercase, and each space in between words is represented by an underscore character. This is the default result of `clean_names()`, so running `clean_names(flights)` will have no effect. 
+
+Suppose, instead, we wanted to change the column names to camel case, where word boundaries are demarcated by an upper case letter.  
+
+```{r}
+flights %>% clean_names("small_camel")
+```
+
+Nonetheless, you will likely only ever be required to use `clean_names()` with the default snake case. 
+
+### `skim()`
+
+The `skim()` function from the **skimr** package is a useful summary function that offers an overview of a tibble  The function creates a report of the tibble, organized by variable type. Example:
+
+```{r out.width="100%"}
+skim(flights)
+```
+
+
+Take a quick look at the section containing numeric variables. This is of particular interest because the right-most column offers insight into the potential distribution of the data. 
+
+Although most data scientists use tibbles, or similar structures, to organize their work, we should remember that tibbles are composed of variables, the individual columns which, together, make up the tibble. Each column, or variable, can be of a different type: character, factor, date and so on. The next few sections will explore different variable types and how to work with them.
 
 ## Characters 
 
@@ -1595,7 +1605,7 @@ flights_weather_joined <- flights %>%
 View(flights_weather_joined)
 ```
 
-## "Tidy" data
+## Tidy data
 
 Now, we will explore the topic of "tidy" data, a manner of data formatting particularly suited to the creation of graphics and the manipulation of the dataframe. You will see that having data stored in "tidy" format is about more than just what the everyday definition of the term "tidy" might suggest: having your data "neatly organized." Instead, we define the term "tidy" as it's used by data scientists who use R, outlining a set of rules by which data is saved.
 
@@ -1738,188 +1748,122 @@ If however you want to convert a "tidy" data frame to "wide" format, you will ne
 
 You can also view examples of both `pivot_longer()` and `pivot_wider()` on the [tidyverse.org](https://tidyr.tidyverse.org/dev/articles/pivot.html#pew) webpage. There's a nice example to check out the different functions available for data tidying and a case study using data from the World Health Organization on that webpage. Furthermore, each week the R4DS Online Learning Community posts a dataset in the weekly [`#`TidyTuesday event](https://github.com/rfordatascience/tidytuesday) that might serve as a nice place for you to find other data to explore and transform. 
 
-## Other Commands
 
-Here are some commands which will prove useful for the rest of the book.
 
-### NA Values 
+## Distributions {#distributions}
 
-When importing datasets that have not already been extensively wrangled, there may be some observations in the dataframe that are blank. These are called missing values, and they are often marked as `NA`. The presence of `NA` values in a dataframe can be problematic. Recall from the previous chapter that without setting `na.rm = TRUE`, the following code gives a very different results. 
+<!-- Include math formulas (sort of?) in the margin. $C ~ binomial(n, p)$, where $C \subset (H,T)$  -->
 
-```{r}
-flights %>% 
-  mutate(gain = arr_delay - dep_delay) %>% 
-  summarize(mean = mean(gain))
+What is a distribution? Think of the distribution of a variable as an urn from which we can pull out, at random, values for that variable. Drawing a thousand or so values from that urn, and then looking at a histogram or density plot, can show where the values are centered and how the values vary. 
 
-flights %>% 
-  mutate(gain = arr_delay - dep_delay) %>% 
-  summarize(mean = mean(gain, na.rm = TRUE))
-```
-
-Suppose we wanted to simply remove all missing values from the `gain` column. We can filter and remove missing values using the helper function `is.na()`. `is.na()` is a boolean function that takes in an observation in a dataframe and returns TRUE if the observation is a missing value and FALSE otherwise. In this case, we will have to use `!is.na()`, as the `!` operator means "not". Thus, we can filter observations that are NOT missing values.
+Consider the distribution of the possible values from rolling a fair die. We can use the `sample()` function to create draws from this distribution: 
 
 ```{r}
-flights %>%
-  mutate(gain = arr_delay - dep_delay) %>%
-  filter(!is.na(gain)) %>%
-  summarize(mean = mean(gain))
+die <- c(1, 2, 3, 4, 5, 6)
+
+sample(x = die, size = 1)
 ```
 
-We can also remove the missing values from the dataset instead of merely filtering them out using the `drop_na()` function. The `flights` dataset contains 336,776 rows. And when 
+This produces one "draw" from the distribution of the possible values of one roll of six-sided die.
+
+Now, suppose we wanted to roll this die 10 times. One of the arguments of the `sample()` function is `replace`. We must specify if values can appear more than once. Since, when rolling a die 10 times, we expect that a value like 3 can appear more than once, we need to set `replace = TRUE`. 
 
 ```{r}
-flights %>%
-  mutate(gain = arr_delay - dep_delay) %>%
-  filter(is.na(gain))
+sample(x = die, size = 10, replace = TRUE)
 ```
-As we see here, there are 9,430 rows of the `flights` dataset that contain missing values in the gain column. So using `drop_na()`, we get:
+
+In other words, rolling a 1 on the first roll should not preclude you from rolling a 1 on a later roll. 
+
+What if the die is not "fair," meaning that some sides are more likely to appear then others? The final argument of the `sample()` function is the `prob` argument. It takes a vector (of the same length as the initial vector `x`) that contains all of the probabilities of selecting each one of the elements of `x`. Suppose that the probability of rolling a 1 was 0.5, and the probability of rolling any other value is 0.1. (These probabilities should sum to 1. If they don't `sample()` will automatically rescale them.) 
 
 ```{r}
-flights %>%
-  mutate(gain = arr_delay - dep_delay) %>%
-  drop_na(gain)
+sample(x = die, 
+       size = 10, 
+       replace = TRUE, 
+       prob = c(0.5, 0.1, 0.1, 0.1, 0.1, 0.1))
 ```
 
-Note that 336,776 - 9,430 = 327346, so `drop_na()` seems to check out. Be careful with `drop_na()`, however, because you may be removing rows with valuable data in other columns. 
-
-Suppose you did not want to remove the missing values but instead replace them with a number. We can use `replace_na()` as a helper function to `mutate()`. Here we replace each missing value in the gain column with a value of 0. 
-
-```{r}
-flights %>%
-  mutate(gain = arr_delay - dep_delay) %>%
-  mutate(gain = replace_na(data = gain, replace = 0))
-```
-
-You must be careful with this, though. Replacing missing values will affect any statistical result, such as the mean or standard deviation. Below we computer the mean: 
-
-```{r}
-flights %>%
-  mutate(gain = arr_delay - dep_delay) %>%
-  mutate(gain = replace_na(data = gain, replace = 0)) %>%
-  summarize(mean = mean(gain))
-```
-
-Comparing it with the previous mean variable we see that the computed value is different. 
-
-There are many additional ways to manipulate missing values, but these three functions cover most of the ways you will need to work with such observations in your data.   
-
-### `clean_names()`
-
-Another useful function is the `clean_names()` function, which is included in the **janitor** package. This function allows you to standardize the column names of a dataset. This can be particularly useful when reading in a dataset from the web. Look at the `flights` dataset, again. 
-```{r}
-glimpse(flights)
-```
-
-As you can see the column names are in all lowercase, and each space in between words is represented by an underscore character. This is the default result of `clean_names()`, so running `clean_names(flights)` will have no effect. 
-
-Suppose, instead, we wanted to change the column names to camel case, where word boundaries are demarcated by an upper case letter.  
-
-```{r}
-flights %>% clean_names("small_camel")
-```
-
-Nonetheless, you will likely only ever be required to use `clean_names()` with the default snake case. 
-
-### `skim()`
-
-The `skim()` function from the **skimr** package is a useful summary function that offers an overview of a dataframe.  It offers users the abilities to see potential trends and outliers for each of the variables in a dataframe. The function creates a report of the dataframe according to variable type. We'll run skim on the `flights` dataset. 
-
-```{r out.width="100%"}
-skim(flights)
-```
-
-
-Take a quick look at the section containing numeric variables. This is of particular interest because the rightmost column offers insight into the potential distribution of the data, something that will be discussed in later depth below. 
-
-## Distribution 
-
-What is a distribution? The distribution of a variable shows how frequently different values of a variable occur. Looking at the visualization of a distribution can show where the values are centered, show how the values vary, and give some information about where a typical value might fall. It can also alert you to the presence of outliers. 
-
-Before we examine distributions in greater depth, let's first explore the `sample()` function. `sample()` takes a sample of some size from some vector either with replacement or without replacement. This might seem very abstract, so consider a six-sided dice represented as a vector. 
-
-```{r}
-dice <- c(1, 2, 3, 4, 5, 6)
-```
-
-Suppose we wanted to simulate rolling this dice once. We can use the `sample()` function to achieve this. 
-```{r}
-sample(x = dice, size = 1)
-```
-
-Now, suppose we wanted to roll this dice 10 times. One of the arguments of the `sample()` function is replace. We must specify if a certain value can be rolled more than once. In this case, should replace be TRUE or FALSE. 
-
-```{r}
-sample(x = dice, size = 10, replace = TRUE)
-```
-
-Here replace should be TRUE. In other words, rolling a 1 on the first roll should not preclude you from rolling a one on a later roll. 
-
-The final argument of the `sample()` function is the prob argument. It takes a vector (of the same length as the initial vector x) that contains all of the probabilities of "landing on" one of the elements of x. Suppose that the probability of rolling a 1 was 0.5, and the probability of rolling any other value is 0.1. Note, these probabilities should sum to 1. 
-
-```{r}
-probs = c(0.5, 0.1, 0.1, 0.1, 0.1, 0.1)
-
-sample(x = dice, size = 10, replace = TRUE, prob = probs)
-
-```
-
-Now, let's return to our discussion of distributions. 
+`sample()` is just one of many functions for creating draws --- or, more colloquially, "drawing" --- from a distribution. Three of the most important functions are: `runif()`, `rbinom()`, and `rnorm()`.
 
 ### `runif()`
 
-Consider Uniform distribution. This is the case in which every outcome has the same chance of occurring. A Uniform distribution you might encounter everyday is rolling a fair dice. For example, you are as likely to roll a 2 as you are to roll a 6. In R, the function `runif()` (read as "r-unif") corresponds to a Uniform contribution. In other words, this function generates random values (within a specified range).
-
-The `runif()` function has three arguments: `n`, `min`, and `max`. Note that in R, `runif()` returns a continuous uniform distribution, not a discrete one. This means that if we tried to simulate our die-rolling example, we would get decimal values.
-
-Let's press on with our die-rolling example now that we have cautioned you about the difference between discrete and continuous uniform distributions. There are three arguments to `runif()`: `n`, `min`, and `max`. `n` is the number of observations, or `n = 1` since we are rolling the die once. The default value for `min` is `0` and the default value of `max` is 1. In our die-rolling example, these two values would be `min = 1` and `max = 6`, respectively. Let's plug these arguments into the function and see what we get.
+Consider a "uniform" distribution. This is the case in which every outcome in the range of possible outcomes has the same chance of occurring.  The function `runif()` (spoken as "r-unif") enables us to draw from a uniform contribution. `runif()` has three arguments: `n`, `min`, and `max`. `runif()` will produce `n` draws from between `min` and `max`, with each value having an equal chance of occurring.
 
 ```{r}
-runif(n = 1,min = 1,max = 6)
+runif(n = 10, min = 4, max = 6)
 ```
-Nice! We just made our first uniform distribution. Again, note that the output contains decimal numbers.
+
+Mathematically, we would write
+
+$$y_i \sim U(4, 6)$$, 
+
+meaning that the each value for $y$ is drawn from a uniform distribution between four and six.
 
 ### `rbinom()`
 
-Now consider Binomial distribution, the case in which the probability of some boolean variable (for instance success or failure) is calculated for repeated, independent trials. One common example would be the probability of flipping a coin and landing on heads. In R, the function `rbinom()` simulates such a distribution. This function takes three arguments, `n`, `size`, and `prob`. `n` is the number of observations, the `size` is the number of trials, and `prob` is the probability of success on each trial. Suppose we wanted to flip a fair coin one time, and let landing on hands represent success. Let `n=1` and `size = 1`, as we only want to flip the coin once. Then, since the coin is a fair coin, let `prob = 0.5`.
+Consider binomial distribution, the case in which the probability of some boolean variable (for instance success or failure) is calculated for repeated, independent trials. One common example would be the probability of flipping a coin and landing on heads. The function `rbinom()` allows us to draw from a binomial distribution. This function takes three arguments, `n`, `size`, and `prob`. `n` is the number of values we seek to draw, the `size` is the number of trials, and `prob` is the probability of success on each trial. Suppose we wanted to flip a fair coin one time, and let landing on hands represent success. 
 
 ```{r}
 rbinom(n = 1 , size = 1, prob = 0.5)
 ```
 
-```{r}
-coin_flip <- tibble(heads = rbinom(n = 100, size = 1, prob = 0.5))
-
-ggplot(data = coin_flip, aes(x = heads)) +
-  geom_bar() +
-  labs(title = "Flipping a Fair Coin 100 Times") +
-  xlab(label = "Flips") +
-  ylab(label = "Count")
-
-```
-
-As you can see there is a pretty even distribution of Heads (1s) and Tails (0s). An even larger sample size would result in a more even spread of Heads and Tails values. 
-
-Suppose instead we wanted to simulate an unfair cin, where the probability of landing on Heads was 0.75 instead of 0.25. 
+Do the same thing 100 times and look at the results:
 
 ```{r}
-coin_flip_2 <- tibble(heads = rbinom(n = 100, size = 1, prob = 0.75))
-
-ggplot(data = coin_flip_2, aes(x = heads)) +
+tibble(heads = rbinom(n = 100, size = 1, prob = 0.5)) %>% 
+ggplot(aes(x = heads)) +
   geom_bar() +
-  labs(title = "Flipping a Fair Coin 100 Times") +
-  xlab(label = "Flips") +
-  ylab(label = "Count")
+    labs(title = "Flipping a Fair Coin 100 Times",
+         x = "Result",
+         y = "Count") +
+    scale_x_continuous(breaks = c(0, 1),
+                       labels = c("Tails", "Heads"))
 ```
 
-### Normal distribution {#normal}
+There is a fairly even distribution of Tails and Heads. More draws would typically result in an even more equal split. 
 
-Let's next discuss one particular kind of distribution: *normal distributions*. Such bell-shaped distributions are defined by two values: (1) the *mean* $\mu$ ("mu") which locates the center of the distribution and (2) the *standard deviation* $\sigma$ ("sigma") which determines the variation of the distribution. In the figure below, we plot three normal distributions where:
+Suppose instead we wanted to simulate an unfair coin, where the probability of landing on Heads was 0.75 instead of 0.25. 
+
+```{r}
+tibble(heads = rbinom(n = 100, size = 1, prob = 0.75)) %>% 
+ggplot(aes(x = heads)) +
+  geom_bar() +
+    labs(title = "Flipping a Fair Coin 100 Times",
+         x = "Result",
+         y = "Count") +
+    scale_x_continuous(breaks = c(0, 1),
+                       labels = c("Tails", "Heads"))
+```
+
+The distribution --- the imaginary urn --- from which we draw the results of a coin flip for a fair coin is a different distribution --- a different imaginary urn --- from the distribution for a biased coin. In fact, tthere are an infinite number of distributions. Yet as long as we can draw values from a distribution, we can work with it. Mathematics:
+
+$$y_i \sim B(n, p)$$. 
+
+Each value for $y$ is drawn from a binomial distribution with parameters $n$ for the number of trials and $p$ for the probability of success. 
+
+
+
+### `rnorm()`
+
+<!-- DK: Given that we have a cool plot at the end, maybe we don't need these earlier plots.  -->
+
+<!-- DK: Need to discuss the fact that we use y_i each time. -->
+
+The most important distribution is the *normal distributions*. Mathematics:
+
+$$y_i \sim N(\mu, \sigma^2)$$. 
+
+Each value $y_i$ is drawn from a normal distribution with parameters $\mu$ for the mean and $\sigma$ for the standard deviation. 
+
+
+This bell-shaped distribution is defined by two parameters: (1) the *mean* $\mu$ (spoken as "mu") which locates the center of the distribution and (2) the *standard deviation* $\sigma$ (spoken as "sigma") which determines the variation of values around that center. In the figure below, we plot three normal distributions where:
 
 1. The solid normal curve has mean $\mu = 5$ \& standard deviation $\sigma = 2$.
 1. The dotted normal curve has mean $\mu = 5$ \& standard deviation $\sigma = 5$.
 1. The dashed normal curve has mean $\mu = 15$ \& standard deviation $\sigma = 2$.
 
 ```{r, echo=FALSE, fig.cap="Three normal distributions."}
+library(ggrepel)
 all_points <- tibble(
   domain = seq(from = -10, to = 25, by = 0.01),
   `mu = 5, sigma = 2` = dnorm(x = domain, mean = 5, sd = 2),
@@ -2013,64 +1957,227 @@ ggplot(data = tibble(x = c(-4, 4)), aes(x)) +
 ```
 
 
-### `rnorm()`
+
 
 ```{r, echo = FALSE}
 set.seed(5)
 ```
 
-The function `rnorm()` can be read as "r-norm". It corresponds to a Normal distribution.
+The function `rnorm()` (spoken as "r-norm") returns draws from a normal distribution. `rnorm()` has three arguments: `n`, `mean`, and `sd`. `n` corresponds to the number of draws, `mean` and `sd` are the $\mu$ and $\sigma$ of the distribution from which we want to draw.  Again, imagine an urn filled with beads. Each bead has a number written on it. If the distribution is standard normal, then we can draw 10 beads from the urn by running: 
 
-`rnorm()` has three arguments: `n`, `mean`, and `sd`. `n` corresponds to the number of observations, `mean` corresponds to the average as a whole, and `sd` corresponds to the size of the standard deviation from the mean. We will go further in depth in future chapters on what the statistical mechanics are behind these distributions, but for now, let's focus on creating a Normal distribution.
-
-If we run the following:
 ```{r}
 rnorm(10)
 ```
 
-We get 10 observations centered around a default `mean` of 0 with a default `sd` of 1. What if we create a histogram of the values?
+These 10 draws come from a distribution with the default `mean` of 0 and the default `sd` of 1. What if we create a histogram of the values?
 
 ```{r}
-distrib <- tibble(value = rnorm(10))
-
-ggplot(distrib, aes(x = value)) + 
-  geom_histogram(bins = 10)
-```
-As you can see, it's not as symmetrical as the one displayed before. Now what if we try taking 100 observations, then 1000?
-
-```{r}
-distrib_2 <- tibble(value = rnorm(100))
-
-ggplot(distrib_2, aes(x = value)) +
+tibble(value = rnorm(10)) %>% 
+ggplot(aes(x = value)) + 
   geom_histogram(bins = 10)
 ```
 
-```{r}
-distrib_3 <- tibble(value = rnorm(1000))
+As you can see, it is not as symmetrical as the one displayed above. This is not surprising! If you just draw 10 beads from the urn, you can not possibly have a very good sense of what all the numbers on all the beads in the urn look like. What if we draw 100 values? What about 100,000?
 
-ggplot(distrib_2, aes(x = value)) +
+```{r}
+tibble(value = rnorm(100)) %>% 
+ggplot(aes(x = value)) +
   geom_histogram(bins = 10)
 ```
 
-Now it's looking a lot more similar (although imperfect)! As you just discovered, the more observations a normal distribution has, the closer it looks to a symmetrical bell curve.
+```{r}
+tibble(value = rnorm(100000)) %>% 
+ggplot(aes(x = value)) +
+  geom_histogram(bins = 10)
+```
+
+Now it's looking a lot more similar (although imperfect)! 
 
 Now, let's compare normal distributions with varying means and standard deviations, which can be set using the mean and sd arguments included with the function. 
 
 ```{r}
-normal_distrib <- tibble(rnorm_5_1 = rnorm(n = 1000, mean = 5, sd = 1), 
-                        rnorm_0_3 = rnorm(n = 1000, mean = 0, sd = 3),
-                        rnorm_0_1 = rnorm(n = 1000, mean = 0, sd = 1)) %>%
+tibble(rnorm_5_1 = rnorm(n = 1000, mean = 5, sd = 1), 
+       rnorm_0_3 = rnorm(n = 1000, mean = 0, sd = 3),
+       rnorm_0_1 = rnorm(n = 1000, mean = 0, sd = 1)) %>%
   pivot_longer(cols = everything(), 
                names_to = "distribution", 
-               values_to = "samples")
-
-ggplot(normal_distrib, aes(x = samples, fill = distribution)) +
-  geom_density(alpha = 0.5) +
-  labs(title = "Comparison of Normal Distributions with Differing Mean and Standard Deviation Values", 
-       fill = "Distribution") +
-  xlab("X") + 
-  ylab("Density")
-
+               values_to = "value") %>% 
+  ggplot(aes(x = value, fill = distribution)) +
+    geom_density(alpha = 0.5) +
+    labs(title = "Comparison of Normal Distributions with Differing Mean and Standard Deviation Values", 
+         fill = "Distribution",
+         x = "Value",
+         y = "Density")
 ```
 
-<!-- DK: We want to show and explain rnorm(), runif() and rbinom(), with a clear explanation of coin-tossing as an example. Like how many heads might appear of you flip a coin with p = 0.6 20 times. (Use that exact example.) -->
+
+
+
+### Working with draws
+
+Once we have a vector of draws, we can examine various aspects of the distribution. Examples:
+
+```{r}
+draws <- rnorm(100, mean = 2, sd = 1)
+```
+
+Even though we know, because we wrote the code, that the draws come from a normal distribution with a mean of 2 and a standard deviation of 1, the calculated results will not match those values exactly because the draws themselves are random.
+
+```{r}
+mean(draws)
+```
+
+```{r}
+sd(draws)
+```
+
+In practice, we will not know the exact distribution which generates our data. (If we did know, then estimation would be unnecessary.) The inherent randomness of the world means that calculated statistics will not match the underlying truth perfectly. But the more data that we collect, the closer the match will be.
+
+In addition to the mean and standard deviation of the draws, we will often be interested in various quantiles of the distribution. Example:
+
+```{r}
+quantile(draws, probs = c(0.05, 0.5, 0.95))
+```
+
+The 5th percentile distribution is the point below which 5% of the data falls. The 95th percentile is, similarly, the point below which 95% of the data falls. The 50th percentile, also referred to as the median, splits the data into two separate, and equal, parts.
+
+Note how cavalier we are in sometimes using the word "distribution" and sometimes the word "draws." These are two different things! The distribution is the underlying reality, which we will only know for certain when we create it ourselves, as in this example. The draws are a vector of numbers which, we assume, are "drawn" from some underlying distribution which, in general, we do not know. 
+
+By assumption, we analyze the draws to make inferences about the distribution.
+
+Although distributions (and the draws therefrom) are complex, we can often treat them in the same way that we treat simple numbers. For example, we can add two distributions together.
+
+```{r}
+n <- 100000
+tibble(Normal = rnorm(n, mean = 1),
+       Uniform = runif(n, min = 2, max = 3),
+       Combined = Normal + Uniform) %>% 
+  pivot_longer(cols = everything(),
+               names_to = "Distribution",
+               values_to = "draw") %>% 
+  ggplot(aes(x = draw, fill = Distribution)) +
+    geom_histogram(aes(y = after_stat(count/sum(count))),
+                   alpha = 0.5, 
+                   bins = 100, 
+                   position = "identity") +
+    labs(title = "Two Distributions and Their Sum",
+         subtitle = "You can sum distributions just like you sum numbers",
+         x = "Value",
+         y = "Probability")
+```
+
+
+<!-- DK: Could do more here, like look at prediction games, betting and so on. -->
+
+## Other Commands
+
+<!-- DK: Need to add matrices. And how to turn them into tibbles. -->
+
+<!-- Look at the code used in the Temperance section of chapter 7. Explain all the key parts here, including rowwise, ungroup and matrices. Also, see the Preliminaries parts of the associated tutorials.  -->
+
+<!-- Are these commands worth covering? -->
+
+<!-- tidyr::separate_rows() -->
+<!-- dplyr::coalesce() -->
+<!-- expand(data, ...) -->
+<!-- crossing(...) -->
+<!-- nesting(...) -->
+
+<!-- - dplyr's function (cut?) to turn continuous data into categorical data. -->
+
+
+Here are some topics which will prove important later in the *Primer*.
+
+## Matrices
+
+Recall that a "matrix" in R is a rectangular array of data, shaped like a data frame or tibble, but containing only one type of data, e.g., numeric. Large matrices also print out ugly. (There are other differences, none of which we care about here.) Example:
+
+```{r}
+m <- matrix(c(3, 4, 8, 9, 12, 13), ncol = 2)
+m
+```
+
+The easiest way to pull information from a matrix is to use `[]`, the subset operator. Here is how we grab the second column of `m`:
+
+```{r}
+m[, 2]
+```
+
+Note how matrices with just one dimension "collapse" into single vectors. Tibbles, on the other hand, always maintain their rectangular shapes, even with only one column or row. 
+
+### NA Values 
+
+When importing datasets that have not already been extensively wrangled, there may be some observations in the dataframe that are blank. These are called missing values, and they are often marked as `NA`. The presence of `NA` values in a dataframe can be problematic. Recall from the previous chapter that without setting `na.rm = TRUE`, the following code gives a very different results. 
+
+```{r}
+flights %>% 
+  mutate(gain = arr_delay - dep_delay) %>% 
+  summarize(mean = mean(gain))
+
+flights %>% 
+  mutate(gain = arr_delay - dep_delay) %>% 
+  summarize(mean = mean(gain, na.rm = TRUE))
+```
+
+Suppose we wanted to simply remove all missing values from the `gain` column. We can filter and remove missing values using the helper function `is.na()`. `is.na()` is a boolean function that takes in an observation in a dataframe and returns TRUE if the observation is a missing value and FALSE otherwise. In this case, we will have to use `!is.na()`, as the `!` operator means "not". Thus, we can filter observations that are NOT missing values.
+
+```{r}
+flights %>%
+  mutate(gain = arr_delay - dep_delay) %>%
+  filter(!is.na(gain)) %>%
+  summarize(mean = mean(gain))
+```
+
+We can also remove the missing values from the dataset instead of merely filtering them out using the `drop_na()` function. The `flights` dataset contains 336,776 rows. And when 
+
+```{r}
+flights %>%
+  mutate(gain = arr_delay - dep_delay) %>%
+  filter(is.na(gain))
+```
+As we see here, there are 9,430 rows of the `flights` dataset that contain missing values in the gain column. So using `drop_na()`, we get:
+
+```{r}
+flights %>%
+  mutate(gain = arr_delay - dep_delay) %>%
+  drop_na(gain)
+```
+
+Note that 336,776 - 9,430 = 327346, so `drop_na()` seems to check out. Be careful with `drop_na()`, however, because you may be removing rows with valuable data in other columns. 
+
+Suppose you did not want to remove the missing values but instead replace them with a number. We can use `replace_na()` as a helper function to `mutate()`. Here we replace each missing value in the gain column with a value of 0. 
+
+```{r}
+flights %>%
+  mutate(gain = arr_delay - dep_delay) %>%
+  mutate(gain = replace_na(data = gain, replace = 0))
+```
+
+You must be careful with this, though. Replacing missing values will affect any statistical result, such as the mean or standard deviation. Below we computer the mean: 
+
+```{r}
+flights %>%
+  mutate(gain = arr_delay - dep_delay) %>%
+  mutate(gain = replace_na(data = gain, replace = 0)) %>%
+  summarize(mean = mean(gain))
+```
+
+Comparing it with the previous mean variable we see that the computed value is different. 
+
+There are many additional ways to manipulate missing values, but these three functions cover most of the ways you will need to work with such observations in your data.   
+
+
+
+## Summary
+
+This chapter covered many, many commands. You should have them all memorized by now.
+
+<!-- Insert funny gif -->
+
+....
+
+
+No! That is ridiculous. We don't have them all memorized. Why should you? The point of this chapter was to give you a tour of what you can do in R and how to do it. With that information, you have a base from which to try to solve the problems you will encounter in the future.
+
+
+

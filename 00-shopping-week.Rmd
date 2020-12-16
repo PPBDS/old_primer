@@ -5,8 +5,6 @@
 
 <!-- 0. Add more material about Happy Git with R and how to use it. Add more material from R basics. They need to know how to create and knit an Rmd file. -->
 
-<!-- 1. Put the Kant quote in a side margin and add a picture. -->
-
 <!-- 3. How should we end this chapter? Perhaps with some cool example graphics. Take this course to build these things? Perhaps even a curl() grab of an Rmd which they then knit into something cool. -->
 
 <!-- DK: Do we need to update any of the graphics, especially since the tutorials now live in a different package? -->
@@ -48,7 +46,7 @@ Although doing so is experimental, we allow for two modes of working with R and 
 FAS OnDemand provides a very similar experience to [RStudio Cloud](https://rstudio.cloud), a paid service. Most data science today is done on your own machine. Most data science in the future will be done in the cloud.  
 
 
-Let's begin with getting familiar with RStudio, whether on your own machine or on FAS OnDemand. Open up RStudio. You should see three *panes*, or panels, dividing the screen: the *console pane*, the *files pane*, and the *environment pane*. 
+Let's begin with getting familiar with RStudio, whether on your own machine or on FAS OnDemand. Open up RStudio. You should see three *panes*, or panels, dividing the screen: the *Console pane*, the *Files pane*, and the *Environment pane*. 
 
 
 ```{r, echo=FALSE, out.width="100%"}
@@ -62,7 +60,7 @@ knitr::include_graphics("00-shopping-week/images/left_window.png")
 ```
 
 
-There are three tabs in this window, we'll be focusing on the Console and Terminal. When you first start R, the Console gives you some information about your version of R. At the time when this was written, 4.0.3 was the latest version of R! The Console is where you can type and run R code. For example, if you type 1 + 1 and hit return, the Console returns 2.
+There are three panes (or tabs) in this window, we'll be focusing on the Console and Terminal. When you first start R, the Console gives you some information about your version of R. At the time when this was written, 4.0.3 was the latest version of R. The Console is where you can type and run R code. For example, if you type 1 + 1 and hit return, the Console returns 2.
 
 Look at the top right:
 
@@ -75,7 +73,7 @@ The main two tabs you'll be using are Environment and Git (which is not yet avai
 
 To create your first variable in RStudio, go to your Console and type:
 
-```{eval=FALSE}
+```{r, eval = FALSE}
 x <- 5
 ```
 
@@ -88,31 +86,10 @@ knitr::include_graphics("00-shopping-week/images/bottom_right_window.png")
 
 The Files tab shows you the computer's file system. When you create a project later, this tab will automatically show the contents of your project's folder. The Plots tab will show you a preview of any plots you make in RStudio. Help will be [explained later](#how-to-get-help).
 
-### Initial Set Up {-}
-
-Whether you are working on FAS OnDemand or on your own computer, the next step is to copy and paste the following to the R Console:
-
-```{r, eval=FALSE}
-library(rstudioapi)
-rstudioapi::writeRStudioPreference(name = "load_workspace", value = FALSE)
-rstudioapi::writeRStudioPreference(name = "save_workspace", value = "never")
-```
-
-The `rstudioapi` commands set sensible defaults for working with RStudio. You only have to execute those commands once. 
-
-Note that R will occasionally ask you if you want to install some packages. Almost all the time you do want to, otherwise R would not be asking you! One tricky aspect of this process is that you will occasionally be asked by R:
-
-```{bash, eval=FALSE}
-Do you want to install from sources the packages which 
-need compilation? (Yes/no/cancel)
-```
-
-Unless you have a good reason not to, always answer "no" to this question. 
-
 
 ### Package installation {-}
 
-Another point of confusion with many new R users is the idea of an R package. R packages, also known as R libraries, extend the functionality of R by providing additional functions, data, and documentation. They are written by a worldwide community of R users and can be downloaded for free. 
+Another point of confusion with many new R users is the idea of an R package. R packages, also known as R libraries, extend the functionality of R by providing additional functions, data, and documentation. 
 
 For example, among the many packages we will use in this book is the **remotes** package.
 
@@ -136,11 +113,25 @@ knitr::include_graphics("00-shopping-week/images/install_vs_load.jpg")
 1. *Install the package*: This is like installing an app on your phone. Most packages are not installed by default when you install R and RStudio. Thus if you want to use a package for the first time, you need to install it. Once you've installed a package, you likely won't install it again unless you want to update it to a newer version.
 1. *"Load" the package*: "Loading" a package is like opening an app on your phone. Packages are not "loaded" by default when you start RStudio on your computer; you need to "load" each package you want to use every time you restart RStudio.
 
-Let's perform these two steps for the **remotes** package.
+Let's install three packages which we will need in this book. At the Console pane within RStudio, type: 
 
-Type `install.packages("remotes")` in the console pane of RStudio and press Return/Enter on your keyboard. Note you must include the quotation marks around the name of the package.
+```{r, eval = FALSE}
+install.packages(c("remotes", "tidyverse", "usethis"))
+```
+
+And press Return/Enter on your keyboard. Note you must include the quotation marks around the names of the packages. Note that these packages depend on other packages, which will be automatically installed.
+
+One tricky aspect of this process is that R will occasionally ask you:
+
+```{bash, eval=FALSE}
+Do you want to install from sources the packages which 
+need compilation? (Yes/no/cancel)
+```
+
+Unless you have a good reason not to, always answer "no" to this question. 
 
 R packages generally live in one of two places: CRAN (rhymes with "clan") for more mature, popular packages and Github for more experimental, less stable packages. `install.packages()` gets packages from CRAN. At the end of this section, we will also install two packages from Github.
+
 
 ### Package loading {-}
 
@@ -148,7 +139,7 @@ Recall that after you've installed a package, you need to "load" it. We do this 
 
 For example, to load the **remotes** package, run the following code in the Console. What do we mean by "run the following code"? Either type or copy-and-paste the following code into the Console and then hit the Enter key. 
 
-```{r, eval=FALSE}
+```{r, eval = FALSE}
 library(remotes)
 ```
 
@@ -162,9 +153,11 @@ then you haven't successfully installed the package. This is an example of an "e
 
 For historical reasons "packages" are also known as "libraries," which is why the relevant command for loading them is `library()`.
 
+Note that R will occasionally ask you if you want to install some packages. Almost all the time you do want to, otherwise R would not be asking you! 
+
 ### Package use {-} 
 
-One very common mistake new R users make when wanting to use particular packages is to forget to load them first by using the `library()` command we just saw. Remember: *you have to load each package you want to use every time you start RStudio.* If you don't load a package before attempting to use one of its features, you'll see an error message similar to:
+One very common mistake new R users make when wanting to use particular packages is to forget to load them first by using the `library()` command. Remember: *you have to load each package you want to use every time you start RStudio.* If you don't load a package before attempting to use one of its features, you'll see an error message similar to:
 
 ```
 Error: could not find function
@@ -174,7 +167,7 @@ This is a different error message than the one you just saw about a package not 
 
 Let's install two packages which are not available from CRAN: **primer.data** and **primer.tutorials**. Copy and paste the following to the R Console:
 
-```{r, eval=FALSE}
+```{r, eval = FALSE}
 library(remotes)
 remotes::install_github(c("PPBDS/primer.data", "PPBDS/primer.tutorials"))
 ```
@@ -183,6 +176,16 @@ Depending on your computer/browser/locale, this might fail, especially if the qu
 
 This will result in many new packages being installed. It may take a few minutes. If something gets messed up, it is often useful to use the `remove.packages()` command to remove the problematic package and then install it again. 
 
+### RStudio set up
+
+You will thank us later if you run these commands now:
+
+```{r, eval = FALSE}
+library(usethis)
+use_blank_slate()
+```
+
+This changes the default value of RStudio to not start each session fresh, with no junk leftover from your last session. This makes it much easier to create *reproducible* analyses. 
 
 ### Tutorials {-}
 
@@ -214,7 +217,9 @@ Tutorials are graded pass/fail. It is very hard to fail. As long as you make an 
 knitr::include_graphics("00-shopping-week/images/tutorial_popup.gif")
 ```
 
-You've finished a tutorial! Now what? There are a few ways you can close out of a tutorial safely so you can quit your RStudio session.
+You've finished a tutorial! Save the resulting file --- it should be called something like `answers_zzzzz.rds`, where zzzzz are 5 random-looking characters/numbers --- to your computer and then submit it to Canvas.
+
+Now what? There are a few ways you can close out of a tutorial safely so you can quit your RStudio session.
 
 * If you clicked "Show in new window" and were working on the tutorial in a pop-up window, simply X out of the pop-up window
 * If you were working on the tutorial inside the Tutorial pane of RStudio, simply press the red stop sign icon

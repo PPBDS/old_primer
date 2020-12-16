@@ -1,19 +1,79 @@
 
-# Functions
+# Functions {#functions}
+
+<!-- Start by reading the distribution section of Chapter 2: -->
+
+<!-- https://ppbds.github.io/primer/wrangling.html#distributions -->
+
+<!-- This is the knowledge which readers start with. Remind them of it. -->
+
+<!-- Then read the virtual sampling sectioon of Chapter 6: -->
+
+<!-- https://ppbds.github.io/primer/one-parameter.html#virtual-sampling -->
+
+<!-- This is what we are preparing readers for. We want that to be easy for them, once they get there. We should also do a better job of connecting this code to the code in Chapter 5 but, right now, we don't show that to readers. -->
+
+<!-- * Need to focus more on functions which actually do something useful, something that teaches concepts which will be valuable later. One idea: A function which takes a tibble and a variable to sample from. It returns one value from that variable. Complexity is added because it removed all missing data first. Could use nhanes as the data set to play with. Further complexity could be added by adding a condition which filters the tibble in some way. my_sampler() -->
 
 
-<!-- * This will now be week 3. Need to focus more on functions which actually do something useful, something that teaches concepts which will be valuable later.  -->
+<!-- ```{r} -->
+<!-- my_sampler <- function(x, var, n = 1){ -->
+<!--  x %>% -->
+<!--    select(var) %>% -->
+<!--    drop_na() %>% -->
+<!--    sample_n(n) %>% -->
+<!--    slice() -->
+<!-- } -->
+
+<!-- my_sampler(x = kenya, var = "poverty") -->
+<!-- my_sampler(nhanes, var = "height") -->
+<!-- ``` -->
+
+<!-- tibble(ID = 1:10) %>%  -->
 
 
-<!-- * Teach standard error. This is something we can do before probability. Calculating mean and sd is easy. Divide the first by the second times root n and --- voila! That is much more productive than crooked casinos. -->
+<!-- tibble(ID = 1:10) %>%  -->
+<!--   mutate(height = map_dbl(ID, ~ my_sampler(nhanes, "height"))) %>%  -->
+<!--   mutate(height_list = map(ID, ~ my_sampler(nhanes, "height", n = 10))) %>%  -->
+<!--   mutate(avg_height = map_dbl(height_list, ~ mean(.))) -->
+  
+<!-- Plot histograms of average height with different n's. Can also do with standard deviation. -->
 
-<!-- * Teach confidence intervals. Again, we can do this before probability, I think. Think of it as, roughly, plus/minus 2 times the standard error. Then, show what coverege is of confidence intervals. -->
+<!-- Lesson: Larger N means more stable estimates. -->
 
-<!-- * Teach random draws. We introduce random variables at the end of chapter 2. Do more with them here. For example, with a data set, calculated a mean and sd. Then do 1,000 draws form that. Then, plot the densities of the raw data and the simulated data on top of one another.  -->
+<!-- Perhaps there are three main parts to the chapter. The first is lists, list-columns, map functions and custom functions. We can cover all that with fairly simple examples. (Don't use N argument yet. Just solve the no NA problem.) Second, as discussed below, is explorations of measures of center and variability for distributions. (Means we need to extend my_sampler with n argument.) We can explore those things with our new tools. The third section plays the Guessing Game. -->
 
-<!-- * Maybe cut of lot of the extra stuff? -->
+<!-- Read, and then delete, the Crooked Casino section. -->
 
-<!-- 4) Add group_nest()? -->
+<!-- Key concept to focus on is the idea of a distribution and draws therefrom. This connects to chapter 2, where we introduced distributions and to chapter 5, where we explain probability distributions. In particular, we should show various ways to measure center and variability. These are cool and important concepts. Is "center" the mean or the median or the trimmed mean or . . . Is "variability" the standard deviation, the mean absolute deviation, the standard deviation of the median absolute deviation or . . . There is nothing explicitly "statistical" here. We are just trying to connect English words to specific formulas. We might show the distributions for which these measures give the same answers and then some (mainly skewed) for which they don't. How to explore these concepts in the context of function writing? Perhaps by writing functions like my_mean() and my_median()? Or maybe focus on a function which calculates MAD SD? Then use list-columns to compare this function to other choices? -->
+
+<!-- Lesson: If you have a really skewed distribution, then median is a more stable measure than mean, and MAD (median absolute difference -- which means absolute difference from the median) is a more stable measure than standard deviation. Results depends too much on who ended up in the sample, like Bill Gates. -->
+
+<!-- Related: Teach random draws. We introduce random variables at the end of chapter 2. Do more with them here. For example, with a data set, calculated a mean and sd. Then do 1,000 draws from that. Then, plot the densities of the raw data and the simulated data on top of one another. -->
+
+<!-- Standard errors, qua standard errors, are a tricky thing to teach. But what if, instead of teaching them as standard errors, we just introduce the formula as a simple way to approximate something which, when multiplied by 2, and then added/subtracted from the mean, gives you a pretty useful 95% confidence interval. Then we could do the same for MAD SD, and show how that works better for skewed variables! Here, "works better" means that, if you do it 1,000 times, it works better on average. No! Too much! -->
+
+<!-- The main use case is the "Guessing Game." Imagine that you are I are using the kenya data set and the distance, pop_density or rv13 variables. (All of which are quite skewed. We might also experiment with the poverty variable, which is less skewed. But skewed variables make this more interesting.) -->
+
+<!-- In the Guessing Game, you guess a number and I guess a number. The goal is to get closest to a random draw from all the values of distance (or whatever). We do this 1,000 times. Whoever gets closer more often, wins the Guessing Game.  -->
+
+<!-- This is a useful exercise for several reasons. First, coding it up is a good practice for writing a function. Indeed, we might re-write the whole chapter to focus on this example. Second, once we have a function, which runs one iteration of the Game --- maybe it takes the data set (or maybe a vector of values?), my guess and your guess, and then returns the winner --- we can use list columns and map_functions to run it a thousand times. This is all more fun and more interesting that stupid max-minus-min functions. -->
+
+<!-- Third, the Guessing Game gets at key statistical issues. There is a lot of meat there, all things that we will revisit many times. Some things to highlight, many of which can be put into the Guessing Game. -->
+
+<!-- 1) Guess a formula rather than a number. Presumably, you and I get to see (all of?) the data before playing the game. In the simplest version, we look at the data and give you a number. (The mean and median both do well in this game, obviously.) But, in a more advanced form of the game, we might be allowed to provide a function. The goal of inference is to come up with a function which wins the prediction game.) -->
+
+<!-- 2) Change the objective function. The simplest form of the Guessing Game just counts each contest separately. A more advanced for would give you a penalty which varies depending on how wrong you are. (This, obviously, is one way to think about minimizing the squared residuals.) This is very fun because there are many different penalty functions, each of which may lead to a different function winning the Guessing Game. -->
+
+<!-- 3) The chapter climaxes with the following cool result: If you are minimizing the sum (or average) of the squared residuals, guessing the mean wins the Guessing Game. However, if you are minimizing the sum (or average) of the absolute values of the residuals, you should guess the median. -->
+
+<!-- 4) Another form of the Guessing Game is like a casino. One person (the Casino) gives a 50% confidence interval. The other person gets to pick either inside or outside. Then there is a draw. The Casino wins if the second person can't consistently win. -->
+
+<!-- Key question: Do we explain standard error here? Could be easy! Calculate the mean. Calculate the sd. Divide and scale by the square root of n. Voila! But, still, I think No. But we should explain everything short of standard error.  -->
+
+<!-- group_nest() might be a useful function.  -->
+
+<!-- Might also show how to add lots of plots to a tibble and then pick out the ones that show cool stuff. If you run 1,000 experiments, show the plots of the 5 extreme ones. -->
 
 
 <!-- Useful reference, maybe -->
@@ -25,11 +85,11 @@
 
 The goal of this chapter is to reveal the __process__ a long-time useR employs for writing functions. We also want to illustrate why the process is the way it is. Merely looking at the finished product, e.g. source code for R packages, can be extremely deceiving. Reality is generally much uglier ... but more interesting! Powerful packages like **dplyr** and **purrr** are ready and waiting to apply your purpose-built functions to various bits of your data. If you can express your analytic wishes in a function, these tools will give you great power.
 
-## Introduction to Functions
+## Introduction
 
 First, let's introduce the concept of functions. A function is a piece of code that is packaged in a way that makes it easy to reuse. Functions make it easy for you to `filter()`, `arrange()`, `select()`, and create a `tibble()`, as you have seen in the last few chapters. Functions also allow you to transform variables and perform a bunch of useful mathematical calculations, such as finding the `min()`, `max()`, and `quantile()`s of a dataset. Functions are also important in generating data and values, such as using `rnorm()` to randomly generate a normal distribution.
 
-Note that every time we mention a function, we include the parentheses. This is because you call a function by including its parentheses and any necessary arguments in those parentheses. If you run the function name without its parentheses, R will return the code that makes up the function. 
+Note that every time we discuss a function, we include the parentheses. This is because you call a function by including its parentheses and any necessary arguments in those parentheses. This is a correct call of `rnorm()`:
 
 ```{r}
 rnorm(1)
@@ -47,7 +107,7 @@ Functions can do all sorts of things. Below, `sample()` takes a vector of values
 sample(x = 1:6, size = 1)
 ```
 
-Functions can also take in other functions as arguments. For example, `replicate()` takes an expression and repeats it for `n` specified times. This is really useful when you want to generate many iterations of data. What if we replicated the rolling of a die ten times?
+Functions can also take in other functions as arguments. For example, `replicate()` takes an expression and repeats it `n` times. What if we replicated the rolling of a die ten times?
 
 ```{r}
 replicate(10, sample(1:6, 1))
@@ -55,10 +115,13 @@ replicate(10, sample(1:6, 1))
 
 An especially useful type of function is the family of `map_*` functions. `map_*` functions come from the **purrr** package, which you will have loaded if you have loaded **tidyverse**. These functions apply the same function to every row in a tibble.
 
+```{r, include = FALSE}
+library(tidyverse)
+```
+
 Let's create a tibble with 3 values: 3, 7, and 2.
 
 ```{r}
-library(tidyverse)
 tibble(x = c(3, 7, 2))
 ```
 
@@ -112,7 +175,8 @@ tibble(x = c(3, 7, 2)) %>%
 
 Only... what exactly is a list-column? Our next section will give you a quick refresher on lists, then dive into how lists, list-columns, and `map_*` functions relate.
 
-## Lists and List-columns
+
+## Lists and list-columns
 
 Let's quickly refresh on what lists are and functions that commonly deal with lists. Recall that a list is different from an atomic vector. Atomic vectors are familiar to us: each element of the vector has one value, and thus if an atomic vector is a column in your dataset, each observation gets a single value.  Lists, however, can contain vectors as elements.
 
@@ -153,14 +217,6 @@ You might be wondering, how is the list `x` different from the lists `list_1` an
 
 There are a number of built-in R functions that output lists. For example, the ***ggplot***s you have been making store all of the graph information in lists.
 
-<!-- EC: Keep thing about ggplot? -->
-
-```{r}
-y <- ggplot(mtcars, aes(x = cyl, y = mpg)) +
-  geom_col()
-y %>% str()
-```
-
 Any function that returns multiple values can be used to create a list output.  For example, consider the following list `x` again:
 
 ```{r}
@@ -191,9 +247,6 @@ Notice this is a 1x1 tibble with one observation, which is a list of one element
 
 
 Lesson: If a function returns multiple values as a vector, like `range()` does, you can't use it directly to obtain a list-column, but you can wrap `list()` around it in order to get the same behavior.
-
-
-<!-- EC: Commenting out this sentence for now. We are now going to learn about [**list columns**](https://r4ds.had.co.nz/many-models.html#list-columns-1).^[If I were going to give a lecture on these topics, it would look like [this one](https://resources.rstudio.com/webinars/how-to-work-with-list-columns-garrett-grolemund).] -->
 
 A list column is a column of your data which is a [list](https://adv-r.hadley.nz/vectors-chap.html#lists) rather than an atomic vector.  Like with lists, you can pipe in `str()` to read the column more easily.
 
@@ -228,7 +281,7 @@ library(primer.data)
 kenya %>%
   select(block, poverty) %>%
   group_by(block) %>%
-  mutate(povertyQuantile = list(quantile(poverty)))
+  mutate(poverty_quantile = list(quantile(poverty)))
 ```
 
 Or let's say that we wanted 1) to subset the dataset to the those with `treatment == "control"`, 2) group by `block`, and 3) get a `summary()` of the `distance` variable by continent:
@@ -238,7 +291,7 @@ kenya %>%
   select(treatment, block, distance) %>%
   filter(treatment == "control") %>%
   group_by(block) %>%
-  summarize(distSummary = list(summary(distance)))
+  summarize(dist_summary = list(summary(distance)))
 ```
 
 ### Using `map_*` functions to create list-columns
@@ -293,7 +346,8 @@ nhanes %>%
   group_by(age, gender) %>%
   summarize(all_weights = list(weight)) %>%
   mutate(log_weights = map(all_weights, log),
-         sorted_log_weights = map(log_weights, ~ sort(., decreasing = TRUE)),
+         sorted_log_weights = map(log_weights, 
+                                  ~ sort(., decreasing = TRUE)),
          top5_log_weights = map(sorted_log_weights, ~ .[1:5]))
 ```
 
@@ -434,7 +488,7 @@ This image --- widely attributed to the Spotify development team --- conveys an 
 knitr::include_graphics("03-functions/images/mvp.jpg")
 ```
 
-Build that skateboard before you build the car or some fancy car part. A limited-but-functioning thing is very useful. It also keeps the spirits high.
+Build that skateboard before you build the car or some fancy car part. A limited-but-functioning thing is very useful. It also keeps spirits high.
 
 This is related to the valuable Telescope Rule:
 
@@ -531,7 +585,7 @@ For functions that will be used again -- which is not all of them! -- it is good
 
 > Rule of Repair: When you must fail, fail noisily and as soon as possible.
 
-#### stop if not
+#### `stopifnot()`
 
 `stopifnot()` is the entry level solution. We use it here to make sure the input `x` is a numeric vector.
 
@@ -578,20 +632,6 @@ In addition to a gratuitous apology, the error also contains two more pieces of 
 If it is easy to do so, we highly recommend this template: "you gave me THIS, but I need THAT".
 
 The tidyverse style guide has a very useful [chapter on how to construct error messages](https://style.tidyverse.org/error-messages.html).
-
-### Wrap-up and what's next?
-
-Here's the function we've written as an introduction to built-in and custom functions:
-
-```{r}
-mmm2
-```
-
-What we've accomplished:
-
-* We've written our first function.
-* We are checking the validity of its input, argument `x`.
-* We've done a good amount of informal testing.
   
 ## Argument Specifications and Default Values
 
@@ -708,7 +748,7 @@ What we've accomplished:
 * We've generalized our dice throwing function to take in a custom value for `n`
 * We've specified a default value: `n=2`
   
-## Formal Testing
+## Formal testing
 
 In this section, we tackle `NA`s, the special argument `...` and formal testing.
 
@@ -827,49 +867,11 @@ quantile_diff(z)
 quantile_diff(z, na.rm = FALSE)
 ```
 
-### The useful but mysterious `...` argument
-
-You probably could have lived a long and happy life without knowing there are at least 9 different algorithms for computing quantiles. [Go read about the `type` argument][rdocs-quantile] of `quantile()`. TLDR: If a quantile is not unambiguously equal to an observed data point, you must somehow average two data points. You can weight this average different ways, depending on the rest of the data, and `type =` controls this.
-
-Let's say we want to give the user of our function the ability to specify how the quantiles are computed, but we want to accomplish with as little fuss as possible. In fact, we don't even want to clutter our function's interface with this! This calls for the very special `...` argument. In English, this set of three dots is frequently called an "ellipsis".
-
-```{r}
-quantile_diff <- function(x, probs = c(0, 1), na.rm = TRUE, ...) {
-  the_quantiles <- quantile(x = x, probs = probs, na.rm = na.rm, ...)
-  max(the_quantiles) - min(the_quantiles)
-}
-```
-
-Thanks to [\@wrathematics][twitter-wrathematics], here's a small example where we can (barely) detect a difference due to `type`.
-
-```{r}
-set.seed(1234)
-z <- rnorm(10)
-quantile(z, type = 1)
-quantile(z, type = 4)
-all.equal(quantile(z, type = 1), quantile(z, type = 4))
-```
-
-Now we can call our function, requesting that quantiles be computed in different ways.
-
-```{r}
-quantile_diff(z, probs = c(0.25, 0.75), type = 1)
-quantile_diff(z, probs = c(0.25, 0.75), type = 4)
-```
-
-While the difference may be subtle, __it's there__. Marvel at the fact that we have passed `type = 1` through to `quantile()` *even though it was not a formal argument of our own function*.
-
-The special argument `...` is very useful when you want the ability to pass arbitrary arguments down to another function, but without constantly expanding the formal arguments to your function. This leaves you with a less cluttered function definition and gives you future flexibility to specify these arguments only when you need to. This is why the `...` argument is used in conjunction with `map_*` functions.
-
-There are also downsides to `...`, so use it with intention. In a package, you will have to work harder to create truly informative documentation for your user. Also, the quiet, absorbent properties of `...` mean it can sometimes silently swallow other named arguments, when the user has a typo in the name. Depending on whether or how this fails, it can be a little tricky to find out what went wrong.
-
-The [ellipsis package](https://ellipsis.r-lib.org) provides tools that help package developers use `...` more safely. The in-progress tidyverse principles guide provides further guidance on the design of functions that take `...` in [Data, dots, details](https://principles.tidyverse.org/dots-position.html).
-
 ## The Crooked Casino
 
 ### Restoring `add_dice()`
 
-In this section, we will be tieing in concepts on `map_*` functions, list-columns, and function writing. We'll also be introducing some important conditional functions (`ifelse()`, `any()`, `all()`, and `case_when()`). 
+In this section, we will be bringing together `map_*` functions, list-columns, and function writing. We'll also be introducing some important conditional functions (`ifelse()`, `any()`, `all()`, and `case_when()`). 
 
 Let’s return to our dice-throwing function, `add_dice()`. 
 
@@ -1032,3 +1034,4 @@ crooked_x %>%
   str()
 ```
 
+## Summary
