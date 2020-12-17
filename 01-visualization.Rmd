@@ -81,16 +81,47 @@ Here are a few useful tips to keep in mind as you learn to program:
 While it is not required to be a seasoned coder/computer programmer to use R, there is still a set of basic programming concepts that new R users need to understand. We now introduce some basic programming terminology. Instead of asking you to memorize all these concepts and terminology right now, we'll guide you so that you'll "learn by doing." To help you learn, we will always use a different font to distinguish regular text from `computer_code`. 
 
 * *Console pane*: where you enter in commands.
+
 * *Running code*: the act of telling R to perform an act by giving it commands in the console.
-* *Objects*: where values are saved in R. You can *assign* values to objects and display the contents of objects. 
+
+* *Objects*: where values are saved in R. You can *assign* values to objects and display the contents of objects. You use the assignment operator `<-` to do so.  You can choose almost any name you like for an object, as long as the name does not begin with a number or a special character like `+`, `*`, `-`, `/`, `^`, `!`, `@`, or `&`. 
+
+For example we can save the values of the equation below to an object named `x`. 
+```{r}
+x <- 4 + 3
+```
+
+Then, whenever we type `x`, the value of 4 + 3 will show:
+
+```{r}
+x
+```
+
+
 * *Data types*: integers, doubles/numerics, logicals, and characters. Integers are values like -1, 0, 2, 4092. Doubles or numerics are a larger set of values containing both the integers but also fractions and decimal values like -24.932 and 0.8. Logicals are either `TRUE` or `FALSE` while characters are text such as "cabbage" or "Hamilton", "The Wire is the greatest TV show ever". Note that characters are often denoted with the quotation marks around them.
-* *Vectors*: a series of values. These are created using the `c()` function, where `c()` stands for "combine". For example, `c(6, 11, 13, 31, 90, 92)` creates a six element series of positive integer values.
+
+* *Vectors*: a series of values. These are created using the `c()` function, where `c()` stands for "combine". 
+
+For example, `c(6, 11, 13, 31, 90, 92)` creates a six element series of positive integer values.
+
+```{r}
+c(6, 11, 13, 31, 90, 92)
+```
+
+
 * *Factors*: *categorical data* are commonly represented in R as factors. Categorical data can also be represented as *strings*. We will go into detail about these and other variable types in Chapter 2.
+
 * *Data frames*: rectangular spreadsheets. They are representations of datasets in R where the rows correspond to *observations* and the columns correspond to *variables* that describe the observations. Modern data frames are called *tibbles*.  
+
 * *Boolean algebra*: `TRUE/FALSE` statements and mathematical operators such as `<` (less than), `<=` (less than or equal), and `!=` (not equal to). For example, `4 + 2 >= 3` will return `TRUE`, but `3 + 5 <= 1` will return `FALSE`. Testing for inclusion with the `%in%` operator. For example, `"B" %in% c("A", "B")` returns `TRUE` while `"C" %in% c("A", "B")` returns `FALSE`. We test for equality in R using `==`. For example, `2 + 1 == 3` compares `2 + 1` to `3` and is correct R code, while `2 + 1 = 3` will return an error. 
+
 * *Logical operators*: `&` representing "and" as well as `|` representing "or." For example, `(2 + 1 == 3) & (2 + 1 == 4)` returns `FALSE` since both clauses are not `TRUE` (only the first clause is `TRUE`). On the other hand, `(2 + 1 == 3) | (2 + 1 == 4)` returns `TRUE` since at least one of the two clauses is `TRUE`. 
+
 * *Functions*, also called *commands*: perform tasks in R. They take in inputs called *arguments* and return outputs. You can either manually specify a function's arguments or use the function's *default values*. For example, the function `seq()` in R generates a sequence of numbers. If you just run `seq()` it will return the value 1. That doesn't seem very useful! This is because the default arguments are set as `seq(from = 1, to = 1)`. Thus, if you don't pass in different values for `from` and `to` to change this behavior, R just assumes all you want is the number 1. You can change the argument values by updating the values after the `=` sign. If we try out `seq(from = 2, to = 5)` we get the result `2 3 4 5`, as we would expect. 
-* *Help files*: provide documentation for various functions and datasets. You can bring up help files by adding a `?` before the name of a function or data frame and then run this in the console. You will then be presented with a page showing the corresponding documentation.     
+
+* *Help files*: provide documentation for various functions and datasets. You can bring up help files by adding a `?` before the name of a function or data frame and then run this in the console. You will then be presented with a page showing the corresponding documentation. 
+
+**Code Comments*: are text placed after a `#` symbol. Nothing will be run after a `#` symbol, which is useful if you want to write human readable comments in your code.
 
 ### Errors, warnings, and messages
 
@@ -234,6 +265,21 @@ ggplot(data = gapminder,
                      y = lifeExp)) 
 ```
 
+In addition to mapping varaibles to the `x` and `y` axises, we can also map variables to `size` and `color`. They can be very useful tools. 
+
+For example, because the data plotted on our scatterplot is from more than one continent, it can be hard to know what point of data corresponds to what continent. Let's change that by setting the `color` argument of `aes()` to the variable `continent`.
+
+```{r}
+ggplot(data = gapminder, 
+       mapping = aes(x = gdpPercap, 
+                     y = lifeExp,
+                     color = continent)) +
+geom_point()
+```
+
+Now we have a slightly better understanding of our data. However, note that the points of the scatterplot are all overlapping, so we do not know if some colors are being covered by others.
+
+
 #### Titles and Labels
 
 In addition to adding the `geom` year, we can also add the layer `labs()`. We use the function `labs()` to add a plot title, axis labels, subtitles, and captions to our graph. You will have noticed that by default R simply uses the names of variables for axes and legends. Let's now add a title and axis labels to our plot.
@@ -251,9 +297,10 @@ ggplot(data = gapminder,
 
 Note that it is up to us, which or how many of the arguments in `labs()` we use.
 
+
 Let's now take a tour of some of the more useful geoms.
 
-<!-- BG: teach color argument here? -->
+
 
 ### `geom_jitter()`
 
