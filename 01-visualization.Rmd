@@ -1,13 +1,10 @@
+
 # Visualization
-
-<!-- BG: Move labels (and other stuff?) to the end of basic plots and then ensure that basic plots have labels in the tutorial. -->
-
 
 Everyone loves visualizations. 
 
-<!-- DK: Should simplify this plot a bit. No fct_relevel since we don't learn that till chapter 2, for example. -->
 
-```{r, echo = FALSE, out.width = "100%", message = FALSE}
+```{r out.width = "100%", message = FALSE}
 library(tidyverse)
 library(ggthemes)
 library(scales)
@@ -16,19 +13,17 @@ library(gapminder)
 gap_p <- gapminder %>%
   filter(continent != "Oceania") %>%
   filter(year == max(year)) %>% 
-  ggplot(aes(gdpPercap, lifeExp, size = pop, color = continent)) +
+  ggplot(aes(gdpPercap, lifeExp, color = continent)) +
     geom_point(alpha = 0.7) +
     geom_smooth(method = "lm", 
                 formula = y ~ x,
                 se = FALSE) + 
     facet_wrap(~continent, nrow = 2) +
-    labs(title = "Life Expectancy and GDP per Capita in 2007",
+    labs(title = "Life Expectancy and GDP per Capita",
          subtitle = "Connection between GDP and life expectancy is weakest in Africa",
          x = "GDP per Capita in USD",
-         y = "Life Expectancy",
-         caption = "Data Source: gapminder R package") +
-    scale_x_log10(breaks = c(500, 5000, 50000),
-                  labels = scales::dollar_format(accuracy = 1)) +
+         y = "Life Expectancy") +
+    scale_x_log10(breaks = c(500, 5000, 50000)) +
     theme_economist() +
     theme(legend.position = "none")
 
@@ -49,19 +44,11 @@ library(tidyverse)
 That one line of code loads all the packages associated with the **tidyverse**, packages which you will use in almost every data analysis. It also tells you which functions from the tidyverse conflict with functions in base R or with other packages you might have loaded. (We hide these and other messages because they are ugly.)
 
 
-If you run this code and get the error message “there is no package called ‘tidyverse’”, you’ll need to install the package, and then run library() once again.
+If you run this code and get the error message “there is no package called ‘tidyverse’”, you’ll need to install the package, and then run `library(tidyverse)` once again.
 
-
-```{r eval=FALSE}
-install.packages("tidyverse")
-```
-
-After installing, run library(tidyverse). Recall, we only need to install a package once. We just need to load it every time we use it. We will also use the package `gapminder` in this chapter.
-
-Recall, we only need to install a package once. We need to load it every time we use it. We will also use another package `gapminder`.
 
 ```{r}
-library(gapminder)
+install.packages("tidyverse")
 ```
 
 If we need to be explicit about where a function (or dataset) comes from, we’ll use the special form: `package::function()`. For example, `ggplot2::ggplot()` tells you explicitly that we’re using the `ggplot()` function from the **ggplot2** package.
@@ -76,9 +63,6 @@ Unlike other statistical software programs like Excel, SPSS, or Minitab that pro
 If you are new to the world of coding, R, and RStudio and feel you could benefit from a more detailed introduction, we suggest you check out the short book, [*Getting Used to R, RStudio, and R Markdown*](https://rbasics.netlify.com/). @usedtor2016 includes screencast recordings that you can follow along and pause as you learn. This book also contains an introduction to R Markdown, a tool used for reproducible research in R.
 
 
-While it is not required to be a seasoned coder/computer programmer to use R, there is still a set of basic programming concepts that new R users need to understand. 
-
-
 ### Tips
 
 Learning to code/program is quite similar to learning a foreign language. It can be daunting and frustrating at first. However, putting in the effort goes a long way.
@@ -87,25 +71,26 @@ Here are a few useful tips to keep in mind as you learn to program:
 
 * **Remember that computers are not actually that smart**: You may think your computer or smartphone is "smart". In reality, you have to tell a computer everything it needs to do. The instructions you give your computer can't have any mistakes in them.
 
-* **Take the "copy, paste, and tweak" approach**: When you learn your first programming language, it is often much easier to take existing code that you know works and modify it to suit your ends. This is as opposed to trying to type out the code from scratch. We suggest not trying to write code from memory, but rather take existing examples we have provided you, then copy, paste, and tweak them to suit your goals. After you start feeling more confident, you can slowly move away from this approach and write code from scratch.
+* **Take the "copy, paste, and tweak" approach**: When you learn your first programming language, it is often much easier to take existing code that you know works and modify it to suit your ends. We suggest not trying to write code from memory, but rather take existing examples we have provided you, then copy, paste, and tweak them. After you start feeling more confident, you can slowly move away from this approach and write code from scratch.
 
 * **Practice is key**:  Just as the only method to improve your foreign language skills is through lots of practice and speaking, the only method to improving your coding skills is through lots of practice. 
 
+
 ### Basic programming
 
-We now introduce some basic programming concepts and terminology. Instead of asking you to memorize all these concepts and terminology right now, we'll guide you so that you'll "learn by doing." To help you learn, we will always use a different font to distinguish regular text from `computer_code`. 
+While it is not required to be a seasoned coder/computer programmer to use R, there is still a set of basic programming concepts that new R users need to understand. We now introduce some basic programming terminology. Instead of asking you to memorize all these concepts and terminology right now, we'll guide you so that you'll "learn by doing." To help you learn, we will always use a different font to distinguish regular text from `computer_code`. 
 
 * *Console pane*: where you enter in commands.
 * *Running code*: the act of telling R to perform an act by giving it commands in the console.
 * *Objects*: where values are saved in R. You can *assign* values to objects and display the contents of objects. 
-* *Data types*: integers, doubles/numerics, logicals, and characters. Integers are values like -1, 0, 2, 4092. Doubles or numerics are a larger set of values containing both the integers but also fractions and decimal values like -24.932 and 0.8. Logicals are either `TRUE` or `FALSE` while characters are text such as "cabbage", "Hamilton", "The Wire is the greatest TV show ever", and "This ramen is delicious." Note that characters are often denoted with the quotation marks around them.
-* *Vectors*: a series of values. These are created using the `c()` function, where `c()` stands for "combine" or "concatenate." For example, `c(6, 11, 13, 31, 90, 92)` creates a six element series of positive integer values.
+* *Data types*: integers, doubles/numerics, logicals, and characters. Integers are values like -1, 0, 2, 4092. Doubles or numerics are a larger set of values containing both the integers but also fractions and decimal values like -24.932 and 0.8. Logicals are either `TRUE` or `FALSE` while characters are text such as "cabbage" or "Hamilton", "The Wire is the greatest TV show ever". Note that characters are often denoted with the quotation marks around them.
+* *Vectors*: a series of values. These are created using the `c()` function, where `c()` stands for "combine". For example, `c(6, 11, 13, 31, 90, 92)` creates a six element series of positive integer values.
 * *Factors*: *categorical data* are commonly represented in R as factors. Categorical data can also be represented as *strings*. We will go into detail about these and other variable types in Chapter 2.
 * *Data frames*: rectangular spreadsheets. They are representations of datasets in R where the rows correspond to *observations* and the columns correspond to *variables* that describe the observations. Modern data frames are called *tibbles*.  
-* *Boolean algebra*: `TRUE/FALSE` statements and mathematical operators such as `<` (less than), `<=` (less than or equal), and `!=` (not equal to). For example, `4 + 2 >= 3` will return `TRUE`, but `3 + 5 <= 1` will return `FALSE`. Testing for inclusion with the `%in%` operator. For example, `"B" %in% c("A", "B")` returns `TRUE` while `"C" %in% c("A", "B")` returns `FALSE`. We test for equality in R using `==` (and not `=`, which is typically used for assignment). For example, `2 + 1 == 3` compares `2 + 1` to `3` and is correct R code, while `2 + 1 = 3` will return an error. 
+* *Boolean algebra*: `TRUE/FALSE` statements and mathematical operators such as `<` (less than), `<=` (less than or equal), and `!=` (not equal to). For example, `4 + 2 >= 3` will return `TRUE`, but `3 + 5 <= 1` will return `FALSE`. Testing for inclusion with the `%in%` operator. For example, `"B" %in% c("A", "B")` returns `TRUE` while `"C" %in% c("A", "B")` returns `FALSE`. We test for equality in R using `==`. For example, `2 + 1 == 3` compares `2 + 1` to `3` and is correct R code, while `2 + 1 = 3` will return an error. 
 * *Logical operators*: `&` representing "and" as well as `|` representing "or." For example, `(2 + 1 == 3) & (2 + 1 == 4)` returns `FALSE` since both clauses are not `TRUE` (only the first clause is `TRUE`). On the other hand, `(2 + 1 == 3) | (2 + 1 == 4)` returns `TRUE` since at least one of the two clauses is `TRUE`. 
 * *Functions*, also called *commands*: perform tasks in R. They take in inputs called *arguments* and return outputs. You can either manually specify a function's arguments or use the function's *default values*. For example, the function `seq()` in R generates a sequence of numbers. If you just run `seq()` it will return the value 1. That doesn't seem very useful! This is because the default arguments are set as `seq(from = 1, to = 1)`. Thus, if you don't pass in different values for `from` and `to` to change this behavior, R just assumes all you want is the number 1. You can change the argument values by updating the values after the `=` sign. If we try out `seq(from = 2, to = 5)` we get the result `2 3 4 5`, as we would expect. 
-* *Help files*: provide documentation for various functions and datasets. You can bring up help files by adding a `?` before the name of a function or data frame and then run this in the console. You will then be presented with a page showing the corresponding documentation.    
+* *Help files*: provide documentation for various functions and datasets. You can bring up help files by adding a `?` before the name of a function or data frame and then run this in the console. You will then be presented with a page showing the corresponding documentation.     
 
 ### Errors, warnings, and messages
 
@@ -127,12 +112,11 @@ Remember, when you see red text in the console, *don't panic*. It doesn't necess
 
 ### Examining `gapminder`
 
-Let's put everything we've learned so far into practice and start exploring some real data! Data comes to us in a variety of formats, from pictures to text to numbers.  Throughout this book, we'll focus on datasets that are saved in "spreadsheet"-type format. This is probably the most common way data are collected and saved in many fields. These "spreadsheet"-type datasets are called _data frames_ in R. We'll focus on working with data saved as data frames throughout this book. Again, "tibble" is the more modern term for "data frame," but we will use both interchangeably.
+Let's put everything we've learned so far into practice and start exploring some real data! Data comes to us in a variety of formats, from pictures to text to numbers. Throughout this book, we'll focus on datasets that are saved in "spreadsheet"-type format. This is probably the most common way data are collected and saved in many fields. These "spreadsheet"-type datasets are called _data frames_ in R. Again, we will be using "data frame" and "tibble" interchangeably for this chapter.
 
 
-We'll begin by exploring the `gapminder` data frame. This dataset is an excerpt of the Gapminder data on life expectancy, GDP per capita, and population by country.
+We'll begin by exploring the `gapminder` data frame in the **gapminder** package. This dataset is an excerpt of the Gapminder data on life expectancy, GDP per capita, and population by country.
 
-Run the following code in your console, either by typing it or by cutting-and-pasting it. It displays the contents of the `trains` data frame in your console. Note that depending on the size of your monitor, the output may vary slightly. 
 
 ```{r}
 library(gapminder)
@@ -143,15 +127,16 @@ Let's unpack this output:
 
 * `A tibble: 1,704 x 6`: A `tibble` is a specific kind of data frame in R. This particular data frame has `1,704` rows corresponding to different *observations*. The tibble also has `6` columns corresponding to 6 *variables* describing each observation.
 * `country`, `continent`, `year`, `lifeExp`, `pop`, and `gdpPercap` are the different variables of this dataset. 
-* We see, dy default, the top 10 rows, but these ten are followed `... with 1,694 more rows`, indicating to us that 1,694 more rows of data could not fit in this screen. R is only showing the first 10 rows, since that is all that you probably want to see at first. You can see more (or fewer) rows with the `print()` command, i.e.,
+* We see, by default, the top 10 rows. R is only showing the first 10 rows, since that is all that you probably want to see at first. You can see more (or fewer) rows with scrolling or using the `print()` command:
 
 ```{r}
 print(gapminder, n = 15)
 ```
+Note the `n` argument tells R the number of rows you want to see. 
 
 ### Exploring data frames
 
-There are many ways to get a feel for the data contained in a data frame such as `trains`. We present two functions that take as their "argument" (their input) the data frame in question. We also include a third method for exploring one particular column of a data frame:
+There are many ways to get a feel for the data contained in a data frame such as `gapminder`. We present two functions that take the dataset as their "argument" (or input). We also include a third method for exploring one particular column of a data frame:
 
 1. Using the `view()` function, which brings up RStudio's built-in data viewer.
 1. Using the `glimpse()` function, which is included in the **dplyr** package.
@@ -163,13 +148,13 @@ Run `view(gapminder)` in your console in RStudio, either by typing it or cutting
 
 By running `view(gapminder)`, we can explore the different *variables* listed in the columns. Observe that there are many different types of variables.  Some of the variables including `year`, `lifeExp`, `pop`, `year` and `gdPercap` are *quantitative* variables. These variables are numerical in nature.  Other variables here, including `country`, `continent` are *categorical*.
 
-If you look in the leftmost column of the `View(trains)` output, you will see a column of numbers. These are the row numbers of the dataset. If you glance across a row with the same number, say row 5, you can get an idea of what each row is representing. This will allow you to identify what object is being described in a given row by taking note of the values of the columns in that specific row. This is often called the *observational unit*.
+If you look in the leftmost column of the `view(gapminder)` output, you will see a column of numbers. These are the row numbers of the dataset. If you glance across a row with the same number, say row 5, you can get an idea of what each row is representing. This will allow you to identify what object is being described in a given row by looking at the values of the columns in that specific row. This is often called the *observational unit*.
 
 You can identify the observational unit by determining what "thing" is being measured or described by each of the variables. 
 
 **2. `glimpse()`**:
 
-The second way we'll cover to explore a data frame is using the `glimpse()` which provides us with an alternative perspective for exploring a data frame than the `View()` function:
+We can also explore a data frame using the `glimpse()`function. 
 
 ```{r}
 glimpse(gapminder)
@@ -183,143 +168,138 @@ Not mentioned here is `chr`, which refers to "character", which is computer term
 
 **3. `$` operator**
 
-Lastly, the `$` operator allows us to extract and then explore a single variable within a data frame. For example, run the following in your console
+Lastly, the `$` operator allows us to extract and then explore a single variable within a data frame.
 
 ```{r}
-gapminder$country
+gapminder$year
 ```
 
-We used the `$` operator to extract only the `country` variable and return it as a vector. We'll only be occasionally exploring data frames using the `$` operator, instead favoring the `view()` and `glimpse()` functions.
+We used the `$` operator to extract only the `year` variable and return it as a vector. We'll only be occasionally exploring data frames using the `$` operator> Mostly, we favor the `view()` and `glimpse()` functions.
 
 
 ## Basic Plots
 
-We begin the development of your data science toolbox with data visualization. By visualizing data, we gain valuable insights we couldn't initially obtain from just looking at the raw data values.  We'll use the **ggplot2** package, as it provides an easy way to customize your plots. 
-
-At their most basic, graphics/plots/charts (we use these terms interchangeably in this book) provide a nice way to explore the patterns in data, such as the presence of *outliers*, *distributions* of individual variables, and *relationships* between groups of variables. Graphics are designed to emphasize the findings and insights you want your audience to understand. This requires a balancing act. On the one hand, you want to highlight as many interesting findings as possible, but not to the extent where your audience becomes overwhelmed.  
-
+We begin the development of your data science toolbox with data visualization. By visualizing data, we gain valuable insights we couldn't initially obtain from just looking at the raw data values. Graphics/plots/charts provide a nice way to explore the patterns in data, such as the presence of *outliers*, *distributions* of individual variables, and *relationships* between groups of variables. We'll use the **ggplot2** package, as it provides an easy way to customize your plots. 
 
 We can break a graphic into the following three essential components:
 
-1. `data`: the dataset containing the variables of interest.
-2. `geom`: the geometric object in question. This refers to the type of object we can observe in a plot. For example: points, lines, and bars.
-3. `aes`: aesthetic attributes of the geometric object. For example, x/y position, color, shape, and size.  Aesthetic attributes are *mapped* to variables in the dataset.
+* `data`: the dataset containing the variables of interest.
+* `geom`: the geometric object in question. This refers to the type of object we want to observe in a plot (scatterplot, line graph, etc.).
+* `aes`: aesthetic attributes of the geometric object. This is where we tell R what variables should be on the x and y axis. Additionally, color and size are additional attributes we will explore later on. Aesthetic attributes are *mapped* to variables in the dataset.
 
-These three components are specified in the `ggplot()` function included in the **ggplot2** package. For the purposes of this book, we'll always provide the `ggplot()` function with the following arguments (i.e., inputs):
+Let's look at an example of a basic scatterplot. 
 
-* The data frame where the variables exist: the `data` argument.
-* The mapping of the variables to aesthetic attributes: the `mapping` argument which specifies the `aes`thetic attributes involved.
-
-After we've specified these components, we then add *layers* to the plot using the `+` sign. The most essential layer to add to a plot is the layer that specifies which type of `geom`etric object we want the plot to involve: points, lines, bars, and others. Other layers we can add to a plot include the plot title, axes labels, visual themes for the plots, and facets.
-
-
-```{r, echo=FALSE}
-gapminder_2007 <- gapminder %>% 
-  filter(year == 2007) %>% 
-  select(-year) %>% 
-  rename(Country = country,
-         Continent = continent,
-         `Life Expectancy` = lifeExp,
-         `Population` = pop,
-         `GDP per Capita` = gdpPercap)
-```
-
-Let's take a look at a subset of the `gapminder` data. Each row in this table corresponds to a country in 2007.
-
-```{r, echo=FALSE}
-print(gapminder_2007, n = 3)
-```
-
-Now consider the following scatterplot, which plots our subset of data from 2007.
-
-```{r, echo=FALSE}
-ggplot(data = gapminder_2007, 
-       mapping = aes(x = `GDP per Capita`, 
-                     y = `Life Expectancy`, 
-                     size = Population, 
-                     color = Continent)) +
-  geom_point() +
-  labs(x = "GDP per capita", y = "Life expectancy", 
-       caption = "Life expectancy over GDP per capita in 2007.") +
-  scale_size_continuous(labels = scales::label_comma())
-```
-
-Let's view this plot through the grammar of graphics:
-
-1. The `data` variable **GDP per Capita** gets mapped to the `x`-position `aes`thetic of the points.
-1. The `data` variable **Life Expectancy** gets mapped to the `y`-position `aes`thetic of the points.
-1. The `data` variable **Population** gets mapped to the `size` `aes`thetic of the points.
-1. The `data` variable **Continent** gets mapped to the `color` `aes`thetic of the points.
-
-We'll see shortly that `data` corresponds to the particular data frame where our data is saved and that "data variables" correspond to particular columns in the data frame. Furthermore, the type of `geom`etric object considered in this plot are points. However, graphics are not limited to just points. We can also use lines, bars, and other geometric objects.
-
-Let's take a tour of some of the more useful geoms.
-
-
-### `geom_point()`
-
-*Scatterplots*, also called *bivariate plots*, allow you to visualize the *relationship* between two numerical variables. Specifically, we will visualize the relationship between the following two numerical variables in the `gapminder` data frame.
-
-1. `lifeExp`: average life expectancy of a country
-1. `gdpPercap`: gross domestic product of a country
-
-Let's go over the code that will creates the desired scatterplot below, piece-by-piece.
-
-```{r, eval = FALSE}
+```{r}
 ggplot(data = gapminder, 
-       mapping = aes(x = gdpPercap, y = lifeExp)) + 
+       mapping = aes(x = gdpPercap, 
+                     y = lifeExp)) + 
   geom_point()
 ```
 
-**Step 1:** Within the `ggplot()` function, we specify two of the plot's components as arguments (i.e., inputs):
+Notice how the three components( i.e.`data`, `geom`, and `aes`) are specified in the `ggplot()` function. Within the`ggplot()` function, we will always use the the following arguments (i.e., inputs):
 
-* The `data` as the `gapminder` data frame via `data = gapminder`.
-* The `aes`thetic `mapping` by setting `mapping = aes(x = gdpPercap, y = lifeExp)`. Specifically, the variable `gdpPercap` maps to the `x` position aesthetic, while the variable `lifeExp` maps to the `y` position.
-        
-**Step 2:** Add a layer to the `ggplot()` function call using the `+` sign. The added layer in question specifies the third component: the `geom`etric object. In this case, the geometric object is set to be points by specifying `geom_point()`.
+Once we've specified these components, we then add *layers* to the plot using the `+` sign. The most essential layer to add to a plot is the layer that specifies which type of `geom`etric object we want the plot to involve: points, lines, bars, and others. In our graph above, the geom we used is `geom_point()`. This tells R we want our graph to include points (i.e. a scatterplot). 
 
-*Note:* The `+` sign comes at the end of the code line and not at the beginning. When adding layers to a plot, start a new line after the `+` so that the code for each layer is on a new line.
+If you look at the code above, you will notice the `+` sign comes at the end of the code line and not at the beginning. When adding layers to a plot, start a new line after the `+` so that the code for each layer is on a new line.
 
-In the graphic above, a *positive relationship* exists between `lifeExp` and `gdpPercap`: as gross domestic product increases, life expectancy tends to also increase. If we do not specify the `geom`etric object, we have a blank plot which is not very useful!
+Let's now dive deeper into `geom_point()`.  
 
-```{r fig.align = "center"}
-ggplot(data = gapminder, mapping = aes(x = gdpPercap, y = lifeExp)) 
+### `geom_point()`
+
+*Scatterplots*, also called *bivariate plots*, allow you to visualize the *relationship* between two numerical variables. 
+
+Recall our scatterplot from above.
+
+```{r}
+ggplot(data = gapminder, 
+       mapping = aes(x = gdpPercap, 
+                     y = lifeExp)) + 
+  geom_point()
 ```
+
+Let's break down this code, piece-by-piece.
+
+Within the `ggplot()` function, we specified two of the plot's components as arguments (i.e., inputs):
+
+* The `data` argument is set to `gapminder` via `data = gapminder`.
+* The `aes`thetic `mapping` by set via `mapping = aes(x = gdpPercap, y = lifeExp)`. Here, we map `gdpPercap` to the `x` axis and `lifeExp` maps to the `y` axis.
+* We added a layer using the `+` sign. The added layer in question specifies the third component: the `geom`etric object. In this case, the geometric object is set to be points by specifying `geom_point()`.
+
+
+In the graphic above, a *positive relationship* exists between `lifeExp` and `gdpPercap`: as gdp per capita increases, life expectancy tends to also increase. If we do not specify the `geom`etric object, we have a blank plot like such:
+
+```{r}
+ggplot(data = gapminder, 
+       mapping = aes(x = gdpPercap, 
+                     y = lifeExp)) 
+```
+
+#### Titles and Labels
+
+In addition to adding the `geom` year, we can also add the layer `labs()`. We use the function `labs()` to add a plot title, axis labels, subtitles, and captions to our graph. You will have noticed that by default R simply uses the names of variables for axes and legends. Let's now add a title and axis labels to our plot.
+
+```{r}
+ggplot(data = gapminder, 
+       mapping = aes(x = gdpPercap, 
+                     y = lifeExp)) + 
+  geom_point() + 
+  labs(title = "The Relationship Between Life
+               Expectancy and GDP Percapita",
+            x = "GDP Percapita",
+            y= "Life Expectancy")
+```
+
+Note that it is up to us, which or how many of the arguments in `labs()` we use.
+
+Let's now take a tour of some of the more useful geoms.
+
+<!-- BG: teach color argument here? -->
 
 ### `geom_jitter()`
 
-In the scatterplot above, there is a large mass of points. This makes it hard to tell the true number of points that are plotted. This is the result of a phenomenon called *overplotting*, where points are being plotted on top of each other over and over again. There are two methods to address the issue of overplotting.
+Our scatterplot from the previous section has a large mass of points. This makes it hard to tell the true number of points that are plotted. This is the result of a phenomenon called *overplotting*, where points are being plotted on top of each other over and over again. There are two methods to address the issue of overplotting.
 
 1. Adjust the transparency of the points 
 1. Add a little random "jitter" or random "nudges", to each of the points
 
 **Method 1: Changing the transparency**
 
-We can change the transparency/opacity of the points by setting the `alpha` argument in `geom_point()`. The`alpha` argument can be any value between `0` and `1`, where `0` sets the points to be 100% transparent and `1` sets the points to be 100% opaque. By default, `alpha` is set to `1`. In other words, if we don't explicitly set an `alpha` value, R will use `alpha = 1`.
+We can change the transparency/opacity of the points by using the `alpha` argument within `geom_point()`. The `alpha` argument can be set to any value between `0` and `1`, where `0` sets the points to be 100% transparent and `1` sets the points to be 100% opaque. By default, `alpha` is set to `1`. In other words, if we don't explicitly set an `alpha` value, R will use `alpha = 1`.
 
-*Note:* how the following code is identical to the code that created the scatterplot with overplotting, but with `alpha = 0.2` added to the `geom_point()` function:
 
-```{r fig.align = "center", warning = FALSE}
+Let's now add an `alpha` argument to our scatterplot. 
+
+```{r}
 ggplot(data = gapminder, 
-       mapping = aes(x = gdpPercap, y = lifeExp)) + 
-  geom_point(alpha = .2)
+       mapping = aes(x = gdpPercap, 
+                     y = lifeExp))  + 
+      labs(title= "The Relationship Between Life Expectancy 
+                    and GDP Percapita",
+                    x = "GDP Percapita",
+                    y= "Life Expectancy") +
+      geom_point(alpha = .2)
 ```
 
-The key feature to note in this plot is that the transparency of the points is cumulative: areas with a high-degree of overplotting are darker, whereas areas with a lower degree are less dark. Note furthermore that there is no `aes()` surrounding `alpha = 0.2`. This is because we are not mapping a variable to an aesthetic attribute, but rather merely changing the default setting of `alpha`. In fact, you'll receive an error if you try to change the second line to read `geom_point(aes(alpha = 0.2))`.
+Note that there is no `aes()` surrounding `alpha = 0.2`. This is because we are not mapping a variable to an aesthetic attribute, but rather merely changing the default setting of `alpha`. In fact, you'll receive an error if you try to change the second line to read `geom_point(aes(alpha = 0.2))`.
 
 **Method 2: Jittering the points**
 
-We can jitter points by using `geom_jitter()` instead of `geom_point()`. Keep in mind, however, that jittering is strictly a visualization tool; even after creating a jittered scatterplot, the original values saved in the data frame remain unchanged. 
+We can also decide to jitter the points on the plot. We do this by replacing `geom_point()` with `geom_jitter()`. Keep in mind that jittering is strictly a visualization tool; even after creating a jittered scatterplot, the original values saved in the data frame remain unchanged. 
 
-In order to specify how much jitter to add, we adjusted the `width` and `height` arguments to `geom_jitter()`.  This corresponds to how hard you'd like to shake the plot in horizontal x-axis units and vertical y-axis units, respectively. It is important to add just enough jitter to break any overlap in points, but not to the extent where you alter the original pattern in points.
+In order to specify how much jitter to add, we use the `width` and `height` arguments to `geom_jitter()`. This corresponds to how hard you'd like to shake the plot in horizontal x-axis units and vertical y-axis units, respectively. It is important to add just enough jitter to break any overlap in points, but not to the extent where you alter the original pattern in points.
 
 ```{r}
-ggplot(data = gapminder, mapping = aes(x = gdpPercap, y = lifeExp)) + 
-  geom_jitter(width = 5, height = 5)
+ggplot(data = gapminder, 
+       mapping = aes(x = gdpPercap, 
+                     y = lifeExp))  + 
+      labs(title= "The Relationship Between Life Expectancy 
+                    and GDP Percapita",
+                    x = "GDP Percapita",
+                    y= "Life Expectancy") +
+      geom_point(alpha = .2)
 ```
 
-
-As can be seen in the resulting plot, in this case jittering doesn't really provide much new insight. In this particular case, it can be argued that changing the transparency of the points by setting `alpha` proved more effective.  When would it be better to use a jittered scatterplot? There is no single right answer. We suggest you make both types of plots and see which one better emphasizes the point you are trying to make. 
+As can be seen in the resulting plot, in this case jittering doesn't really provide much new insight. It can be argued that changing the transparency of the points by setting `alpha` proved more effective. When deciding whether to jitter a scatterplot or use the `alpha` argument to `geom_point()`, know that there is no single right answer. We suggest you play around with both methods to see which one better emphasizes the point you are trying to make. 
 
 ### `geom_line()`
 
@@ -335,6 +315,7 @@ The most common examples of linegraphs have some notion of time on the x-axis: h
 
 
 
+
 ### `geom_histogram()`
 
 A histogram is a plot that visualizes the *distribution* of a numerical value as follows:
@@ -343,8 +324,10 @@ A histogram is a plot that visualizes the *distribution* of a numerical value as
 1. For each bin, we count the number of observations that fall in the range corresponding to that bin.
 1. Then for each bin, we draw a bar whose height marks the corresponding count.
 
-Let's consider the `lifeExp` in Asia in the `gapminder` data frame once again, but unlike with the linegraphs, let's say we don't care about its relationship with time, but rather we only care about how the values of `lifeExp` *distribute*. In other words:
+Let's consider the `lifeExp` variable of the the `gapminder` data frame. Unlike with the linegraphs, let's say we don't care about its relationship with time, but rather we only care about how the values of `lifeExp` *distribute*. 
 
+
+Here is our code to create a histogram:
 
 ```{r}
 ggplot(data = gapminder, 
@@ -353,38 +336,56 @@ ggplot(data = gapminder,
  
 ```
 
-Unlike with scatterplots and linegraphs, there is now only one variable being mapped in `aes()`: the single numerical variable `lifeExp`. The y-aesthetic of a histogram, the count of the observations in each bin, gets computed for you automatically. Furthermore, the geometric object layer is now a `geom_histogram()`. After running the following code, you'll see the histogram as well as warning messages. We'll discuss the warning messages first. 
+Unlike scatterplots and linegraphs, there is now only one variable being mapped in `aes()`. Here, that variable is `lifeExp`. The y-aesthetic of a histogram, the count of the observations in each bin, gets computed for you automatically. Furthermore, the geometric object layer is now a `geom_histogram()`. After running the following code, you'll see the histogram as well as warning messages. 
+
 * The warning message is telling us that the histogram was constructed using `bins = 30` for 30 equally spaced bins. This is known in computer programming as a default value; unless you override this default number of bins with a number you specify, R will choose 30 by default. We'll see in the next section how to change the number of bins to another value than the default.
 
-It's hard to get a sense for which range of life expectancy is spanned by each bin; everything is one giant amorphous blob. So let's add white vertical borders demarcating the bins by adding a `color = "white"` argument to `geom_histogram()` and ignore the warning about setting the number of bins to a better value:
+It's hard to get a sense for which range of life expectancy is spanned by each bin; everything is one giant amorphous blob. So let's add white vertical borders demarcating the bins by adding a `color` argument to `geom_histogram()`. We set `color `to "white" in  `geom_histogram()` to create a white outline between bins.
 
-```{r warning = FALSE, message = FALSE, fig.align = "center"}
-ggplot(data = gapminder, mapping = aes(x = lifeExp)) +
-  geom_histogram(color = "white", fill = "steelblue")
+```{r}
+ggplot(data = gapminder, 
+       mapping = aes(x = lifeExp)) +
+  geom_histogram(color = "white")
+```
+
+We can also use the `fill` argument to change the color of the actual bins. Let's set `fill` to "steelblue". 
+
+```{r}
+ggplot(data = gapminder, 
+       mapping = aes(x = lifeExp)) +
+  geom_histogram(color = "white", 
+                 fill = "steelblue")
 ```
 
 We can also adjust the number of bins in our histogram in one of two ways:
 
 1. By adjusting the number of bins via the `bins` argument to `geom_histogram()`. 
+
 2. By adjusting the width of the bins via the `binwidth` argument to `geom_histogram()`. 
 
 As mentioned in the previous section, the default number of bins is 30. We can override this default, to say 40 bins, as follows. Notice the warning message disappeared!
 
-```{r, eval = FALSE}
-ggplot(data = gapminder, mapping = aes(x = lifeExp)) +
-  geom_histogram(bins = 40, color = "white",fill = "steelblue" )
+```{r}
+ggplot(data = gapminder, 
+       mapping = aes(x = lifeExp)) +
+  geom_histogram(bins = 40, 
+                 color = "white",
+                 fill = "steelblue" )
 ```
 
-Using the second method, instead of specifying the number of bins, we specify the width of the bins by using the `binwidth` argument in the `geom_histogram()` layer. For example, let's set the width of each bin to be 10&deg;F.
+Using the second method, instead of specifying the number of bins, we specify the width of the bins by using the `binwidth` argument in the `geom_histogram()` layer. For example, let's set the width of each bin to be 5.
 
-```{r, eval = FALSE}
-ggplot(data = gapminder, mapping = aes(x = lifeExp)) +
-  geom_histogram(binwidth = 5, color = "white",fill = "steelblue")
+```{r}
+ggplot(data = gapminder,
+       mapping = aes(x = lifeExp)) +
+  geom_histogram(binwidth = 5, 
+                 color = "white",
+                 fill = "steelblue")
 ```
 
-We compare both resulting histograms side-by-side. 
+Let's compare both resulting histograms side-by-side. 
 
-```{r warning=FALSE, message=FALSE, echo=FALSE, fig.align="center"}
+```{r warning = FALSE, message = FALSE}
 x <- ggplot(data = gapminder, mapping = aes(x = lifeExp)) +
   geom_histogram(bins = 40, color = "white",fill = "steelblue")
 
@@ -397,7 +398,7 @@ x + y
 
 ### `geom_bar()` 
 
-Similarly to histograms, `geom_bar()` visualizes the distribution of a categorical variable. This is a simpler task, as we are simply counting different categories within a categorical variable, also known as the *levels* of the categorical variable. Often the best way to visualize these different counts, also known as *frequencies*, is with barplots (also called barcharts).
+Similarly to histograms, `geom_bar()` visualizes the distribution of a categorical variable. This is a simpler task, as we are simply counting different categories within a categorical variable, also known as the *levels* of the categorical variable. Often the best way to visualize these different counts, also known as *frequencies*, is with barplots.
 
 Run the following code that manually creates a data frame representing a collection of fruit: 3 apples and 2 oranges. Notice how `fruits` lists the fruit individually.
 
@@ -416,8 +417,6 @@ ggplot(data = fruits,
   geom_bar()
 ```
 
-
-
 #### No pie charts!
 
 One of the most common plots used to visualize the distribution of categorical data is the pie chart. While they may seem harmless enough, pie charts actually present a problem in that humans are unable to judge angles well. @robbins2013 argues that we overestimate angles greater than 90 degrees and we underestimate angles less than 90 degrees. In other words, it is difficult for us to determine the relative size of one piece of the pie compared to another.  
@@ -425,12 +424,15 @@ One of the most common plots used to visualize the distribution of categorical d
 While pie charts present information in a way such that comparisons must be made by comparing angles, barplots are more effective because they present the information in a way such that comparisons between categories can be made with single horizontal lines.
 
 
-
 #### Two categorical variables
 
-Barplots are a very common way to visualize the frequency of different categories, or levels, of a single categorical variable. Another use of barplots is to visualize the *joint* distribution of two categorical variables at the same time. Let's examine the *joint* distribution of different types of manufacturers' cars by `class` as well as `model`. In other words, the number of cars for each `class` and `model` combination. 
+Barplots are a very common way to visualize the frequency of different categories, or levels, of a single categorical variable. Another use of barplots is to visualize the *joint* distribution of two categorical variables at the same time. 
 
-The code below creates a barplot of `class` frequency:
+Let's look at a different dataset `mpg`, which contains a subset of the fuel economy data that the EPA released every year between 1999 and 2008. Each observation is a different car.
+
+Let's examine the *joint* distribution of two different types of manufacturers' cars by `class` as well as `model`. In other words, the number of cars for each `class` and `model` combination. 
+
+The code below creates a barplot of `class` frequency.
 
 ```{r}
 ggplot(data = mpg, 
@@ -438,105 +440,105 @@ ggplot(data = mpg,
   geom_bar()
 ```
 
-We can now map the additional variable `model` by adding a `fill = model` inside the `aes()` aesthetic mapping.
+Let's now map the additional variable `model` by adding a `fill = model` inside the `aes()` aesthetic mapping. Recall the `fill` aesthetic corresponds to the color used to fill the bars.
 
 ```{r}
 ggplot(data = mpg, 
-       mapping = aes(x = class, fill = model)) +
+       mapping = aes(x = class, 
+                     fill = model)) +
   geom_bar()
 ```
 
 This is an example of a *stacked barplot*.  While simple to make, in certain aspects it is not ideal. For example, it is difficult to compare the heights of the different colors between the bars, corresponding to comparing the number of cars from each model between classes.
 
-Before we continue, let's address some common points of confusion among new R users. First, the `fill` aesthetic corresponds to the color used to fill the bars, while the `color` aesthetic corresponds to the color of the outline of the bars. Observe that mapping `model` to `color` and not `fill` yields grey bars with different colored outlines.
+An alternative to stacked barplots are *side-by-side barplots*, also known as *dodged barplots*. The code to create a side-by-side barplot  includes a `position = "dodge"` argument added inside `geom_bar()`. In other words, we are overriding the default barplot type, which is a *stacked* barplot, and specifying it to be a side-by-side barplot instead.
+
 
 ```{r}
 ggplot(data = mpg, 
-       mapping = aes(x = class, color = model)) +
-  geom_bar()
-```
-
-Second, note that `fill` is another aesthetic mapping much like `x`-position; thus we were careful to include it within the parentheses of the `aes()` mapping. The following code, where the `fill` aesthetic is specified outside the `aes()` mapping will yield an error. This is a fairly common error that new `ggplot` users make:
-
-```{r, error=TRUE}
-ggplot(data = mpg, 
-       mapping = aes(x = class), fill = model) +
-  geom_bar()
-```
-
-An alternative to stacked barplots are *side-by-side barplots*, also known as *dodged barplots*. The code to create a side-by-side barplot is identical to the code to create a stacked barplot, but with a `position = "dodge"` argument added to `geom_bar()`. In other words, we are overriding the default barplot type, which is a *stacked* barplot, and specifying it to be a side-by-side barplot instead.
-
-```{r}
-ggplot(data = mpg, 
-       mapping = aes(x = class, fill = model)) +
+       mapping = aes(x = class, 
+                     fill = model)) +
   geom_bar(position = "dodge")
 ```
 
-
-
 Note the width of the bars vary among one another. We can make one tweak to the `position` argument to get them to be the same size in terms of width as the other bars by using the more robust `position_dodge()` function.
 
-```{r eval = FALSE}
-ggplot(data = mpg, mapping = aes(x = class, fill = model)) +
+```{r}
+ggplot(data = mpg, 
+       mapping = aes(x = class, 
+                     fill = model)) +
   geom_bar(position = position_dodge(preserve = "single"))
 ```
 
 
 
 
+
 ### `geom_smooth()`
 
-<!-- DK: Will handle geom_smooth(). -->
+We can add trend lines to the plots we create using the `geom_smooth()` function. 
 
-Now let's go back to the `geom_point()` section and add a smooth line using the `geom_smooth()` function. 
+<!-- DK: Will handle geom_smooth().explain method, se, and formula -->
 
-Here's the scatterplot we created from the `geom_point()` section:
+Recall the following scatterplot from the `geom_point()` section. 
 
-```{r fig.align="center", warning=TRUE, echo=FALSE}
-ggplot(data = gapminder, mapping = aes(x = gdpPercap, y = lifeExp)) + 
+```{r}
+ggplot(data = gapminder, 
+       mapping = aes(x = gdpPercap, 
+                     y = lifeExp)) + 
   geom_point()
 ```
 
-Let's try adding a regression line on a scatterplot using the `geom_smooth()` function in combination with the argument `method = lm`, where `lm` stands for linear model. We can add `geom_smooth(method = lm)` as another layer in our plot.  
+We can add a trend line to our graph by adding the layer `geom_smooth()`. Including trend lines allow us to visualize the patterns in the presence of overplotting.
 
-```{r fig.align = "center", echo = FALSE}
+```{r}
+ggplot(data = gapminder, 
+       mapping = aes(x = gdpPercap, 
+                     y = lifeExp)) + 
+  geom_point() +
+  geom_smooth()
+```
+
+Do you see the message R gives us? R is telling us that we need to specify the `method` and `formula` argument. 
+
+Let's first deal with the `method` argument. Use the `geom_smooth()` function in combination with the argument `method = lm`, where `lm` stands for linear model.
+
+```{r}
 ggplot(data = gapminder, mapping = aes(x = gdpPercap, y = lifeExp)) + 
   geom_point() +
   geom_smooth(method = lm)
 ```
 
-Another method to fit a line to a scatter plot is called the `loess` method, which computes a smooth local regression and is the default value for a small number of observations. You can read more about loess using the R code `?loess` in your console. 
+Notice R continues to give us a message that we still need to include and specify the `formula` argument. Let's set the `formula` to `y ~ x` within `geom_smooth()`.
 
-Here's what the graph looks like using the Loess method for local regression fitting:
-
-```{r fig.align = "center", warning = TRUE, echo = FALSE}
+```{r}
 ggplot(data = gapminder, mapping = aes(x = gdpPercap, y = lifeExp)) + 
   geom_point() +
-  geom_smooth(method = loess)
+  geom_smooth(method = "lm", formula = y ~ x)
 ```
 
 Notice the gray section surrounding both sides of both of the lines we plotted. This area is called the confidence interval, which is set to a 95% confidence interval by default. Therefore, using the 95% default confidence interval, we can be 95% certain that predictions for the model used in each plot fall within the gray area.
 
 If we want to remove the gray area, or the confidence interval, we can set `se = FALSE` within the `geom_smooth()` function.
 
-```{r fig.align = "center", warning = TRUE, echo = FALSE}
+```{r}
 ggplot(data = gapminder, mapping = aes(x = gdpPercap, y = lifeExp)) + 
   geom_point() +
-  geom_smooth(method = loess, se = FALSE)
+  geom_smooth(method = "lm", formula = y ~ x, se = FALSE)
 ```
 
 ### `geom_density()`
 
 Recall the histogram we plotted in the `geom_histogram()` section.
 
-```{r warning=TRUE, fig.align="center"}
+```{r}
 ggplot(data = gapminder, mapping = aes(x = lifeExp)) +
   geom_histogram()
 ```
 
 We can change `geom_histogram()` to `geom_density()` to make a density plot, which is a smoothed version of the histogram. This is a useful alternative to the histogram that displays continuous data in a smooth distribution.
 
-```{r warning=TRUE, fig.align="center"}
+```{r}
 ggplot(data = gapminder, mapping = aes(x = lifeExp)) +
   geom_density()
 ```
@@ -548,22 +550,27 @@ ggplot(data = gapminder, mapping = aes(x = lifeExp)) +
 
 Let's go over some important points about specifying the arguments (i.e., inputs) to functions. Run the following two segments of code:
 
-```{r, eval = FALSE}
-ggplot(data = gapminder, mapping = aes(x = lifeExp)) +
+```{r message = FALSE}
+ggplot(data = gapminder, 
+       mapping = aes(x = lifeExp)) +
 geom_histogram(color = "white")
  
 ```
 
-```{r, eval=FALSE}
-ggplot(data = gapminder, mapping = aes(x = lifeExp)) +
+```{r message = FALSE}
+ggplot(data = gapminder, 
+       mapping = aes(x = lifeExp)) +
 geom_histogram(color = "white")
 ```
 
-You'll notice that both code segments create the same barplot, even though in the second segment we omitted the `data = ` and `mapping = ` code argument names. This is because the `ggplot()` function by default assumes that the `data` argument comes first and the `mapping` argument comes second. As long as you specify the data frame in question first and the `aes()` mapping second, you do not need to include the explicit statement of the argument names `data = ` and `mapping = `. 
+Both code segments create the same barplot, even though in the second segment we omitted the `data = ` and `mapping = ` code argument names. This is because the `ggplot()` function by default assumes that the `data` argument comes first and the `mapping` argument comes second. As long as you specify the data frame in question first and the `aes()` mapping second, you do not need to include the explicit statement of the argument names `data = ` and `mapping = `. 
 
 Going forward for the rest of this book, all `ggplot()` code will be like the second segment: with the `data = ` and `mapping = ` explicit naming of the argument omitted with the default ordering of arguments respected. We'll do this for brevity's sake; it's common to see this style when reviewing other R users' code.
 
-Data "in the wild" is never ready for visualization. We can't use all the beautiful plots that we learned in the previous chapter until we have "wrangled" the data into a convenient shape. In this chapter, we'll introduce a series of functions from the **tidyverse** collection of packages which help with wrangling, and everything else we need to do to work with data. Such functions include:
+
+### Data Wrangling 
+
+We can't use all the beautiful plots that we learned in the previous chapter until we have "wrangled" the data into a convenient shape. In this chapter, we'll introduce a series of functions from the **tidyverse** collection of packages which help with wrangling, and everything else we need to do to work with data. Such functions include:
 
 * `filter()`the data frame's existing rows to only pick out a subset of them.
 
@@ -577,53 +584,37 @@ Data "in the wild" is never ready for visualization. We can't use all the beauti
 
 *`summarize()` the data. It creates a new data frame comprised of summary statistics for one (or more) rows for each grouped variable. 
 
+Notice how we used `computer_code` font to describe the actions we want to take on our data frames. This is because the **dplyr** package, one of the packages in the **tidyverse**, has intuitively verb-named functions that are easy to remember. 
 
-%>% Notice how we used `computer_code` font to describe the actions we want to take on our data frames. This is because the **dplyr** package, one of the packages in the **tidyverse**, has intuitively verb-named functions that are easy to remember. 
+Keep in mind, there are many more advanced data wrangling functions than just the six listed in the introduction to this chapter; you'll see some examples of these in Section \@ref(other-verbs). However, just with these six verb-named functions you'll be able to perform a broad array of data wrangling tasks for the rest of this book.
 
-There is a further benefit to learning to use the **dplyr** package for data wrangling: its similarity to the database querying language [SQL](https://en.wikipedia.org/wiki/SQL) (pronounced "sequel" or spelled out as "S", "Q", "L"). SQL (which stands for "Structured Query Language") is used to manage large databases quickly and efficiently and is widely used by many institutions with a lot of data. While SQL is a topic left for a book or a course on database management, keep in mind that once you learn **dplyr**, you can learn SQL easily. 
+<!-- BG: stopped here -->
 
 ### The pipe operator: `%>%`
 
 Before we start data wrangling, let's first introduce a nifty tool that gets loaded with the **dplyr** package included in the tidyverse: the pipe operator `%>%`. The pipe operator allows us to combine multiple operations in R into a single sequential *chain* of actions.
 
-Recall from chapter 1 that to add the `geom` layer to your ggplot you had format your code as:
+Recall our code for our scatterplot.
 
-```{r, eval = FALSE}
-ggplot(data = gapminder, mapping = aes(x = gdpPercap, y = lifeExp)) + 
+```{r}
+ggplot(data = gapminder, 
+       mapping = aes(x = gdpPercap, 
+                     y = lifeExp)) + 
   geom_point()
 ```
 
-Without the `+` at the end of the first row, your computer would not know to continue onto the second. The same would occur without a pipe operator.
+Much like how the `+` sign has to come at the end of lines when constructing plots, the pipe operator `%>%` has to come at the end of lines as well. Without the `+` at the end of the first row, your computer would not know to continue onto the second. 
 
 
-<!-- EF: How do I use the index. It might be nice to define argument within the index -->
+The code below filters the `gapminder` dataset to only show about Asia, opposed to having data on all continents.
 
-The code below filters the `gapminder` dataset to only show about Asia, opposed to having data on all continents. 
-
-```{r, eval = FALSE}
-gapminder_Asia <- gapminder %>% 
+```{r}
+gapminder %>% 
   filter(continent == "Asia")
 ```
 
-Much like when adding layers to a `ggplot()` using the `+` sign, you form a single *chain* of data wrangling operations by combining verb-named functions into a single sequence using the pipe operator `%>%`. Furthermore, much like how the `+` sign has to come at the end of lines when constructing plots, the pipe operator `%>%` has to come at the end of lines as well. Note also that the pipe operator can be used multiple times sequentially. Simply include it at the end of your line, and the following function will be immediately linked to the output of the previous line containing the operator. We call the text within the parentheses the argument(s) of a function.
+A single *chain* of data wrangling operations is formed here by combining verb-named functions into a single sequence using the pipe operator `%>%`. 
 
-It is worth noting that most **dplyr** verbs, as well as most functions in the larger **tidyverse**, achieve this effect by always having their first argument be an input tibble. For example, look at `?dplyr::filter` to see that, for example, the first argument of `filter()` is a tibble named `.data`. So, we can rewrite the above code snippet as:
-
-```{r, eval = FALSE}
-gapminder_Asia <- gapminder %>% 
-  filter(.data= ., continent == "Asia")
-```
-
-The "." serves as special role when using pipes. It represents the tibble which was "passed down" from the previous step in the pipe. Here, we are telling R that "." --- which is `gapminder` in this case --- is the first argument to `filter()`. Since argument names do not have to be used, we can rewrite this as:
-
-```{r, eval = FALSE}
-gapminder_Asia <- gapminder %>% 
-  filter(.,  continent == "Asia")
-```
-
-You will almost never write code that looks like this, at least with simple **dplyr** verbs like `filter()`. But, behind the scenes, this is what is going on. And, in more advanced cases, we will need to use "." to refer to the passed-in tibble.
-
-Keep in mind, there are many more advanced data wrangling functions than just the six listed in the introduction to this chapter; you'll see some examples of these in Section \@ref(other-verbs). However, just with these six verb-named functions you'll be able to perform a broad array of data wrangling tasks for the rest of this book.
 
 
 ### `filter()` rows
@@ -634,16 +625,25 @@ knitr::include_graphics("01-visualization/images/filter.png")
 
 The `filter()` function here works much like the "Filter" option in Microsoft Excel; it allows you to specify criteria about the values of a variable in your dataset and then filters out only the rows that match that criteria.
 
-Let's revisit our code from the previous section.
+Let's revisit the code from the previous section.
 
-```{r, eval = FALSE}
-gapminder_Asia <- gapminder %>% 
+```{r}
+gapminder %>% 
   filter(continent == "Asia")
 ```
 
-The result of using `filter()` will be a transformed/modified data frame that you want, in this case, only data from Asia. In our example, we'll save the result in a new data frame by using the `<-` assignment operator with the name `gapminder_Asia` via `gapminder_Asia <-`. Because we assigned this modified data frame to `gapminder_Asia`, it is a separate entity from the initial `gapminder` data frame. If, however, we had written the code as `gapminder <- gapminder` you would have overwritten the previous data frame, and the original `gapminder` data from the **gapminder* package would have to be re-installed to access it again.
+The result of using `filter()` will be a transformed/modified data frame that you want, in this case, only data from Asia. When we alter our data, it can be a good idea to save the result in a new data frame by using the `<-` assignment operator.
 
-Note the order of the code. First, take the `flights` data frame `flights` *then* `filter()` the data frame so that only those where the `continent` equals `"Asia"` are included. We test for equality using the double equal sign `==` and not a single equal sign `=`. In other words `filter(continent = "Asia")` will yield an error. This is a convention across many programming languages. If you are new to coding, you'll probably forget to use the double equal sign `==` a few times before you get the hang of it.
+```{r}
+gapminder_asia <- gapminder %>% 
+  filter(continent == "Asia")
+```
+
+Let's break down the code here: 
+
+Here we assigned our new data to an object named `gapminder_Asia` via `gapminder_Asia <-`. Because we assigned this modified data frame to `gapminder_Asia`, it is a separate entity from the initial `gapminder` data frame. If, however, we had written the code as `gapminder <- gapminder` you would have overwritten the previous data frame, and the original `gapminder` data from the **gapminder* package would have to be re-installed to access it again.
+
+We take the `gapminder` data frame *then* `filter()` the data frame so that only those where the `continent` equals `"Asia"` are included. We test for equality using the double equal sign `==` and not a single equal sign `=`. In other words `filter(continent = "Asia")` will yield an error. This is a convention across many programming languages. If you are new to coding, you'll probably forget to use the double equal sign `==` a few times before you get the hang of it.
 
 You can use other operators beyond just the `==` operator that tests for equality:
 
@@ -660,19 +660,15 @@ Furthermore, you can combine multiple criteria using operators that make compari
 
 
 
-Let's see see some of these in action. First, let's filter `airquality` for all rows that contain data from months May to December. We can do this by using `>=` operator. Run the following code in your console:
+Let's see see some of these in action. First, let's explore a new data set called `airquality` . The dataset includes daily airquality measurements in New York, May to September 1973. Let's filter `airquality` for all rows that contain data from months May to December. We can do this by using `>=` operator. Run the following code in your console:
 
-
-```{r, eval = FALSE}
-airquality_new <-  <- airquality %>% 
+```{r}
+airquality %>% 
   filter(Month >= 5)
-View(airquality)
 ```
 
 
-
 Let's now use the `mpg` tibble to explore `&` and `|` operators. Let's say we were interested in cars whose class is compact AND the manufacturer is Audi OR Volkswagen. We would use the following code:
-
 
 ```{r}
 mpg %>% 
@@ -680,9 +676,9 @@ mpg %>%
         (manufacturer == "audi" | manufacturer == "volkswagen"))
 ```
 
-**Note:** We can often skip the use of `&` and just separate our conditions with a comma. The previous code will return the identical output `mpg_new` as the following code:
+**Note:** We can often skip the use of `&` and just separate our conditions with a comma. The previous code will return the identical output as above.
 
-```{r, eval = FALSE}
+```{r}
 mpg %>% 
   filter(class == "compact",
         (manufacturer == "audi" | manufacturer == "volkswagen"))
@@ -690,33 +686,31 @@ mpg %>%
 
 Let's present another example that uses the `!` "not" operator to pick rows that *don't* match a criteria. As mentioned earlier, the `!` can be read as "not." Here we are filtering rows corresponding to cars that are not manufactured by Audi or Volkswagen.
 
-```{r, eval = FALSE}
+```{r}
 mpg %>% 
   filter(!(manufacturer == "audi" | manufacturer == "volkswagen"))
 ```
 
 Note the careful use of parentheses around the `(manufacturer == "audi" | manufacturer == "volkswagen")`. If we didn't use parentheses as follows:
 
-```{r, eval = FALSE}
+```{r}
 mpg %>%
   filter(!manufacturer == "audi" | manufacturer == "volkswagen")
 ```
 
+The code would read as cars NOT manufactured by Audi or cars that are actually manufactured by Volkswagen. In other words, "yes" to Audi or "no" to Volkswagen.
+
 If we decided to include more manufacturers, it would be unwieldy to write. A slightly shorter approach uses the `%in%` operator along with the `c()` function. Recall from Subsection \@ref(programming-concepts) that the `c()` function "combines" or "concatenates" values into a single *vector* of values.
 
-```{r, eval = FALSE}
-mpg_many <- mpg %>% 
+```{r}
+mpg %>% 
   filter(manufacturer %in% c("audi","volkswagen","toyota"))
-view(mpg_many)
 ```
-
-One of the most common mistakes is to use `==` in this `filter()` rather than `%in%`. This is diabolical since it won't fail and, in certain situations, it might not even issue a warning. Beware!
 
 What this code is doing is filtering `mpg` for all cars where `manufacturer` is in the vector: `c("audi","volkswagen","toyota")`. Remember we could have used `==` here, but using `%in%` along with `c()` takes much less energy to code.
 
 As a final note, we recommend that `filter()` should often be among the first verbs you consider applying to your data. This cleans your dataset to only those rows you care about.
 
-<!-- EF: Should we include something hear about NA values? -->
 
 
 ### `select` variables
@@ -729,11 +723,11 @@ Using the `filter()` function we were able to pick out specific *rows* from the 
 
 We've seen that the `gapminder` data frame in the `gapminder` package contains 6 different variables. You can identify the names of these 6 variables by running the `glimpse()` function from the **dplyr** package:
 
-```{r, eval = FALSE}
+```{r}
 glimpse(gapminder)
 ```
 
-However, say you only need two of these 6 variables, say `continent` and `lifeExp`. You can `select()`  these two variables:
+However, say you only need 2 of these 6 variables, say `continent` and `lifeExp`. You can `select()`  these two variables:
 
 ```{r}
 gapminder %>% 
@@ -749,14 +743,14 @@ gapminder %>%
   select(-year)
 ```
 
-Another way of selecting columns/variables is by specifying a range of columns:
+Another way of selecting columns/variables is by specifying a range of columns using the `:` operator. 
 
-```{r, eval = FALSE}
+```{r}
 gapminder %>% 
   select(country:lifeExp)
 ```
 
-This will `select()` all columns between the two specified variables (i.e. the 2 variables `country` and `continent`, as well as all 4 columns between  `country` and `lifeExp`. 
+This will `select()` all columns between the two specified variables. By running this code, we select `country`, `continent`, `year`, and `lifeExp`.
 
 The `select()` function can also be used to rearrange columns when used with the `everything()` helper function.  For example, suppose we want the `continent`, `country` variables to appear immediately after the `year` variable, while not discarding the rest of the variables. In the following code, `everything()` will pick up all remaining variables: 
 
@@ -782,7 +776,6 @@ gapminder %>%
   select(contains("t"))
 ```
 
-
 ### `slice()` and `pull()` and `[]`
 
 `slice()` and `pull()` are additional functions that you can use to pick out specific rows or columns within a data frame.
@@ -802,51 +795,38 @@ slice(gapminder, 2:5) %>%
   pull(lifeExp)
 ```
 
-This is often handy when you want to feed the data into a function, like `mean()` which requires a vector as input:
-
-```{r}
-slice(gapminder, 2:5) %>% 
-  pull(lifeExp) %>% 
-  mean()
-```
-
-The most common way to subset vectors is to use the "bracket" operator `[]`. Example:
-
-```{r}
-gapminder$lifeExp[2:5]
-```
 
 ### `arrange()` rows
 
 One of the most commonly performed data wrangling tasks is to sort a data frame's rows in the alphanumeric order of one of the variables. Unlike `filter()` or `select()`, `arrange()` does not remove any rows or columns from the data frame. Instead, the **dplyr** package's `arrange()` function allows us to sort/reorder a data frame's rows according to the values of the specified variable.
 
-Suppose we are interested in finding which top 5 countries have the highest life expectancy in our dataset.
+Suppose we are interested in finding which top 5 countries that have the highest life expectancies in the `gapminder` dataset.
 
 
-First, let's `select()` some pertinent variables to make the data more easy to read and use `filter()` to narrow our data to Afganistan.
+We would first want to `select()` some pertinent variables to make the data more easy to read.
 
-```{r, eval}
-gapminder_le <- gapminder %>% 
+```{r}
+gapminder %>% 
   select(country, year, lifeExp)
-gapminder_le
 ```
 
 It would be tedious to go through all 1,704 rows trying to find the top 5 years. This is where we can use `arrange()` to organize our data.
 
 ```{r}
-gapminder_le %>% 
+gapminder %>% 
+  select(country, year, lifeExp) %>% 
   arrange(lifeExp)
 ```
 
-This is, however, the opposite of what we want. The rows are sorted with the flights covering the least distance displayed first. This is because `arrange()` always returns rows sorted in ascending order by default. To switch the ordering to be in "descending" order instead, we use the `desc()` function like so:
+Notice how the life expectancy column is sorted with the smallest values to the largest. This is because `arrange()` always returns rows sorted in ascending order by default. To switch the ordering to be in "descending" order instead, we use the `desc()` function like so:
 
 ```{r}
-gapminder_le %>% 
+gapminder %>% 
+  select(country, year, lifeExp) %>% 
   arrange(desc(lifeExp))
 ```
  
 As you can see, we now have our countries of interest. 
-
 
 Be aware that when you use the `desc()` helper function with a character variable, will sort the destinations reverse alphabetically. 
 
@@ -855,7 +835,6 @@ gapminder %>%
   arrange(continent)
 ```
 
-As you can see, character variables will be sorted alphabetically. Using the `desc()` helper function with a character variable, will sort the countries alphabetically. 
 
 
 ### `mutate()` 
@@ -864,21 +843,34 @@ As you can see, character variables will be sorted alphabetically. Using the `de
 knitr::include_graphics("01-visualization/images/mutate.png")
 ```
 
-Another common transformation of data is to create/compute new variables based on existing ones. For example, say you are more comfortable thinking of temperature in degrees Celsius (&deg;C) instead of degrees Fahrenheit (&deg;F). The formula to convert temperatures from &deg;F to &deg;C is
+Another common transformation of data is to create/compute new variables based on existing ones. In other words, we want to make a new column using already existing data. We can use the `mutate()` function from the **dplyr** package, which takes existing variables and mutates them to create new ones. 
 
-$$
-\text{temp in C} = \frac{\text{temp in F} - 32}{1.8}
-$$
+Let's create a new variable using the `trains` dataset form the **primer.data** package. The `trains` dataset contains data for attitudes toward immigration-related policies, both before and after an experiment which randomly exposed a treated group to Spanish-speakers on a Boston commuter train platform.
 
-We can using the `mutate()` function from the **dplyr** package, which takes existing variables and mutates them to create new ones. The `airquality` data set contains values for temperature that we can manipulate to Celcius. Let's use `mutate()` to do so. 
+Let's first load the **primer.data** package so we can`glimpse()` the data set `trains`.
 
-```{r, eval = TRUE}
-airquality <- airquality %>% 
-  mutate(Temp_in_C = (Temp - 32) / 1.8)
+```{r}
+library(primer.data)
+glimpse(trains)
 ```
 
-In this code, we `mutate()` the `airquality` data frame by creating a new variable `Temp_in_C = (Temp - 32) / 1.8` and then *overwrite* the original `airquality` data frame. Why did we overwrite the data frame `airquality`, instead of assigning the result to a new data frame like `airquality_new`? As a rough rule of thumb, as long as you are not losing original information that you might need later, it's acceptable practice to overwrite existing data frames with updated ones, as we did here. On the other hand, why did we not overwrite the variable `Temp`, but instead created a new variable called `Temp_in_C`?  Because if we did this, we would have erased the original information contained in `Temp` of temperatures in Fahrenheit that may still be valuable to us.
+Notice that the `income` variable is written out in full value. Let's use `mutate()` to create a new variable where income is written in thousands. The code would look like the following:
 
+```{r}
+trains %>% 
+  mutate(income_in_thousands = (income) / 1000)
+```
+
+Notice that we have a newly created column at the far right-hand side of our data set named `income_in_thousands`. 
+
+When creating new variables we can also *overwrite* the original data frames like `trains` like so:
+
+```{r}
+trains <- trains %>% 
+  mutate(income_in_thousands = (income) / 1000)
+```
+
+Why overwrite a data frame `trains` instead of assigning the result to a new data frame like `trains_new`? As a rough rule of thumb, as long as you are not losing original information that you might need later, it's acceptable practice to overwrite existing data frames with updated ones, as we did here. On the other hand, why did we not overwrite the variable `income`, but instead created a new variable called `income_in_thousands`?  Because if we did this, we would have erased the original information contained in `income` and would not be able to use them in the future. 
 
 
 #### `ifelse()`
@@ -899,32 +891,30 @@ mpg %>%
 
 Alternatively to `ifelse()`, use `dplyr::case_when()`. `case_when()` is particularly useful inside mutate when you want to create a new variable that relies on a complex combination of existing variables. Note that there is a more robust version of `ifelse()` in **dplyr**: `if_else()`. This works exactly the same as the standard version but is somewhat more robust. 
 
-<!-- DK: Is this useful? -->
-<!-- BG: I think if we don't put more here, this small section is not very meaningful -->
 
 ### `summarize()`
 
 The next common task when working with data frames is to compute *summary statistics*. Summary statistics are single numerical values that summarize a large number of values. Commonly known examples of summary statistics include the *mean* (also called the average) and the *median* (the middle value). Other examples of summary statistics that might not immediately come to mind include the *sum*, the smallest value also called the *minimum*, the largest value also called the *maximum*, and the *standard deviation*.
 
-Return to a the `airquality` dataset. Let's calculate two summary statistics of the `Temp` temperature variable in the `airquality` data frame: the mean and standard deviation. To compute these summary statistics, we need the `mean()` and `sd()` *summary functions* in R. Summary functions in R take in many values and return a single value.
 
-Recall the output of the `summary()` function. 
+The function `sumamary()` offers an array of summary statistics for each of the columns of the dataset.
 
 ```{r}
 summary(airquality)
 ```
 
-This function offers an array of summary statistics for each of the columns of the dataset, but `summarize()` (or alternatively `summarise()`) allows us to calculate these statistics on individual columns of the dataset. 
+The function `summarize()` (or alternatively `summarise()`) allows us to calculate these statistics on individual columns of the dataset. 
 
-More precisely, we'll use the `mean()` and `sd()` summary functions within the `summarize()`  function from the **dplyr** package. Note you can also use the British English spelling of `summarise()`. The `summarize()` function takes in a data frame and returns a data frame with only one row corresponding to the summary statistics. 
+Let's calculate summary statistics of the `Temp` variable in the `airquality` data frame. Let's calculate the mean and standard deviation. To compute these summary statistics, we need the `mean()` and `sd()` *summary functions* in R.
 
-We'll save the results in a new data frame called `summary_temp` that will have two columns/variables: the `mean` and the `std_dev`:
+Recall the output of the `summary()` function. 
 
-```{r, eval = TRUE}
-summary_temp <- airquality %>% 
+```{r}
+airquality %>% 
   summarize(mean = mean(Temp), std_dev = sd(Temp))
-summary_temp
 ```
+
+The `mean()` and `sd()` summary functions go inside the `summarize()`  function from the **dplyr** package. Note you can also use the British English spelling of `summarise()`. The `summarize()` function takes in a data frame and returns a data frame with only one row corresponding to the summary statistics. 
 
 
 
@@ -932,7 +922,7 @@ summary_temp
 
 <!-- DK: Maybe ntile()? Others? Discuss na.rm = TRUE; quantile; is.na(); acting on logical vectors -->
 
-What are other summary functions we can use inside the `summarize()` verb to compute summary statistics? You can use any function in R that takes many values and returns just one. Here are just a few:
+`mean()` and `sd()` are just two of the summary functions. What are other summary functions we can use inside the `summarize()`? Here are just a few:
 
 * mean(): the the average
 * min() and max(): the minimum and maximum values, respectively
@@ -948,25 +938,6 @@ What are other summary functions we can use inside the `summarize()` verb to com
 The *mean* is the most commonly reported measure of center.  It is commonly called the *average* though this term can be a little ambiguous.  The mean is the sum of all of the data elements divided by how many elements there are. If we have $n$ data points, the mean is given by: 
 
 $$Mean = \frac{x_1 + x_2 + \cdots + x_n}{n}$$
-
-
-<!-- > nhanes %>% summarize(mean_age = mean(age)) -->
-<!-- # A tibble: 1 x 1 -->
-<!--   mean_age -->
-<!--      <dbl> -->
-<!-- 1     36.7 -->
-<!-- > nhanes %>% summarize(mean_height = mean(height)) -->
-<!-- # A tibble: 1 x 1 -->
-<!--   mean_height -->
-<!--         <dbl> -->
-<!-- 1          NA -->
-<!-- > nhanes %>% summarize(mean_height = mean(height, na.rm = TRUE)) -->
-<!-- # A tibble: 1 x 1 -->
-<!--   mean_height -->
-<!--         <dbl> -->
-<!-- 1        162. -->
-
-<!-- Teach drop_na() and drop_na(height) -->
 
 **`median()`**
 
@@ -989,16 +960,20 @@ airquality %>%
 
 ### `group_by()`
 
-Say instead of a single mean temperature for the whole year, you would like 12 mean temperatures, one for each of the 12 months separately. In other words, we would like to compute the mean temperature split by month. We can do this by "grouping" temperature observations by the values of another variable, in this case by the 12 values of the variable `Month`. Run the following code:
+Let's begin by revisiting the code in the previous section. We used the `mean()` argument to `summarize()` to calculate the average `Temp` value of the entire year.
+
+```{r}
+airquality %>% 
+  summarize(mean = mean(Temp))
+```
+
+However, let's say instead of a single mean temperature for the whole year, you would like 5 mean temperatures, one for each of the 5 months in which data was gathered. In other words, we would like to compute the mean temperature split by month. We can do this by "grouping" temperature observations by the values of `Month`.Run the following code:
 
 ```{r}
 airquality %>% 
   group_by(Month) %>% 
-  summarize(mean = mean(Temp), 
-            std_dev = sd(Temp))
+  summarize(mean = mean(Temp))
 ```
-
-<!-- DK: This whole section stinks. Please fix! -->
 
 Notice the warning R gives us. The warning means that the tibble which issues forth from the end of the pipe has been "ungrouped". This means the group attribute we applied with `group_by()` no longer exists. This behavior is default, but what if we want to keep the group attribute? (i.e., we want the resulting tibble to still be grouped by month) 
 
@@ -1008,46 +983,16 @@ The proper way to handle the situation, here and everywhere else that we use `gr
 airquality %>% 
   group_by(Month) %>% 
   summarize(mean = mean(Temp), 
-            std_dev = sd(Temp),
             .groups = "drop")
 ```
 
-This code does the same thing as the first version, but does not issue a warning, since we have made an affirmative decision to drop any grouping variables. See `?summarize` for a discussion of other possible values for `.groups`.
+This code does the same thing as the first version, but does not issue a warning, since we have made an affirmative decision to drop any grouping variables.
 
 
 **Note:** The `group_by()` function doesn't change data frames by itself. Rather it changes the *meta-data*, or data about the data, specifically the grouping structure. It is only after we apply the `summarize()` function that the data frame changes.
 
-Consider the `airquality` data.
 
-```{r}
-airquality
-```
-
-The first line of the output reads `# A tibble: 153 x 7`. This is an example of meta-data, in this case the number of observations/rows and variables/columns in `airquality`. The actual data itself is the table of values. Now let's pipe the `flights` data frame into `group_by(Month)`:
-
-```{r, eval = TRUE}
-airquality %>%
-  group_by(Month)
-```
-
-
-Only by combining a `group_by()` with another data wrangling operation, in this case `summarize()`, will the data actually be transformed
-
-```{r, eval = TRUE}
-airquality %>%
-  group_by(Month) %>% 
-   summarize(mean = mean(Temp), 
-            std_dev = sd(Temp),
-            .groups = "drop")
-  
-```
-
-
-
-<!-- Let's revisit the `n()` here -->
-
-
-#### Grouping by more than one variable
+<!-- #### Grouping by more than one variable -->
 
 <!-- You are not limited to grouping by one variable. Say you want to know the number of flights leaving each of the three New York City airports *for each month*. We can also group by a second variable `month` using `group_by(origin, month)`: -->
 
@@ -1078,33 +1023,53 @@ airquality %>%
 In some datasets, some values are returned as `NA`? `NA` is how R encodes *missing values*  where `NA` indicates "not available" or "not applicable." If a value for a particular row and a particular column does not exist, `NA` is stored instead. Values can be missing for many reasons. Perhaps the data was collected but someone forgot to enter it? Perhaps the data was not collected at all because it was too difficult to do so? Who knows! You'll often encounter issues with missing values when working with real data.
 
 
-Recall our dataset `airquality`. The code below selects the two variables `Ozone` and `Month`. Notice the `NA` values in the `Ozone` column.
+Recall our dataset `airquality`. Notice the `NA` values in the `Ozone` variable.
 
 ```{r}
 airquality %>% 
-  select(Ozone, Month)
+  select(Ozone)
 ```
 
-Any time you try to calculate a summary statistic of a variable that has one or more `NA` missing values in R, `NA` is returned. To work around this fact, you can set the `na.rm` argument to `TRUE`, where `rm` is short for "remove"; this will ignore any `NA` missing values and only return the summary value for all non-missing values. 
+Any time you try to calculate a summary statistic of a variable that has one or more `NA` missing values in R, `NA` is returned like such:
 
 ```{r}
 airquality %>% 
-  select(Ozone, Month) %>% 
-  group_by(Month) %>% 
+  summarize(mean_ozone = mean(Ozone))
+```
+
+To work around this fact, you can set the `na.rm` argument to `TRUE`, where `rm` is short for "remove"; this will ignore any `NA` missing values and only return the summary value for all non-missing values. 
+
+```{r}
+airquality %>% 
   summarize(ozone_avg = (mean(Ozone, na.rm = TRUE)))
 ```
 
-
-Notice how the `na.rm = TRUE` are used as arguments to the `mean()` and `sd()` summary functions individually, and not to the `summarize()` function.
+**Note:** The `na.rm = TRUE` are used as arguments to the `mean()` and `sd()` summary functions individually, and not to the `summarize()` function.
 
 However, one needs to be cautious whenever ignoring missing values as we've just done. There are possible ramifications of blindly sweeping rows with missing values "under the rug." This is in fact why the `na.rm` argument to any summary statistic function in R is set to `FALSE` by default. In other words, R does not ignore rows with missing values by default. R is alerting you to the presence of missing data and that you should be mindful of its absence.
+
+
+Another alternative we can use is the `drop_na()` function. We can either drop all `NA` values for the entire data set or individual variables. 
+
+When no argument is placed inside `drop_na()`, the function applies to the entire dataset.
+
+```{r}
+airquality %>% 
+  drop_na()
+```
+
+When the variable of interest is placed inside `drop_na()`, the function only applies to that variable. 
+
+```{r}
+airquality %>% 
+  drop_na(Ozone)
+```
 
 
 ## Advanced Plots
 
 <!-- DK: Other stuff needed here? after_stat; plotting two geoms at once; scale_x for changing labels; scales:: for axis formatting. coord_cartesian() and xlim/ylim, which allows for zooming/rescaling graphs. Other? -->
 
-<!-- - scales in general, and in particular, RColorBrewer and viridis. -->
 <!-- - using scales to change the name and labels of a legend. -->
 
 <!-- - facet_grid() to facet by more than 1 variable. -->
@@ -1113,168 +1078,174 @@ However, one needs to be cautious whenever ignoring missing values as we've just
 
 <!-- 2) Purpose of Advanced plotting is to show the tools for making the plots that appear in socviz.co, chapters 3 and 4.  -->
 
+<!-- BG: teach scalexcont, scaleycont, afterstat, late tricks in the book, do not worrry about building gapminder -->
+
 
 In the previous section we have seen the three components that every plot must include: data, data mappings, and a geom. You may have found that the graphics from before look a bit boring. Luckily, the Grammar of Graphics allows us to add more layers on our own in order to customize our plots. We will go over some of the additional layers here, but the [Data Visualization with ggplot2 Cheat Sheet](https://rstudio.com/wp-content/uploads/2015/03/ggplot2-cheatsheet.pdf) is a great resource to refer to as your ggplot visualizations get more complicated.
-
-<!-- Links to relevant readings in Healy.  -->
-
-To keep it simple, we will change the Gapminder plot from the beginning of the chapter layer by layer. We begin by creating a subset of the data and then plotting that subset.
-
-```{r}
-gapminder_07 <- gapminder %>% 
-                    filter(year == 2007, continent != "Oceania")
-```
-
-```{r}
-ggplot(data = gapminder_07, 
-       mapping = aes(x = gdpPercap, y = lifeExp, color = continent)) +
-  geom_point()
-```
-
-At the moment it consists of only three necessary elements: 
-
-* A subset of the gapminder dataset
-* GDP per capita on the x-axis, and life expectancy on the y-axis (mappings)
-* `geom_point()`, which creates a scatterplot
 
 ### Faceting
 
 Let's start by introducing a new concept called *faceting*.  Faceting is used when we'd like to split a particular visualization by the values of another variable. This will create multiple copies of the same type of plot with matching x and y axes, but whose content will differ. 
 
-If we look at the plot above, it is quite difficult to compare the continents despite the colors. It would be much easier if we could "split" this scatterplot by the 5 continents in the dataset. In other words, we would create plots of `gdpPercap` and `lifeExp` for each `continent` separately. We do this by adding a `facet_wrap(~ continent)` layer. Note the `~` is a "tilde" and can generally be found on the key next to the "1" key on US keyboards. The tilde is required and you'll receive the error `Error in as.quoted(facets) : object 'month' not found` if you don't include it here. 
+
+Before we proceed, let's create a subset of the data `gapminder` to use.
 
 ```{r}
-ggplot(data = gapminder_07, 
-       mapping = aes(x = gdpPercap, y = lifeExp, color = continent)) +
+gapminder_filt <- gapminder %>% 
+      filter(year == 2007, continent != "Oceania")
+```
+
+
+Let's plot our filtered data using `geom_point()`
+
+```{r}
+ggplot(data = gapminder_filt, 
+       mapping = aes(x = gdpPercap, 
+                     y = lifeExp, 
+                     color = continent)) +
+  geom_point()
+```
+
+As you can see, it is quite difficult to compare the continents despite the colors. It would be much easier if we could "split" this scatterplot by the 5 continents in the dataset. In other words, we would create plots of `gdpPercap` and `lifeExp` for each `continent` separately. We do this by using the function `facet_wrap()` with the argument `~ continent`.
+
+```{r}
+ggplot(data = gapminder_filt, 
+       mapping = aes(x = gdpPercap, 
+                     y = lifeExp, 
+                     color = continent)) +
   geom_point() +
   facet_wrap(~ continent)
 ```
 
-This is way better! However, R chooses by default 2 plots per row, so that Asia and Europe are below the other two continents. We can specify the number of rows and columns in the grid by using the `nrow` and `ncol` arguments inside of `facet_wrap()`. Let's get all continents in a row by setting nrow = 1:
+This is way better! However, R chooses by default 2 plots per row, so that Asia and Europe are below the other two continents. We can specify the number of rows and columns in the grid by using the `nrow` argument inside of `facet_wrap()`. Let's get all continents in a row by setting `nrow` to 1.
+
 
 ```{r}
-ggplot(data = gapminder_07, 
-       mapping = aes(x = gdpPercap, y = lifeExp, color = continent)) +
+ggplot(data = gapminder_filt, 
+       mapping = aes(x = gdpPercap, 
+                     y = lifeExp, 
+                     color = continent)) +
   geom_point() +
-  facet_wrap(~ continent, nrow = 1)
+  facet_wrap(~ continent, 
+             nrow = 1)
 ```
 
-Note that, as expected, we can see a positive correlation between economic development and life expectancy on all continents. Now it is also clearer that Asia is on average at about the same level as the Americas, but there are more countries in Asia that are at both extremes.
+This is way better! However, R chooses by default 2 plots per row, so that Asia and Europe are below the other two continents. We can specify the number of rows and columns in the grid by using the `nrow` and `ncol` arguments inside of `facet_wrap()`. Let's get all continents in a row by setting `nrow` to 1.
+
+
+Let's now add a trend line `geom_smooth()` to our faceted plot.
+
+```{r}
+ggplot(data = gapminder_filt, 
+       mapping = aes(x = gdpPercap, 
+                     y = lifeExp, 
+                     color = continent)) +
+  geom_point() +
+  facet_wrap(~ continent, nrow = 1) +
+  geom_smooth(method = "lm", 
+              formula = y ~ x, 
+              se = FALSE)
+```
+
+As expected, we can see a positive correlation between economic development and life expectancy on all continents. Now it is also clearer that Asia is on average at about the same level as the Americas, but there are more countries in Asia that are at both extremes.
 
 
 ### Stats
 
-<!-- DK: This section is confusing. And irrelevant? Should we explain after_stat() here or elsewhere? -->
+<!-- BG: I think I misused after_stat() here -->
 
-The next layer are stats, or `stat`istical transformations. ggplot provides us with many different ones, but most of them are only suitable for certain types of geoms. Take for example `stat_boxplot()`, which is applicable to scatterplots and adds boxplots to our plot:
-
-```{r}
-ggplot(data = gapminder_07, 
-       mapping = aes(x = gdpPercap, y = lifeExp, color = continent)) +
-  geom_point() +
-  facet_wrap(~ continent, nrow = 1) +
-  stat_boxplot()
-```
-
-Now we not only recognize the differences between the continents, but also within the continents better. However, the interpretation of box plots is not so intuitive, at least at first glance. An easier to understand alternative is a line of best fit, which we can add with `stat_smooth(formula = y ~ x, method = "lm", se = FALSE)`:
+Consider the following histogram.
 
 ```{r}
-ggplot(data = gapminder_07, 
-       mapping = aes(x = gdpPercap, y = lifeExp, color = continent)) +
-  geom_point() +
-  facet_wrap(~ continent, nrow = 1) +
-  stat_smooth(formula = y ~ x, method = "lm", se = FALSE)
+ggplot(data = gapminder, 
+       mapping = aes(x = lifeExp))+ 
+  geom_histogram(bins = 20, 
+                 color = "white")
 ```
 
-These were only two stats, but there are many more for different purposes. If you type "stat" in the console, you will get suggestions for the different options that ggplot offers.
+Let's say we were interested in getting the values for the tallest bin. We can try to look at the graph and make a rough estimation, but this is not practical long-term. We can use the function `after_stat()` within `geom_histogram()` to calculate the value for us. 
 
+
+```{r message = FALSE}
+ggplot(data = gapminder, 
+       mapping = aes(x = lifeExp))+ 
+  geom_histogram(aes(y = after_stat(count/sum(count)), 
+                   bins = 20))
+```
+
+ 
 ### Coordinate Systems
 
-Next, we can specify the type of coordinate system. In most cases we will use Cartesian coordinate systems, which are set with `coord_cartesian()`. R draws every plot by default with this method, so we don't need to determine it specifically. Depending on the data we are working with, more exotic variants like `coord_polar()` or `coord_map()` may be helpful. 
+Next, we can specify the type of coordinate system. In most cases we will use Cartesian coordinate systems. A coordinate system that is used most often is `coord_flip()`. This is actually just a Cartesian coordinate system, but as the name suggests, it simply swaps the axes.
 
-A coordinate system that is used more often is `coord_flip()`. This is actually just a Cartesian coordinate system, but as the name suggests, it simply swaps the axes:
+
+Consider the faceted scatterplot we previously created. 
 
 ```{r}
-ggplot(data = gapminder_07, 
-       mapping = aes(x = gdpPercap, y = lifeExp, color = continent)) +
+ggplot(data = gapminder_filt, 
+       mapping = aes(x = gdpPercap, 
+                     y = lifeExp, 
+                     color = continent)) +
   geom_point() +
   facet_wrap(~ continent, nrow = 1) +
-  stat_smooth(formula = y ~ x, method = "lm", se = FALSE) + 
+  geom_smooth(method = "lm", 
+              formula = y ~ x, 
+              se = FALSE)
+```
+
+Let's now add the layer `coord_flip()` to flip the axises.
+
+```{r}
+ggplot(data = gapminder_filt, 
+       mapping = aes(x = gdpPercap, 
+                     y = lifeExp, 
+                     color = continent)) +
+  geom_point() +
+  facet_wrap(~ continent, nrow = 1) +
+  geom_smooth(method = "lm", 
+              formula = y ~ x, 
+              se = FALSE) +
   coord_flip()
 ```
 
-As can be seen, lifeExp is now on the x-axis and gdpPercap on the y-axis. Compared to the previous plot it is now easier to observe the distribution of life expectancy in the respective continents. For example, we can see that many countries in Africa are at about 55 years, in the Americas and Asia at 75 years, and in Europe at 80 years. However, we think it makes more sense to consider `lifeExp` as the dependent variable, so don't use `coord_flip()` in the subsequent plots.
+As can be seen, `lifeExp` is now on the x-axis and `gdpPercap` on the y-axis. Compared to the previous plot it is now easier to observe the distribution of life expectancy in the respective continents. For example, we can see that many countries in Africa are at about 55 years, in the Americas and Asia at 75 years, and in Europe at 80 years. However, we think it makes more sense to consider `lifeExp` as the dependent variable, so don’t use `coord_flip()` in the subsequent plots.
 
 
-### Positions, Axis Limits and Scales
+### Axis Limits and Scales
 
-We can also use ggplot to change the position of the plot content. Positions are rather "cosmetic" elements, which make plots easier to understand. As before, there are many different options to do this, which often only work for certain geoms. For example, when we work with barplots, we can use `position_dodge()` or `position_stack()` to specify whether we want to arrange the bars in the plot side by side or on top of each other. For scatterplots like ours, `position_jitter()` can be used:
+We can also manipulate the limits of the axes by using `xlim()` and `ylim()`. For example, assume that we are only interested in countries with a GDP per capita from 0 to 30000. We can tell R as follows that we only want to see this range. Note that, because `data` is the first argument and `mapping` is the second to `ggplot()`, we don't actually have to name the arguments. We can just provide them, as long as they are in the correct order.
 
-```{r}
-ggplot(data = gapminder_07, 
-       mapping = aes(x = gdpPercap, y = lifeExp, color = continent)) +
-  geom_point(position = position_jitter(width = 10, height = 15)) +
-  facet_wrap(~ continent, nrow = 1) +
-  stat_smooth(formula = y ~ x, method = "lm", se = FALSE)
-```
-
-Notice several things about this code. First, positions should be placed in the geom they refer to (in our case `geom_point()`). Second, positions always start with `position =` followed by the position type (in our case `position_jitter()`). The width and height are optional and can be freely defined. You might wonder what the difference between `position_jitter()` and `geom_jitter()` is. The answer is: Nothing. In R there are often several functions which can lead to the same result. However, it is practical to start with `geom_point()` first, because then you still have the choice of changing the position by shaking the dots - with `geom_jitter()` the plot is constructed like this from the beginning.
-
-Besides the position we can also manipulate the limits of the axes by using `xlim()` and `ylim()`. For example, assume that we are only interested in countries with a GDP per capita from 0 to 30000. We can tell R as follows that we only want to see this range. Note that, because `data` is the first argument and `mapping` is the second to `ggplot()`, we don't actually have to name the arguments. We can just provide them, as long as they are in the correct order.
-
-```{r}
-ggplot(gapminder_07, 
+```{r warning = FALSE}
+ggplot(gapminder_filt, 
        aes(x = gdpPercap, y = lifeExp, color = continent)) +
   geom_point() +
-  facet_wrap(~ continent, nrow = 1) +
-  stat_smooth(formula = y ~ x, method = "lm", se = FALSE) + 
+  facet_wrap(~ continent) +
   xlim(0, 30000)
 ```
 
-We can see that the GDP per capita on the y-axis is now only shown from 0 to 30000. 
+We can see that the GDP per capita on the x-axis is now only shown from 0 to 30000. 
 
-Finally we can change the scaling of the axes. For example, it might be useful to display the axes with `scale_x_log10()` or `scale_y_log10()` on a logarithmic scale. Let's try this out on GDP per capita. Also, note that we can (lazily!) not provide the explicit `x` and `y` argument names to `aes()` as long as we provide the values in the right order: `x` comes before `y`. 
+
+We can also change the scaling of the axes. For example, it might be useful to display the axes with `scale_x_log10()` or `scale_y_log10()` on a logarithmic scale. Let's try this out on GDP per capita. Also, note that we can (lazily!) not provide the explicit `x` and `y` argument names to `aes()` as long as we provide the values in the right order: `x` comes before `y`. 
 
 ```{r}
-ggplot(gapminder_07, 
+ggplot(gapminder_filt, 
        aes(gdpPercap, lifeExp, color = continent)) +
   geom_point() +
-  facet_wrap(~ continent, nrow = 1) +
+  facet_wrap(~ continent) +
   stat_smooth(formula = y ~ x, method = "lm", se = FALSE) + 
   scale_x_log10()
 ```
 
-Notice how the scale of GDP per capita has changed (for now, don't worry about the overlapping labels).
+<!-- BG: Need scale_x_cont and scale_y_cont here -->
 
+### Text
 
-### Labels and Text
-
-The last plot we made looks quite good, but it is not perfect yet. You will have noticed that by default R simply uses the names of variables for axes and legends. Also, the plot has no title yet. We can easily change this by using `labs()`:
-
-```{r}
-ggplot(gapminder_07, 
-       aes(gdpPercap, lifeExp, color = continent)) +
-  geom_point() +
-  facet_wrap(~ continent, nrow = 1) +
-  stat_smooth(formula = y ~ x, method = "lm", se = FALSE) + 
-  scale_x_log10() +
-  labs(title = "Life Expectancy and GDP per Capita (2007)",
-       subtitle = "Selected Nations by Continent",
-       x = "GDP per Capita, USD",
-       y = "Life Expectancy, Years",
-       caption = "Source: Gapminder") 
-```
-
-
-
-If a `title` or other `labs()` argument is too long, you can insert a newline character --- a "\\n" --- in the middle, which will cause the `title` to take up two lines rather than one. This is the simplest way to deal with titles or axis labels which are too long.
-
-It is up to us, which or how many of the arguments in `labs()` we use. While most arguments are probably self-explanatory, it makes sense to have a look at the last one. It determines the title of the legend, and should always be named after the aesthetic to which the legend refers. Since the legend was created by the *color* argument in the density plot, we can refer to it with `color =`.
-
-We can also change labels within the plots. Wouldn't it be great if we knew which country each point refers to? We can do this with the help of `geom_text()`:
+Recall we use `labs()` to add labels and titles to our plots. 
+We can also change labels inside the plots. Wouldn't it be great if we knew which country each point refers to? We can do this with the help of `geom_text()`:
 
 ```{r}
-ggplot(gapminder_07, 
+ggplot(gapminder_filt, 
        aes(gdpPercap, lifeExp, color = continent)) +
   geom_point() +
   facet_wrap(~ continent, nrow = 1) +
@@ -1289,119 +1260,96 @@ ggplot(gapminder_07,
             color = "black", check_overlap = TRUE)
 ```
 
-Great! Notice that we need to determine an aesthetic called *label*. This defines the character variable which will be used as the basis for the labels.
+Let's breakdown the code within `geom_text()`. We included a new aesthetic called *label*. This defines the character variable which will be used as the basis for the labels. We set `label` to country so each point corresponds to the country is represents. We set the text font by setting `size` to 2, and we set the text color using `color`. Finally, we included the argument `check_overlap = TRUE` to make sure the names of the countries were legible. 
 
 
 ### Themes
 
-We are almost finished, but our plot still has the boring default design. ggplot provides so called *themes*, which can be used to change the overall appearance of a plot without much effort. For example, `theme_linedraw()` uses a white background and black text:
+**Themes** can be used to change the overall appearance of a plot without much effort. We add themes as layers to our plots. You can find an overview of the different themes in ggplot [here](https://ggplot2.tidyverse.org/reference/ggtheme.html).
+
+
+Let's consider the following faceted scatterplot.
 
 ```{r}
-ggplot(gapminder_07, 
-       aes(gdpPercap, lifeExp, color = continent)) +
-  geom_point() +
-  facet_wrap(~ continent, nrow = 1) +
-  stat_smooth(formula = y ~ x, method = "lm", se = FALSE) + 
-  scale_x_log10() +
-  labs(title = "Life Expectancy and GDP per Capita (2007)",
-       subtitle = "Selected Nations by Continent",
-       x = "GDP per Capita, USD",
-       y = "Life Expectancy, Years",
-       caption = "Source: Gapminder",
-       color = "Continent") +
-  geom_text(aes(label = country), size = 2, 
-            color = "black", check_overlap = TRUE) +
-  theme_linedraw()
-```
 
-You can find an overview of the different themes in ggplot [here](https://ggplot2.tidyverse.org/reference/ggtheme.html). The **ggthemes** package even adds some additional themes.
-
-In addition to ready-to-use themes, the `theme()` function also offers a wide [selection](https://ggplot2.tidyverse.org/reference/theme.html) of functions for manually changing individual elements. Let's remove the legend, change the font in the plot and enlarge the axis labels a bit:
-
-```{r}
-library(ggthemes)
-
-gapminder %>% 
-  filter(year == 2007) %>% 
-  filter(continent != "Oceania") %>% 
-  ggplot(aes(gdpPercap, lifeExp, color = continent)) +
-    geom_point() +
-    geom_smooth(formula = y ~ x, method = "lm", se = FALSE) + 
-    facet_wrap(~ continent, nrow = 2) +
-    scale_x_log10(breaks = c(500, 5000, 50000),
-                  labels = scales::dollar_format(accuracy = 1)) +
-    labs(title = "Life Expectancy and GDP per Capita (2007)",
-         subtitle = "Selected Nations by Continent",
-         x = "GDP per Capita, USD",
-         y = "Life Expectancy, Years",
-         caption = "Source: Gapminder",
-         color = "Continent") +
-    theme_economist() +
-    theme(legend.position = "none")
-
-```
-
-Now take a moment to compare this plot with the one we started with:
-
-```{r}
-ggplot(data = gapminder_07, 
-       mapping = aes(x = gdpPercap, y = lifeExp, color = continent)) +
-  geom_point()
-```
-
-You can see that while some things are not *necessary* to create a plot, they can make a big difference in how much information we can derive from it. By the way, do you remember when we mentioned the Grammar of Graphics and said we will build plots layer by layer? This is exactly how you do it.
-
-
-
-
-
-## Summary
-
-We began by showing you this plot.
-
-```{r, echo = FALSE}
-gap_p
-```
-
-This back to how impressed you were! You now have the tools to create plots like this on your own. Just run this code:
-
-```{r, eval = FALSE}
-library(tidyverse)
-library(scales)
-library(gapminder)
-
-gap_p <- gapminder %>%
+gapminder %>%
   filter(continent != "Oceania") %>%
   filter(year == max(year)) %>% 
-  ggplot(aes(gdpPercap, lifeExp, size = pop, color = continent)) +
+  ggplot(aes(gdpPercap, lifeExp, color = continent)) +
     geom_point(alpha = 0.7) +
     geom_smooth(method = "lm", 
                 formula = y ~ x,
                 se = FALSE) + 
     facet_wrap(~continent, nrow = 2) +
-    labs(title = "Life Expectancy and GDP per Capita in 2007",
+    labs(title = "Life Expectancy and GDP per Capita",
          subtitle = "Connection between GDP and life expectancy is weakest in Africa",
          x = "GDP per Capita in USD",
-         y = "Life Expectancy",
-         caption = "Data Source: gapminder R package") +
-    scale_x_log10(breaks = c(500, 5000, 50000),
-                  labels = scales::dollar_format(accuracy = 1)) +
-    theme(legend.position = "none")
+         y = "Life Expectancy") +
+    scale_x_log10(breaks = c(500, 5000, 50000)) 
+```
 
+Let's now add a theme to our faceted scatterplot. We will use the theme `theme_economist()` to make our plot look like the plots in the *The Economist*.
+
+```{r}
+gapminder %>%
+  filter(continent != "Oceania") %>%
+  filter(year == max(year)) %>% 
+  ggplot(aes(gdpPercap, lifeExp, color = continent)) +
+    geom_point(alpha = 0.7) +
+    geom_smooth(method = "lm", 
+                formula = y ~ x,
+                se = FALSE) + 
+    facet_wrap(~continent, nrow = 2) +
+    labs(title = "Life Expectancy and GDP per Capita",
+         subtitle = "Connection between GDP and life expectancy is weakest in Africa",
+         x = "GDP per Capita in USD",
+         y = "Life Expectancy") +
+    scale_x_log10(breaks = c(500, 5000, 50000)) +
+  theme_economist()
+```
+
+This looks pretty good. However, notice the legend the top of our graph.  It crowds our graph and takes away from the most important part: the data. We can use `theme()` to customize the non-data parts of our plots such as background, gridlines, and legends. Let's de-clutter the graph by removing our legend. We can do this by using the `legend.position` argument and setting it to "none".
+
+```{r}
+gapminder %>%
+  filter(continent != "Oceania") %>%
+  filter(year == max(year)) %>% 
+  ggplot(aes(gdpPercap, lifeExp, color = continent)) +
+    geom_point(alpha = 0.7) +
+    geom_smooth(method = "lm", 
+                formula = y ~ x,
+                se = FALSE) + 
+    facet_wrap(~continent, nrow = 2) +
+    labs(title = "Life Expectancy and GDP per Capita",
+         subtitle = "Connection between GDP and life expectancy is weakest in Africa",
+         x = "GDP per Capita in USD",
+         y = "Life Expectancy") +
+    scale_x_log10(breaks = c(500, 5000, 50000)) +
+  theme_economist() +  
+  theme(legend.position = "none")
+  
+```
+
+Great. Now our graph is easier to visualize. In addition, note that the `theme()` function also offers a wide [selection](https://ggplot2.tidyverse.org/reference/theme.html) of functions for manually changing individual elements.
+
+
+## Summary
+
+In this chapter, we first looked at basic coding terminology and concepts that we deal with when programming with R. We then learned about the three basic components that make up each plot: data, mapping, and one or more geoms. The **ggplot2** package offers a wide range of geoms that we can use to create different types of plots. Next, we examined the "super package" **tidyverse**, which includes helpful tools for visualization. It also offers features for importing and manipulating data, which is the main topic of the next chapter. Lastly, we explored advanced plotting features such as axis scaling, faceting, and themes. When we put this all together, we were able to create the following visualization:
+
+
+```{r}
 gap_p
 ```
 
-
-We looked at basic concepts and terms we are dealing with when programming with R. We learned about the three basic components that make up each plot: data, mapping, and one or more geoms. The **ggplot2** package offers a wide range of geoms that we can use to create different types of plots. We explored advanced plotting features such as axis scaling, labeling and themes. Finally, we examined the "super package" **tidyverse**, which also includes **ggplot2**. Besides tools for visualization, it offers features for importing and manipulating data, which is the main topic of the next chapter.
-
-Finally, it should be mentioned that we have only seen a small part of what R offers. For example, we can use the **gganimate** package to bring a slightly modified version of our gapminder plot to life:
+It is important to know that we have only seen a small part of what R offers. For example, we can use the **gganimate** package to bring a slightly modified version of our gapminder plot to life:
 
 ```{r, cache = TRUE, out.width = "100%"}
 library(gganimate)
 
-gapminder %>%
+gap_anim <- gapminder %>%
   filter(continent != "Oceania") %>%
-  ggplot(aes(gdpPercap, lifeExp, size = pop, color = continent)) +
+  ggplot(aes(gdpPercap, lifeExp, color = continent)) +
     geom_point(show.legend = FALSE, alpha = 0.7) +
     facet_wrap(~continent, nrow = 1) +
     scale_size(range = c(2, 12)) +
@@ -1414,17 +1362,16 @@ gapminder %>%
     labs(title = "Year: {frame_time}") +
     shadow_wake(wake_length = 0.1, alpha = FALSE)
 
+gap_anim
 ```
 
 The **plotly** package makes our plot interactive. Click on it and explore!
 
-<!-- DK: I don't like getting rid of the (concerning!) warning by force. Is plotly maintained? -->
 
 ```{r, cache = TRUE, message = FALSE, warning = FALSE, out.width = "100%"}
 library(plotly)
 
-ggplotly(gap_p)
+ggplotly(gap_anim)
 ```
-
 
 A beautiful plot is just a collection of steps, each simple enough on its own. We have taught you (some of) these steps. Time to start walking on your own.
