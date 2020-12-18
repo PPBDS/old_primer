@@ -45,7 +45,7 @@ library(tidyverse)
 That one line of code loads all the packages associated with the **tidyverse**, packages which you will use in almost every data analysis. It also tells you which functions from the tidyverse conflict with functions in base R or with other packages you might have loaded. (We hide these and other messages in this book because they are ugly.)
 
 
-If you run this code and get the error message “there is no package called ‘tidyverse’”, you’ll need to install the package, and then run `library(tidyverse)` once again.
+If you run this code and get the error message “there is no package called ‘tidyverse’”, you’ll need to install the package first using the code below. Then, run `library(tidyverse)` once again.
 
 
 ```{r, eval = FALSE}
@@ -79,20 +79,21 @@ Here are a few useful tips to keep in mind as you learn to program:
 
 ### Basic programming
 
-While it is not required to be a seasoned coder/computer programmer to use R, there is still a set of basic programming concepts that new R users need to understand. We now introduce some basic programming terminology. Instead of asking you to memorize all these concepts and terminology right now, we'll guide you so that you'll "learn by doing." To help you learn, we will always use a different font to distinguish regular text from `computer_code`. 
+While it is not required to be a seasoned coder/computer programmer to use R, there is still a set of basic programming concepts that new R users need to understand. We now introduce some basic programming terminology. Instead of asking you to memorize all these concepts and terminology right now, we'll guide you. To help you learn, we will always use a different font to distinguish regular text from `computer_code`. 
 
-* *Console pane*: where you enter in commands.
+* *Console pane*: where you enter in commands in RStudio.
 
-* *Running code*: the act of telling R to perform an act by giving it commands in the console.
+* *Running code*: the act of telling R to put our code into action. 
 
-* *Objects*: where values are saved in R. You can *assign* values to objects and display the contents of objects. You use the assignment operator `<-` to do so.  You can choose almost any name you like for an object, as long as the name does not begin with a number or a special character like `+`, `*`, `-`, `/`, `^`, `!`, `@`, or `&`. 
+* *Objects*: where values are saved in R. You can *assign* values to objects and display the contents of objects. You use the assignment operator `<-` to do so.  You can choose almost any name you like for an object, as long as the name does not begin with a number or a special character like `+`, `*`, `-`, `/`, `^`, etc.
 
 For example we can save the values of the equation below to an object named `x`. 
+
 ```{r}
 x <- 4 + 3
 ```
 
-Then, whenever we type `x`, the value of 4 + 3 will show:
+Now, whenever we type `x`, the value of 4 + 3 will show:
 
 ```{r}
 x
@@ -103,22 +104,29 @@ x
 
 * *Vectors*: a series of values. These are created using the `c()` function, where `c()` stands for "combine". 
 
-For example, `c(6, 11, 13, 31, 90, 92)` creates a six element series of positive integer values.
+For example, `c(2, 4, 6, 8)` creates a four element series of integer values.
 
 ```{r}
-c(6, 11, 13, 31, 90, 92)
+c(1, 2, 3, 4)
 ```
 
 
 * *Factors*: *categorical data* are commonly represented in R as factors. Categorical data can also be represented as *strings*. We will go into detail about these and other variable types in Chapter 2.
 
-* *Data frames*: rectangular spreadsheets. They are representations of datasets in R where the rows correspond to *observations* and the columns correspond to *variables* that describe the observations. Modern data frames are called *tibbles*.  
+* *Data frames*: rectangular spreadsheets of data. Their rows correspond to *observations* and the columns correspond to *variables* that describe the observations. Modern data frames are called *tibbles*.  
 
 * *Boolean algebra*: `TRUE/FALSE` statements and mathematical operators such as `<` (less than), `<=` (less than or equal), and `!=` (not equal to). For example, `4 + 2 >= 3` will return `TRUE`, but `3 + 5 <= 1` will return `FALSE`. Testing for inclusion with the `%in%` operator. For example, `"B" %in% c("A", "B")` returns `TRUE` while `"C" %in% c("A", "B")` returns `FALSE`. We test for equality in R using `==`. For example, `2 + 1 == 3` compares `2 + 1` to `3` and is correct R code, while `2 + 1 = 3` will return an error. 
 
 * *Logical operators*: `&` representing "and" as well as `|` representing "or." For example, `(2 + 1 == 3) & (2 + 1 == 4)` returns `FALSE` since both clauses are not `TRUE` (only the first clause is `TRUE`). On the other hand, `(2 + 1 == 3) | (2 + 1 == 4)` returns `TRUE` since at least one of the two clauses is `TRUE`. 
 
-* *Functions*, also called *commands*: perform tasks in R. They take in inputs called *arguments* and return outputs. You can either manually specify a function's arguments or use the function's *default values*. For example, the function `seq()` in R generates a sequence of numbers. If you just run `seq()` it will return the value 1. That doesn't seem very useful! This is because the default arguments are set as `seq(from = 1, to = 1)`. Thus, if you don't pass in different values for `from` and `to` to change this behavior, R just assumes all you want is the number 1. You can change the argument values by updating the values after the `=` sign. If we try out `seq(from = 2, to = 5)` we get the result `2 3 4 5`, as we would expect. 
+* *Functions*, also called *commands*: perform tasks in R. They take in inputs called *arguments* and return outputs. You can either manually specify a function's arguments or use the function's *default values*. 
+
+For example, `sqrt(64)` will take the square root of 64, which is 8.
+
+```{r}
+sqrt(64)
+```
+
 
 * *Help files*: provide documentation for various functions and datasets. You can bring up help files by adding a `?` before the name of a function or data frame and then run this in the console. You will then be presented with a page showing the corresponding documentation. 
 
@@ -134,7 +142,7 @@ R will show red text in the console pane in three different situations:
 
 * **Warnings**: Red text prefaced with "Warning:". It will try to explain why there's a warning. Generally your code will still work, but with some caveats. For example, if you create a scatterplot based on a dataset where two of the rows of data have missing entries, you will see this warning: `Warning: Removed 2 rows containing missing values (geom_point)`. R will still produce the scatterplot with all the remaining non-missing values, but it is warning you that two of the points aren't there.
 
-* **Messages**: When the red text doesn't start with either "Error" or "Warning", it's *just a friendly message*. You'll see these messages when you load *R packages* or when you read data saved in spreadsheet files with the `read_csv()` function as you'll see in Chapter 2. These are helpful diagnostic messages. They don't stop your code from working. Additionally, you'll see these messages when you install packages too using `install.packages()`.
+* **Messages**: When the red text doesn't start with either "Error" or "Warning", it's *just a friendly message*. You'll see these messages when you load *R packages*. These are helpful diagnostic messages. They don't stop your code from working. Additionally, you'll see these messages when you install packages too using `install.packages()`.
 
 Remember, when you see red text in the console, *don't panic*. It doesn't necessarily mean anything is wrong. Rather:
 
@@ -157,14 +165,17 @@ gapminder
 
 Let's unpack this output:
 
-* `A tibble: 1,704 x 6`: A `tibble` is a specific kind of data frame in R. This particular data frame has `1,704` rows corresponding to different *observations*. The tibble also has `6` columns corresponding to 6 *variables* describing each observation.
-* `country`, `continent`, `year`, `lifeExp`, `pop`, and `gdpPercap` are the different variables of this dataset. 
+* `A tibble: 1,704 x 6`: A `tibble` is a specific kind of data frame in R. This particular data frame has `1,704` rows corresponding to different *observations*. 
+
+* The tibble also has `6` columns corresponding to 6 *variables* describing each observation. `country`, `continent`, `year`,`lifeExp`, `pop`, and `gdpPercap` are the different variables of this dataset. 
+
 * We see, by default, the top 10 rows. R is only showing the first 10 rows, since that is all that you probably want to see at first. You can see more (or fewer) rows with scrolling or using the `print()` command:
 
 ```{r}
 print(gapminder, n = 15)
 ```
-Note the `n` argument tells R the number of rows you want to see. 
+
+*Note:* the `n` argument tells R the number of rows you want to see. 
 
 ### Exploring data frames
 
@@ -180,9 +191,8 @@ Run `view(gapminder)` in your console in RStudio, either by typing it or cutting
 
 By running `view(gapminder)`, we can explore the different *variables* listed in the columns. Observe that there are many different types of variables.  Some of the variables including `year`, `lifeExp`, `pop`, `year` and `gdPercap` are *quantitative* variables. These variables are numerical in nature.  Other variables here, including `country`, `continent` are *categorical*.
 
-If you look in the leftmost column of the `view(gapminder)` output, you will see a column of numbers. These are the row numbers of the dataset. If you glance across a row with the same number, say row 5, you can get an idea of what each row is representing. This will allow you to identify what object is being described in a given row by looking at the values of the columns in that specific row. This is often called the *observational unit*.
+If you look in the leftmost column of the `view(gapminder)` output, you will see a column of numbers. These are the row numbers of the dataset. If you glance across a row with the same number, say row 5, you can get an idea of what each row is representing. This will allow you to identify what object is being described in a given row. This is often called the *observational unit*.
 
-You can identify the observational unit by determining what "thing" is being measured or described by each of the variables. 
 
 **2. `glimpse()`**:
 
@@ -206,7 +216,7 @@ Lastly, the `$` operator allows us to extract and then explore a single variable
 gapminder$year
 ```
 
-We used the `$` operator to extract only the `year` variable and return it as a vector. We'll only be occasionally exploring data frames using the `$` operator> Mostly, we favor the `view()` and `glimpse()` functions.
+We used the `$` operator to extract only the `year` variable and return it as a vector. We'll only be occasionally exploring data frames using the `$` operator. Mostly, we favor the `view()` and `glimpse()` functions.
 
 
 ## Basic Plots
@@ -228,7 +238,7 @@ ggplot(data = gapminder,
   geom_point()
 ```
 
-Notice how the three components( i.e.`data`, `geom`, and `aes`) are specified in the `ggplot()` function. Within the`ggplot()` function, we will always use the the following arguments (i.e., inputs):
+Notice how the three components( i.e.`data`, `geom`, and `aes`) are specified in the `ggplot()` function.
 
 Once we've specified these components, we then add *layers* to the plot using the `+` sign. The most essential layer to add to a plot is the layer that specifies which type of `geom`etric object we want the plot to involve: points, lines, bars, and others. In our graph above, the geom we used is `geom_point()`. This tells R we want our graph to include points (i.e. a scatterplot). 
 
@@ -251,14 +261,13 @@ ggplot(data = gapminder,
 
 Let's break down this code, piece-by-piece.
 
-Within the `ggplot()` function, we specified two of the plot's components as arguments (i.e., inputs):
+* The `data` argument is set to `gapminder` via `data = gapminder`.\
 
-* The `data` argument is set to `gapminder` via `data = gapminder`.
 * The `aes`thetic `mapping` by set via `mapping = aes(x = gdpPercap, y = lifeExp)`. Here, we map `gdpPercap` to the `x` axis and `lifeExp` maps to the `y` axis.
-* We added a layer using the `+` sign. The added layer in question specifies the third component: the `geom`etric object. In this case, the geometric object is set to be points by specifying `geom_point()`.
 
+* The `geom`etric object is specified to `geom_point()`, telling R we want a scatterplot. We added a layer using the `+` sign.
 
-In the graphic above, a *positive relationship* exists between `lifeExp` and `gdpPercap`: as gdp per capita increases, life expectancy tends to also increase. If we do not specify the `geom`etric object, we have a blank plot like such:
+In the graphic above, notice that a *positive relationship* exists between `lifeExp` and `gdpPercap`: as gdp per capita increases, life expectancy tends to also increase. If we do not specify the `geom`etric object, we have a blank plot like such:
 
 ```{r}
 ggplot(data = gapminder, 
@@ -266,9 +275,11 @@ ggplot(data = gapminder,
                      y = lifeExp)) 
 ```
 
-In addition to mapping varaibles to the `x` and `y` axises, we can also map variables to `size` and `color`. They can be very useful tools. 
+#### More Aesthetics 
 
-For example, because the data plotted on our scatterplot is from more than one continent, it can be hard to know what point of data corresponds to what continent. Let's change that by setting the `color` argument of `aes()` to the variable `continent`.
+In addition to mapping varaibles to the `x` and `y` axises, we can also map variables to `color`. They can be very useful tools. 
+
+For example, because the data plotted on our scatterplot is from more than one continent, it can be hard to know which point of data corresponds to which continent. Let's change that by setting the `color` argument of `aes()` to the variable `continent`.
 
 ```{r}
 ggplot(data = gapminder, 
@@ -280,10 +291,11 @@ geom_point()
 
 Now we have a slightly better understanding of our data. However, note that the points of the scatterplot are all overlapping, so we do not know if some colors are being covered by others.
 
+<!-- BG: size here? -->
 
 #### Titles and Labels
 
-In addition to adding the `geom` year, we can also add the layer `labs()`. We use the function `labs()` to add a plot title, axis labels, subtitles, and captions to our graph. You will have noticed that by default R simply uses the names of variables for axes and legends. Let's now add a title and axis labels to our plot.
+We use the function `labs()` to add a plot title, axis labels, subtitles, and captions to our graph. You will have noticed that by default R simply uses the names of variables for axes and legends. Let's now add a title and axis labels to our plot.
 
 ```{r}
 ggplot(data = gapminder, 
@@ -296,19 +308,18 @@ ggplot(data = gapminder,
             y= "Life Expectancy")
 ```
 
-Note that it is up to us, which or how many of the arguments in `labs()` we use.
+Note that like `geom`s, we add a layer  when including the function `labs()`to our plot. Note that it is up to us, which or how many of the arguments in `labs()` we use.
 
 
 Let's now take a tour of some of the more useful geoms.
 
 
-
 ### `geom_jitter()`
 
-Our scatterplot from the previous section has a large mass of points. This makes it hard to tell the true number of points that are plotted. This is the result of a phenomenon called *overplotting*, where points are being plotted on top of each other over and over again. There are two methods to address the issue of overplotting.
+Our scatterplot from the previous section has a large mass of points. This makes it hard to tell the true number of points that are plotted. This is the result of a phenomenon called *overplotting*, where points are being plotted on top of each other over and over again. There are two methods we can use to address overplotting.
 
 1. Adjust the transparency of the points 
-1. Add a little random "jitter" or random "nudges", to each of the points
+1. Add a little random "jitter" or random "nudges" to each of the points
 
 **Method 1: Changing the transparency**
 
@@ -347,7 +358,7 @@ ggplot(data = gapminder,
       geom_point(alpha = .2)
 ```
 
-As can be seen in the resulting plot, in this case jittering doesn't really provide much new insight. It can be argued that changing the transparency of the points by setting `alpha` proved more effective. When deciding whether to jitter a scatterplot or use the `alpha` argument to `geom_point()`, know that there is no single right answer. We suggest you play around with both methods to see which one better emphasizes the point you are trying to make. 
+As can be seen in the resulting plot, jittering doesn't really provide much new insight. It can be argued that changing the transparency of the points by setting `alpha` proved more effective. When deciding whether to jitter a scatterplot or use the `alpha` argument to `geom_point()`, know that there is no single right answer. We suggest you play around with both methods to see which one better emphasizes the point you are trying to make. 
 
 ### `geom_line()`
 
@@ -359,7 +370,7 @@ knitr::include_graphics("https://imgs.xkcd.com/comics/decline.png")
 
 The most common examples of linegraphs have some notion of time on the x-axis: hours, days, weeks, years, etc. Since time is sequential, we connect consecutive observations of the variable on the y-axis with a line. Linegraphs that have some notion of time on the x-axis are also called *time series* plots. 
 
-<!-- BG: need data set to show graph here. I tried it with gapminder and it didnt work well -->
+<!-- BG: need data set to show graph here. I tried it with gapminder and it didn't work well -->
 
 
 
