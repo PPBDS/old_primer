@@ -22,21 +22,22 @@ library(nycflights13)
 library(fivethirtyeight)
 ```
 
-The **tidyverse** package will be used in every chapter. **primer.data** is the data package created specifically for this course. **lubridate** is a package for working with dates and times. **janitor** offers functions for cleaning up dirty data. **skimr** contains functions that are useful for providing summary statistics. **nycflights** includes data associated with flights out of New York City's three major airports. **gapminder** has data for countries across decades. **fivethirtyeight** cleans up data from the [FiveThirtyEight](https://fivethirtyeight.com/) team.  
+<!-- BG: no more flights. fivethirtyeight? -->
+The **tidyverse** package will be used in every chapter. **primer.data** is the data package created specifically for this course. **lubridate** is a package for working with dates and times. **janitor** offers functions for cleaning up dirty data. **skimr** contains functions that are useful for providing summary statistics. **nycflights** includes data associated with flights out of New York City's three major airports. **gapminder** has data for countries across decades. **fivethirtyeight** cleans up data from the [FiveThirtyEight](https://fivethirtyeight.com/) team.
 
 ## Data Gathering
 
 <!-- DK: Not sure I like this example. We should do our own thing. -->
 
-Recall the `read_csv()` function introduced briefly in chapter 1 of this textbook. Let’s import a Comma Separated Values .csv file that exists on the internet. The .csv file dem_score.csv contains ratings of the level of democracy in different countries spanning 1952 to 1992 and is accessible at https://moderndive.com/data/dem_score.csv. Let’s use the read_csv() function from the readr package to read it off the web, import it into R, and save it in a data frame called dem_score. 
+The `read_csv()` function turns flat files into data frames. More specifically, it turns files whose values are separated by commas (hence CSV). Let’s import a Comma Separated Values .csv file that exists on the internet. The .csv file dem_score.csv contains ratings of the level of democracy in different countries spanning 1952 to 1992 and is accessible at https://moderndive.com/data/dem_score.csv. Let’s use the read_csv() function from the **readr** package to read it off the web, import it into R, and save it in a data frame called dem_score. 
 
 ```{r}
 dem_score <- read_csv(file = "https://moderndive.com/data/dem_score.csv")
 ```
 
-In this dem_score data frame, the minimum value of -10 corresponds to a highly autocratic nation, whereas a value of 10 corresponds to a highly democratic nation. Note also that backticks surround the different variable names. Variable names in R by default are not allowed to start with a number nor include spaces, but we can get around this fact by surrounding the column name with backticks.
+In this `dem_score` data frame, the minimum value of -10 corresponds to a highly autocratic nation, whereas a value of 10 corresponds to a highly democratic nation. Note also that backticks surround the different variable names. Variable names in R by default are not allowed to start with a number nor include spaces, but we can get around this fact by surrounding the column name with backticks.
 
-Note that the read_csv() function included in the readr package is different than the read.csv() function that comes installed with R. While the difference in the names might seem trivial (an _ instead of a .), the read_csv() function is, in our opinion, easier to use since it can more easily read data off the web and generally imports data at a much faster speed. Furthermore, the read_csv() function included in the readr saves data frames as tibbles by default.
+Its important to know that the `read_csv()` function included in the readr package is different than the `read.csv()` function that comes installed with R. While the difference in the names might seem trivial (an _ instead of a .), the `read_csv()` function is, in our opinion, easier to use since it can more easily read data off the web and generally imports data at a much faster speed. Furthermore, the read_csv() function included in the readr saves data frames as tibbles by default.
 
 The result of this code chunk is pretty tame. It tells us that each comma from the .csv file corresponds to a column, and the column names are taken from the first line of the file. Then, the function "guesses" an appropriate data type for each of the columns it creates. Sometimes .csv files are a lot dirtier and require significant wrangling before you can explore the data and create usable graphics. 
 
@@ -56,47 +57,46 @@ gender_data
 As you can see, the second row was likely meant to contain the column names. You can run `?read_csv()` in your console to see the additional arguments that the `read_csv()` function may contain to make the new dataframe easier to work with. The skip argument allows you to skip rows of the dataset. 
 
 ```{r}
-gender_data <- read_csv(file = url, skip = 1)
+gender_data <- read_csv(file = url, 
+                        skip = 1)
 gender_data
 ```
 
-
-```{r echo=FALSE, fig.margin=TRUE, out.width="100%"}
-knitr::include_graphics("https://imgs.xkcd.com/comics/scientist_tech_help.png")
-```
-
-Now suppose we want to change the data type of one of more of the columns. The `col_type` argument allows us to do this. Without the `col_type` argument, the `division` column is read in as a character column. Instead, we want it to be read in as a factor.  
+Suppose we want to change the data type of one of more of the columns. The `col_type` argument allows us to do this. Without the `col_type` argument, the `division` column is read in as a character column. Instead, we want it to be read in as a factor.  
 
 ```{r}
-gender_data <- read_csv(file = url, skip = 1, col_type = cols(division = col_factor()))
+gender_data <- read_csv(file = url, 
+                        skip = 1, col_type = cols(division = col_factor()))
 ```
 
-Now that the new dataset has been read in, explore it using the `View()` and `glimpse()` functions and the `$` operator from the previous chapter. 
+Now that the new dataset has been read in, explore it using the `glimpse()` function and the `$` operator from the previous chapter. 
 
-```{r, eval=FALSE}
-View(gender_data)
-```
 
 ```{r}
 glimpse(gender_data)
 
 gender_data$division
 ```
+
 Run the `summary()` function on the `gender_data` dataframe.
+
 ```{r}
 summary(gender_data)
 ```
+
 You may notice that something appears to be wrong with this dataset. Which department could have employed 644 male full professors? Let's explore what is going wrong here. 
 ```{r}
 gender_data %>% filter(full_profs_m == 644)
 ```
 
 It seems that one row of the table takes the sum of each of the other rows. This is likely the last row of the dataframe. Use `tail()` to print the last rows of the dataframe to check the final row.
+
 ```{r}
 tail(gender_data)
 ```
 
 Now, remove the "Total" row because it will affect any dplyr functions we try to run on the dataframe. Check the `tail()` of the dataframe again to make sure that the proper row was removed. 
+
 ```{r}
 gender_data <- gender_data %>%
   filter(concentration != "Total")
@@ -266,76 +266,101 @@ You can learn much more by examining tutorials and help files from the jsonlite 
 
 <!-- Add a Tibble section after data gathering. Could include discussion of allowed variable names, the use of ``, and  early in the book. clean_names() and skim() also. You can have a variable name be a number, but in order to refer to that variable, you need to use backticks. -->
 
+Tibbles are a kind of data frame, useful for storing data in which we have the same number of observations for each variable. We can use the `tibble()` function to create data frames. Tibbles are composed of variables, the individual columns which, together, make up the tibble. Each column, or variable, can be of a different type: character, factor, date and so on.
 
-Tibbles are a kind of data frame, useful for storing data in which we have the same number of observations for each variable. 
+
+For example: 
+
+```{r}
+tibble(a = 1, b = 2, c = 3)
+```
+
+In our code, we specify the variable names (or the names of columns) as , `a`, `b`, and `c`. Under each variable, we give a different numerical value. Under each variable name, the data type is specified for the data within that column. For our tibble above, numerical values are under each column so `<int>` appears under each letter. 
+
+When giving variable names to our tibbles, there are some conditions. If the names of our variables begin with a number such as `54` or include spaces like `my var`, you must include backticks around each name like such:
+
+```{r}
+tibble(`54` = 1, `my var` = 2, c = 3)
+```
+
+If we did not include the backticks, R would give us an error.
+
+```{r error, eval = FALSE}
+tibble(54 = 1, my var = 2, c = 3)
+```
+
+
 
 ### `clean_names()`
 
-Another useful function is the `clean_names()` function, which is included in the **janitor** package. This function allows you to standardize the column names of a dataset. This can be particularly useful when reading in a dataset from the web. Look at the `flights` dataset, again. 
+Another useful function to use for datasets is the `clean_names()` function, which is included in the **janitor** package. This function allows you to standardize the column names of a dataset. This can be particularly useful when reading in a dataset from the web. 
+
+Look at the `trains` dataset, again. 
 
 ```{r}
-glimpse(flights)
+glimpse(trains)
 ```
 
-As you can see the column names are in all lowercase, and each space in between words is represented by an underscore character. This is the default result of `clean_names()`, so running `clean_names(flights)` will have no effect. 
+As you can see the column names are in all lowercase, and each space in between words is represented by an underscore character. This is the default result of `clean_names()`, so running `clean_names(trains)` will have no effect. 
 
-Suppose, instead, we wanted to change the column names to camel case, where word boundaries are demarcated by an upper case letter.  
+Suppose, instead, we wanted to change the column names to camel case, where spaces are demarcated by an upper case letter.  
 
 ```{r}
-flights %>% clean_names("small_camel")
+trains %>% clean_names("small_camel")
 ```
 
 Nonetheless, you will likely only ever be required to use `clean_names()` with the default snake case. 
+
 
 ### `skim()`
 
 The `skim()` function from the **skimr** package is a useful summary function that offers an overview of a tibble  The function creates a report of the tibble, organized by variable type. Example:
 
 ```{r out.width="100%"}
-skim(flights)
+skim(trains)
 ```
-
 
 Take a quick look at the section containing numeric variables. This is of particular interest because the right-most column offers insight into the potential distribution of the data. 
 
-Although most data scientists use tibbles, or similar structures, to organize their work, we should remember that tibbles are composed of variables, the individual columns which, together, make up the tibble. Each column, or variable, can be of a different type: character, factor, date and so on. The next few sections will explore different variable types and how to work with them.
 
 ## Characters 
 
-We've spent a lot of time working with big, beautiful data frames that are clean and wholesome, like the `gapminder` and `nycflights13` data.
+We've spent a lot of time working with big, beautiful data frames that are clean and wholesome, like the `gapminder` and `trains` data. But real life datasets rwill be much nastier. You will bring data into R from the outside world and discover there are problems. You might think: how hard can it be to deal with character data? And the answer is: it can be very hard! Here we discuss common remedial tasks for cleaning and transforming character data, also known as "strings". Basically, a string is one or more characters that are enclosed inside a pair of matching 'single' or "double quotes" .
 
-But real life will be much nastier. You will bring data into R from the outside world and discover there are problems. You might think: how hard can it be to deal with character data? And the answer is: it can be very hard!
-
-Here we discuss common remedial tasks for cleaning and transforming character data, also known as "strings". A data frame or tibble will consist of one or more *atomic vectors* of a certain class. This lesson deals with things you can do with vectors of class `character`.
+A data frame or tibble will consist of one or more *atomic vectors* of a certain class. An atomic vector is one of the two types of vectors. There are six types: logical, integer, double, character. This lesson deals with things you can do with vectors of class `character`.
 
 At the beginning of the chapter, we loaded the **tidyverse**, which includes `stringr`. This package allows users to manipulate strings with its functions that being with `str_`.
 
 There are some basic string manipulation tasks:
 
-* Study a single character vector
+1. Study a single character vector
   - How long are the strings?
   - Presence/absence of a literal string
-* Operate on a single character vector
+  
+1. Operate on a single character vector
   - Keep/discard elements that contain a literal string
   - Split into two or more character vectors using a fixed delimiter    
   - Snip out pieces of the strings based on character position
   - Collapse into a single string
-* Operate on two or more character vectors
+  
+1. Operate on two or more character vectors
   - Glue them together element-wise to get a new character vector.
 
 `fruit`, `words`, and `sentences` are character vectors that ship with stringr for practicing.*
 
 ### Studying a single character vector
 
-Determine presence/absence of a literal string with `str_detect()`. Spoiler: later we see `str_detect()` also detects regular expressions.
+We can determine if a character vector matches a pattern using `str_detect()`. It returns a logical vector that is the same length as the input. Recall logicals are either `TRUE` or `FALSE`.
 
-Which fruits actually use the word "fruit"?
+Let's consider the character vector `fruit`
+
+Let's use `str_detect()` to see which fruits actually use the word "fruit"?
 
 ```{r}
 str_detect(fruit, pattern = "fruit")
 ```
 
-What's the easiest way to get the actual fruits that match? Use `str_subset()` to keep only the matching elements. Note we are storing this new vector `my_fruit` to use in later examples!
+What's the easiest way to get the actual fruits that match? Use `str_subset()` to keep only the matching elements. *Note:* we are storing this new vector `my_fruit` to use in later examples!
 
 ```{r}
 (my_fruit <- str_subset(fruit, pattern = "fruit"))
@@ -347,7 +372,7 @@ Use `stringr::str_view()` to create a window in your viewer that highlights a sp
 str_view(fruit[5:10], pattern = "berry")
 ```
 
-This can be helpful when you want to check that you are highlighting the correct pattern (especially when using regex). What do you think the following regex means? (This will be explained in more depth later)
+This can be helpful when you want to check that you are highlighting the correct pattern (especially when using regex, which is short for "regular expression").
 
 ```{r}
 str_view(fruit[1:5], pattern = "^a.*o")
@@ -355,15 +380,15 @@ str_view(fruit[1:5], pattern = "^a.*o")
 
 ### Operating on a single character vector
 
-Use `stringr::str_split()` to split strings on a delimiter. Some of our fruits are compound words, like "grapefruit", but some have two words, like "ugli fruit". Here we split on a single space `" "`, but show use of a regular expression later. 
+We can use `str_split()` to split a string up into pieces. Some of our fruits are compound words, like "grapefruit", but some have two words, like "ugli fruit". Here we split on a single space `" "`, but show use of a regular expression later. 
 
 ```{r}
 str_split(my_fruit, pattern = " ")
 ```
 
-It's bummer that we get a *list* back. But it must be so! In full generality, split strings must return list, because who knows how many pieces there will be?
+Split strings must return *list*  because who knows how many pieces there will be? Lists will be explained later in this chapter. For now, just know that they tree-like structured vectors.
 
-If you are willing to commit to the number of pieces, you can use `str_split_fixed()` and get a character matrix. You're welcome!
+You can specify the number of pieces the string is split into using `str_split_fixed()` . In return, you will get a character matrix. A matrix is a rectangular array of data that displays one type of data such as "character".
 
 ```{r}
 str_split_fixed(my_fruit, pattern = " ", n = 2)
@@ -377,45 +402,29 @@ my_fruit_df %>%
   separate(my_fruit, into = c("pre", "post"), sep = " ")
 ```
 
-Count characters in your strings with `str_length()`. Note this is different from the length of the character vector itself.
+You can count characters in your strings with `str_length()`. Note this is different from the `length()` of the character vector itself.
 
 ```{r}
 length(my_fruit)
 str_length(my_fruit)
 ```
 
-You can snip out substrings based on character position with `str_sub()`.
+You can extract parts of a string using `str_sub()`.`str_sub()` takes start and end arguments which give the (inclusive) position of the substring.
 
 ```{r}
-head(fruit) %>% 
-  str_sub(1, 3)
+animals <- c("dog", "cat", "bird")
+str_sub(animals, 1, 3)
 ```
 
-The `start` and `end` arguments are vectorised. __Example:__ a sliding 3-character window.
+The `start` and `end` arguments are vectorised. In the code above, you are telling R to extract the first letter (1) all the way through the third (3).
+
+You can combine a character vector of length `n > 1` to a single string with `str_c()`, which also has other uses (see the [next section](#catenate-vectors)).
 
 ```{r}
-tibble(fruit) %>% 
-  head() %>% 
-  mutate(snip = str_sub(fruit, 1:6, 3:8))
+str_c("x", "y")
 ```
 
-Finally, `str_sub()` also works for assignment, i.e. on the left hand side of `<-`.
-
-```{r}
-(x <- head(fruit, 3))
-str_sub(x, 1, 3) <- "AAA"
-x
-```
-
-You can collapse a character vector of length `n > 1` to a single string with `str_c()`, which also has other uses (see the [next section](#catenate-vectors)).
-
-
-```{r}
-head(fruit) %>% 
-  str_c(collapse = ", ")
-```
-
-You can replace a pattern with `str_replace()`. Here we use an explicit string-to-replace, but later we revisit with a regular expression.
+You can replace a pattern within a string with `str_replace()`. Here we use an explicit string-to-replace, but later we revisit with a regular expression.
 
 ```{r}
 str_replace(my_fruit, pattern = "fruit", replacement = "THINGY")
@@ -447,7 +456,7 @@ If you have two or more character vectors of the same length, you can glue them 
 str_c(fruit[1:4], fruit[5:8], sep = " & ")
 ```
 
-Element-wise catenation can be combined with collapsing.
+Element-wise catenation can be combined with `str_c()`.
 
 ```{r}
 str_c(fruit[1:4], fruit[5:8], sep = " & ", collapse = ", ")
@@ -460,6 +469,7 @@ fruit_df <- tibble(
   fruit1 = fruit[1:4],
   fruit2 = fruit[5:8]
 )
+
 fruit_df %>% 
   unite("flavor_combo", fruit1, fruit2, sep = " & ")
 ```
@@ -473,11 +483,11 @@ knitr::include_graphics("02-wrangling/images/regexp.jpg")
 
 Frequently your string tasks cannot be expressed in terms of a fixed string, but can be described in terms of a pattern. Regular expressions, aka "regexes", are the standard way to specify these patterns. In regexes, specific characters and constructs take on special meaning in order to match multiple strings.
 
-The country names in the `gapminder` dataset are convenient for examples. Load it now and store 
-the `r nlevels(gapminder::gapminder$country)` unique country names in the object `countries`.
+The country names in the `gapminder` dataset are convenient for examples. Let's use it now and store the `r nlevels(gapminder::gapminder$country)` unique country names in the object `countries`.
 
 ```{r}
 countries <- levels(gapminder$country)
+countries
 ```
 
 The first metacharacter is the period `.`, which stands for any single character, except a newline (which by the way, is represented by `\n`). The regex `i.a` will match all countries that have an `i`, followed by any single character, followed by `a`. Yes, regexes are case sensitive, i.e. "Italy" does not match.
@@ -579,8 +589,7 @@ list(match = intersect(matches, str_subset(fruit, pattern = "le")),
 
 ### Raw strings
 
-You’ve probably caught on by now that there are certain characters with special meaning in regexes, 
-including `$ * + . ? [ ] ^ { } | ( ) \`. This makes things difficult when we want to use these characters within the strings instead of as regexes. Previously, we would have to do a lot of maneuvering to create strings containing special characters, but now we can use `r"()"`. 
+You’ve probably caught on by now that there are certain characters with special meaning in regexes, including `$ * + . ? [ ] ^ { } | ( ) \`. This makes things difficult when we want to use these characters within the strings instead of as regexes. Previously, we would have to do a lot of maneuvering to create strings containing special characters, but now we can use `r"()"`. 
 
 ```{r}
 r"(Do you use "airquotes" much?)"
