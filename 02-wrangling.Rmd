@@ -11,7 +11,7 @@
 Start by loading the packages which we will need in this chapter.
 
 
-```{r, message=FALSE}
+```{r, message = FALSE}
 library(tidyverse)
 library(primer.data)
 library(lubridate)
@@ -626,19 +626,21 @@ To get a frequency table as a tibble, from a tibble, use `dplyr::count()`. To ge
 gapminder %>% 
   count(continent)
 fct_count(gapminder$continent)
+
 ```
 
 ### Dropping unused levels
 
 Just because you drop all the rows corresponding to a specific factor level, the levels of the factor itself do not change. Sometimes all these unused levels can come back to haunt you later, e.g., in figure legends.
 
-Watch what happens to the levels of `country` when we filter Gapminder to a handful of countries.
+Watch what happens to the levels of `country` when we filter `gapminder` to a handful of countries.
 
 ```{r}
 nlevels(gapminder$country)
-h_countries <- c("Egypt", "Haiti", "Romania", "Thailand", "Venezuela")
 h_gap <- gapminder %>%
-filter(country %in% h_countries)
+  filter(country %in% c("Egypt", "Haiti", 
+                        "Romania", "Thailand", 
+                        "Venezuela"))
 nlevels(h_gap$country)
 ```
 
@@ -662,8 +664,8 @@ h_gap$country %>%
 
 By default, factor levels are ordered alphabetically. When you think about it, this ordering might as well be random! It is preferable to order the levels according to some principle:
 
-* Frequency. Make the most common level the first and so on.
-* Another variable. Order factor levels according to a summary statistic for another variable.
+* Frequency: Make the most common level the first and so on.
+* Another variable: Order factor levels according to a summary statistic for another variable.
 
 First, let's order continent by frequency, forwards and backwards. This is often a great idea for tables and figures, esp. frequency barplots.
 
@@ -709,33 +711,47 @@ Now we order `country` by another variable, forwards and backwards. This other v
 ```{r}
 # Order countries by median life expectancy
 
-fct_reorder(gapminder$country, gapminder$lifeExp) %>% 
-  levels() %>% head()
+fct_reorder(gapminder$country, 
+            gapminder$lifeExp) %>% 
+  levels() %>% 
+  head()
 
 # Order according to minimum life exp instead of median
 
-fct_reorder(gapminder$country, gapminder$lifeExp, min) %>% 
-  levels() %>% head()
+fct_reorder(gapminder$country, 
+            gapminder$lifeExp, min) %>% 
+  levels() %>% 
+  head()
 
 # Backwards!
 
-fct_reorder(gapminder$country, gapminder$lifeExp, .desc = TRUE) %>% 
-  levels() %>% head()
+fct_reorder(gapminder$country, 
+            gapminder$lifeExp, 
+            .desc = TRUE) %>% 
+  levels() %>% 
+  head()
 ```
 
-So why do we reorder factor levels? It often makes plots much better! When a factor is mapped to x or y, it should almost always be reordered by the quantitative variable you are mapping to the other one.
+Why do we reorder factor levels? It often makes plots much better! When a factor is mapped to x or y, it should almost always be reordered by the quantitative variable you are mapping to the other one. 
+
 Compare the interpretability of these two plots of life expectancy in Asian countries in 2007. The only difference is the order of the `country` factor. Which one do you find easier to learn from?
 
-```{r alpha-order-silly, fig.show = 'hold', out.width = '49%', out.height="80%"}
-gap_asia_2007 <- gapminder %>% filter(year == 2007, continent == "Asia")
-ggplot(gap_asia_2007, aes(x = lifeExp, y = country)) + geom_point()
-ggplot(gap_asia_2007, aes(x = lifeExp, y = fct_reorder(country, lifeExp))) +
-  geom_point()
+```{r , echo = FALSE, alpha-order-silly, fig.show = 'hold', out.width = '49%', out.height="80%"}
+gap_asia_2007 <- gapminder %>% 
+  filter(year == 2007, 
+         continent == "Asia")
+
+ggplot(gap_asia_2007, aes(x = lifeExp, 
+                          y = country)) + geom_point()
+
+ggplot(gap_asia_2007, aes(x = lifeExp, 
+                          y = fct_reorder(country, 
+                                          lifeExp))) + geom_point()
 ```
 
 Use `fct_reorder2()` when you have a line chart of a quantitative x against another quantitative y and your factor provides the color. This way the legend appears in the same order as the data! Note, the order is taken by the right side of the plot (not the left). Contrast the legend on the left with the one on the right. 
 
-```{r legends-made-for-humans, fig.show = 'hold', out.width = '49%', out.height="80%"}
+```{r legends-made-for-humans, fig.show = 'hold', out.width = '49%', out.height="80%", echo = FALSE}
 h_countries <- c("Egypt", "Haiti", "Romania", "Thailand", "Venezuela")
 h_gap <- gapminder %>%
   filter(country %in% h_countries) %>% 
@@ -813,14 +829,14 @@ fct_c(df1$country, df2$country)
 
 ## Lists
 
-Lists are a type of vector that is a step up in complexity from atomic vectors, because lists can contain other lists. This makes them suitable for representing hierarchical or tree-like structures. You create a list with `list()`:
+Earlier, we briefly introduced lists. Lists are a type of vector that is a step up in complexity from atomic vectors, because lists can contain other lists. This makes them suitable for representing hierarchical or tree-like structures. You create a list with the function `list()`:
 
 ```{r}
 x <- list(1, 2, 3)
 x
 ```
 
-A very useful tool for working with lists is `str()` because it focuses on the **str**ucture, not the contents.
+A very useful tool for working with lists is `str()` because it focuses on displaying the **str**ucture, not the contents.
 
 ```{r}
 str(x)
@@ -828,7 +844,7 @@ x_named <- list(a = 1, b = 2, c = 3)
 str(x_named)
 ```
 
-Unlike atomic vectors, `list()` can contain a mix of objects:
+Unlike atomic vectors, `list()` can contain a mix of objects.
 
 ```{r}
 y <- list("a", 1L, 1.5, TRUE)
@@ -860,9 +876,11 @@ knitr::include_graphics("02-wrangling/images/lists-structure.png")
 
 There are three principles:
 
-- Lists have rounded corners. Atomic vectors have square corners.
-- Children are drawn inside their parent, and have a slightly darker background to make it easier to see  the hierarchy.
-- The orientation of the children (i.e. rows or columns) isn't important, so I'll pick a row or column orientation to either save space or illustrate an important property in the example.
+1. Lists have rounded corners. Atomic vectors have square corners.
+
+1. Children are drawn inside their parent, and have a slightly darker background to make it easier to see  the hierarchy.
+
+1. The orientation of the children (i.e. rows or columns) isn't important, so I'll pick a row or column orientation to either save space or illustrate an important property in the example.
 
 ### Subsetting
 
@@ -872,7 +890,7 @@ There are three ways to subset a list, which I'll illustrate with a list named `
 a <- list(a = 1:3, b = "a string", c = pi, d = list(-1, -5))
 ```
 
-`[` extracts a sub-list. The result will always be a list.
+`[ ]` extracts a sub-list. The result will always be a list.
 
 ```{r}
 str(a[1:2])
@@ -881,21 +899,21 @@ str(a[4])
 
 Like with vectors, you can subset with a logical, integer, or character vector.
     
-`[[` extracts a single component from a list. It removes a level of hierarchy from the list.
+`[[ ]]` extracts a single component from a list. It removes a level of hierarchy from the list.
 
 ```{r}
 str(a[[1]])
 str(a[[4]])
 ```
 
-`$` is a shorthand for extracting named elements of a list. It works similarly to `[[` except that you don't need to use quotes.
+`$` is a shorthand for extracting named elements of a list. It works similarly to `[[ ]]` except that you don't need to use quotes.
     
 ```{r}
 a$a
 a[["a"]]
 ```
 
-The distinction between `[` and `[[` is really important for lists, because `[[` drills down into the list while `[` returns a new, smaller list. Compare the code and output above with the visual representation.
+The distinction between `[ ]` and `[[ ]]` is really important for lists, because `[[ ]]` drills down into the list while `[ ]` returns a new, smaller list. Compare the code and output above with the visual representation.
 
 ```{r lists-subsetting, echo = FALSE, out.width = "75%", fig.align='center', fig.cap = "Subsetting a list, visually."}
 knitr::include_graphics("02-wrangling/images/lists-subsetting.png")
@@ -903,7 +921,7 @@ knitr::include_graphics("02-wrangling/images/lists-subsetting.png")
 
 ### Lists of condiments
 
-The difference between `[` and `[[` is very important, but it's easy to get confused. To help you remember, let me show you an unusual pepper shaker.
+The difference between `[ ]` and `[[ ]]` is very important, but it's easy to get confused. To help you remember, let me show you an unusual pepper shaker.
 
 ```{r, echo = FALSE, out.width = "40%", fig.align='center'} 
 knitr::include_graphics("02-wrangling/images/pepper.jpg")
@@ -931,7 +949,7 @@ knitr::include_graphics("02-wrangling/images/pepper-3.jpg")
 
 ## Date-Times 
 
-We will manipulate date-times using the lubridate package, which makes it easier to work with dates and times in R. `lubridate` is not part of the core tidyverse because you only need it when you're working with dates/times.
+We will manipulate date-times using the **lubridate** package, which makes it easier to work with dates and times in R. **lubridate** is not part of the core tidyverse because you only need it when you're working with dates/times.
 
 ```{r echo=FALSE, fig.margin=TRUE, out.width="60%", fig.align='center'}
 knitr::include_graphics("https://imgs.xkcd.com/comics/iso_8601.png")
@@ -945,10 +963,9 @@ There are three types of date/time data that refer to an instant in time:
 
 * A `date-time` is a date plus a time: it uniquely identifies an
   instant in time (typically to the nearest second). Tibbles print this
-  as `<dttm>`. Elsewhere in R these are called POSIXct, but I don't think
-  that's a very useful name.
+  as `<dttm>`.
 
-You should always use the simplest possible data type that works for your needs. That means if you can use a date instead of a date-time, you should. Date-times are substantially more complicated because of the need to handle time zones, which we'll come back to at the end of the chapter.
+You should always use the simplest possible datatype that works for your needs. That means if you can use a date instead of a date-time, you should. Date-times are substantially more complicated because of the need to handle time zones, which we'll come back to at the end of the chapter.
 
 To get the current date or date-time you can use `today()` or `now()`:
 
@@ -959,9 +976,9 @@ now()
 
 Otherwise, there are three ways you're likely to create a date/time:
 
-* From a string.
-* From individual date-time components.
-* From an existing date/time object.
+1. From a string.
+1. From individual date-time components.
+1. From an existing date/time object.
 
 They work as follows:
 
@@ -994,6 +1011,7 @@ You can also force the creation of a date-time from a date by supplying a timezo
 ymd(20170131, tz = "UTC")
 ```
 
+
 ### From individual components
 
 Instead of a single string, sometimes you'll have the individual components of the date-time spread across multiple columns. This is what we have in the flights data:
@@ -1010,43 +1028,6 @@ flights %>%
   select(year, month, day, hour, minute) %>% 
   mutate(departure = make_datetime(year, month, day, hour, minute))
 ```
-
-Let's do the same thing for each of the four time columns in `flights`. The times are represented in a slightly odd format, so we use modulus arithmetic to pull out the hour and minute components. Once I've created the date-time variables, I focus in on the variables we'll explore in the rest of the chapter.
-
-```{r}
-make_datetime_100 <- function(year, month, day, time) {
-  make_datetime(year, month, day, time %/% 100, time %% 100)
-}
-flights_dt <- flights %>% 
-  filter(!is.na(dep_time), !is.na(arr_time)) %>% 
-  mutate(
-    dep_time = make_datetime_100(year, month, day, dep_time),
-    arr_time = make_datetime_100(year, month, day, arr_time),
-    sched_dep_time = make_datetime_100(year, month, day, sched_dep_time),
-    sched_arr_time = make_datetime_100(year, month, day, sched_arr_time)
-  ) %>% 
-  select(origin, dest, ends_with("delay"), ends_with("time"))
-flights_dt
-```
-
-With this data, I can visualise the distribution of departure times across the year:
-
-```{r}
-flights_dt %>% 
-  ggplot(aes(dep_time)) + 
-  geom_freqpoly(binwidth = 86400) # 86400 seconds = 1 day
-```
-
-Or within a single day:
-
-```{r}
-flights_dt %>% 
-  filter(dep_time < ymd(20130102)) %>% 
-  ggplot(aes(dep_time)) + 
-  geom_freqpoly(binwidth = 600) # 600 s = 10 minutes
-```
-
-Note that when you use date-times in a numeric context (like in a histogram), 1 means 1 second, so a binwidth of 86400 means one day. For dates, 1 means 1 day.
 
 ### From other types
 
@@ -1086,48 +1067,6 @@ month(datetime, label = TRUE)
 wday(datetime, label = TRUE, abbr = FALSE)
 ```
 
-We can use `wday()` to see that more flights depart during the week than on the weekend:
-
-```{r}
-flights_dt %>% 
-  mutate(wday = wday(dep_time, label = TRUE)) %>% 
-  ggplot(aes(x = wday)) +
-    geom_bar()
-```
-
-There's an interesting pattern if we look at the average departure delay by minute within the hour. It looks like flights leaving in minutes 20-30 and 50-60 have much lower delays than the rest of the hour!
-
-```{r}
-flights_dt %>% 
-  mutate(minute = minute(dep_time)) %>% 
-  group_by(minute) %>% 
-  summarise(
-    avg_delay = mean(arr_delay, na.rm = TRUE),
-    n = n()) %>% 
-  ggplot(aes(minute, avg_delay)) +
-    geom_line()
-```
-
-Interestingly, if we look at the scheduled departure time we don't see such a strong pattern:
-
-```{r}
-sched_dep <- flights_dt %>% 
-  mutate(minute = minute(sched_dep_time)) %>% 
-  group_by(minute) %>% 
-  summarise(
-    avg_delay = mean(arr_delay, na.rm = TRUE),
-    n = n())
-ggplot(sched_dep, aes(minute, avg_delay)) +
-  geom_line()
-```
-
-So why do we see that pattern with the actual departure times? Well, like much data collected by humans, there's a strong bias towards flights leaving at "nice" departure times. Always be alert for this sort of pattern whenever you work with data that involves human judgement!
-
-```{r}
-ggplot(sched_dep, aes(minute, n)) +
-  geom_line()
-```
-
 
 ### Setting components
 
@@ -1146,16 +1085,6 @@ ymd("2015-02-01") %>%
   update(hour = 400)
 ```
 
-You can use `update()` to show the distribution of flights across the course of the day for every day of the year: 
-
-```{r}
-flights_dt %>% 
-  mutate(dep_hour = update(dep_time, yday = 1)) %>% 
-  ggplot(aes(dep_hour)) +
-    geom_freqpoly(binwidth = 300)
-```
-
-Setting larger components of a date to a constant is a powerful technique that allows you to explore patterns in the smaller components.
 
 ### Time zones 
 
@@ -1173,53 +1102,36 @@ In R, the time zone is an attribute of the date-time that only controls printing
 
 There are many ways to bring data together.
 
-Bind - This is basically smashing ~~rocks~~ tibbles together. You can smash things together row-wise ("row binding") or column-wise ("column binding"). Why do I characterize this as rock-smashing? They're often fairly crude operations, with lots of responsibility falling on the analyst for making sure that the whole enterprise even makes sense.
+1 **Bind** - This is basically smashing tibbles together. You can smash things together row-wise ("row binding") or column-wise ("column binding"). Binding tibbles are often fairly crude operations because you must makes sure that the whole enterprise even makes sense.
+When *row binding*: you need to consider the variables in the two tibbles. Do the same variables exist in each? Are they of the same type? Different approaches for row binding have different combinations of flexibility vs rigidity around these matters.
 
-When row binding, you need to consider the variables in the two tibbles. Do the same variables exist in each? Are they of the same type? Different approaches for row binding have different combinations of flexibility vs rigidity around these matters.
+When *column binding*: the onus is entirely on the analyst to make sure that the rows are aligned. I would avoid column binding whenever possible. If you can introduce new variables through any other, safer means, do so! By safer, I mean: use a mechanism where the row alignment is correct by definition. A proper join is the gold standard.
 
-When column binding, the onus is entirely on the analyst to make sure that the rows are aligned. I would avoid column binding whenever possible. If you can introduce new variables through any other, safer means, do so! By safer, I mean: use a mechanism where the row alignment is correct by definition. A proper join is the gold standard.
+2. **Join** - Here you designate a variable (or a combination of variables) as a key. A row in one data frame gets matched with a row in another data frame because they have the same key. You can then bring information from variables in a secondary data frame into a primary data frame based on this key-based lookup. That description is incredibly oversimplified, but that's the basic idea.
 
-Join - Here you designate a variable (or a combination of variables) as a key. A row in one data frame gets matched with a row in another data frame because they have the same key. You can then bring information from variables in a secondary data frame into a primary data frame based on this key-based lookup. That description is incredibly oversimplified, but that's the basic idea.
-
-A variety of row- and column-wise operations fit into this framework, which implies there are many different flavors of join. The concepts and vocabulary around joins come from the database world. The relevant functions in dplyr follow this convention and all mention `join`. The most relevant base R function is `merge()`.
+A variety of row-wise and column-wise operations fit into this framework, which implies there are many different flavors of join. The concepts and vocabulary around joins come from the database world. The relevant functions in dplyr follow this convention and all mention `join`. The most relevant base R function is `merge()`.
 
 Let's explore each type of operation with a few examples.
 
 ### Row binding
 
+The `bind_rows()` function is used to combine rows of two data frames.
+
 Here's what a perfect row bind of three (untidy!) data frames looks like using data from the Lord of the Rings trilogy.
 
 ```{r}
-fship <- tribble(
-                         ~Film,    ~Race, ~Female, ~Male,
-  "The Fellowship Of The Ring",    "Elf",    1229,   971,
-  "The Fellowship Of The Ring", "Hobbit",      14,  3644,
-  "The Fellowship Of The Ring",    "Man",       0,  1995
-)
-rking <- tribble(
-                         ~Film,    ~Race, ~Female, ~Male,
-      "The Return Of The King",    "Elf",     183,   510,
-      "The Return Of The King", "Hobbit",       2,  2673,
-      "The Return Of The King",    "Man",     268,  2459
-)
-ttow <- tribble(
-                         ~Film,    ~Race, ~Female, ~Male,
-              "The Two Towers",    "Elf",     331,   513,
-              "The Two Towers", "Hobbit",       0,  2463,
-              "The Two Towers",    "Man",     401,  3589
-)
-(lotr_untidy <- bind_rows(fship, ttow, rking))
+data1 <- tibble(x1 = 1:5,                
+                x2 = letters[1:5]) 
+data2 <- tibble(x1 = 0, 
+                x3 = 5:9) 
+data3 <- tibble(x3 = 5:9, 
+                x4 = letters[5:9])
+
+bind_rows(data1, data2)
 ```
 
-`dplyr::bind_rows()` works like a charm with these very row-bindable data frames. But what if one of the data frames is somehow missing a variable? Let's mangle one and find out.
+In the above code, we created 3 tibbles, `data1`, `data2`, `data3` with rows and columns in it and then we use `bind_rows()` function to combine the rows that were present in the data frame. Also where the variable name is not listed `bind_rows()` inserted a `NA` value.
 
-```{r error = TRUE}
-ttow_no_Female <- ttow %>% mutate(Female = NULL)
-bind_rows(fship, ttow_no_Female, rking)
-rbind(fship, ttow_no_Female, rking)
-```
-
-We see that `dplyr::bind_rows()` does the row bind and puts `NA` in for the missing values caused by the lack of `Female` data from The Two Towers. Nonetheless, this can be problematic with more dissimilar datasets. 
 
 ### Column binding
 
@@ -1227,31 +1139,16 @@ We see that `dplyr::bind_rows()` does the row bind and puts `NA` in for the miss
 knitr::include_graphics("02-wrangling/images/wrangling.gif")
 ```
 
-Column binding is much more dangerous because it often "works" when it should not. It's your job to make sure the rows are aligned and it's all too easy to screw this up.
+The `bind_cols()` function is used to combine columns of two data frames. Column binding is much more dangerous because it often "works" when it should not. It's your job to make sure the rows are aligned and it's all too easy to screw this up.
 
-The data in `gapminder` was originally excavated from 3 messy Excel spreadsheets: one each for life expectancy, population, and GDP per capital. Let's relive some of the data wrangling joy and show a column bind gone wrong.
 
-I create 3 separate data frames, do some evil row sorting, then column bind. There are no errors. The result `gapminder_garbage` sort of looks OK. Univariate summary statistics and exploratory plots will look OK. But I've created complete nonsense!
+Let's use the same tibbles we previously created.
 
 ```{r}
-life_exp <- gapminder %>%
-  select(country, year, lifeExp)
-
-pop <- gapminder %>%
-  arrange(year) %>% 
-  select(pop)
-  
-gdp_percap <- gapminder %>% 
-  arrange(pop) %>% 
-  select(gdpPercap)
-
-(gapminder_garbage <- bind_cols(life_exp, pop, gdp_percap))
-
-summary(gapminder$lifeExp)
-summary(gapminder_garbage$lifeExp)
-range(gapminder$gdpPercap)
-range(gapminder_garbage$gdpPercap)
+bind_cols(data1, data3)
 ```
+
+In our code above, we have combined the variables x1, x2 of `data1` and x3, x4 of `data2` with each other.
 
 One last cautionary tale about column binding. This one requires the use of `cbind()` and it's why the tidyverse is generally unwilling to recycle when combining things of different length.
 
@@ -1272,7 +1169,8 @@ This data frame isn't obviously wrong, but it is wrong. See how Canada's populat
 Bottom line: Row bind when you need to, but inspect the results re: coercion. Column bind only if you must and be extremely paranoid.
 
 ### Joins in dplyr
-The most recent release of gapminder includes a new data frame, `country_codes`, with country names and ISO codes. Therefore you can also use it to practice joins.
+
+The most recent release of `gapminder` includes a new data frame, `country_codes`, with country names and ISO codes. Therefore you can also use it to practice joins.
 
 ```{r end_multi_tibbles}
 gapminder %>% 
@@ -1624,7 +1522,7 @@ Let's switch gears and learn about the concept of "tidy" data format with a moti
 
 Let's focus our attention on the `drinks` data frame and look at its first 5 rows:
 
-```{r, echo=FALSE}
+```{r, echo = FALSE}
 drinks %>%  
   head(5)
 ```
@@ -1637,7 +1535,7 @@ Let's apply some of the data wrangling verbs on the `drinks` data frame:
 1. `select()` all columns except `total_litres_of_pure_alcohol` by using the `-` sign, *then*
 1. `rename()` the variables `beer_servings`, `spirit_servings`, and `wine_servings` to `beer`, `spirit`, and `wine`, respectively.
 
-and save the resulting data frame in `drinks_smaller`:
+We will save the resulting data frame in `drinks_smaller`.
 
 ```{r}
 drinks_smaller <- drinks %>%
@@ -1647,40 +1545,43 @@ drinks_smaller <- drinks %>%
 drinks_smaller
 ```
 
+
 Let's now ask ourselves a question: "Using the `drinks_smaller` data frame, how would we create the side-by-side barplot below. 
 
-```{r, fig.cap="Comparing alcohol consumption in 4 countries."}
-drinks_smaller_tidy <- drinks_smaller %>% 
-  pivot_longer(cols = -country, names_to = "type", values_to = "servings")
-
-drinks_smaller_tidy_plot <- ggplot(drinks_smaller_tidy, 
-                                   aes(x = country, y = servings, fill = type)) + geom_col(position = "dodge") + 
-                              labs(x = "country", y = "servings")
-```
-
-Let's break down the graphic:
-
-1. The categorical variable `country` with four levels (China, Italy, Saudi Arabia, USA) would have to be mapped to the `x`-position of the bars.
-1. The numerical variable `servings` would have to be mapped to the `y`-position of the bars (the height of the bars).
-1. The categorical variable `type` with three levels (beer, spirit, wine) would have to be mapped to the `fill` color of the bars.
-
-Observe, however, that `drinks_smaller` has three separate variables `beer`, `spirit`, and `wine`. In order to use the `ggplot()` function to recreate the barplot we need a single variable `type` with three possible values: `beer`, `spirit`, and `wine`.  We could then map this `type` variable to the `fill` aesthetic of our plot.  In other words, to recreate the barplot, our data frame would have to look like this:
-
-```{r}
-drinks_smaller_tidy
-```
-
-Observe that while `drinks_smaller` and `drinks_smaller_tidy` are both rectangular in shape and contain the same 12 numerical values (3 alcohol types by 4 countries), they are formatted differently. `drinks_smaller` is formatted in what's known as  ["wide"](https://en.wikipedia.org/wiki/Wide_and_narrow_data) format, whereas `drinks_smaller_tidy` is formatted in what's known as ["long/narrow"](https://en.wikipedia.org/wiki/Wide_and_narrow_data#Narrow) format.
-
-In the context of doing data science in R, long/narrow format is also known as "tidy" format. In order to use the **ggplot2** and **dplyr** packages for data visualization and data wrangling, your input data frames must be in "tidy" format. Thus, all non-"tidy" data must be converted to "tidy" format first. Before we convert non-"tidy" data frames like `drinks_smaller` to "tidy" data frames like `drinks_smaller_tidy`, let's define "tidy" data.
+<!-- # ```{r, fig.cap = "Comparing alcohol consumption in 4 countries."} -->
+<!-- # drinks_smaller_tidy <- drinks_smaller %>%  -->
+<!-- #   pivot_longer(cols = -country,  -->
+<!-- #                names_to = "type",  -->
+<!-- #                values_to = "servings") -->
+<!-- #  -->
+<!-- # drinks_smaller_tidy_plot <- ggplot(drinks_smaller_tidy,  -->
+<!-- #                                    aes(x = country,  -->
+<!-- #                                        y = servings,  -->
+<!-- #                                        fill = type)) +  -->
+<!-- #   geom_col(position = "dodge") +  -->
+<!-- #                               labs(x = "country", y = "servings") -->
+<!-- #  -->
+<!-- # ``` -->
+<!-- #  -->
+<!-- # Let's break down the graphic: -->
+<!-- #  -->
+<!-- # 1. The categorical variable `country` with four levels (China, Italy, Saudi Arabia, USA) would have to be mapped to the `x`-position of the bars. -->
+<!-- # 1. The numerical variable `servings` would have to be mapped to the `y`-position of the bars (the height of the bars). -->
+<!-- # 1. The categorical variable `type` with three levels (beer, spirit, wine) would have to be mapped to the `fill` color of the bars. -->
+<!-- #  -->
+<!-- # Observe, however, that `drinks_smaller` has three separate variables `beer`, `spirit`, and `wine`. In order to use the `ggplot()` function to recreate the barplot we need a single variable `type` with three possible values: `beer`, `spirit`, and `wine`.  We could then map this `type` variable to the `fill` aesthetic of our plot.  In other words, to recreate the barplot, our data frame would have to look like this: -->
+<!-- #  -->
+<!-- # ```{r} -->
+<!-- # drinks_smaller_tidy -->
+<!-- # ``` -->
+<!-- #  -->
+<!-- # Observe that while `drinks_smaller` and `drinks_smaller_tidy` are both rectangular in shape and contain the same 12 numerical values (3 alcohol types by 4 countries), they are formatted differently. `drinks_smaller` is formatted in what's known as  ["wide"](https://en.wikipedia.org/wiki/Wide_and_narrow_data) format, whereas `drinks_smaller_tidy` is formatted in what's known as ["long/narrow"](https://en.wikipedia.org/wiki/Wide_and_narrow_data#Narrow) format. -->
+<!-- #  -->
+<!-- # In the context of doing data science in R, long/narrow format is also known as "tidy" format. In order to use the **ggplot2** and **dplyr** packages for data visualization and data wrangling, your input data frames must be in "tidy" format. Thus, all non-"tidy" data must be converted to "tidy" format first. Before we convert non-"tidy" data frames like `drinks_smaller` to "tidy" data frames like `drinks_smaller_tidy`, let's define "tidy" data. -->
 
 ### Definition of "tidy" data 
 
-
-What does it mean for your data to be "tidy"? While "tidy" has a clear English meaning of "organized," the word "tidy" in data science using R means that your data follows a standardized format. We will follow Hadley Wickham's  definition of "tidy" data:
-
-
-A *dataset* is a collection of values, usually either numbers (if quantitative) or strings AKA text data (if qualitative/categorical). Values are organised in two ways. Every value belongs to a variable and an observation. A variable contains all values that measure the same underlying attribute (like height, temperature, duration) across units. An observation contains all values measured on the same unit (like a person, or a day, or a city) across attributes.
+What does it mean for your data to be "tidy"? While "tidy" has a clear English meaning of "organized," the word "tidy" in data science using R means that your data follows a standardized format. 
 
 "Tidy" data is a standard way of mapping the meaning of a dataset to its structure. A dataset is messy or tidy depending on how rows, columns and tables are matched up with observations, variables and types. In *tidy data*:
 
@@ -1692,7 +1593,6 @@ A *dataset* is a collection of values, usually either numbers (if quantitative) 
 ```{r, echo=FALSE, out.width="100%"}
 knitr::include_graphics("02-wrangling/images/tidy-1.png")
 ```
-
 
 ### Converting to "tidy" data
 
@@ -1714,10 +1614,12 @@ drinks_smaller_tidy <- drinks_smaller %>%
 drinks_smaller_tidy
 ```
 
-We set the arguments to `pivot_longer()` as follows:
+Let's dissect the arguments to `pivot_longer()`.
 
-1. `names_to` here corresponds to the name of the variable in the new "tidy"/long data frame that will contain the *column names* of the original data. Observe how we set `names_to = "type"`. In the resulting `drinks_smaller_tidy`, the column `type` contains the three types of alcohol `beer`, `spirit`, and `wine`. Since `type` is a variable name that doesn't appear in `drinks_smaller`, we use quotation marks around it. You'll receive an error if you just use `names_to = type` here.
-1. `values_to` here is the name of the variable in the new "tidy" data frame that will contain the *values* of the original data. Observe how we set `values_to = "servings"` since each of the numeric values in each of the `beer`, `wine`, and `spirit` columns of the `drinks_smaller` data corresponds to a value of `servings`. In the resulting `drinks_smaller_tidy`, the column `servings` contains the 4 $\times$ 3 = 12 numerical values. Note again that `servings` doesn't appear as a variable in `drinks_smaller` so it again needs quotation marks around it for the `values_to` argument.
+1. the first argument`names_to` corresponds to the name of the variable in the new "tidy"/long data frame that will contain the *column names* of the original data. Observe how we set `names_to = "type"`. In the resulting `drinks_smaller_tidy`, the column `type` contains the three types of alcohol `beer`, `spirit`, and `wine`. Since `type` is a variable name that doesn't appear in `drinks_smaller`, we use quotation marks around it. You'll receive an error if you just use `names_to = type` here.
+
+1. The second argument `values_to` corresponds to the name of the variable in the new "tidy" data frame that will contain the *values* of the original data. Observe how we set `values_to = "servings"` since each of the numeric values in each of the `beer`, `wine`, and `spirit` columns of the `drinks_smaller` data corresponds to a value of `servings`. In the resulting `drinks_smaller_tidy`, the column `servings` contains the 4 $\times$ 3 = 12 numerical values. Note again that `servings` doesn't appear as a variable in `drinks_smaller` so it again needs quotation marks around it for the `values_to` argument.
+
 1. The third argument `cols` is the columns in the `drinks_smaller` data frame you either want to or don't want to "tidy." Observe how we set this to `-country` indicating that we don't want to "tidy" the `country` variable in `drinks_smaller` and rather only `beer`, `spirit`, and `wine`. Since `country` is a column that appears in `drinks_smaller` we don't put quotation marks around it.
 
 The third argument here of `cols` is a little nuanced, so let's consider code that's written slightly differently but that produces the same output: 
@@ -1731,25 +1633,25 @@ drinks_smaller %>%
 
 Note that the third argument now specifies which columns we want to "tidy" with `c(beer, spirit, wine)`, instead of the columns we don't want to "tidy" using `-country`. We use the `c()` function to create a vector of the columns in `drinks_smaller` that we'd like to "tidy." Note that since these three columns appear one after another in the `drinks_smaller` data frame, we could also do the following for the `cols` argument:
 
-```{r, eval=FALSE}
+```{r, eval = FALSE}
 drinks_smaller %>% 
   pivot_longer(names_to = "type", 
                values_to = "servings", 
                cols = beer:wine)
 ```
 
-With our `drinks_smaller_tidy` "tidy" formatted data frame, we can now produce the barplot you saw previously using `geom_col()`. Recall from the previous chapter that we use `geom_col()` and not `geom_bar()`, since we would like to map the "pre-counted" `servings` variable to the `y`-aesthetic of the bars.
+<!-- With our `drinks_smaller_tidy` "tidy" formatted data frame, we can now produce the barplot you saw previously using `geom_col()`. Recall from the previous chapter that we use `geom_col()` and not `geom_bar()`, since we would like to map the "pre-counted" `servings` variable to the `y`-aesthetic of the bars. -->
 
-```{r eval=FALSE}
-ggplot(drinks_smaller_tidy, aes(x = country, y = servings, fill = type)) +
-  geom_col(position = "dodge")
-```
+<!-- ```{r eval=FALSE} -->
+<!-- ggplot(drinks_smaller_tidy, aes(x = country, y = servings, fill = type)) + -->
+<!--   geom_col(position = "dodge") -->
+<!-- ``` -->
 
-(ref:drinks-col) Comparing alcohol consumption in 4 countries using geom_col().
+<!-- (ref:drinks-col) Comparing alcohol consumption in 4 countries using geom_col(). -->
 
-```{r, echo=FALSE, fig.cap='(ref:drinks-col)'}
-drinks_smaller_tidy_plot
-```
+<!-- ```{r, echo=FALSE, fig.cap='(ref:drinks-col)'} -->
+<!-- drinks_smaller_tidy_plot -->
+<!-- ``` -->
 
 Converting "wide" format data to "tidy" format often confuses new R users. The only way to learn to get comfortable with the `pivot_longer()` function is with practice, practice, and more practice using different datasets. For example, run `?pivot_longer` and look at the examples in the bottom of the help file.
 
@@ -1765,7 +1667,7 @@ You can also view examples of both `pivot_longer()` and `pivot_wider()` on the [
 
 What is a distribution? Think of the distribution of a variable as an urn from which we can pull out, at random, values for that variable. Drawing a thousand or so values from that urn, and then looking at a histogram or density plot, can show where the values are centered and how the values vary. 
 
-Consider the distribution of the possible values from rolling a fair die. We can use the `sample()` function to create draws from this distribution: 
+Consider the distribution of the possible values from rolling a fair die. We can use the `sample()` function to create draws from this distribution, meaning it will change (or sometimes stay the same) for every subsequent draw.
 
 ```{r}
 die <- c(1, 2, 3, 4, 5, 6)
@@ -1783,7 +1685,7 @@ sample(x = die, size = 10, replace = TRUE)
 
 In other words, rolling a 1 on the first roll should not preclude you from rolling a 1 on a later roll. 
 
-What if the die is not "fair," meaning that some sides are more likely to appear then others? The final argument of the `sample()` function is the `prob` argument. It takes a vector (of the same length as the initial vector `x`) that contains all of the probabilities of selecting each one of the elements of `x`. Suppose that the probability of rolling a 1 was 0.5, and the probability of rolling any other value is 0.1. (These probabilities should sum to 1. If they don't `sample()` will automatically rescale them.) 
+What if the die is not "fair," meaning that some sides are more likely to appear then others? The final argument of the `sample()` function is the `prob` argument. It takes a vector (of the same length as the initial vector `x`) that contains all of the probabilities of selecting each one of the elements of `x`. Suppose that the probability of rolling a 1 was 0.5, and the probability of rolling any other value is 0.1. (These probabilities should sum to 1. If they don't `sample()` will automatically re-scale them.) 
 
 ```{r}
 sample(x = die, 
@@ -1792,7 +1694,7 @@ sample(x = die,
        prob = c(0.5, 0.1, 0.1, 0.1, 0.1, 0.1))
 ```
 
-`sample()` is just one of many functions for creating draws --- or, more colloquially, "drawing" --- from a distribution. Three of the most important functions are: `runif()`, `rbinom()`, and `rnorm()`.
+**Note:**`sample()` is just one of many functions for creating draws --- or, more colloquially, "drawing" --- from a distribution. Three of the most important functions are: `runif()`, `rbinom()`, and `rnorm()`.
 
 ### `runif()`
 
@@ -1802,15 +1704,20 @@ Consider a "uniform" distribution. This is the case in which every outcome in th
 runif(n = 10, min = 4, max = 6)
 ```
 
-Mathematically, we would write
+Mathematically, we would write:
 
 $$y_i \sim U(4, 6)$$, 
 
-meaning that the each value for $y$ is drawn from a uniform distribution between four and six.
+This meand that the each value for $y$ is drawn from a uniform distribution between four and six.
 
 ### `rbinom()`
 
-Consider binomial distribution, the case in which the probability of some boolean variable (for instance success or failure) is calculated for repeated, independent trials. One common example would be the probability of flipping a coin and landing on heads. The function `rbinom()` allows us to draw from a binomial distribution. This function takes three arguments, `n`, `size`, and `prob`. `n` is the number of values we seek to draw, the `size` is the number of trials, and `prob` is the probability of success on each trial. Suppose we wanted to flip a fair coin one time, and let landing on hands represent success. 
+Consider binomial distribution, the case in which the probability of some boolean variable (for instance success or failure) is calculated for repeated, independent trials. One common example would be the probability of flipping a coin and landing on heads. The function `rbinom()` allows us to draw from a binomial distribution. This function takes three arguments, `n`, `size`, and `prob`. 
+*`n` is the number of values we seek to draw. 
+*`size` is the number of trials. 
+*`prob` is the probability of success on each trial. 
+
+Suppose we wanted to flip a fair coin one time, and let landing on heads represent success. 
 
 ```{r}
 rbinom(n = 1 , size = 1, prob = 0.5)
@@ -1829,7 +1736,7 @@ ggplot(aes(x = heads)) +
                        labels = c("Tails", "Heads"))
 ```
 
-There is a fairly even distribution of Tails and Heads. More draws would typically result in an even more equal split. 
+In our graph above, we use the function `scale_x_continuous()` because our x-axis variable is continuous, it can take on two particular real values. `scale_x_continuous()` converts our x-axis to having two different "tick marks". **Note:** There is a fairly even distribution of Tails and Heads. More draws would typically result in an even more equal split. 
 
 Suppose instead we wanted to simulate an unfair coin, where the probability of landing on Heads was 0.75 instead of 0.25. 
 
@@ -1871,7 +1778,7 @@ This bell-shaped distribution is defined by two parameters: (1) the *mean* $\mu$
 1. The dotted normal curve has mean $\mu = 5$ \& standard deviation $\sigma = 5$.
 1. The dashed normal curve has mean $\mu = 15$ \& standard deviation $\sigma = 2$.
 
-```{r, echo=FALSE, fig.cap="Three normal distributions."}
+```{r, echo = FALSE, fig.cap="Three normal distributions."}
 library(ggrepel)
 all_points <- tibble(
   domain = seq(from = -10, to = 25, by = 0.01),
