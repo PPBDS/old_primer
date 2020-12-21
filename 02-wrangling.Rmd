@@ -327,11 +327,9 @@ A tibble can consist of one or more atomic vectors of a certain class. An *atomi
 
 This lesson deals with things you can do with vectors of class `character`.`fruit`, `words`, and `sentences` are character vectors we will manipulate.
 
-
 ### Studying a single character vector
 
 `str_detect()` determines if a character vector matches a pattern.  It returns a logical vector that is the same length as the input. Recall logicals are either `TRUE` or `FALSE`.
-
 
 Which fruits actually use the word "fruit"?
 
@@ -345,9 +343,7 @@ To get the actual fruits that match, we  use `str_subset()` to keep only the mat
 (my_fruit <- str_subset(fruit, pattern = "fruit"))
 ```
 
-<!-- BG: talk about parentheses trick here -->
-
-Use `stringr::str_view()` to create a window in your viewer that highlights the specified pattern within the list. Consider the pattern "berry". 
+Use `str_view()` to create a window in your viewer that highlights the specified pattern within the list. Consider the pattern "berry". 
 
 ```{r}
 str_view(fruit[5:10], pattern = "berry")
@@ -364,20 +360,6 @@ Some of our fruits are compound words, like "grapefruit", but some have two word
 str_split(my_fruit, pattern = " ")
 ```
 
-You can specify the number of pieces the string is split into using `str_split_fixed()`. Set the argument `n` to the desired number of pieces. For example:
-
-```{r}
-str_split_fixed(my_fruit, pattern = " ", n = 2)
-```
-
-If the to-be-split variable lives in a data frame, `separate()` will split it into 2 or more variables whose names you can specify using `into`.
-
-```{r}
-my_fruit_df <- tibble(my_fruit)
-my_fruit_df %>% 
-  separate(my_fruit, into = c("pre", "post"), sep = " ")
-```
-
 `str_length()` counts characters in your strings. Note this is different from the `length()` of the character vector itself.
 
 ```{r}
@@ -385,33 +367,34 @@ length(my_fruit)
 str_length(my_fruit)
 ```
 
-You can extract parts of a string using `str_sub()`.`str_sub()` takes start and end arguments which are vectorised.
+`str_sub()` extracts parts of a string.`The function takes start and end arguments which are vectorised.
 
 Here, we tell R to extract the first three letters of each character.
+
 ```{r}
 animals <- c("dog", "cat", "bird")
 str_sub(animals, 1, 3)
 ```
 
-You can combine a character vector of length to a single string with `str_c()`.
+ `str_c()` combines a character vector of length to a single string.
 
 ```{r}
 str_c("x", "y")
 ```
 
-Use the `sep` argument to control how they’re separated:
+You can use the `sep` argument to control how they’re separated:
 
 ```{r}
 str_c("x", "y", sep = ", ")
 ```
 
-You can replace a pattern within a string with `str_replace()`.
+ `str_replace()` replaces a pattern within a string.
 
 ```{r}
 str_replace(my_fruit, pattern = "fruit", replacement = "THINGY")
 ```
 
-A special case that comes up a lot is replacing `NA`, for which there is `str_replace_na()`.
+ `str_replace_na()` replaces `NA` in your string.
 
 ```{r}
 melons <- str_subset(fruit, pattern = "melon")
@@ -420,7 +403,7 @@ melons
 str_replace_na(melons, "UNKNOWN MELON")
 ```
 
-If the `NA`- afflicted variable lives in a data frame, you can use `tidyr::replace_na()`.
+If the `NA`- afflicted variable lives in a data frame, you can use `replace_na()`.
 
 ```{r}
 tibble(melons) %>% 
@@ -436,13 +419,13 @@ If you have two or more character vectors of the same length, you can glue them 
 str_c(fruit[1:2], fruit[3:4], sep = " & ")
 ```
 
-Element-wise catenation can be combined with `str_c()`.
+Element-wise you can combine two vectors with `str_c()`.
 
 ```{r}
 str_c(fruit[1:2], fruit[3:4], sep = " & ", collapse = ", ")
 ```
 
-If the to-be-combined vectors are variables in a data frame, you can use `unite()` to make a single new variable from them such as `flavor_combo`.
+If the to-be-combined vectors are variables in a data frame, you can use `unite()` to make a single new variable.
 
 ```{r}
 fruit_df <- tibble(fruit1 = fruit[1:2],
@@ -452,28 +435,24 @@ fruit_df %>%
   unite("flavor_combo", fruit1, fruit2, sep = " & ")
 ```
 
+
 ### Regular expressions with stringr
 
 Your string tasks cannot be expressed in terms of a fixed string, but can be described in terms of a pattern. Regular expressions, aka "regexes", are the standard way to specify these patterns. In regexes, specific characters and constructs take on special meaning in order to match multiple strings.
 
-Consider the country names in the `gapminder` dataset. 
-
-Let's store the `levels(gapminder::gapminder$country)` unique country names in the object `countries`.
+Let's store the `levels(gapminder$country)` country names in the object `countries`.
 
 ```{r}
 countries <- levels(gapminder$country)
-countries
 ```
 
-Below, the first metacharacter is the period `.` , which stands for any single character, except a newline (which by the way, is represented by `\n`). The regex `i.a` will match all countries that have an `i`, followed by any single character, followed by `a`. Yes, regexes are case sensitive, i.e. "Italy" does not match.
+In the code below, the first metacharacter is the period `.` , which stands for any single character, except a newline (which by the way, is represented by `\n`). The regex `i.a` will match all countries that have an `i`, followed by any single character, followed by `a`. Regexes are case sensitive, i.e. "Italy" does not match.
 
 ```{r}
 str_subset(countries, pattern = "i.a")
 ```
 
-Anchors can be included to express where the expression must occur within the string. The `^` indicates the beginning of string and `$` indicates the end.
-
-Notice we observe fewer countries.
+Anchors can be included to express where the expression must occur within the string. The `^` indicates the beginning of string and `$` indicates the end. Notice we observe fewer countries.
 
 ```{r}
 str_subset(countries, pattern = "i.a$")
@@ -501,15 +480,14 @@ You can decorate characters (and other constructs, like metacharacters and class
 | ?          | 0 or 1    | {,m}       | at most m                  |
 |            |           | {n,m}      | between n and m, inclusive |
 
-Explore these by inspecting matches for `l` followed by `e`, allowing for various numbers of characters in between.
+
+Let's now explore the quantifiers  above by inspecting matches for `l` followed by `e`, allowing for various numbers of characters in between.
 
 `l.*e` will match strings with 0 or more characters in between, i.e. any string with an `l` eventually followed by an `e`. This is the most inclusive regex for this example, so we store the result as `matches` to use as a baseline for comparison.
 
 ```{r}
 (matches <- str_subset(fruit, pattern = "l.*e"))
 ```
-
-<!-- BG: parentheses trick allows us to print it out  -->
 
 Change the quantifier from `*` to `+` to require at least one intervening character. The strings that no longer match: all have a literal `le` with no preceding `l` and no following `e`.
 
@@ -531,6 +509,7 @@ Finally, we remove the quantifier and allow for no intervening characters. The s
 list(match = intersect(matches, str_subset(fruit, pattern = "le")),
      no_match = setdiff(matches, str_subset(fruit, pattern = "le")))
 ```
+
 
 ### Raw strings
 
@@ -554,9 +533,9 @@ As you can see, a backslash is used to escape the initial backslash.
 
 ## Factors
 
-Factors are categorical variables that may only take on a specified set of values. Thus, they are known as categorical variables, as they can be separated into categories. To manipulate factors we will use the [forcats][forcats-web] package, a core package in the tidyverse. Like the stringr package whose functions begin with `str_`, main functions of the forcats package start with `fct_`.
+Factors are categorical variables that may only take on a specified set of values. Thus, they are known as categorical variables, as they can be separated into categories. To manipulate factors we will use the [forcats][forcats-web] package, a core package in the tidyverse. 
 
-Get to know your factor before you start touching it! It's polite. Let's use `gapminder$continent` as our example.
+Let's use `gapminder$continent` as our example.
 
 ```{r}
 str(gapminder$continent)
@@ -565,7 +544,7 @@ nlevels(gapminder$continent)
 class(gapminder$continent)
 ```
 
-To get a frequency table as a tibble, from a tibble, use `dplyr::count()`. To get a similar result from a free-range factor, use `forcats::fct_count()`.
+To get a frequency table as a tibble, from a tibble, use `count()`. To get a similar result from a free-range factor, use `fct_count()`.
 
 ```{r}
 gapminder %>% 
@@ -591,14 +570,14 @@ nlevels(h_gap$country)
 
 Even though `h_gap` only has data for a handful of countries, we are still schlepping around all levels from the original `gapminder` tibble.
 
-How can you get rid of them? The base function `droplevels()` operates on all the factors in a data frame or on a single factor. The function `forcats::fct_drop()` operates on a factor.
+How can you get rid of them? The base function `droplevels()` operates on all the factors in a data frame or on a single factor. The function `fct_drop()` operates on a factor.
 
 ```{r}
 h_gap_dropped <- h_gap %>% 
   droplevels()
 nlevels(h_gap_dropped$country)
 
-# Use forcats::fct_drop() on a free-range factor
+# Use fct_drop() on a free-range factor
 
 h_gap$country %>%
   fct_drop() %>%
@@ -607,27 +586,29 @@ h_gap$country %>%
 
 ### Change order of the levels
 
-By default, factor levels are ordered alphabetically. When you think about it, this ordering might as well be random! It is preferable to order the levels according to some principle:
-
-* Frequency: Make the most common level the first and so on.
-* Another variable: Order factor levels according to a summary statistic for another variable.
-
-First, let's order continent by frequency, forwards and backwards. This is often a great idea for tables and figures, esp. frequency barplots.
+By default, factor levels are ordered alphabetically. 
 
 ```{r}
-# Default order is alphabetical
-
 gapminder$continent %>%
   levels()
+```
 
-# Order by frequency
+We can also order factors by:
 
+1. Frequency: Make the most common level the first and so on.
+1. Another variable: Order factor levels according to a summary statistic for another variable.
+
+Let's order continent by frequency using `fct_infreq()`.
+
+```{r}
 gapminder$continent %>% 
   fct_infreq() %>%
   levels()
+```
 
-# Backwards!
+We can also have the frequency print out backwards using `fct_rev()`.
 
+```{r}
 gapminder$continent %>% 
   fct_infreq() %>%
   fct_rev() %>% 
@@ -636,14 +617,12 @@ gapminder$continent %>%
 
 These two barcharts of frequency by continent differ only in the order of the continents. Which do you prefer? We show the code for just the second one.
 
-
 ```{r, out.width = '100%', echo = FALSE}
 gapminder %>% 
   ggplot(aes(x = continent)) +
     geom_bar() +
     coord_flip()
 ```
-
 
 
 ```{r, out.width = '100%'}
@@ -656,9 +635,7 @@ gapminder %>%
 ```
 
 
-
-
-Now we order `country` by another variable, forwards and backwards. This other variable is usually quantitative and you will order the factor according to a grouped summary. The factor is the grouping variable and the default summarizing function is `median()` but you can specify something else.
+Let's now order `country` by another variable, forwards and backwards. This other variable is usually quantitative and you will order the factor according to a grouped summary. The factor is the grouping variable and the default summarizing function is `median()` but you can specify something else.
 
 ```{r}
 # Order countries by median life expectancy
@@ -688,7 +665,7 @@ Why do we reorder factor levels? It often makes plots much better! When a factor
 
 Compare the interpretability of these two plots of life expectancy in Asian countries in 2007. The only difference is the order of the `country` factor. Which one do you find easier to learn from?
 
-```{r , echo = FALSE, alpha-order-silly, fig.show = 'hold', out.width = '49%', out.height="80%"}
+```{r , echo = FALSE, alpha-order-silly, fig.show = 'hold', out.width = '100%'}
 gap_asia_2007 <- gapminder %>% 
   filter(year == 2007, 
          continent == "Asia")
@@ -701,33 +678,33 @@ ggplot(gap_asia_2007, aes(x = lifeExp,
                                           lifeExp))) + geom_point()
 ```
 
-Use `fct_reorder2()` when you have a line chart of a quantitative x against another quantitative y and your factor provides the color. This way the legend appears in the same order as the data! Note, the order is taken by the right side of the plot (not the left). Contrast the legend on the left with the one on the right. 
+<!-- Use `fct_reorder2()` when you have a line chart of a quantitative x against another quantitative y and your factor provides the color. This way the legend appears in the same order as the data! Note, the order is taken by the right side of the plot (not the left). Contrast the legend on the left with the one on the right.  -->
 
-```{r legends-made-for-humans, fig.show = 'hold', out.width = '49%', out.height="80%", echo = FALSE}
-h_countries <- c("Egypt", "Haiti", "Romania", "Thailand", "Venezuela")
-h_gap <- gapminder %>%
-  filter(country %in% h_countries) %>% 
-  droplevels()
-ggplot(h_gap, aes(x = year, y = lifeExp, color = country)) +
-  geom_line()
-ggplot(h_gap, aes(x = year, y = lifeExp,
-                  color = fct_reorder2(country, year, lifeExp))) +
-  geom_line() +
-  labs(color = "country")
-```
+<!-- ```{r legends-made-for-humans, fig.show = 'hold', out.width = '49%', out.height="80%", echo = FALSE} -->
+<!-- h_countries <- c("Egypt", "Haiti", "Romania", "Thailand", "Venezuela") -->
+<!-- h_gap <- gapminder %>% -->
+<!--   filter(country %in% h_countries) %>%  -->
+<!--   droplevels() -->
+<!-- ggplot(h_gap, aes(x = year, y = lifeExp, color = country)) + -->
+<!--   geom_line() -->
+<!-- ggplot(h_gap, aes(x = year, y = lifeExp, -->
+<!--                   color = fct_reorder2(country, year, lifeExp))) + -->
+<!--   geom_line() + -->
+<!--   labs(color = "country") -->
+<!-- ``` -->
 
-Sometimes you just want to hoist one or more levels to the front. Why? Because we said so. This resembles what we do when we move variables to the front with `dplyr::select(special_var, everything())`.
+<!-- Sometimes you just want to hoist one or more levels to the front. Why? Because we said so. This resembles what we do when we move variables to the front with `dplyr::select(special_var, everything())`. -->
 
-```{r}
-h_gap$country %>% 
-  levels()
+<!-- ```{r} -->
+<!-- h_gap$country %>%  -->
+<!--   levels() -->
 
-h_gap$country %>% 
-  fct_relevel("Romania", "Haiti") %>% 
-  levels()
-```
+<!-- h_gap$country %>%  -->
+<!--   fct_relevel("Romania", "Haiti") %>%  -->
+<!--   levels() -->
+<!-- ``` -->
 
-This might be useful if you are preparing a report for, say, the Romanian government. The reason for always putting Romania first has nothing to do with the data, it is important for external reasons and you need a way to express this.
+<!-- This might be useful if you are preparing a report for, say, the Romanian government. The reason for always putting Romania first has nothing to do with the data, it is important for external reasons and you need a way to express this. -->
 
 ### Recode the levels
 
@@ -749,7 +726,7 @@ i_gap$country %>%
 
 ### Grow a factor
 
-Let's create two data frames, each with data from two countries, dropping unused factor levels.
+Let's create two tibbles, each with data from two countries and dropped unused factor levels.
 
 ```{r}
 df1 <- gapminder %>%
@@ -780,6 +757,10 @@ fct_c(df1$country, df2$country)
 ```
 
 ## Lists
+
+```{r lists-subsetting, echo = FALSE, out.width = "75%", fig.align='center', fig.cap = "Subsetting a list, visually."}
+knitr::include_graphics("02-wrangling/images/lists-subsetting.png")
+```
 
 Earlier, we briefly introduced lists. Lists are a type of vector that is a step up in complexity from atomic vectors, because lists can contain other lists. This makes them suitable for representing hierarchical or tree-like structures. You create a list with the function `list()`:
 
@@ -866,38 +847,6 @@ a[["a"]]
 ```
 
 The distinction between `[ ]` and `[[ ]]` is really important for lists, because `[[ ]]` drills down into the list while `[ ]` returns a new, smaller list. Compare the code and output above with the visual representation.
-
-```{r lists-subsetting, echo = FALSE, out.width = "75%", fig.align='center', fig.cap = "Subsetting a list, visually."}
-knitr::include_graphics("02-wrangling/images/lists-subsetting.png")
-```
-
-### Lists of condiments
-
-The difference between `[ ]` and `[[ ]]` is very important, but it's easy to get confused. To help you remember, let me show you an unusual pepper shaker.
-
-```{r, echo = FALSE, out.width = "40%", fig.align='center'} 
-knitr::include_graphics("02-wrangling/images/pepper.jpg")
-```
-
-If this pepper shaker is your list `x`, then, `x[1]` is a pepper shaker containing a single pepper packet:
-
-```{r, echo = FALSE, out.width = "40%", fig.align='center'}
-knitr::include_graphics("02-wrangling/images/pepper-1.jpg")
-```
-
-`x[2]` would look the same, but would contain the second packet. `x[1:2]` would be a pepper shaker containing two pepper packets. 
-
-`x[[1]]` is:
-
-```{r echo = FALSE, out.width = "40%", fig.align='center'} 
-knitr::include_graphics("02-wrangling/images/pepper-2.jpg")
-```
-
-If you wanted to get the content of the pepper package, you'd need `x[[1]][[1]]`:
-
-```{r, echo = FALSE, out.width = "40%", fig.align='center'}
-knitr::include_graphics("02-wrangling/images/pepper-3.jpg")
-```
 
 ## Date-Times 
 
