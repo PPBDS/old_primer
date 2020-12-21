@@ -98,13 +98,23 @@ renv::restore()
 
 This will install all the packages you need in the directory of this project. (This has no effect on your main library of R packages.) Restart your R session. Again, this means that you now have two separate installations of, for example, `ggplot2`. One is in the default place which your R sessions is by default pointed to. (In a different project without a `renv` directory, you can run `.libPaths()` to see where that is.) The second place that `ggplot2` is installed is in the `renv` directory which lives in this project. 
 
-Note that, for the most part, you won't do anything with **renv** after this initial use. However, there are three other **renv** commands you might issue:
+Note that, for the most part, you won't do anything with **renv** after this initial use. If you use error = TRUE in any code chunk, you will also need renv.ignore = TRUE in that code chunk, or you will get an annoying warning because renv can't parse the code in that chunk.
+
+However, there are three other **renv** commands you might issue:
 
 `renv::status()` just reports if anything is messed up. It won't hurt anything.
 
 `renv::restore()` looks at the `renv.lock` file and installs the packages it specifies. You will need to do this when I make a change to `renv.lock`, e.g., if I upgrade our version of **ggplot2** or add a new package.
 
 `renv::snapshot()` should only be issued if you know what you are doing. This changes the `renv.lock` file, which is something that, usually, only I do. Most common case for use would be if you need to add a new package to the project.
+
+I am a little hazy about how renv ensure that we have the development versions of two key packages: rstudio/bslib and r-lib/downlit. You might need to install these by hand:
+
+```{r, eval = FALSE}
+remotes::install_github(c("rstudio/bslib", "r-lib/downlit"))
+```
+
+
 
 
 3) Create a branch to work from:
