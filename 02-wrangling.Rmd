@@ -49,13 +49,11 @@ The **tidyverse** package will be used in every chapter. **primer.data** is the 
 <!-- DK: Not sure I like this example. We should do our own thing. -->
 
 The `read_csv()` function turns flat files into data frames. More specifically, it turns files whose values are separated by commas (hence CSV). Let’s import a Comma Separated Values file that exists on the internet. 
-
 Its important to know that the `read_csv()` function included in the readr package is different than the `read.csv()` function that comes installed with R. 
 
+It tells us that each comma from the .csv file corresponds to a column, and the column names are taken from the first line of the file. Then, the function "guesses" an appropriate data type for each of the columns it creates. Sometimes .csv files are a lot dirtier and require significant wrangling before you can explore the data and create usable graphics. 
 
-The result of this code chunk is pretty tame. It tells us that each comma from the .csv file corresponds to a column, and the column names are taken from the first line of the file. Then, the function "guesses" an appropriate data type for each of the columns it creates. Sometimes .csv files are a lot dirtier and require significant wrangling before you can explore the data and create usable graphics. 
-
-This is a link to a file containing the faculty's gender data across departments at Harvard University. Note, the file argument of the `read_csv()` function can take the link to a dataset in a number of forms. In the previous example and the one below, the file argument takes a url. Other formats that this argument could take are full or partial file paths for .csv files saved locally on your computer. 
+This link below brings you to a file containing the faculty's gender data across departments at Harvard University. Note, the file argument of the `read_csv()` function can take the link to a dataset in a number of forms. Below, the file argument takes a url. Other formats that this argument could take are full or partial file paths for .csv files saved locally on your computer. 
 
 ```{r}
 url <- "https://raw.githubusercontent.com/PPBDS/primer/master/02-wrangling/data/faculty.csv"
@@ -65,7 +63,7 @@ fac <- read_csv(file = url,
 fac
 ```
 
-We need to "skip" the first row of the file because it does not contain actual data.
+We need to "skip" the first row of the file because there is a code comment at the top, which has nothing to do with the actual data.
 
 Run the `summary()` function on the `fac` dataframe.
 
@@ -271,14 +269,14 @@ Recall the `fac` tibble we created earlier in the Chapter.
 fac
 ```
 
-Let's look at the deparment with 644 make professors.
+Let's look at the department with 644 make professors.
 
 ```{r, error = TRUE}
 fac %>%
   filter(Professors M == 644)
 ```
 
-We can solve this problem by using backticks.
+Notice that there is a space in the column name `Professors M`. Recall that we can solve this problem by using backticks.
 
 ```{r, error = TRUE}
 fac %>%
@@ -286,6 +284,7 @@ fac %>%
 ```
 
 There is not a department called "total." And backticks are annoying. So we run the `clean_names()` function, from the **janitor** package.  
+
 ```{r, message = FALSE}
 library(janitor)
 fac %>%
@@ -295,20 +294,19 @@ fac %>%
 <!-- DK: Fix this. -->
 
 
+It seems that one row of the table takes the sum of each of the other rows. This is likely the last row of the dataframe. Use `tail()` to print the last rows of the dataframe to check the final row.
 
-<!-- It seems that one row of the table takes the sum of each of the other rows. This is likely the last row of the dataframe. Use `tail()` to print the last rows of the dataframe to check the final row. -->
+```{r}
+tail(fac)
+```
 
-<!-- ```{r} -->
-<!-- tail(fac) -->
-<!-- ``` -->
+We remove the "Total" row because it will affect any dplyr functions we try to run later. Check the `tail()` of the dataframe again to make sure that the proper row was removed.
 
-<!-- Now, remove the "Total" row because it will affect any dplyr functions we try to run on the dataframe. Check the `tail()` of the dataframe again to make sure that the proper row was removed.  -->
-
-<!-- ```{r} -->
-<!-- fac %>% -->
-<!--   filter(concentration != "Total") %>%  -->
-<!--   tail() -->
-<!-- ``` -->
+```{r}
+fac %>%
+  filter(Concentration != "Total") %>%
+  tail()
+```
 
 
 
@@ -317,7 +315,7 @@ fac %>%
 The `skim()` function from the **skimr** package is a useful summary function that offers an overview of a tibble  The function creates a report of the tibble, organized by variable type. Example:
 
 ```{r out.width="100%"}
-skim(trains)
+skim(fac)
 ```
 
 Take a quick look at the section containing numeric variables. This is of particular interest because the right-most column offers insight into the potential distribution of the data. 
@@ -325,78 +323,65 @@ Take a quick look at the section containing numeric variables. This is of partic
 
 ## Characters 
 
-We've spent a lot of time working with big, beautiful data frames that are clean and wholesome, like the `gapminder` and `trains` data. But real life datasets rwill be much nastier. You will bring data into R from the outside world and discover there are problems. You might think: how hard can it be to deal with character data? And the answer is: it can be very hard! Here we discuss common remedial tasks for cleaning and transforming character data, also known as "strings". Basically, a string is one or more characters that are enclosed inside a pair of matching 'single' or "double quotes" .
+So far, we have encountered tibbles that are clean and wholesome, like the `gapminder` and `trains` data. But real life datasets will be much nastier. You will bring data into R from the outside world and discover there are problems. We will now discuss common remedial tasks for cleaning and transforming character data, also known as strings. A *string* is one or more characters that are enclosed inside a pair of matching 'single' or "double quotes" .
 
-A data frame or tibble will consist of one or more *atomic vectors* of a certain class. An atomic vector is one of the two types of vectors. There are six types: logical, integer, double, character. This lesson deals with things you can do with vectors of class `character`.
-
-At the beginning of the chapter, we loaded the **tidyverse**, which includes `stringr`. This package allows users to manipulate strings with its functions that being with `str_`.
+A tibble can consist of one or more atomic vectors of a certain class. An *atomic vector* is one of the two types of vectors. There are six types: logical, integer, double, character. This lesson deals with things you can do with vectors of class `character`.
 
 <!-- DK: Is this long list useful?  Not that I can see, unless you tell us the commands which do it. -->
 
-There are some basic string manipulation tasks:
+There are some basic string manipulation tasks we will cover:
 
 1. Study a single character vector
-  - How long are the strings?
-  - Presence/absence of a literal string
   
 1. Operate on a single character vector
-  - Keep/discard elements that contain a literal string
-  - Split into two or more character vectors using a fixed delimiter    
-  - Snip out pieces of the strings based on character position
-  - Collapse into a single string
   
 1. Operate on two or more character vectors
-  - Glue them together element-wise to get a new character vector.
 
-`fruit`, `words`, and `sentences` are character vectors that ship with stringr for practicing.*
+
+`fruit`, `words`, and `sentences` are character vectors we will manipulate.
+
 
 ### Studying a single character vector
 
-We can determine if a character vector matches a pattern using `str_detect()`. It returns a logical vector that is the same length as the input. Recall logicals are either `TRUE` or `FALSE`.
+`str_detect()` determines if a character vector matches a pattern.  It returns a logical vector that is the same length as the input. Recall logicals are either `TRUE` or `FALSE`.
 
-Let's consider the character vector `fruit`
 
-Let's use `str_detect()` to see which fruits actually use the word "fruit"?
+Which fruits actually use the word "fruit"?
 
 ```{r}
 str_detect(fruit, pattern = "fruit")
 ```
 
-What's the easiest way to get the actual fruits that match? Use `str_subset()` to keep only the matching elements. *Note:* we are storing this new vector `my_fruit` to use in later examples!
+To get the actual fruits that match, we  use `str_subset()` to keep only the matching elements. *Note:* we are storing this new vector `my_fruit` to use in later examples!
 
 ```{r}
 (my_fruit <- str_subset(fruit, pattern = "fruit"))
 ```
 
-Use `stringr::str_view()` to create a window in your viewer that highlights a specified pattern for any and all instances within the list. Below we look at a subset of fruit and highlight the pattern "berry" within items in that list. 
+Use `stringr::str_view()` to create a window in your viewer that highlights the specified pattern within the list. Consider the pattern "berry". 
 
 ```{r}
 str_view(fruit[5:10], pattern = "berry")
 ```
 
-This can be helpful when you want to check that you are highlighting the correct pattern (especially when using regex, which is short for "regular expression").
-
-```{r}
-str_view(fruit[1:5], pattern = "^a.*o")
-```
 
 ### Operating on a single character vector
 
-We can use `str_split()` to split a string up into pieces. Some of our fruits are compound words, like "grapefruit", but some have two words, like "ugli fruit". Here we split on a single space `" "`, but show use of a regular expression later. 
+`str_split()` splits a string up into pieces. 
+
+Some of our fruits are compound words, like "grapefruit", but some have two words, like "ugli fruit". Here we split on a single space `" "`. 
 
 ```{r}
 str_split(my_fruit, pattern = " ")
 ```
 
-Split strings must return *list*  because who knows how many pieces there will be? Lists will be explained later in this chapter. For now, just know that they tree-like structured vectors.
-
-You can specify the number of pieces the string is split into using `str_split_fixed()` . In return, you will get a character matrix. A matrix is a rectangular array of data that displays one type of data such as "character".
+You can specify the number of pieces the string is split into using `str_split_fixed()`. Set the argument `n` to the desired number of pieces. For example:
 
 ```{r}
 str_split_fixed(my_fruit, pattern = " ", n = 2)
 ```
 
-If the to-be-split variable lives in a data frame, `tidyr::separate()` will split it into 2 or more variables.
+If the to-be-split variable lives in a data frame, `separate()` will split it into 2 or more variables whose names you can specify using `into`.
 
 ```{r}
 my_fruit_df <- tibble(my_fruit)
@@ -404,23 +389,22 @@ my_fruit_df %>%
   separate(my_fruit, into = c("pre", "post"), sep = " ")
 ```
 
-You can count characters in your strings with `str_length()`. Note this is different from the `length()` of the character vector itself.
+`str_length()` counts characters in your strings. Note this is different from the `length()` of the character vector itself.
 
 ```{r}
 length(my_fruit)
 str_length(my_fruit)
 ```
 
-You can extract parts of a string using `str_sub()`.`str_sub()` takes start and end arguments which give the (inclusive) position of the substring.
+You can extract parts of a string using `str_sub()`.`str_sub()` takes start and end arguments which are vectorised.
 
+Here, we tell R to extract the first three letters of each character.
 ```{r}
 animals <- c("dog", "cat", "bird")
 str_sub(animals, 1, 3)
 ```
 
-The `start` and `end` arguments are vectorised. In the code above, you are telling R to extract the first letter (1) all the way through the third (3).
-
-You can combine a character vector of length `n > 1` to a single string with `str_c()`, which also has other uses (see the [next section](#catenate-vectors)).
+You can combine a character vector of length to a single string with `str_c()`.
 
 ```{r}
 str_c("x", "y")
@@ -432,7 +416,7 @@ Use the `sep` argument to control how they’re separated:
 str_c("x", "y", sep = ", ")
 ```
 
-You can replace a pattern within a string with `str_replace()`. Here we use an explicit string-to-replace, but later we revisit with a regular expression.
+You can replace a pattern within a string with `str_replace()`.
 
 ```{r}
 str_replace(my_fruit, pattern = "fruit", replacement = "THINGY")
@@ -447,18 +431,17 @@ melons
 str_replace_na(melons, "UNKNOWN MELON")
 ```
 
-If the `NA`-afflicted variable lives in a data frame, you can use `tidyr::replace_na()`.
+If the `NA`- afflicted variable lives in a data frame, you can use `tidyr::replace_na()`.
 
 ```{r}
 tibble(melons) %>% 
   replace_na(replace = list(melons = "UNKNOWN MELON"))
 ```
 
-And that concludes our treatment of regex-free manipulations of character data!
 
 ### Operating on two or more character vectors 
 
-If you have two or more character vectors of the same length, you can glue them together element-wise, to get a new vector of that length. Here are some ... awful smoothie flavors?
+If you have two or more character vectors of the same length, you can glue them together element-wise, to get a new vector of that length. 
 
 ```{r}
 str_c(fruit[1:4], fruit[5:8], sep = " & ")
@@ -1491,8 +1474,6 @@ drinks_smaller <- drinks %>%
   rename(beer = beer_servings, spirit = spirit_servings, wine = wine_servings)
 drinks_smaller
 ```
-
-
 
 
 ### Definition of "tidy" data 
