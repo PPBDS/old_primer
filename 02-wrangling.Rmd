@@ -2,9 +2,9 @@
 
 <!-- TODO: --> 
 
-<!-- Don't use small camel. Find a csv file with problems. -->
+<!-- Don't use small camel. -->
 
-<!-- Show fruit before working on fruit, or at least beginning of fruit, or random sample of fruit. Maybe put fruit in a tibble and work on it from there. Students are not used to, and rarely do, work on vectors directly . ..  -->
+<!-- Show fruit before working on fruit, or at least beginning of fruit, or random sample of fruit. Maybe put fruit in a tibble and work on it from there. Students are not used to, and rarely do, work on vectors directly . ..  Or not.  -->
 
 <!-- Showing all the countries is bad. No walls of text! -->
 
@@ -22,9 +22,8 @@
 
 <!-- Make out.width = "100%" the default? -->
 
-<!-- Maybe make a big set of FEC data from the 2016 election for use as the practice data? Ought to use something different from airlines . . . which are boring. -->
+<!-- Maybe make a big set of FEC data from the 2016 election for use as the practice data? Ought to use something different from airlines . . . which are boring. Don't worry about that now. -->
 
-<!-- Get rid of some of these garbage data packages which we don't really use. Why not use primer.data (or built in tidyverse data) for everything? -->
 
 Start by loading the packages which we will need in this chapter.
 
@@ -635,24 +634,29 @@ gapminder$continent %>%
   levels()
 ```
 
-These two barcharts of frequency by continent differ only in the order of the continents. Which do you prefer?
+These two barcharts of frequency by continent differ only in the order of the continents. Which do you prefer? We show the code for just the second one.
 
-<!-- BG: put code on top of each other. Too small  -->
 
-```{r, fig.show = 'hold', out.width = '49%', out.height="60%", echo = FALSE}
-p <- ggplot(gapminder, aes(x = continent)) +
-  geom_bar() +
-  coord_flip()
-p
-
-gap_tmp <- gapminder %>% 
-  mutate(continent = continent %>% fct_infreq() %>% fct_rev())
-
-p <- ggplot(gap_tmp, aes(x = continent)) +
-  geom_bar() +
-  coord_flip()
-p
+```{r, out.width = '100%', echo = FALSE}
+gapminder %>% 
+  ggplot(aes(x = continent)) +
+    geom_bar() +
+    coord_flip()
 ```
+
+
+
+```{r, out.width = '100%'}
+gapminder %>% 
+  mutate(continent = fct_infreq(continent)) %>% 
+  mutate(continent = fct_rev(continent)) %>% 
+  ggplot(aes(x = continent)) +
+    geom_bar() +
+    coord_flip()
+```
+
+
+
 
 Now we order `country` by another variable, forwards and backwards. This other variable is usually quantitative and you will order the factor according to a grouped summary. The factor is the grouping variable and the default summarizing function is `median()` but you can specify something else.
 
@@ -1853,7 +1857,7 @@ tibble(Normal = rnorm(n, mean = 1),
 
 Here are some topics which will prove important later in the *Primer*.
 
-## Matrices
+### Matrices
 
 Recall that a "matrix" in R is a rectangular array of data, shaped like a data frame or tibble, but containing only one type of data, e.g., numeric. Large matrices also print out ugly. (There are other differences, none of which we care about here.) Example:
 
@@ -1894,6 +1898,7 @@ flights %>%
 ```
 
 We can also remove the missing values from the dataset instead of merely filtering them out using the `drop_na()` function. The `flights` dataset contains 336,776 rows. 
+
 ```{r}
 flights %>%
   mutate(gain = arr_delay - dep_delay) %>%
@@ -1908,28 +1913,8 @@ flights %>%
   drop_na(gain)
 ```
 
-Note that 336,776 - 9,430 = 327346, so `drop_na()` seems to check out. Be careful with `drop_na()`, however, because you may be removing rows with valuable data in other columns!
+Note that 336,776 - 9,430 = 327,346, so `drop_na()` seems to check out. Be careful with `drop_na()`, however, because you may be removing rows with valuable data in other columns!
 
-Suppose you did not want to remove the missing values but instead replace them with a number. We can use `replace_na()` as a helper function to `mutate()`. Here we replace each missing value in the gain column with a value of 0. 
-
-```{r}
-flights %>%
-  mutate(gain = arr_delay - dep_delay) %>%
-  mutate(gain = replace_na(data = gain, replace = 0))
-```
-
-You must be careful with this, though. Replacing missing values will affect any statistical result, such as the mean or standard deviation. Below, we compute the mean: 
-
-```{r}
-flights %>%
-  mutate(gain = arr_delay - dep_delay) %>%
-  mutate(gain = replace_na(data = gain, replace = 0)) %>%
-  summarize(mean = mean(gain))
-```
-
-Comparing it with the previous mean variable, we can see that the computed value is different. 
-
-There are many additional ways to manipulate missing values, but these three functions cover most of the ways you will need to work with such observations in your data.   
 
 
 
