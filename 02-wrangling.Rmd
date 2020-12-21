@@ -46,8 +46,6 @@ The **tidyverse** package will be used in every chapter. **primer.data** is the 
 
 ## Data Gathering
 
-<!-- DK: Not sure I like this example. We should do our own thing. -->
-
 The `read_csv()` function turns flat files into data frames. More specifically, it turns files whose values are separated by commas (hence CSV). Let’s import a Comma Separated Values file that exists on the internet. 
 Its important to know that the `read_csv()` function included in the readr package is different than the `read.csv()` function that comes installed with R. 
 
@@ -325,20 +323,10 @@ Take a quick look at the section containing numeric variables. This is of partic
 
 So far, we have encountered tibbles that are clean and wholesome, like the `gapminder` and `trains` data. But real life datasets will be much nastier. You will bring data into R from the outside world and discover there are problems. We will now discuss common remedial tasks for cleaning and transforming character data, also known as strings. A *string* is one or more characters that are enclosed inside a pair of matching 'single' or "double quotes" .
 
-A tibble can consist of one or more atomic vectors of a certain class. An *atomic vector* is one of the two types of vectors. There are six types: logical, integer, double, character. This lesson deals with things you can do with vectors of class `character`.
-
-<!-- DK: Is this long list useful?  Not that I can see, unless you tell us the commands which do it. -->
-
-There are some basic string manipulation tasks we will cover:
-
-1. Study a single character vector
-  
-1. Operate on a single character vector
-  
-1. Operate on two or more character vectors
+A tibble can consist of one or more atomic vectors of a certain class. An *atomic vector* is one of the two types of vectors. There are six types: logical, integer, double, character. 
 
 
-`fruit`, `words`, and `sentences` are character vectors we will manipulate.
+This lesson deals with things you can do with vectors of class `character`.`fruit`, `words`, and `sentences` are character vectors we will manipulate.
 
 
 ### Studying a single character vector
@@ -357,6 +345,8 @@ To get the actual fruits that match, we  use `str_subset()` to keep only the mat
 ```{r}
 (my_fruit <- str_subset(fruit, pattern = "fruit"))
 ```
+
+<!-- BG: talk about parentheses trick here -->
 
 Use `stringr::str_view()` to create a window in your viewer that highlights the specified pattern within the list. Consider the pattern "berry". 
 
@@ -500,38 +490,6 @@ str_subset(fruit, pattern = "\\bmelon")
 str_subset(fruit, pattern = "\\Bmelon")
 ```
 
-<!-- BG: Do we need this below?  -->
-
-<!-- Characters can be specified via classes. You can make them explicitly "by hand" or use some pre-existing ones.  Character classes are usually given inside square brackets, `[]` but a few come up so often that we have a metacharacter for them, such as `\d` for a single digit. -->
-
-<!-- Here we match `ia` at the end of the country name, preceded by one of the characters in the class. Or, in the negated class, preceded by anything but one of those characters. -->
-
-<!-- ```{r} -->
-<!-- # Make a class "by hand" -->
-
-<!-- str_subset(countries, pattern = "[nls]ia$") -->
-
-<!-- # Use ^ to negate the class -->
-
-<!-- str_subset(countries, pattern = "[^nls]ia$") -->
-<!-- ``` -->
-
-<!-- Here we revisit splitting `my_fruit` with two more general ways to match whitespace: the `\s` metacharacter and the POSIX class `[:space:]`. Notice that we must prepend an extra backslash `\` to escape `\s` and the POSIX class has to be surrounded by two sets of square brackets. -->
-
-<!-- ```{r} -->
-<!-- # Remember this? -->
-<!-- # str_split_fixed(fruit, pattern = " ", n = 2) -->
-<!-- # Alternatives: -->
-
-<!-- str_split_fixed(my_fruit, pattern = "\\s", n = 2) -->
-<!-- str_split_fixed(my_fruit, pattern = "[[:space:]]", n = 2) -->
-<!-- ``` -->
-
-<!-- Let's see the country names that contain punctuation. -->
-
-<!-- ```{r} -->
-<!-- str_subset(countries, "[[:punct:]]") -->
-<!-- ``` -->
 
 ### Quantifiers
 
@@ -551,6 +509,8 @@ Explore these by inspecting matches for `l` followed by `e`, allowing for variou
 ```{r}
 (matches <- str_subset(fruit, pattern = "l.*e"))
 ```
+
+<!-- BG: parentheses trick allows us to print it out  -->
 
 Change the quantifier from `*` to `+` to require at least one intervening character. The strings that no longer match: all have a literal `le` with no preceding `l` and no following `e`.
 
@@ -676,6 +636,8 @@ gapminder$continent %>%
 ```
 
 These two barcharts of frequency by continent differ only in the order of the continents. Which do you prefer?
+
+<!-- BG: put code on top of each other. Too small  -->
 
 ```{r, fig.show = 'hold', out.width = '49%', out.height="60%", echo = FALSE}
 p <- ggplot(gapminder, aes(x = continent)) +
@@ -1378,7 +1340,7 @@ View(airlines)
 
 We see that in `airports`, `carrier` is the carrier code, while `name` is the full name of the airline company. Using this table, we can see that `"VX"`, `"HA"`, and `"B6"` correspond to Virgin America, Hawaiian Airlines, and JetBlue, respectively. However, wouldn't it be nice to have all this information in a single data frame instead of two separate data frames? We can do this by "joining" the `flights` and `airlines` data frames.
 
-Note that the values in the variable `carrier` in the `flights` data frame match the values in the variable `carrier` in the `airlines` data frame. In this case, we can use the variable `carrier` as a *key variable* to match the rows of the two data frames. Key variables are almost always *identification variables* that uniquely identify the observational units. This ensures that rows in both data frames are appropriately matched during the join. @rds2016 created the following diagram to help us understand how the different data frames in the `nycflights13` package are linked by various key variables:
+Note that the values in the variable `carrier` in the `flights` data frame match the values in the variable `carrier` in the `airlines` data frame. In this case, we can use the variable `carrier` as a *key variable* to match the rows of the two data frames. Key variables are almost always *identification variables* that uniquely identify the observational units. This ensures that rows in both data frames are appropriately matched during the join. @rds2016 created the following diagram to help us understand how the different data frames in the **nycflights13** package are linked by various key variables:
 
 ```{r, echo=FALSE, fig.cap="Relationships among nycflights tables", out.width="70%", fig.align='center'}
 knitr::include_graphics("02-wrangling/images/relational-nycflights.png")
