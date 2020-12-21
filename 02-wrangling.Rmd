@@ -444,22 +444,20 @@ tibble(melons) %>%
 If you have two or more character vectors of the same length, you can glue them together element-wise, to get a new vector of that length. 
 
 ```{r}
-str_c(fruit[1:4], fruit[5:8], sep = " & ")
+str_c(fruit[1:2], fruit[3:4], sep = " & ")
 ```
 
 Element-wise catenation can be combined with `str_c()`.
 
 ```{r}
-str_c(fruit[1:4], fruit[5:8], sep = " & ", collapse = ", ")
+str_c(fruit[1:2], fruit[3:4], sep = " & ", collapse = ", ")
 ```
 
-If the to-be-combined vectors are variables in a data frame, you can use `tidyr::unite()` to make a single new variable from them.
+If the to-be-combined vectors are variables in a data frame, you can use `unite()` to make a single new variable from them such as `flavor_combo`.
 
 ```{r}
-fruit_df <- tibble(
-  fruit1 = fruit[1:4],
-  fruit2 = fruit[5:8]
-)
+fruit_df <- tibble(fruit1 = fruit[1:2],
+                   fruit2 = fruit[3:4])
 
 fruit_df %>% 
   unite("flavor_combo", fruit1, fruit2, sep = " & ")
@@ -467,31 +465,26 @@ fruit_df %>%
 
 ### Regular expressions with stringr
 
-```{r echo = FALSE, fig.cap = "From [\\@ThePracticalDev](https://twitter.com/ThePracticalDev/status/774309983467016193)", out.width = "70%", fig.align='center'}
-knitr::include_graphics("02-wrangling/images/regexp.jpg")
+Your string tasks cannot be expressed in terms of a fixed string, but can be described in terms of a pattern. Regular expressions, aka "regexes", are the standard way to specify these patterns. In regexes, specific characters and constructs take on special meaning in order to match multiple strings.
 
-```
+Consider the country names in the `gapminder` dataset. 
 
-Frequently your string tasks cannot be expressed in terms of a fixed string, but can be described in terms of a pattern. Regular expressions, aka "regexes", are the standard way to specify these patterns. In regexes, specific characters and constructs take on special meaning in order to match multiple strings.
-
-The country names in the `gapminder` dataset are convenient for examples. Let's use it now and store the `r nlevels(gapminder::gapminder$country)` unique country names in the object `countries`.
+Let's store the `levels(gapminder::gapminder$country)` unique country names in the object `countries`.
 
 ```{r}
 countries <- levels(gapminder$country)
 countries
 ```
 
-The first metacharacter is the period `.`, which stands for any single character, except a newline (which by the way, is represented by `\n`). The regex `i.a` will match all countries that have an `i`, followed by any single character, followed by `a`. Yes, regexes are case sensitive, i.e. "Italy" does not match.
+Below, the first metacharacter is the period `.` , which stands for any single character, except a newline (which by the way, is represented by `\n`). The regex `i.a` will match all countries that have an `i`, followed by any single character, followed by `a`. Yes, regexes are case sensitive, i.e. "Italy" does not match.
 
 ```{r}
 str_subset(countries, pattern = "i.a")
 ```
 
-Notice that `i.a` matches "ina", "ica", "ita", and more.
-
 Anchors can be included to express where the expression must occur within the string. The `^` indicates the beginning of string and `$` indicates the end.
 
-Note how the regex `i.a$` matches many fewer countries than `i.a` alone. Likewise, more elements of `my_fruit` match `d` than `^d`, which requires "d" at string start.
+Notice we observe fewer countries.
 
 ```{r}
 str_subset(countries, pattern = "i.a$")
@@ -499,7 +492,7 @@ str_subset(my_fruit, pattern = "d")
 str_subset(my_fruit, pattern = "^d")
 ```
 
-The metacharacter `\b` indicates a word boundary and `\B` indicates NOT a word boundary. This is our first encounter with something called "escaping" and right now I just want you at accept that we need to prepend a second backslash to use these sequences in regexes in R. We'll come back to this tedious point later.
+`\b` indicates a word boundary, such as a space.`\B` indicates NOT a word boundary.
 
 ```{r}
 str_subset(fruit, pattern = "melon")
@@ -507,36 +500,38 @@ str_subset(fruit, pattern = "\\bmelon")
 str_subset(fruit, pattern = "\\Bmelon")
 ```
 
-Characters can be specified via classes. You can make them explicitly "by hand" or use some pre-existing ones.  Character classes are usually given inside square brackets, `[]` but a few come up so often that we have a metacharacter for them, such as `\d` for a single digit.
+<!-- BG: Do we need this below?  -->
 
-Here we match `ia` at the end of the country name, preceded by one of the characters in the class. Or, in the negated class, preceded by anything but one of those characters.
+<!-- Characters can be specified via classes. You can make them explicitly "by hand" or use some pre-existing ones.  Character classes are usually given inside square brackets, `[]` but a few come up so often that we have a metacharacter for them, such as `\d` for a single digit. -->
 
-```{r}
-# Make a class "by hand"
+<!-- Here we match `ia` at the end of the country name, preceded by one of the characters in the class. Or, in the negated class, preceded by anything but one of those characters. -->
 
-str_subset(countries, pattern = "[nls]ia$")
+<!-- ```{r} -->
+<!-- # Make a class "by hand" -->
 
-# Use ^ to negate the class
+<!-- str_subset(countries, pattern = "[nls]ia$") -->
 
-str_subset(countries, pattern = "[^nls]ia$")
-```
+<!-- # Use ^ to negate the class -->
 
-Here we revisit splitting `my_fruit` with two more general ways to match whitespace: the `\s` metacharacter and the POSIX class `[:space:]`. Notice that we must prepend an extra backslash `\` to escape `\s` and the POSIX class has to be surrounded by two sets of square brackets.
+<!-- str_subset(countries, pattern = "[^nls]ia$") -->
+<!-- ``` -->
 
-```{r}
-# Remember this?
-# str_split_fixed(fruit, pattern = " ", n = 2)
-# Alternatives:
+<!-- Here we revisit splitting `my_fruit` with two more general ways to match whitespace: the `\s` metacharacter and the POSIX class `[:space:]`. Notice that we must prepend an extra backslash `\` to escape `\s` and the POSIX class has to be surrounded by two sets of square brackets. -->
 
-str_split_fixed(my_fruit, pattern = "\\s", n = 2)
-str_split_fixed(my_fruit, pattern = "[[:space:]]", n = 2)
-```
+<!-- ```{r} -->
+<!-- # Remember this? -->
+<!-- # str_split_fixed(fruit, pattern = " ", n = 2) -->
+<!-- # Alternatives: -->
 
-Let's see the country names that contain punctuation.
+<!-- str_split_fixed(my_fruit, pattern = "\\s", n = 2) -->
+<!-- str_split_fixed(my_fruit, pattern = "[[:space:]]", n = 2) -->
+<!-- ``` -->
 
-```{r}
-str_subset(countries, "[[:punct:]]")
-```
+<!-- Let's see the country names that contain punctuation. -->
+
+<!-- ```{r} -->
+<!-- str_subset(countries, "[[:punct:]]") -->
+<!-- ``` -->
 
 ### Quantifiers
 
