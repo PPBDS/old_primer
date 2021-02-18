@@ -1,137 +1,233 @@
-# To load rayshader you need to have xQuartz downloaded on the Mac. See
-# https://www.xquartz.org/ and
-# https://github.com/tylermorganwall/rayshader/issues/5 etc.
+# To load and use rayshader, you need to have xQuartz installed
+# on your Mac (see https://www.xquartz.org/). For general infos on
+# rayshader and some tutorials, have a look at https://www.rayshader.com/
+# and https://wcmbishop.github.io/rayshader-demo/. Note that in any case,
+# 3D ggplots with rayshader can only be created if a plot contains a color
+# or fill aesthetic.
 
 library(rayshader)
-library(animation)
-library(gifski)
 library(tidyverse)
-
-# Key trick is the use of render_depth() to create the png, at least until we
-# try to allow for interactive use. Or maybe render_movie()?
-
-# Code for the first two models rayshader plot
-
-city_pop <- 100000
-has_disease <- 0.01 * city_pop
-
-test_positive_true <- 0.95 * has_disease
-test_negative_false <- 0.05 * has_disease
-
-test_positive_false <- (city_pop - has_disease) * 0.05  
-test_negative_true <- (city_pop - has_disease) * 0.95  
-
-pop <- tibble(patient_id = 1:100000, 
-              have_disease = c(rep(1, has_disease),
-                               rep(0, city_pop - has_disease)),         
-              positive_test = c(rep(1, test_positive_true),
-                                rep(0, test_negative_false),
-                                rep(0, test_negative_true),
-                                rep(1, test_positive_false)))
-
-pop_sum <- pop  %>%
-  group_by(positive_test, have_disease) %>%
-  summarize(total = n())
-
-pos_factor <- as.factor(pop_sum$positive_test)
-disease_factor <- as.factor(pop_sum$have_disease)
-
-mtplot = ggplot(pop_sum) +
-  geom_point(aes(x = pos_factor, y = disease_factor, color = total)) +
-  theme(legend.position = "none") +
-  labs(x = "Test Result", y = "Disease Status")
-
-plot_gg(mtplot, width = 3.5, multicore = F, windowsize = c(800, 800), 
-        zoom = 0.85, phi = 30, theta = 10, sunangle = 225, soliddepth = -100,
-        reduce_size = TRUE, raytrace = FALSE)
-
-# render_snapshot(file = "05-probability/images/rayshader_disease.png")
+library(rgl)
+library(av)
 
 
-# Code for the second two models rayshader plot where we isolate a slice
 
-pop <- tibble(patient_id = 1:1980, positive_test = c(rep(1, 990),
-                                                     rep(1, 990)),
-              have_disease = c(rep(1, 990),
-                               rep(0, 990))) %>%
-  group_by(positive_test, have_disease) %>%
-  summarize(total = n())
+# PLOT 1 - ROLLING DICE ---------------------------------------------------------------
 
-pos_factor <- as.factor(pop$positive_test)
-disease_factor <- as.factor(pop$have_disease)
-
-mtplot = ggplot(pop) +
-  geom_point(aes(x = pos_factor, y = disease_factor, color = total)) +
-  theme(legend.position = "none") +
-  labs(x = "Test Result", y = "Disease Status")
-
-plot_gg(mtplot, width = 3.5, multicore = F, windowsize = c(800, 800), 
-        zoom = 0.85, phi = 30, theta = 10, sunangle = 225, soliddepth = -100,
-        reduce_size = TRUE, raytrace = FALSE)
-
-# Code for joint distributions rayshader plot
+## Step 1: Create any required objects
 
 mydata <- tibble(die.1 = sample(1:6, size = 1000, prob =
                                   c(0.1,0.1,0.1,0.1,0.1,0.5), replace = TRUE),
                  die.2 = sample(1:6, size = 1000, prob =
                                   c(0.1,0.1,0.1,0.1,0.5,0.1), replace = TRUE)) %>%
-  group_by(die.1, die.2) %>%
-  summarize(total = n())
+          group_by(die.1, die.2) %>%
+          summarize(total = n())
 
 die1_factor <- as.factor(mydata$die.1)
 die2_factor <- as.factor(mydata$die.2)
 
-mtplot = ggplot(mydata) +
-  geom_point(aes(x=die1_factor,y=die2_factor,color=total)) +
-  scale_color_continuous(limits=c(0,100)) +
-  theme(legend.position = "none") +
-  labs(x = "Die 1", y = "Die 2")
 
-plot_gg(mtplot, width = 3.5, multicore = F, windowsize = c(800, 800), 
-        zoom = 0.85, phi = 30, theta = 10, sunangle = 225, soliddepth = -100,
-        reduce_size = TRUE, raytrace = FALSE)
+## Step 2: Create a ggplot object.
 
-# Code for 3 models rayshader
+mtplot <-  ggplot(mydata) +
+              geom_point(aes(x = die1_factor, y = die2_factor, color = total)) +
+              scale_color_continuous(limits = c(0,100)) +
+              labs(x = "Die 1", y = "Die 2") +
+              theme(legend.position = "none")
+
+
+## Step 3: Turn it into a 3D plot. This takes a bit of time and
+## will open an interactive "RGL Device" window with the plot.
+
+plot_gg(mtplot,
+        width = 3.5, # Plot width
+        zoom = 0.70, # How close camera should be, smaller is closer
+        sunangle = 225, # Angle of sunshine for shadows
+        soliddepth = -50, # Thickness of pane
+        reduce_size = TRUE) # Reduces file size
+
+
+## Step 4: Tilt the 3D plot in the desired position and run
+## the below command to save an image of the current 3D view.
+
+render_snapshot("05-probability/images/dice.png")
+
+
+## Step 5: Close the "RGL Device" window by running this command. Do
+## this EVERY time before you try to create a new 3D plot.
+
+rgl.close()
+
+
+
+# PLOT 2 - TEST RESULTS ------------------------------------------------------------------
+
+## Step 1: Create any required objects
+
+set.seed(123)
+
+sims <- 100000
+
+jd_disease <- tibble(ID = 1:sims) %>%
+                mutate(have_disease = map_int(ID, ~ rbinom(n = 1,
+                                                           size = 1,
+                                                           prob = 0.01))) %>%
+
+                mutate(test_positive = map_int(have_disease, ~ ifelse(rbinom(n = 1,
+                                                                             size = 1,
+                                                                             prob = 0.95),
+                                                                      ., ! .)))
+
+jd_sum <- jd_disease %>%
+            group_by(test_positive, have_disease) %>%
+            summarize(total = n())
+
+
+## Step 2: Create a ggplot object.
+
+gg <- jd_sum %>%
+        ggplot(aes(x = as.factor(test_positive),
+                   y = as.factor(have_disease),
+                   color = total)) +
+        geom_point(size = 5) +
+        scale_x_discrete(breaks = c(0, 1),
+                         labels = c("Negative", "Positive")) +
+        scale_y_discrete(breaks = c(0, 1),
+                         labels = c("Negative", "Positive")) +
+        labs(x = "Test Result",
+             y = "Disease Status",
+             title = "Unnormalized Distribution of Test Results and Disease Status",
+             subtitle = "Rare diseases have many false positives",
+             color = "Cases") +
+        theme_classic()
+
+
+## Step 3: Turn it into a 3D plot.
+
+plot_gg(gg,
+        width = 7,
+        height = 5,
+        zoom = 0.60,
+        scale = 250,
+        sunangle = 225,
+        soliddepth = -50,
+        reduce_size = TRUE)
+
+
+## Step 4: Tilt the 3D plot in the preferred position and run
+## the below command to save an image of the current 3D view.
+
+render_snapshot(filename = "05-probability/images/disease.png")
+
+
+## Step 5: Close the "RGL Device" window.
+
+rgl.close()
+
+
+
+# PLOT 3 - BLACK AND WHITE MARBLES --------------------------------------------------------
+
+## Step 1: Create any required objects
 
 x <- tibble(p = rep(seq(0, 1, 0.5), 1000)) %>%
-  mutate(white_marbles = map_int(p, ~ rbinom(n = 1, size = 3, p = .))) %>%
-  group_by(p,white_marbles) %>%
-  summarize(total = n())
+       mutate(white_marbles = map_int(p, ~ rbinom(n = 1, size = 3, p = .))) %>%
+       group_by(p,white_marbles) %>%
+       summarize(total = n())
 
 p_factor <- as.factor(x$p)
 x_factor <- as.factor(x$white_marbles)
 
-mtplot = ggplot(x) +
-  geom_point(aes(x=x_factor,y=p_factor,color=total)) +
-  scale_color_continuous() +
-  theme(legend.position = "none") +
-  labs(x = "Number of White Marbles Out of 3 Samples",
-       y = "Number of White Marbles in the Bag")
 
-plot_gg(mtplot, width = 3.5, multicore = F, windowsize = c(800, 800), 
-        zoom = 0.85, phi = 30, theta = 10, sunangle = 225, soliddepth = -100,
-        reduce_size = TRUE, raytrace = FALSE)
+## Step 2: Create a ggplot object.
 
-# Code for N models plot
+mtplot <-  ggplot(x, aes(x_factor, p_factor, color = total)) +
+              geom_point() +
+              scale_color_continuous() +
+              labs(x = "White Marbles Selected",
+                   y = "White Marbles in the Bag",
+                   title = "Black and White Marbles",
+                   subtitle = "More white marbles in bag mean more white marbles selected",
+                   color = "Count")
+
+
+## Step 3: Turn it into a 3D plot.
+
+plot_gg(mtplot,
+        height = 4,
+        width = 5,
+        zoom = 0.70,
+        sunangle = 225,
+        soliddepth = -50,
+        reduce_size = TRUE)
+
+
+## Step 4: Tilt the 3D plot in the preferred position and run
+## the below command to save an image of the current 3D view.
+
+render_snapshot("05-probability/images/marbles.png")
+
+
+## Step 5: Close the "RGL Device" window.
+
+rgl.close()
+
+
+
+# PLOT 4 - COIN TOSS ----------------------------------------------------------------------
+
+## Step 1: Create any required objects
 
 set.seed(10)
 
 x <- tibble(p = rep(seq(0, 1, 0.1), 1000)) %>%
-  mutate(heads = map_int(p, ~ rbinom(n = 1, size = 20, p = .))) %>%
-  group_by(p,heads) %>%
-  summarize(total = n())
+        mutate(heads = map_int(p, ~ rbinom(n = 1, size = 20, p = .))) %>%
+        group_by(p,heads) %>%
+        summarize(total = n())
 
 p_factor <- as.factor(x$p)
 x_factor <- as.factor(x$heads)
+
+
+## Step 2: Create a ggplot object.
 
 mtplot = ggplot(x) +
   geom_point(aes(x = x_factor, y = p_factor, color = total)) +
   theme(legend.position = "none") +
   labs(x = "Number of Heads out of 20 Tosses",
-       y = "Value of p")
+       y = expression(rho[h]),
+       title = "Empirical Distribution of Number of Heads",
+       subtitle = expression(paste("Based on simulations with various values of ", rho[h]))) +
+  theme(title = element_text(size = 9),
+        axis.text.x = element_text(size = 7),
+        axis.title.y = element_text(size = 7))
 
-plot_gg(mtplot, width = 3.5, multicore = F, windowsize = c(800, 800), 
-        zoom = 0.85, phi = 30, theta = 10, sunangle = 225, soliddepth = -100,
-        reduce_size = TRUE, raytrace = FALSE)
+
+## Step 3: Turn it into a 3D plot.
+
+plot_gg(mtplot,
+        width = 3.5,
+        zoom = 0.7,
+        sunangle = 225,
+        soliddepth = -50,
+        reduce_size = TRUE)
+
+
+## Step 4: Tilt the 3D plot in the preferred position and run
+## the below command to save an image of the current 3D view.
+
+render_snapshot(filename = "05-probability/images/coins.png")
+
+
+## Step 5: Close the "RGL Device" window.
+
+rgl.close()
+
+
+
+# PLOT 5 - ANIMATON ---------------------------------------------------------------
+
+## Will add soon
+
 
 
