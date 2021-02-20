@@ -408,7 +408,7 @@ Don't worry about the distinctions between discrete and continuous outcomes, or 
 
 <!-- DK: Does this really belong here? Maybe at the end? -->
 
-```{r, echo = FALSE, fig.cap = 'Bruno de Finetti, an Italian statistician who wrote a famous treatise on the theory of probability that began with the statement "PROBABILITY DOES NOT EXIST." This is because probability only exists subjectively in our minds.'}
+```{r, echo = FALSE, out.width="60%", fig.align='center', fig.cap = 'Bruno de Finetti, an Italian statistician who wrote a famous treatise on the theory of probability that began with the statement "PROBABILITY DOES NOT EXIST." This is because probability only exists subjectively in our minds.'}
 
 knitr::include_graphics("05-probability/images/de_finetti.jpg")
 
@@ -531,8 +531,52 @@ Joint distributions are also mathematical objects that cover a set of outcomes, 
 
 Let's say that you are rolling two six-sided dice simultaneously. Die 1 is weighted so that there is a 50% chance of rolling a 6 and a 10% chance of each of the other values. Die 2 is weighted so there is a 50% chance of rolling a 5 and a 10% chance of rolling each of the other values. Let's roll both dice 1,000 times. In previous examples involving two dice, we cared about the sum of results and not the outcomes of the first versus the second die of each simulation. With a joint distributions, the order matters; so instead of 11 possible outcomes on the x-axis of our distribution plot (ranging from 2 to 12), we have 36. Furthermore, a 2D probability distribution is not sufficient to represent all of the variables involved, so the joint distribution for this example is displayed using a 3D plot.
 
-```{r, echo = FALSE}
-knitr::include_graphics("05-probability/images/dice.png")
+```{r, echo = FALSE, message=FALSE, warning=FALSE}
+library(rayshader)
+library(rgl)
+
+mydata <- tibble(die.1 = sample(1:6, size = 1000, prob =
+                                  c(0.1,0.1,0.1,0.1,0.1,0.5), replace = TRUE),
+                 die.2 = sample(1:6, size = 1000, prob =
+                                  c(0.1,0.1,0.1,0.1,0.5,0.1), replace = TRUE)) %>%
+          group_by(die.1, die.2) %>%
+          summarize(total = n())
+
+die1_factor <- as.factor(mydata$die.1)
+die2_factor <- as.factor(mydata$die.2)
+
+
+## Step 2: Create a ggplot object.
+
+mtplot <-  ggplot(mydata) +
+              geom_point(aes(x = die1_factor, y = die2_factor, color = total)) +
+              scale_color_continuous(limits = c(0,100)) +
+              labs(x = "Die 1", y = "Die 2") +
+              theme(legend.position = "none")
+
+
+## Step 3: Turn it into a 3D plot. This takes a bit of time and
+## will open an interactive "RGL Device" window with the plot.
+
+plot_gg(mtplot,
+        width = 3.5, # Plot width
+        zoom = 0.65, # How close view on plot should be (1=normal, <1=closer)
+        theta = 25, # From which direction to view plot (0-360°)
+        phi = 30, # How "steep" view on plot should be (0-90°)
+        sunangle = 225, # Angle of sunshine for shadows (0-360°)
+        soliddepth = -50, # Thickness of pane (always <0, the smaller the thicker)
+        windowsize = c(2048,1536)) # Resolution
+
+
+## Step 4: Embed plot in Rmd file.
+
+rglwidget()
+
+
+## Step 5: Close the "RGL Device" window by running this command. Do
+## this EVERY time before you try to create a new 3D plot.
+
+rgl.close()
 ```
 
 ## Tree diagrams
@@ -671,8 +715,57 @@ jd_disease %>%
 
 Below is a joint distribution displayed in 3D. Instead of using the "jitter" feature in R to unstack the dots, we are using a 3D plot to visualize the number of dots in each box. The number of people who correctly test negative is far greater than of the other categories. There are far fewer false positives and true positives -- and only a handful of false negatives. This is why we can barely see the 3D bar coming from those combinations.
 
-```{r, echo = FALSE}
-knitr::include_graphics("05-probability/images/disease.png")
+```{r, echo = FALSE, message=FALSE, warning=FALSE}
+
+set.seed(123)
+
+sims <- 100000
+
+jd_disease <- tibble(ID = 1:sims) %>%
+                mutate(have_disease = map_int(ID, ~ rbinom(n = 1,
+                                                           size = 1,
+                                                           prob = 0.01))) %>%
+                mutate(test_positive = map_int(have_disease, ~ ifelse(rbinom(n = 1,
+                                                                             size = 1,
+                                                                             prob = 0.95),
+                                                                      ., ! .)))
+
+jd_sum <- jd_disease %>%
+            group_by(test_positive, have_disease) %>%
+            summarize(total = n())
+
+gg <- jd_sum %>%
+        ggplot(aes(x = as.factor(test_positive),
+                   y = as.factor(have_disease),
+                   color = total)) +
+        geom_point(size = 5) +
+        scale_x_discrete(breaks = c(0, 1),
+                         labels = c("Negative", "Positive")) +
+        scale_y_discrete(breaks = c(0, 1),
+                         labels = c("Negative", "Positive")) +
+        labs(x = "Test Result",
+             y = "Disease Status",
+             title = "Unnormalized Distribution of Results and Status",
+             subtitle = "Rare diseases have many false positives",
+             color = "Cases") +
+        theme_classic() +
+        theme(legend.position = "none",
+              title = element_text(size = 7),
+              axis.text.x = element_text(size = 7),
+              axis.text.y = element_text(size = 7))
+
+plot_gg(gg,
+        width = 3.5,
+        zoom = 0.65,
+        theta = 25,
+        phi = 30,
+        sunangle = 225,
+        soliddepth = -50,
+        windowsize = c(2048,1536))
+
+rglwidget()
+
+rgl.close()
 ```
 
 <!-- DK: Insert the sliced rayshader distribution here, and discuss. Then, below, we do the same thing by hand. Then, use this text: -->
@@ -805,8 +898,41 @@ jd_marbles %>%
 
 Here is the 3D visualization:
 
-```{r, echo = FALSE}
-knitr::include_graphics("05-probability/images/marbles.png")
+```{r, echo = FALSE, message=FALSE, warning=FALSE}
+
+x <- tibble(p = rep(seq(0, 1, 0.5), 1000)) %>%
+       mutate(white_marbles = map_int(p, ~ rbinom(n = 1, size = 3, p = .))) %>%
+       group_by(p,white_marbles) %>%
+       summarize(total = n())
+
+p_factor <- as.factor(x$p)
+x_factor <- as.factor(x$white_marbles)
+
+mtplot <-  ggplot(x, aes(x_factor, p_factor, color = total)) +
+              geom_point() +
+              scale_color_continuous() +
+              labs(x = "White Marbles Selected",
+                   y = "White Marbles in the Bag",
+                   title = "Black and White Marbles",
+                   subtitle = "More white marbles in bag mean more are selected",
+                   color = "Count") +
+              theme(legend.position = "none",
+                    title = element_text(size = 7),
+              axis.text.x = element_text(size = 6),
+              axis.text.y = element_text(size = 6))
+
+plot_gg(mtplot,
+        width = 3.5,
+        zoom = 0.65,
+        theta = 25,
+        phi = 30,
+        sunangle = 225,
+        soliddepth = -50,
+        windowsize = c(2048,1536))
+
+rglwidget()
+
+rgl.close()
 ```
 
 
@@ -937,8 +1063,42 @@ x %>%
 
 Here is the 3D version of the same plot.
 
-```{r, echo = FALSE}
-knitr::include_graphics("05-probability/images/coins.png")
+```{r, echo = FALSE, message=FALSE, warning=FALSE}
+
+set.seed(10)
+
+x <- tibble(p = rep(seq(0, 1, 0.1), 1000)) %>%
+        mutate(heads = map_int(p, ~ rbinom(n = 1, size = 20, p = .))) %>%
+        group_by(p,heads) %>%
+        summarize(total = n())
+
+p_factor <- as.factor(x$p)
+x_factor <- as.factor(x$heads)
+
+coinplot <-  ggplot(x) +
+  geom_point(aes(x = x_factor, y = p_factor, color = total)) +
+  theme(legend.position = "none") +
+  labs(x = "Number of Heads out of 20 Tosses",
+       y = expression(rho[h]),
+       title = "Empirical Distribution of Number of Heads",
+       subtitle = expression(paste("Based on simulations with various values of ", rho[h]))) +
+  theme(title = element_text(size = 9),
+        axis.text.x = element_text(size = 7),
+        axis.title.y = element_text(size = 7),
+        legend.position = "none")
+
+plot_gg(coinplot,
+        width = 3.5,
+        zoom = 0.65,
+        theta = 25,
+        phi = 30,
+        sunangle = 225,
+        soliddepth = -50,
+        windowsize = c(2048,1536))
+
+rglwidget()
+
+rgl.close()
 ```
 
 In both of these diagrams, we see 11 models and 21 outcomes. We don't really care about the p($models$, $data$), the joint distribution of the models-which-might-be-true and the data-which-our-experiment-might-generate. Instead, we want to estimate $p$, the unknown parameter which determines the probability that this coin will come up heads when tossed. The joint distribution alone can't tell us that. We *created* the joint distribution before we had even conducted the experiment. It is our creation, a tool which we use to make inferences. Instead, we want the conditional distribution, p($models$ | $data = 8$). We have the results of the experiment. What do those results tell us about the probability distribution of $p$? 
