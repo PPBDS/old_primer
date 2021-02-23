@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Maps | Preceptor’s Primer for Bayesian Big Data Science</title>
+<title>Maps | Preceptor’s Primer for Bayesian Data Science</title>
 <meta name="author" content="David Kane">
 <!-- JS --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.2"></script><script src="https://kit.fontawesome.com/6ecbd6c532.js" crossorigin="anonymous"></script><script src="libs/header-attrs-2.5.3/header-attrs.js"></script><script src="libs/jquery-3.5.1/jquery-3.5.1.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="libs/bootstrap-4.5.3/bootstrap.min.css" rel="stylesheet">
@@ -22,7 +22,7 @@
 
     <div class="d-flex align-items-start justify-content-between">
       <h1>
-        <a href="index.html" title="">Preceptor’s Primer for Bayesian Big Data Science</a>
+        <a href="index.html" title="">Preceptor’s Primer for Bayesian Data Science</a>
       </h1>
       <button class="btn btn-outline-primary d-lg-none ml-2 mt-1" type="button" data-toggle="collapse" data-target="#main-nav" aria-expanded="true" aria-controls="main-nav"><i class="fas fa-bars"></i><span class="sr-only">Show table of contents</span></button>
     </div>
@@ -200,21 +200,25 @@
 ## $ P001001  &lt;dbl&gt; 4.8e+06, 7.1e+05, 6.4e+06, 2.9e+06, 3.7e+07, 4.5e+06, 4.3e+0…
 ## $ P002005  &lt;dbl&gt; 1957932, 241338, 651358, 1278329, 1880350, 1215567, 1806024,…
 ## $ geometry &lt;MULTIPOLYGON [°]&gt; MULTIPOLYGON (((-85 31, -85..., MULTIPOLYGON ((…</code></pre>
-<p>This is just like the tibble we had before, except now we have this funky “multipolygon” called <code>geometry</code>. This is a list column containing all the information <code>ggplot()</code> needs to create a map.</p>
-<p>In order to create a map using <code>ggplot()</code>, we need a new geom: <code>geom_sf()</code>. This works much like the geoms we have seen before, such as <code>geom_point()</code> and <code>geom_line()</code>, except with spatial data. Consider:</p>
+<p>This is similar to the tibble we created before. However, there are two key differences. First, we now have this funky “multipolygon” column called <code>geometry</code>. This is a list column containing all the information <code>ggplot()</code> needs to create a map. Second, rural is no longer a tibble.</p>
 <div class="sourceCode" id="cb888"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/class.html">class</a></span><span class="op">(</span><span class="va">rural</span><span class="op">)</span></code></pre></div>
+<pre><code>## [1] "sf"         "tbl_df"     "tbl"        "data.frame"</code></pre>
+<p><code><a href="https://rdrr.io/r/base/class.html">class()</a></code> is a function which tells us the, uh, “class” of an object. <code>rural</code> is of class “sf,” which is a special kind of tibble which includes information for plotting. For this reason, <strong>you should never use <code><a href="https://tibble.tidyverse.org/reference/as_tibble.html">as_tibble()</a></code> on an object of class “sf” since doing so strips the object of the key attributes it needs to make plotting easier.</strong></p>
+<p>In order to create a map using <code>ggplot()</code>, we need a new geom: <code>geom_sf()</code>. This works much like the geoms we have seen before, such as <code>geom_point()</code> and <code>geom_line()</code>, except with spatial data. In particular, it is designed to work with objects of class “sf.” Example:</p>
+<div class="sourceCode" id="cb890"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">rural</span> <span class="op">%&gt;%</span>
   <span class="fu">ggplot</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">geom_sf</span><span class="op">(</span><span class="op">)</span></code></pre></div>
-<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-764-1.png" width="100%"></div>
+<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-765-1.png" width="100%"></div>
 <p>We have the boundaries of each state, including Alaska and Hawaii. But there are some problems. <strong>ggplot2</strong> is doing its best to fit everything on one image, which is taxing on the system. We can’t see any particular state very well, because the map is zoomed far out. Also, there are no colors because we didn’t fill it with our data.</p>
 <p>So, let’s create a new map with <code>geom_sf()</code> and fill it with <code>prop_rural</code>. And we’ll filter out Alaska, Hawaii, and Puerto Rico for now.</p>
-<div class="sourceCode" id="cb889"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb891"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">rural</span> <span class="op">%&gt;%</span>
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span><span class="op">(</span><span class="op">!</span> <span class="va">NAME</span> <span class="op">%in%</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Alaska"</span>, <span class="st">"Hawaii"</span>, <span class="st">"Puerto Rico"</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span>
   <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>fill <span class="op">=</span> <span class="va">P002005</span> <span class="op">/</span> <span class="va">P001001</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">geom_sf</span><span class="op">(</span><span class="op">)</span></code></pre></div>
-<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-765-1.png" width="100%"></div>
+<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-766-1.png" width="100%"></div>
 <p>Now we have something usable! This already has a lot of what we’d want from a map—most notably, the states are shaded based on our variable of interest, helping us to see some patterns in the data. But it could use a bit of a makeover, which we’ll give it in the next section.</p>
 <div id="making-maps-pretty" class="section level3 unnumbered">
 <h3>Making maps pretty<a class="anchor" aria-label="anchor" href="#making-maps-pretty"><i class="fas fa-link"></i></a>
@@ -229,7 +233,7 @@
 </ul>
 <p>A great function for providing the fill colors for maps is <code>scale_fill_viridis_c()</code>. This has a few different color palettes that can be selected with the <code>option</code> argument, all of which are easily distinguishable both when displayed in black and white and for people with common forms of colorblindness. You can also reverse the default order of the colors with the <code>direction = -1</code> option. This function is for continuous variables such as <code>prop_rural</code>; if you have a discrete variable, you can use the analogous <code>scale_fill_viridis_d()</code>.</p>
 <p>We’ll also use <code>theme_void()</code>, a great theme for maps that gets rid of the gray background. Finally, we’ll use <code>labs()</code> to give the legend the title “Percent Rural” (and multiply the values of the variable by 100) and add an overall title and caption.</p>
-<div class="sourceCode" id="cb890"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb892"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">rural</span> <span class="op">%&gt;%</span>
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span><span class="op">(</span><span class="op">!</span> <span class="va">NAME</span> <span class="op">%in%</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Alaska"</span>, <span class="st">"Hawaii"</span>, <span class="st">"Puerto Rico"</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span>
   <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>fill <span class="op">=</span> <span class="fl">100</span> <span class="op">*</span> <span class="va">P002005</span> <span class="op">/</span> <span class="va">P001001</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
@@ -240,14 +244,14 @@
          caption <span class="op">=</span> <span class="st">"Source: Census 2010"</span>,
          fill <span class="op">=</span> <span class="st">"Percent Rural"</span><span class="op">)</span> <span class="op">+</span>
     <span class="fu">theme_void</span><span class="op">(</span><span class="op">)</span></code></pre></div>
-<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-766-1.png" width="100%"></div>
+<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-767-1.png" width="100%"></div>
 <p>With this map, it is clear that the more rural states are concentrated in the Great Plains, the South, and parts of New England, while the (South)west and Northeast are less rural.</p>
 </div>
 <div id="adding-back-alaska-and-hawaii" class="section level3 unnumbered">
 <h3>Adding back Alaska and Hawaii<a class="anchor" aria-label="anchor" href="#adding-back-alaska-and-hawaii"><i class="fas fa-link"></i></a>
 </h3>
 <p>But what about Alaska and Hawaii? If you want to display those on your map without having to zoom out, you can take advantage of an argument in <code><a href="https://rdrr.io/pkg/tidycensus/man/get_decennial.html">get_decennial()</a></code>, <code>shift_geo = TRUE</code>:</p>
-<div class="sourceCode" id="cb891"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb893"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">rural_shifted</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/tidycensus/man/get_decennial.html">get_decennial</a></span><span class="op">(</span>geography <span class="op">=</span> <span class="st">"state"</span>,
                                variables <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"P001001"</span>, <span class="st">"P002005"</span><span class="op">)</span>,
                                year <span class="op">=</span> <span class="fl">2010</span>,
@@ -256,7 +260,7 @@
                                shift_geo <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">%&gt;%</span>
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/rename.html">rename</a></span><span class="op">(</span>state <span class="op">=</span> <span class="va">NAME</span><span class="op">)</span> <span class="op">%&gt;%</span>
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>prop_rural <span class="op">=</span> <span class="va">P002005</span><span class="op">/</span><span class="va">P001001</span><span class="op">)</span></code></pre></div>
-<div class="sourceCode" id="cb892"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb894"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">rural_shifted</span> <span class="op">%&gt;%</span>
   <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>fill <span class="op">=</span> <span class="va">prop_rural</span> <span class="op">*</span> <span class="fl">100</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">geom_sf</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> 
@@ -266,7 +270,7 @@
        caption <span class="op">=</span> <span class="st">"Source: Census 2010"</span>,
        fill <span class="op">=</span> <span class="st">"Percent Rural"</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">theme_void</span><span class="op">(</span><span class="op">)</span></code></pre></div>
-<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-769-1.png" width="100%"></div>
+<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-770-1.png" width="100%"></div>
 <p>Now, Alaska and Hawaii can be displayed near the lower 48 states. This option removes Puerto Rico from your tibble altogether, so it is not a good choice if you want to show data from Puerto Rico.</p>
 </div>
 </div>
@@ -274,7 +278,7 @@
 <h2>Faceting maps<a class="anchor" aria-label="anchor" href="#faceting-maps"><i class="fas fa-link"></i></a>
 </h2>
 <p>A powerful tool in <strong>ggplot2</strong> to use with maps is faceting. Let’s grab data from the ACS on the population in Harris County, Texas census tracts by race:</p>
-<div class="sourceCode" id="cb893"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb895"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">racevars</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span>White <span class="op">=</span> <span class="st">"B02001_002"</span>, 
               Black <span class="op">=</span> <span class="st">"B02001_003"</span>, 
               Asian <span class="op">=</span> <span class="st">"B02001_005"</span>,
@@ -294,7 +298,7 @@
 <li>We added a <code>summary_var</code>, “B02001_001,” which is the total population. As we’ll see, this appears as a separate column, which is helpful to us. (As an exercise, try going back to the code that created <code>rural</code> and see how you would do that in a long format with <code>summary_var</code>.)</li>
 </ul>
 <p>Let’s take a look at <code>harris</code>:</p>
-<div class="sourceCode" id="cb894"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb896"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">glimpse</span><span class="op">(</span><span class="va">harris</span><span class="op">)</span></code></pre></div>
 <pre><code>## Rows: 3,144
 ## Columns: 8
@@ -311,7 +315,7 @@
 <h3>Transforming and mapping the data<a class="anchor" aria-label="anchor" href="#transforming-and-mapping-the-data"><i class="fas fa-link"></i></a>
 </h3>
 <p>Now we can use <code>facet_wrap()</code> to look at our race variables side-by-side:</p>
-<div class="sourceCode" id="cb896"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb898"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">harris</span> <span class="op">%&gt;%</span>
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>Percent <span class="op">=</span> <span class="fl">100</span> <span class="op">*</span> <span class="op">(</span><span class="va">estimate</span> <span class="op">/</span> <span class="va">summary_est</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span>
   <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>fill <span class="op">=</span> <span class="va">Percent</span>, color <span class="op">=</span> <span class="va">Percent</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
@@ -322,7 +326,7 @@
   <span class="fu">labs</span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Racial geography of Harris County, Texas"</span>,
        caption <span class="op">=</span> <span class="st">"Source: American Community Survey 2014-2018"</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">theme_void</span><span class="op">(</span><span class="op">)</span></code></pre></div>
-<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-773-1.png" width="100%"></div>
+<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-774-1.png" width="100%"></div>
 <p>Note how easy it was to create the percentages using <code>summary_est</code>. We also used <code>color = Percent</code> and <code>scale_color_viridis_c()</code> to avoid having annoying borders around each of the census tracts. Otherwise, this doesn’t differ much from our code before, yet it is much easier to make comparisons across variables. Faceting is a powerful tool to use with maps.</p>
 </div>
 </div>
@@ -331,13 +335,13 @@
 </h2>
 <p>Instead of a census tract map for just one city, let’s do a “big data” project involving every census track in the country, plotting the percentage of people who are two or more races.</p>
 <p>Start by finding the correct variable in the American Community Survey by using the <code><a href="https://rdrr.io/pkg/tidycensus/man/load_variables.html">load_variables()</a></code> function. This function takes two required arguments: the year of the Census or endyear of the ACS sample, and the specific dataset. Example:</p>
-<div class="sourceCode" id="cb897"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb899"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">acs2018</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/tidycensus/man/load_variables.html">load_variables</a></span><span class="op">(</span><span class="fl">2018</span>, <span class="st">"acs5"</span><span class="op">)</span>
 
 <span class="va">acs2018</span></code></pre></div>
 <p>In the 2018 ACS, the variable we’re looking for is called <code>"B02001_008"</code>. We also need total population (<code>"B02001_001"</code>) to calculate a percentage. There are a total of 74,134 census tracts in the US. Note that the <code>state.name</code> vector included base R, includes the names of every state in the US.</p>
 <p>In this case, we use <code>state.name</code> to make <code>continental</code>, a vector of every state in the US other than Alaska and Hawaii.</p>
-<div class="sourceCode" id="cb898"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb900"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">continental</span> <span class="op">&lt;-</span> <span class="va">state.name</span><span class="op">[</span><span class="op">!</span> <span class="va">state.name</span> <span class="op">%in%</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Alaska"</span>, <span class="st">"Hawaii"</span><span class="op">)</span><span class="op">]</span>
 
 <span class="va">races</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/tidycensus/man/get_acs.html">get_acs</a></span><span class="op">(</span>geography <span class="op">=</span> <span class="st">"tract"</span>,
@@ -368,7 +372,7 @@
 ## 10 0109… Cens… B02001_…        0    12         833         113
 ## # … with 72,349 more rows, and 1 more variable: geometry &lt;MULTIPOLYGON [°]&gt;</code></pre>
 <p>We set <code>size</code> to 0.003 to create thin outlines around our census tracts, any larger and they would make it hard to see our tracts. We also use the <code>inferno</code> option of <code>scale_fill_viridis()</code> for a different aesthetic from our previous plots. We add <code>theme_void()</code> and some <code>labs()</code> .</p>
-<div class="sourceCode" id="cb900"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb902"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">races</span>  <span class="op">%&gt;%</span>
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>Percent <span class="op">=</span> <span class="fl">100</span> <span class="op">*</span> <span class="op">(</span><span class="va">estimate</span> <span class="op">/</span> <span class="va">summary_est</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span>
   <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>fill <span class="op">=</span> <span class="va">Percent</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
@@ -377,14 +381,14 @@
   <span class="fu">labs</span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Percent of People Who are Two or More Races by Census Tract"</span>,
        caption <span class="op">=</span> <span class="st">"Source: American Community Survey 2014-2018"</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">theme_void</span><span class="op">(</span><span class="op">)</span></code></pre></div>
-<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-777-1.png" width="100%"></div>
+<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-778-1.png" width="100%"></div>
 </div>
 <div id="pums" class="section level2 unnumbered">
 <h2>PUMS<a class="anchor" aria-label="anchor" href="#pums"><i class="fas fa-link"></i></a>
 </h2>
 <p>Census microdata, often referred to as ‘Public Use Microdata Samples’ or PUMS, contains advanced census data on individual people. PUMS contains data for roughly 1% of the US population. To access PUMS, use the <code>get_PUMS()</code> function, which works in a very similar way to <code><a href="https://rdrr.io/pkg/tidycensus/man/get_decennial.html">get_decennial()</a></code> or <code><a href="https://rdrr.io/pkg/tidycensus/man/get_acs.html">get_acs()</a></code>.</p>
 <p>If you’re having trouble finding which PUMS variables represents what, the <strong>tidycensus</strong> dataset <code>pums_variables</code> can be helpful.</p>
-<div class="sourceCode" id="cb901"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb903"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">glimpse</span><span class="op">(</span><span class="va">pums_variables</span><span class="op">)</span></code></pre></div>
 <pre><code>## Rows: 26,482
 ## Columns: 12
@@ -401,7 +405,7 @@
 ## $ val_length &lt;int&gt; 1, 1, 13, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 5, 1, 1, 1, 1, 1, …
 ## $ val_na     &lt;dbl&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA…</code></pre>
 <p>Here we make <code>US_pums</code> contain age, sex, and income data for every single person in PUMS. <code>AGEP</code> is age, <code>FINCP</code> is income, and <code>SEX</code> is sex.</p>
-<div class="sourceCode" id="cb903"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb905"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">US_pums</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/tidycensus/man/get_pums.html">get_pums</a></span><span class="op">(</span>variables <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"AGEP"</span>, <span class="st">"FINCP"</span>, <span class="st">"SEX"</span><span class="op">)</span>,
                     state <span class="op">=</span> <span class="va">state.name</span>,
                     recode <span class="op">=</span> <span class="cn">TRUE</span>,
@@ -417,7 +421,7 @@
 <p>But why is PUMS useful? Well, it allows us to create new interesting variables.</p>
 <p>Let’s try making a map with PUMS. Let’s say we wanted to make a map of the percentage of the population of states in the Northwest that are seniors, which we will define as the percent of the population that is 65 or above. Although there’s no variable that will tell us this directly, we can use PUMS to construct it. We want our data to be as detailed as possible, so we will map our data by PUMAs. We define states in the northwest as Washington, Idaho, and Oregon.</p>
 <p>First, we want to put your custom PUMS estimates on a map. To do this, let’s use the <strong>tigris</strong> package to download PUMA boundaries for the states in the northwest as an sf object.</p>
-<div class="sourceCode" id="cb904"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb906"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">nw_states</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"OR"</span>, <span class="st">"WA"</span>, <span class="st">"ID"</span><span class="op">)</span>
 <span class="va">nw_pumas</span> <span class="op">&lt;-</span> <span class="fu">map</span><span class="op">(</span><span class="va">nw_states</span>, 
                 <span class="fu">tigris</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/tigris/man/pumas.html">pumas</a></span>, 
@@ -425,25 +429,25 @@
                 cb <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">%&gt;%</span>
     <span class="fu">reduce</span><span class="op">(</span><span class="va">rbind</span><span class="op">)</span></code></pre></div>
 <p>Now, we use <code><a href="https://rdrr.io/pkg/tidycensus/man/get_pums.html">get_pums()</a></code> to get our data. We select <code>PUMA</code> and <code>AGEP</code>, which stand for PUMA and age respectively.</p>
-<div class="sourceCode" id="cb905"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb907"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">nw_pums</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/tidycensus/man/get_pums.html">get_pums</a></span><span class="op">(</span>variables <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"PUMA"</span>, <span class="st">"AGEP"</span><span class="op">)</span>,
                     state <span class="op">=</span> <span class="va">nw_states</span>,
                     recode <span class="op">=</span> <span class="cn">TRUE</span>,
                     survey <span class="op">=</span> <span class="st">"acs1"</span>,
                     year <span class="op">=</span> <span class="fl">2018</span><span class="op">)</span></code></pre></div>
 <p>Now, we use <code>dplyr:group_by()</code> and <code>dplyr:summarize()</code> to make a modified version of <code>nw_pums</code> with new variables. <code>total_pop</code> represents the total population of a PUMA, and <code>pct_Senior</code> represents the fraction of the population in that PUMA that’s 65 or over (&gt;64).</p>
-<div class="sourceCode" id="cb906"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb908"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">nw_Senior</span> <span class="op">&lt;-</span> <span class="va">nw_pums</span> <span class="op">%&gt;%</span>
     <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html">group_by</a></span><span class="op">(</span><span class="va">ST</span>, <span class="va">PUMA</span><span class="op">)</span> <span class="op">%&gt;%</span>
     <span class="fu">summarize</span><span class="op">(</span>total_pop <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">PWGTP</span><span class="op">)</span>, 
               pct_Senior <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">PWGTP</span><span class="op">[</span><span class="va">AGEP</span> <span class="op">&gt;</span> <span class="fl">64</span><span class="op">]</span><span class="op">)</span> <span class="op">/</span> <span class="va">total_pop</span>,
               .groups <span class="op">=</span> <span class="st">"drop"</span><span class="op">)</span></code></pre></div>
 <p>Working with PUMS data can be little tricky, so before we get to mapping we have to <code>left_join()</code> <code>nw_Senior</code> back into <code>nw_pums</code>, mapping <code>"STATEFP10"</code> to <code>ST</code>, and <code>"PUMACE10"</code> to <code>"PUMA"</code>. This is a confusing quirk of PUMS data that you do not need to worry about.</p>
-<div class="sourceCode" id="cb907"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb909"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">nw_final</span> <span class="op">&lt;-</span> <span class="va">nw_pumas</span> <span class="op">%&gt;%</span>
     <span class="fu">left_join</span><span class="op">(</span><span class="va">nw_Senior</span>, by <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"STATEFP10"</span> <span class="op">=</span> <span class="st">"ST"</span>, <span class="st">"PUMACE10"</span> <span class="op">=</span> <span class="st">"PUMA"</span><span class="op">)</span><span class="op">)</span> </code></pre></div>
 <p>Then, we use <code>geom_sf()</code> to make our plot. We use <code>scale_fill_viridis_b(option = "magma")</code> and <code>theme_void()</code> to customize the look of our map, and use <code>labels = scales::label_percent(1))</code> as a handy trick to convert <code>pct_Senior</code>’s fractions into percentages. Add some <code>labs()</code> and we’re done!</p>
-<div class="sourceCode" id="cb908"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb910"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">nw_final</span> <span class="op">%&gt;%</span> 
   <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>fill <span class="op">=</span> <span class="va">pct_Senior</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
     <span class="fu">geom_sf</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
@@ -453,7 +457,7 @@
     <span class="fu">labs</span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Percentage of population that are Seniors"</span>,
          caption <span class="op">=</span> <span class="st">"Source: American Community Survey 2014-2018"</span><span class="op">)</span> <span class="op">+</span>
     <span class="fu">theme_void</span><span class="op">(</span><span class="op">)</span></code></pre></div>
-<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-785-1.png" width="100%"></div>
+<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-786-1.png" width="100%"></div>
 </div>
 <div id="want-to-explore-further" class="section level2 unnumbered">
 <h2>Want to explore further?<a class="anchor" aria-label="anchor" href="#want-to-explore-further"><i class="fas fa-link"></i></a>
@@ -518,7 +522,7 @@
 <footer class="bg-primary text-light mt-5"><div class="container"><div class="row">
 
   <div class="col-12 col-md-6 mt-3">
-    <p>"<strong>Preceptor’s Primer for Bayesian Big Data Science</strong>" was written by David Kane. </p>
+    <p>"<strong>Preceptor’s Primer for Bayesian Data Science</strong>" was written by David Kane. </p>
   </div>
 
   <div class="col-12 col-md-6 mt-3">
