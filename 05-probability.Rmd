@@ -556,7 +556,7 @@ Let's say that you are rolling two six-sided dice simultaneously. Die 1 is weigh
 ```{r, echo = FALSE}
 # DK: Revisit and clean up this code.
 
-## Step 1: Create and organize the data.
+# Step 1: Create and organize the data.
 
 mydata <- tibble(die.1 = sample(1:6, size = 1000, prob =
                                   c(0.1,0.1,0.1,0.1,0.1,0.5), replace = TRUE),
@@ -570,7 +570,7 @@ die1_factor <- as.factor(mydata$die.1)
 die2_factor <- as.factor(mydata$die.2)
 
 
-## Step 2: Create a ggplot object.
+# Step 2: Create a ggplot object.
 
 mtplot <-  ggplot(mydata) +
               geom_point(aes(x = die1_factor, y = die2_factor, color = total)) +
@@ -579,8 +579,8 @@ mtplot <-  ggplot(mydata) +
               theme(legend.position = "none")
 
 
-## Step 3: Turn it into a 3D plot. This takes a bit of time and
-## will open an interactive "RGL Device" window with the plot.
+# Step 3: Turn it into a 3D plot. This takes a bit of time and
+# will open an interactive "RGL Device" window with the plot.
 
 plot_gg(mtplot,
         width = 3.5, # Plot width
@@ -592,13 +592,13 @@ plot_gg(mtplot,
         windowsize = c(2048,1536)) # Resolution
 
 
-## Step 4: Embed plot in Rmd file.
+# Step 4: Embed plot in Rmd file.
 
 rglwidget()
 
 
-## Step 5: Close the "RGL Device" window by running this command. Do
-## this EVERY time before you try to create a new 3D plot.
+# Step 5: Close the "RGL Device" window by running this command. Do
+# this EVERY time before you try to create a new 3D plot.
 
 rgl.close()
 ```
@@ -1110,7 +1110,95 @@ To answer this question, we simply take a vertical *slice* from the joint distri
 
 This animation shows what we want to do with joint distributions. We take a slice (the red one), isolate it, rotate it to look at the conditional distribution, normalize it (change the values along the current z-axis from counts to probabilities), then observe the resulting posterior.
 
+<!-- 
 
+TW: I tried to recreate the GIF below in rayshader, but failed. For those bold enough to try, the process 
+to create it would be as follows (problem described at the end):
+
+
+1. Create a dataframe with three columns: x, y and z. These will be the coordinates. 
+   Note that you need to cover every possible combination of x and y-values, and 
+   every such combination must have a z-value. Thus, the dataframe should have 
+   3 * [(#x-values)*(#values)] observations. Creating this by hand is a tedious process, 
+   but if you are using the same series of z-values over and over again, MS Excel might 
+   be helpful. 
+   If you want to save time, check out the file Values.xlsx in primer/05-probability. It
+   contains a dataframe I created, but it does not have the exact same dimensions as the plot 
+   in the GIF.
+   
+   
+2. Create a 2D plot like this and and save it as an object.
+    
+plot <-- ggplot(df, aes(x, y, color = z)) +
+          geom_point() +
+          theme(legend.position = "none")
+   
+   
+3. Turn it into a 3D plot. Use the following code. Only the first
+   argument is required, you may adjust the rest.
+
+plot_gg(plot,
+        width = 3.5,
+        zoom = 0.65,
+        theta = 25,
+        phi = 30,
+        sunangle = 225,
+        soliddepth = -50,
+        windowsize = c(2048,1536))
+
+
+4. If you installed xquartz, and window named "RGL Device" with the plot 
+   should have opened on your machine. Tilt the plot in the desired position.
+   Then, run this command to create a snapshot:
+   
+render_snapshot()
+
+   Congrats, you now have a single snapshot. However, keep in mind that in order to 
+   create a GIF, you need a series of snapshots that can be rendered into a GIF. This
+   means you will have to repeat the above process for every possible perspective/plot 
+   seen in below. And since the GIF consist of different plots, you must not only change
+   the perspective, but also the plot itself when creating all those snapshots. As I see it, 
+   there are four different plots that would need to be created:
+    
+    - "edge view" and all blue (initial view / one snapshot)
+    - "edge view" and one distribution red (one snapshot)
+    - "edge view" and all but red distribution flat (one snapshot) 
+    - shift to a frontal 2D-like perspective (many snapshots)
+   
+   The last step can (and should) be automated. This involves writing a loop that changes the 
+   view on the plot just a little bit, creates a snapshot, moves on to the next position, creates
+   another snapshot, and so on. This is not as hard as it seems, and a basic example of this can
+   be found here https://www.tylermw.com/a-step-by-step-guide-to-making-3d-maps-with-satellite-imagery-in-r/
+   (scroll down to the last image).
+   
+
+5. Once you have created all the snapshots the GIF will consist of, make sure their names reflect
+   the order in which they should be displayed. For example, "plot1.png", "plot2.png" and so on. If
+   you write the loop the right way, you may only have to rename the first three snapshots created 
+   manually. See the link above for details.
+   Finally, you can put it all together. First, run this command in R to close the "RGL Device" window:
+
+rgl::rgl.close()
+
+  Next, run this command in the TERMINAL. Make sure that you are in the right working directory and that 
+  you have ffmpeg installed. The third part defines the framerate per second, the example below uses 60. 
+  The fifth part must be named like your snapshots, followed by "%d.png". The last part is the name of the 
+  mp4 file, or the GIF, and can be named anything you like.
+
+system("ffmpeg -framerate 60 -i plot%d.png -pix_fmt yuv420p plot_gif.mp4")
+   
+   
+-----------------------
+   
+The Problem:
+
+I don't know how to create a 3D plot with rayshader and gpplot AND manually defined colors. Specifically, 
+I didn't manage to create the 3D plot with one red distribution surrounded by blue distributions. The issue 
+seems to be that rayshader uses the "color" aesthetic to make the z-axis. If you try to change the color of 
+a range of observations to red/blue, the z-values of these observations will be messed up.  
+
+
+-->
 
 ![](05-probability/animations/color_red_combo.gif)
 
