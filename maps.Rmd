@@ -29,16 +29,50 @@ Note that to use **tidycensus**, you'll need a Census API key.  You can request 
 census_api_key("API KEY")  # You must replace API KEY with your actual key.
 ```
 
+If you run the `census_api_key()` function with the option `install = TRUE`, it will save your API key in your `.Renviron` so you don't have to run `census_api_key()` every time you want to get data from the Census. However, you should only do this once. You can examine/edit your `.Renviron` file directly with `usethis::edit_r_environ()`.
 
-where `"API KEY"` is replaced with your API key. If you run the `census_api_key()` function with the option `install = TRUE`, it will save your API key in your `.Renviron` so you don't have to run `census_api_key()` every time you want to get data from the Census. However, you should only do this once. You can examine/edit your `.Renviron` file directly with `usethis::edit_r_environ()`.
+There are two main sources we will be getting data from: the **American Community Survey (ACS)** and the **Decennial Census**. Both sources are available at  [data.census.gov](https://data.census.gov).
 
-To get data from the decennial census, use `get_decennial()`. Key arguments include:
 
-- `geography` determines the unit of analysis.  Here, we use "state", but there are many other [geographies](https://walkerke.github.io/tidycensus/articles/basic-usage.html#geography-in-tidycensus) you could use, such as "us" for the entire country, "county" for counties, and so on.
-- `variables` selects which Census variables you want.  Unfortunately, they have rather opaque names.  If you didn't know that "P001001" was the variable name for population, you have a couple of options:
-    - Use the `load_variables()` function in **tidycensus** to generate a tibble of variable names (described [here](https://walkerke.github.io/tidycensus/articles/basic-usage.html#searching-for-variables)).
-    - Search on [data.census.gov](https://data.census.gov) for the variable you want and download the results of the search. The variable name will be in the .csv file.
-- `year` is the year.  `get_decennial()` can obtain data from the 1990, 2000, and 2010 Census.
+When you click on [data.census.gov](https://data.census.gov)., you will be brought to a homepage with a search bar. You can then type the topic of interest.
+
+```{r}
+knitr::include_graphics("maps/images/searchbar.png")
+```
+
+For example, you could search for "resident population", and it will bring you to a page of various sources. Under each bolded title, you will see *Survey/Program* , which tells you the data source. We will only be focusing on the ACS and Decennial Census sources.
+
+```{r}
+knitr::include_graphics("maps/images/source-arrow.png")
+```
+
+
+
+To get data from the Decennial Census, use `get_decennial()`. The key arguments here are `geography`, `variables`, and `year`. 
+
+* `geography` determines the unit of analysis (i.e. the "geography" of your data.  For example, we could use "state", but there are many other [geographies](https://walkerke.github.io/tidycensus/articles/basic-usage.html#geography-in-tidycensus) you could use, such as "us" for the entire country, "county" for counties, and so on.
+
+* `variables` selects which Census variables you want. To know which variable you are dealing with, you have two options.  
+
+**The first way:** look at the data.census.gov website. In addition to *Survey/Program*, you will also see the bolded term *Tables*. It will tell you the name of the variable. However, the variable names are a little tricky. For example, the variable name for population below is "BO1003".
+
+```{r}
+knitr::include_graphics("maps/images/table.png")
+```
+
+**The second way**:  use the `load_variables()` function in **tidycensus** to generate a tibble of variable names (described [here](https://walkerke.github.io/tidycensus/articles/basic-usage.html#searching-for-variables)). The two key arguments to `load_variables()` are the `year` and `dataset`.
+For the year, you must use the year or end-year of the Decennial Census. For the `dataset` argument, you can either use "sf1" and "sf3". 
+
+
+* `year` is the last argument to `get_decennial()` that we will be using. `get_decennial()` can obtain data from the 1990, 2000, and 2010 Census. You can find the year for your variable under *Years* .
+
+```{r}
+knitr::include_graphics("maps/images/years.png")
+```
+
+Now that we have a better understanding the arguments to the function `get_decennial()`, let's practice using it!
+
+Consider the following code.
 
 ```{r, eval=FALSE}
 library(tidyverse)
