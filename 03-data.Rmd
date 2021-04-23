@@ -18,33 +18,83 @@ library(gapminder)
 library(fivethirtyeight)
 ```
 
-## Reading Files
 
-The `read_csv()` function turns text files into tibbles. More specifically, it converts files whose values are separated by commas. Let’s import a **c**omma **s**eparated **v**alues (hence "csv") file from the internet. The `read_csv()` function included in the **readr** package, which is one of the packages in the Tidyverse, is different than the `read.csv()` function that comes installed with R. Always use Tidyverse functions, if possible. 
+## Writing and Reading Files
 
-Each comma from the csv file corresponds to a column, and the column names are taken from the first line of the file. The function then "guesses" an appropriate data type for each of the columns. The link below is for a file containing faculty gender data across departments at Harvard University. Note, the `file` argument of the `read_csv()` function is very flexible. Below, it takes a url. `file` can also be the absolute or relative path for a file saved locally on your computer. 
+Getting data into and out of R is a major part of any real world data science project. 
+
+### read_csv() and write_csv() 
+
+<!-- BG: could be a CSV file section (or delim file b/c type of delim file...then include read_delim()), same for RDS, -->
+
+<!-- 90% is reading files w/ arguments -->
+
+A csv file is a **c**omma **s**eparated **v**alue file. In other words, these are files whose values are separated by commas. Each comma from the csv file corresponds to a column, and the column names are taken from the first line of the file. The function then "guesses" an appropriate data type for each of the columns. 
+
+When you wish to import a csv file into R, you can use `write_csv()`. The most important arguments to this function are `x` (the data frame to save), and `path` (the location to save it).
 
 ```{r}
-url <- "https://raw.githubusercontent.com/PPBDS/primer/master/02-wrangling/data/faculty.csv"
-
-fac <- read_csv(file = url, 
-                skip = 1)
-fac
+# example of write_csv()
 ```
 
-We need to "skip" the first row of the file because there is a code comment at the top, which has nothing to do with the actual data.
+Once you write your data to a file, the `read_csv()` function, which is from the **readr** package, is used to turn the text files into tibbles. Note that this function is different than the `read.csv()` function that comes installed with R. Always use Tidyverse functions, if possible. 
+
+The link below is for a file containing faculty gender data across departments at Harvard University. Note, the `file` argument of the `read_csv()` function is very flexible. Below, it takes a url. `file` can also be the absolute or relative path for a file saved locally on your computer. 
+
+<!-- BG: read it in first w/out skip, then improve it w/ skip argument -->
+
+<!-- BG: Then, explain col_types() argument here as a way of solving the error -->
+
 
 ```{r}
-summary(fac)
+file_1 <- "https://raw.githubusercontent.com/PPBDS/primer/master/02-wrangling/data/faculty.csv"
+
+read_csv(file = file_1)
 ```
 
-Don't confuse `summary()`, which is a built-in --- generally termed "base" --- R function for providing a summary of an object, with `summarize()`, which is one of the more important functions from **dplyr**, one of the Tidyverse packages.
+```{r}
+read_csv(file = file_1,
+         skip = 1)
+```
 
-You may notice that something appears to be wrong with this dataset. Which department could have employed 644 male professors? We will explore this mystery later in the Chapter.
+```{r}
+read_csv(file = file_1,
+         skip = 1,
+         col_types = cols(Concentration = col_character(),
+                          `Professors M` = col_double(),
+                          `Professors F` = col_double()))
 
-<!-- DK: Mention other read in functions, and packages like readxl. Connect it better to the tutorials. -->
+```
 
-### JSON
+```{r}
+read_csv(file = file_1,
+         skip = 1,
+         col_types = cols(Concentration = col_character(),
+                          `Professors M` = col_double(),
+                          `Professors F` = col_double()))
+
+```
+
+Take note of the `skip` argument here. We need to "skip" the first row of the file because there is a code comment at the top, which has nothing to do with the actual data.
+
+
+<!-- BG: something about read_delim() here -->
+
+### read_excel()
+
+<!-- BG: in order to write_excel() files you have to install complex packages. Easy to read, hard to create. Beyond scope of Primer. -->
+
+
+### write_rds() and read_rds()
+
+<!-- BG: same thing here. Make RDS header? -->
+
+<!-- BG: Writing here is just as important as reading. Just as likely to write as read.  -->
+
+To begin, rds files store a single R object. The function `read_rds` reads in the desired file. You will see it work with the function `write_rds()`, where you 
+
+
+## JSON
 
 An increasingly common format for sharing data is JavaScript Object Notation or JSON. Because this format is very general, it is nothing like a spreadsheet. Consider an example of information stored in a JSON format:
 
@@ -61,7 +111,6 @@ The file above actually represents a tibble. To read it, we can use the function
 
 ### HTML
 
-<!-- DK: Rewrite these sections. -->
 
 The data we need to answer a question is not always in a handy csv file. For example, we can find interesting data about murders in the US in [this Wikipedia page](https://en.wikipedia.org/w/index.php?title=Gun_violence_in_the_United_States_by_state): 
 
