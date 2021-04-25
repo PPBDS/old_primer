@@ -23,66 +23,58 @@ library(fivethirtyeight)
 
 Getting data into and out of R is a major part of any real world data science project. 
 
-### read_csv() and write_csv() 
+### CSV files
 
-<!-- BG: could be a CSV file section (or delim file b/c type of delim file...then include read_delim()), same for RDS, -->
+"CSV" stands for **c**omma **s**eparated **v**alue. In other words, csv files these are files whose values are separated by commas. Each comma from the csv file corresponds to a column, and the column names are taken from the first line of the file. The function then "guesses" an appropriate data type for each of the columns.
 
-<!-- 90% is reading files w/ arguments -->
+* `write_csv()` saves data as a csv file in R. This function has two main arguments: `x` and `path`. The `x` argument is the data set that you want to save. The `path` argument is the file path where you want to save the file. The end of the path argument is the name that you want to use for the file. 
 
-A csv file is a **c**omma **s**eparated **v**alue file. In other words, these are files whose values are separated by commas. Each comma from the csv file corresponds to a column, and the column names are taken from the first line of the file. The function then "guesses" an appropriate data type for each of the columns. 
+* `read_csv()`, which is from the **readr** package, reads a file back into R. The read_csv has one main argument: `file`, which is the file path to the file that you are wanting to read into R.
 
-When you wish to import a csv file into R, you can use `write_csv()`. The most important arguments to this function are `x` (the data frame to save), and `path` (the location to save it).
-
-```{r}
-# example of write_csv()
-```
-
-Once you write your data to a file, the `read_csv()` function, which is from the **readr** package, is used to turn the text files into tibbles. Note that this function is different than the `read.csv()` function that comes installed with R. Always use Tidyverse functions, if possible. 
-
-The link below is for a file containing faculty gender data across departments at Harvard University. Note, the `file` argument of the `read_csv()` function is very flexible. Below, it takes a url. `file` can also be the absolute or relative path for a file saved locally on your computer. 
-
-<!-- BG: read it in first w/out skip, then improve it w/ skip argument -->
-
-<!-- BG: Then, explain col_types() argument here as a way of solving the error -->
-
+For example, the link below is for a file containing faculty gender data across departments at Harvard University. Note, the `file` argument of the `read_csv()` function is very flexible. Below, it takes a url. `file` can also be the absolute or relative path for a file saved locally on your computer. 
 
 ```{r}
-file_1 <- "https://raw.githubusercontent.com/PPBDS/primer/master/02-wrangling/data/faculty.csv"
+file_1 <- "https://raw.githubusercontent.com/PPBDS/primer.tutorials/master/inst/www/test_2.csv"
 
 read_csv(file = file_1)
 ```
 
-```{r}
-read_csv(file = file_1,
-         skip = 1)
-```
+We need to "skip" the first two rows of the file because there are code comments at the top, which has nothing to do with the actual data.
 
 ```{r}
 read_csv(file = file_1,
-         skip = 1,
-         col_types = cols(Concentration = col_character(),
-                          `Professors M` = col_double(),
-                          `Professors F` = col_double()))
-
+         skip = 2)
 ```
+
+Do you see the column specification message? As of now, R "guesses" an appropriate data type for each of the columns. To get rid of this message, we tell R the column data types.
 
 ```{r}
 read_csv(file = file_1,
          skip = 1,
-         col_types = cols(Concentration = col_character(),
-                          `Professors M` = col_double(),
-                          `Professors F` = col_double()))
+         col_types = cols(a = col_double(),
+                          b = col_double(),
+                          c = col_double()))
 
 ```
 
-Take note of the `skip` argument here. We need to "skip" the first row of the file because there is a code comment at the top, which has nothing to do with the actual data.
+`read_csv()` reads files whose values are separated by commas, i.e. delimited by commas. However, in the real world, some data may use different delimiters other than commas such as pipes. In this case, we can use `read_delim()` to read the file. The function `read_delim()` takes the arguments as `read_csv()`. The only difference is the `delim` argument needs to be specified. 
 
 
-<!-- BG: something about read_delim() here -->
 
-### read_excel()
+### Excel Files
 
-<!-- BG: in order to write_excel() files you have to install complex packages. Easy to read, hard to create. Beyond scope of Primer. -->
+Excel is a spreadsheet program that use tables to analyze, store, or manipulate data. The tables are composed of cells which include text, numbers, or formulas.
+
+In order to write excel files you have to install complex packages, and they are hard to create. Writing excel files is beyond the scope of Primer. However, reading excel files is easy. To do so, we use the `read_excel()` function from the **readxl** package.
+
+
+```{r}
+library(readxl)
+
+file_2 <- "https://raw.githubusercontent.com/PPBDS/primer.tutorials/master/inst/www/excel_1.xlsx"
+
+read_excel(file = "excel_1.xlsx" )
+```
 
 
 ### write_rds() and read_rds()
@@ -97,6 +89,10 @@ To begin, rds files store a single R object. The function `read_rds` reads in th
 ## JSON
 
 An increasingly common format for sharing data is JavaScript Object Notation or JSON. Because this format is very general, it is nothing like a spreadsheet. Consider an example of information stored in a JSON format:
+
+<!-- BG: pick example of json file (could be from library) stick it in data directory w/ faculty.csv, submit PR just for this -->
+
+read_xml 
 
 ```{r, echo = FALSE}
 library(jsonlite)
