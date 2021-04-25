@@ -25,11 +25,11 @@ Getting data into and out of R is a major part of any real world data science pr
 
 ### CSV files
 
-"CSV" stands for **c**omma **s**eparated **v**alue. In other words, csv files these are files whose values are separated by commas. Each comma from the csv file corresponds to a column, and the column names are taken from the first line of the file. The function then "guesses" an appropriate data type for each of the columns.
+"CSV" stands for **c**omma **s**eparated **v**alue. In other words, csv files are files whose values are separated by commas. Each comma from the csv file corresponds to a column, and the column names are taken from the first line of the file. The function then "guesses" an appropriate data type for each of the columns.
 
-* `write_csv()` saves data as a csv file in R. This function has two main arguments: `x` and `path`. The `x` argument is the data set that you want to save. The `path` argument is the file path where you want to save the file. The end of the path argument is the name that you want to use for the file. 
+* `write_csv()` saves data as a csv file in R. This function has two main arguments: `x` and `path`. The `x` argument is the data set that you want to save. The `file` argument is the file path where you want to save the file. The end of the path argument is the name that you want to use for the file. 
 
-* `read_csv()`, which is from the **readr** package, reads a file back into R. The read_csv has one main argument: `file`, which is the file path to the file that you are wanting to read into R.
+* `read_csv()`, which is from the **readr** package, reads a file back into R. The `read_csv` has one main argument: `file`, which is the file path to the file that you are wanting to read into R.
 
 For example, the link below is for a file containing faculty gender data across departments at Harvard University. Note, the `file` argument of the `read_csv()` function is very flexible. Below, it takes a url. `file` can also be the absolute or relative path for a file saved locally on your computer. 
 
@@ -70,38 +70,57 @@ In order to write excel files you have to install complex packages, and they are
 
 ```{r}
 library(readxl)
-
-file_2 <- "https://raw.githubusercontent.com/PPBDS/primer.tutorials/master/inst/www/excel_1.xlsx"
-
-read_excel(file = "excel_1.xlsx" )
+# need example 
 ```
 
 
-### write_rds() and read_rds()
+### RDS
 
-<!-- BG: same thing here. Make RDS header? -->
+rds files store a single R object within a file. 
 
-<!-- BG: Writing here is just as important as reading. Just as likely to write as read.  -->
+When we save to a rds file, we use the function `write_rds()`. Just like `write_csv()`, this function has two main arguments: `x` and `file`.  The `x` argument is the data set that you want to save. The `file` argument is the file path where you want to save the file. The end of the path argument is the name that you want to use for the file. 
 
-To begin, rds files store a single R object. The function `read_rds` reads in the desired file. You will see it work with the function `write_rds()`, where you 
+`read_rds()` reads the file back into R. Just like `read_csv()` `read_rds` has one main argument: `file`, which is the file path to the file that you are wanting to read into R.
+
+```{r}
+# need example here
+```
 
 
 ## JSON
 
-An increasingly common format for sharing data is JavaScript Object Notation or JSON. Because this format is very general, it is nothing like a spreadsheet. Consider an example of information stored in a JSON format:
+An increasingly common format for sharing data is **J**avaScript **O**bject **N**otation or JSON. Because this format is very general, it is nothing like a spreadsheet. Note that JSON files are often made available via the internet. Several organizations provide a JSON API or a web service that you can connect directly to and from which you can obtain data. 
 
-<!-- BG: pick example of json file (could be from library) stick it in data directory w/ faculty.csv, submit PR just for this -->
+The functions `fromJSON()` and `toJSON()` allow you to convert between R objects and JSON. Both functions come from the **jsonlite** package. 
 
-read_xml 
+The function `toJSON()` converts a tibble to JSON format.
 
 ```{r, echo = FALSE}
 library(jsonlite)
-example <- data.frame(name= c("Miguel", "Sofia", "Aya", "Cheng"), student_id = 1:4, exam_1 = c(85, 94, 87, 90), exam_2 = c(86, 93, 88, 91))
-json <- toJSON(example, pretty = TRUE) 
-json
+
+example_1 <- tibble(name= c("Miguel", "Sofia", "Aya", "Cheng"), student_id = 1:4, exam_1 = c(85, 94, 87, 90), exam_2 = c(86, 93, 88, 91))
+
+toJSON(example_1, pretty = TRUE) 
+
+# The pretty argument adds indentation and whitespace when TRUE. 
 ```
 
-The file above actually represents a tibble. To read it, we can use the function `fromJSON` from the **jsonlite** package. Note that JSON files are often made available via the internet. Several organizations provide a JSON API or a web service that you can connect directly to and from which you can obtain data.
+The function `fromJSON()` converts JSON format to a tibble.
+
+```{r, echo = FALSE}
+library(jsonlite)
+
+json_format_ex <-
+'[
+  {"Name" : "Mario", "Age" : 32, "Occupation" : "Plumber"}, 
+  {"Name" : "Peach", "Age" : 21, "Occupation" : "Princess"},
+  {},
+  {"Name" : "Bowser", "Occupation" : "Koopa"}
+]'
+
+fromJSON(json_format_ex) 
+```
+
 
 ## Webscraping
 
