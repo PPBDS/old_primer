@@ -1326,10 +1326,16 @@ As you may have noticed, if you calculated the value using the first method, you
 
 ## Cardinal Virtues
 
-The four [Cardinal Virtues](https://en.wikipedia.org/wiki/Cardinal_virtues) are Wisdom, Justice, Courage, and Temperance. Because data science is, ultimately, a moral act, we use these virtues to guide our work. *Wisdom* highlights the importance of exploring your data. Given the questions you seek to answer, is the data valid? Is it representative? Is it ethical to proceed? *Justice* focuses on the Preceptor Table and the mathematical structure of the model. The virtue of *Courage* allows us to go from words and math to code, the hardest step in the data science process. *Temperance* guides us in the use of the model we have created to answer the questions we began with. We should be modest in the claims we make, and wary of naive attempts to "test" them.
+The four [Cardinal Virtues](https://en.wikipedia.org/wiki/Cardinal_virtues) are Wisdom, Justice, Courage, and Temperance. Because data science is, ultimately, a moral act, we use these virtues to guide our work.  
 
+* *Wisdom* begins with the ideal Preceptor Table. What data, if we had it, would allow us to answer our question easily? We explore the data we have. Are the data we have close enough to the data we want that we can consider all the data as coming from the same *population*? If not, we can't proceed further. As John Tukey noted, "The combination of some data and an aching desire for an answer does not ensure that a reasonable answer can be extracted from a given body of data."
 
-<!-- DK: THe below Not bad, but should be rewritten and tightened up. Delete the themes.Rmd when you are done. If it is worth remembering, it is worth including here. Highlight these two key connections: validity <==> columns and representativeness <==> rows. -->
+* *Justice* looks at the actual Preceptor Table, a structure which includes a row for every unit in the population -- the data we want to have and the data which we actually have. Is our data *representative* of the population? Is the meaning of the columns consistent, i.e., can we assume *validity*? We then make an assumption about the *data generating mechanism*. What mathematical formula connects the outcome variable we are interested in with the other data that we have?
+
+* *Courage* allows us to explore different models. Even though Justice has provided the basic mathematical structure of the model, we still need to decide which variables to include and to estimate the values of unknown parameters. We avoid hypothesis tests. We check our models for consistency with the data we have. We select one model. 
+
+* *Temperance* guides us in the use of the model we have created to answer the questions we began with. We create posteriors of *quantities of interest*.  We should be modest in the claims we make. The posteriors we create are never the "truth." The assumptions we made to create the model are never perfect. Yet decisions made with flawed posteriors are almost always better than 
+
 
 ### Wisdom
 
@@ -1338,19 +1344,25 @@ The four [Cardinal Virtues](https://en.wikipedia.org/wiki/Cardinal_virtues) are 
 knitr::include_graphics("other/images/Wisdom.jpg")
 ```
 
-Wisdom encompasses four topics: data, validity, the population and ethics.
+Wisdom helps us decide if we can even hope to answer our question with the data we have.
 
-First, we look at the data and perform an exploratory data analysis, an EDA. You can never look at your data too much.
+First, start with the ideal Preceptor Table. What rows and columns of data do you need such that, if you had them all, the calculation of the number of interest would be trivial? If you want to know the average height of an adult in India, then the ideal Preceptor Table would include a row for each adult and one column for their height. With no missing data, the average is easy to determine, as would a wide variety of other *estimands*, other unknown numbers. 
 
-Second, confirm that the data we have accurately capturing the concepts we care about. Is the data *valid*, given the problem we are trying to solve? @roas write:
+One key aspect of this ideal Preceptor Table is whether or not we need more than one potential outcome in order to calculate our estimand. For example, if we want to know the causal effect of exposure to Spanish-speakers on attitude toward immigration that we need a causal model, one which estimates that attitude under both treatment and control. The Preceptor Table would require two columns for the outcome. If, on the other hand, we only want to predict someone's attitude, or compare one person's attitide to another's, then we would only need a Preceptor Table with one column for the outcome. 
 
-> Most important is that the data you are analyzing should map to the research question you are trying to answer. This sounds obvious but is often overlooked or ignored because it can be inconvenient. Optimally, this means that the outcome measure should accurately reflect the phenomenon of interest, the model should include all relevant predictors, and the model should generalize to the cases to which it will be applied.
+Are we are modeling (just) for prediction or are we (also) modeling for causation? Predictive models care nothing about causation. Causal models are often also concerned with prediction, if only as a means of measuring the quality of the model. 
 
-> For example, with regard to the outcome variable, a model of incomes will not necessarily tell you about patterns of total assets. A model of test scores will not necessarily tell you about child intelligence or cognitive development. ...
+Every model is predictive, in the sense that, if we give you new data --- and it is drawn from a stable distribution --- then you can create a predictive forecast. But only a subset of those models are causal, meaning that, for a given individual, you can change the value of one input and figure out what the new output would be and then, from that, calculate the causal effect.
 
-> A sample that is representative of all mothers and children may not be the most appropriate for making inferences about mothers and children who participate in the Temporary Assistance for Needy Families program. ... Similarly, results regarding diet and exercise obtained from a study performed on patients at risk for heart disease may not be generally applicable to generally healthy individuals. 
+With prediction, all we care about is forecasting Y given X on some as-yet-unseen data --- implying that the Preceptor Table has rows in which we know all the X but not the Y. But there is no notion of "manipulation" in such models. We don't pretend that, for Joe, we could turn variable X from a value of 5 to a value of 30 by just turning some knob and, by doing so, cause Joe's value of Y to change from 17 to 23. We can compare two people (or two groups of people), one with X equal to 5 and one with X equal to 30, and see how they differ in Y. The basic assumption of predictive models is that there is only one possible Y for Joe. There are not, by assumption, two possible values for Y, one if X equal 5 and another if X equals 30. The Preceptor Table has a single column under Y.
 
-We want there to be a connection between the problem we face and the data we have. But desire is a poor replacement for substance. If the data we have is not relevant, then data science is useless.
+With causal inference, however, we can consider the case of Joe with $X = 5$ and Joe with $X = 30$. The same mathematical model can be used. And both models can be used for prediction, for estimating what the value of Y will be for a yet-unseen observation with values X. But, in this case, instead of only a single column in the Preceptor Table for Y, we have at least two (and possibly many) such columns, one for each of the potential outcomes under consideration.
+
+*The difference between prediction models and causal models is that the former have one column for Y and the latter have more than one.* 
+
+Second, we look at the data we have and perform an exploratory data analysis, an EDA. You can never look at your data too much.
+
+
 
 Third, a key concept is the "population," which is largely equivalent to the rows of the ideal Preceptor Table, as discussed in Chapter \@ref(rubin-causal-model). @roas write:
 
@@ -1362,9 +1374,6 @@ Third, a key concept is the "population," which is largely equivalent to the row
 
 > Representativeness is a concern even with data that would not conventionally be considered as a sample. For example, the forecasting model in Section 7.1 contains data from 16 consecutive elections, and these are not a sample from anything, but one purpose of the model is to predict future elections. Using the regression fit to past data to predict the next election is mathematically equivalent to considering the observed data and the new outcome as a random sample from a hypothetical superpopulation. Or, to be more precise, it is like treating the errors as a random sample from the normal error distribution. For another example, if a regression model is fit to data from the 50 states, we are not interested in making predictions for a hypothetical 51st state, but you may well be interested in the hypothetical outcome in the 50 states in a future year. As long as some generalization is involved, ideas of statistical sampling arise, and we need to think about representativeness of the sample to the implicit or explicit population about which inferences will be drawn. This is related to the idea of generative modeling, as discussed in Section 4.1.
 
-*Validity is about the columns in our tibble. Representativeness is about the rows.*
-
-Fourth, even if we can make a model, we should always ask ourselves: Should we? Ethics matter.
 
 
 ### Justice
@@ -1373,8 +1382,42 @@ Fourth, even if we can make a model, we should always ask ourselves: Should we? 
 knitr::include_graphics("other/images/Justice.jpg")
 ```
 
-There are three key aspects of *Justice*: the Preceptor Table, predictive versus causal models, and mathematical formula.
+There are three key aspects of *Justice*: the data generating mechanism, representativeness and validity.
 
+First, the *data generating mechanism* is the mathematical formula, and associated error term, which relates covariates to our outcome variable.  
+
+
+*Justice* requires (simple) math. Consider a model of coin-tossing:
+
+
+$$ T_i  \sim B(p_H, n = 20) $$
+The total number $T$ of Heads in experiment $i$ with 20 flips of a single coin, $T_i$, is distributed as a binomial with $n = 20$ and an unknown probability $\rho_h$ of the coin coming up Heads. 
+ 
+Note:
+
+* This is a cheat and a simplification! We are Bayesians but we have not specified the full Bayesian machinery. We really need priors on the unknown parameter $\rho_h$ as well. But that is too complex for an introductory class, so we wave our hands, accept the default sensible parameters built into the functions we use and point readers to more advanced books, like @roas. 
+
+* Defining $\rho_h$ as the "the probability that the coin comes up Heads" is a bit of a fudge. If you calculate that by hand and then compare it to what our tools produce, they won't be the same. Instead, the calculated value will be closer to zero. Why? $\rho_h$ is really the "long-run percentage of the time the coin comes up Heads." It is not just the percentage from this experiment. 
+
+
+* In this simple case, we are fortunate that the parameter $\rho_h$ has such a (mostly!) simple analog to a real world quantity. Much of the time, parameters are not so easy to interpret. In a more complex model, especially with one with interaction terms, we focus less on parameters and more on actual predictions.
+
+Second,
+
+
+Third, confirm that the data we have accurately capturing the concepts we care about. Is the data *valid*, given the problem we are trying to solve? @roas write:
+
+> Most important is that the data you are analyzing should map to the research question you are trying to answer. This sounds obvious but is often overlooked or ignored because it can be inconvenient. Optimally, this means that the outcome measure should accurately reflect the phenomenon of interest, the model should include all relevant predictors, and the model should generalize to the cases to which it will be applied.
+
+> For example, with regard to the outcome variable, a model of incomes will not necessarily tell you about patterns of total assets. A model of test scores will not necessarily tell you about child intelligence or cognitive development. ...
+
+> A sample that is representative of all mothers and children may not be the most appropriate for making inferences about mothers and children who participate in the Temporary Assistance for Needy Families program. ... Similarly, results regarding diet and exercise obtained from a study performed on patients at risk for heart disease may not be generally applicable to generally healthy individuals. 
+
+We want there to be a connection between the problem we face and the data we have. But desire is a poor replacement for substance. If the data we have is not relevant, then data science is useless.
+
+
+
+We want there to be a connection between the problem we face and the data we have. But desire is a poor replacement for substance. If the data we have is not relevant, then data science is useless.
 
 #### Preceptor Table
 
@@ -1394,39 +1437,9 @@ The central problem in inference is to fill in the question marks on the actual 
 
 Note that the concept of a Preceptor Table is more subtle than it at first appears. For example, consider a problem in which we are using `party` to predict `income` with the `trains` data. Naively, it might look like we don't have any question marks. For all 115 rows in the data, we have `party` and `income`. But the Preceptor Table we really need has more than 115 rows because we are trying to draw inferences about people not in the sample of 115. What if a new person shows up, tells us their party, and asks us to guess their income? The ideal Preceptor Table would include their row, with the data for `party` present but the data for `income` a question mark.
 
-#### Predictive versus causal models
-
-Are we are modeling (just) for prediction or are we (also) modeling for causation? Predictive models care nothing about causation. Causal models are often also concerned with prediction, if only as a means of measuring the quality of the model. 
-
-Every model is predictive, in the sense that, if we give you new data --- and it is drawn from a stable distribution --- then you can create a predictive forecast. But only a subset of those models are causal, meaning that, for a given individual, you can change the value of one input and figure out what the new output would be and then, from that, calculate the causal effect.
-
-With prediction, all we care about is forecasting Y given X on some as-yet-unseen data --- implying that the Preceptor Table has rows in which we know all the X but not the Y. But there is no notion of "manipulation" in such models. We don't pretend that, for Joe, we could turn variable X from a value of 5 to a value of 30 by just turning some knob and, by doing so, cause Joe's value of Y to change from 17 to 23. We can compare two people (or two groups of people), one with X equal to 5 and one with X equal to 30, and see how they differ in Y. The basic assumption of predictive models is that there is only one possible Y for Joe. There are not, by assumption, two possible values for Y, one if X equal 5 and another if X equals 30. The Preceptor Table has a single column under Y.
-
-With causal inference, however, we can consider the case of Joe with $X = 5$ and Joe with $X = 30$. The same mathematical model can be used. And both models can be used for prediction, for estimating what the value of Y will be for a yet-unseen observation with values X. But, in this case, instead of only a single column in the Preceptor Table for Y, we have at least two (and possibly many) such columns, one for each of the potential outcomes under consideration.
-
-*The difference between prediction models and causal models is that the former have one column for Y and the latter have more than one.* 
-
-A related issue is the different types of Preceptor Tables. All of these are Preceptor Tables, but it is useful, I think, to have a clear description of the different types. 
-
-#### Mathematical Model
-
-*Justice* requires (simple) math. Consider a model of coin-tossing:
 
 
-$$ T_i  \sim B(p_H, n = 20) $$
-The total number $T$ of Heads in experiment $i$ with 20 flips of a single coin, $T_i$, is distributed as a binomial with $n = 20$ and an unknown probability $\rho_h$ of the coin coming up Heads. 
- 
- Note:
-
-* This is a cheat and a simplification! We are Bayesians but we have not specified the full Bayesian machinery. We really need priors on the unknown parameter $\rho_h$ as well. But that is too complex for an introductory class, so we wave our hands, accept the default sensible parameters built into the functions we use and point readers to more advanced books, like @roas. 
-
-* Defining $\rho_h$ as the "the probability that the coin comes up Heads" is a bit of a fudge. If you calculate that by hand and then compare it to what our tools produce, they won't be the same. Instead, the calculated value will be closer to zero. Why? $\rho_h$ is really the "long-run percentage of the time the coin comes up Heads." It is not just the percentage from this experiment. 
-
-<!-- DK: too complex for this chapter? -->
-
-* In this simple case, we are fortunate that the parameter $\rho_h$ has such a (mostly!) simple analog to a real world quantity. Much of the time, parameters are not so easy to interpret. In a more complex model, especially with one with interaction terms, we focus less on parameters and more on actual predictions.
-
-
+*Validity is about the columns in our tibble. Representativeness is about the rows.*
 
 
 ### Courage
@@ -1435,8 +1448,11 @@ The total number $T$ of Heads in experiment $i$ with 20 flips of a single coin, 
 knitr::include_graphics("other/images/Courage.jpg")
 ```
 
-
 The three languages of data science are words, math and code, and the most important of these is code. We need to explain the structure of our model using all three languages, but we need *Courage* to implement the model in code.
+
+Courage requires us to take the general mathematical formula provide by Justice and then make it specific. Which variables should we include in the model and which do we exclude? Every data science project involves the creation of several models. For each, we specify the precise data generating mechanism. Using that formula, and some R code, we create a fitted model. All models have parameters. We can never know the true values of the parameters, but we can create, and explore, posterior distributions for those unknown true values.
+
+
 
 Code allows us to "fit" a model by estimating the values of the unknown parameters, like $\rho_h$. Sadly, we can never know the true values of these parameters. But, like all good data scientists, we can express our uncertain knowledge in the form of posterior probability distributions. With those distributions, we can compare the actual values of the outcome variable with the  "fitted" or "predicted" results of the model. We can examine the "residuals," the difference between the fitted and actual values.  
 
@@ -1448,9 +1464,11 @@ It doesn't matter what the outcome is. It could be the result of a coin flip, th
 
 Some of our uncertainty is driven by our ignorance about $\rho_h$. 
 
-A parameter is something which does not exist in the real world. (If it did, or could, then it would be data.) Instead, a parameter is a mental abstraction, a building block which we will use to to help us accomplish our true goal: To replace at least some of the questions marks in the Preceptor Table. Since parameters are mental abstractions, we will always be uncertain as to their value, however much data we might collect.
+A parameter is something which does not exist in the real world. (If it did, or could, then it would be data.) Instead, a parameter is a mental abstraction, a building block which we will use to to help us accomplish our true goal: To replace at least some of the questions marks in the actual Preceptor Table. Since parameters are mental abstractions, we will always be uncertain as to their value, however much data we might collect.
 
-But some, often most, of the uncertainty comes from forces that are, by assumption, not in the model. For example, if the coin is fair, we expect $T_i$ to equal 10. But, often, it will be different, even if we are correct and $\rho_h$ equals exactly 0.5. *Some randomness is intrinsic in this fallen world.* 
+But some, often most, of the uncertainty comes from forces that are, by assumption, not in the model. For example, if the coin is fair, we expect $T_i$ to equal 10. But, often, it will be different, even if we are correct and $\rho_h$ equals exactly 0.5. 
+
+*Some randomness is intrinsic in this fallen world.* 
 
 
 ### Temperance
@@ -1458,6 +1476,7 @@ But some, often most, of the uncertainty comes from forces that are, by assumpti
 ```{r, echo = FALSE, fig.cap = "Temperance."}
 knitr::include_graphics("other/images/Temperance.jpg")
 ```
+
 
 There are few more important concepts in statistics and data science than the "Data Generating Mechanism." Our *data* --- the data that we collect and see --- has been *generated* by the complexity and confusion of the world. God's own *mechanism* has brought His data to us. Our job is to build a model of that process, to create, on the computer, a mechanism which generates fake data consistent with the data which we see. With that DGM, we can answer any question which we might have. In particular, with the DGM, we provide predictions of data we have not seen and estimates of the uncertainty associated with those predictions. *Courage* helped us to create the DGM. *Temperance* will guide us in its use.
 

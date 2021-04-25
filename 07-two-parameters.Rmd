@@ -160,8 +160,6 @@ The statistical term "population" is often relevant here. Recall from Chapter \@
 
 Wisdom asks: *Is there really a single population which includes both the data that we have and the data we need to answer our questions?* If there is, then we can proceed. If not, we must find another approach. 
 
-The other aspect of Wisdom is ethics. Just because we *can* make a model does not mean we *should* make that model. Models can be used for evil and, if at all possible, we should do no evil. Fortunately, it is hard to generate many ethical worries about height models. If, instead, we were modeling criminality, the ethics become much more complex . . .
-
 ## Justice
 
 ```{r, echo = FALSE}
@@ -683,99 +681,6 @@ pp %>%
 <!-- DK: Need more text. Explain all the things that could be wrong with the model. Explain what is going on in different columns. Explain all the cool R code tricks. Discuss difference between predict and epred.  -->
 
 
-## Coverage {#coverage}
-
-<!-- Prove that the bootstrap works, that our 95% confidence intervals provide correct coverage. We make a game and I give you a sample of like 40. Here's the 40, and you give me a 95% CI using the bootstrap tools we learned. Then I give you another 40. And another. If we do this 1,00 times, and we use the same procedure for calculating a confidence interval each time, then 950 should include the truth. That's how we know bootstraps is correct and I could only demonstrate this to you if we know what the truth is.  
-
-Plan: create function called create_ci(), which takes a tibble with a single variable called height and returns the 95% confidence interval --- i.e., a numeric vector of length 2 --- for the 2.5th and 97.5th percentiles.  Note that you get to hard code everything.
-
-Then, create a tibble, first column is ID. Second column is height_sample, which is created by running sample(ch7$height, size = 40, replace = FALSE). Third column is ci, which is result mutate(ci = map(height_sample, ~ create_ci(.)). Fourth column is within_ci, which is TRUE if ci includes the TRUE value and FALSE otherwise. (If you want to have two columns, one for each limit, that is fine.)
--->
-
-<!-- Discuss how this exercise is still useful even if we begin with all our data. That is, don't sample. Just use all 5,000 people. Then, do the bootstrap to get a confidence interval. Note that the interval will be --- how much? --- smaller than the ones we got above, because we are using 116 times as much data. But it is also weird. I know exactly what the mean is! I have the entire Rubin Table! I don't need a confidence interval for the mean.  -->
-
-<!-- That is both true, and false. If all you truly care about is the mean these 5,000 people then, it is true, you are done. But that is generally not the case! The true Rubin Table is often bigger than you might initially think. You might also be interested in data from another time period (which has occurred but which may not be available to you) or from 2021, which has not even happened yet. Your Rubin Table includes rows for all those people. They are just missing. You also care about the millions of people who are not in the 5,000. You really want the mean for the country. (Or the world?) So, you use the model that you have to estimate stuff for the data that you don't. What is your best guess for the mean in 2010 (which you can check) or in 2021 (which you can't)? How confident are you are that estimate? What is your 50/50 prediction interval? -->
-
-<!-- Relatedly, what if I told you that your 2010 data I gave you did not include one person (or ten people or 100), which was (were) dropped at random from the data by mistake. What is your guess as to the height of that single person, or the height of the average of the 10 people or the tallest of the 10 classes? What is your confidence interval for that? Want to bet? These are all different estimands. -->
-
-You now understand how to use `stan_glm()` to estimate posterior probability distributions. But we have not, yet, offered evidence that these distributions are accurate, that they "work." Does the 95% confidence interval really include the true value 95% of the time? The technical term for this is "coverage," derived from the idea that any X% confidence interval for an unknown value should include that unknown value, should "cover" the value, X% of the time. We can explore coverage with a simple simulation.
-
-<!-- DK: When I use n = 1000, the book fails to build, I suspect because storing a 1,000 models is too much. -->
-
-<!-- DK: Could make a fun plot which shows, first, all 1000 confidence intervals as lines in order, with the 50 or so who misssed the truth in red. And, next to it, show the same but ordered by lower bound. Then, the misses would be 25 at the top and 25 at the bottom. -->
-
-```{r, cache = TRUE}
-# Calculating key values, and giving them useful names, at the top of a block of
-# code is handy.
-
-true_value <- mean(ch7_all$height)
-
-# Always run initial versions of the simulation with n = 3. That is enough
-# iterations to make sure that the code is working. Once it is, switch n to a
-# larger number.
-
-n <- 100
-
-# Using set.seed() ensures that you will get the same result when you run this
-# code as we did in writing the book.
-
-set.seed(96)
-
-# Simulations like this demonstrate the power of list-columns and map functions.
-# It is always a good idea to start with a tibble that only includes an ID or
-# counter variable. Then, we add columns to this tibble as we, step-by-step,
-# conduct the simulation.
-
-cov_analysis <- tibble(ID = 1:n) %>% 
-  
-  # Note how sample_id is a tibble, not just a number, as we are used to in
-  # tibbles. List-columns can contain almost anything. The first argument to
-  # map() is the thing that we are iterating over. In this case, ID does not
-  # matter since we are not using its value in the function call to slice_sample().
-  
-  mutate(sample_data = map(ID, ~ slice_sample(ch7_all, n = 50))) %>% 
-  
-  # It is easy to forget both the tilde and the period when using map functions.
-  # In this row, we are doing the exact same modeling as we did above. But, in
-  # this case, we are making a new model, with new data, in each row. That can
-  # be an expensive operation, especially since we are saving the fitted model
-  # each time.
-  
-  mutate(model = map(sample_data, ~ stan_glm(data = ., 
-                                             height ~ 1, 
-                                             refresh = 0))) %>% 
-  
-  # For each model, we need the 95% confidence interval. posterior_interval(),
-  # when given a fitted model and a parameter, returns that confidence interval
-  # as a matrix with two columns.
-  
-  mutate(conf_interval = map(model, 
-                             ~ posterior_interval(., 
-                                                  pars = "(Intercept)",
-                                                  prob = 0.95))) %>% 
-  
-  # The next chunk of code is not really necessary. We don't need to pull out
-  # the lower and upper bound into separate columns and then, after doing so,
-  # check the coverage. But, when debugging, it is nice to check each step. Note
-  # the use of [] to pull values from the conf_interval matrix.
-  
-  mutate(lower = map_dbl(conf_interval, ~ .[1, 1])) %>% 
-  mutate(upper = map_dbl(conf_interval, ~ .[1, 2])) %>% 
-  mutate(coverage = ifelse(true_value > lower & 
-                             true_value < upper,
-                           TRUE, FALSE))
-
-```
-
-```{r}
-summary(cov_analysis$coverage)
-```
-
-Given randomness, coverage will only be precisely correct by luck. The key point is that, *about* 95% of the time, a 95% confidence interval includes the true value.
-
-<!-- DK: More to say? -->
-
-
 ## 0/1 Outcomes {#zero-one-outcomes}
 
 Variables with well-behaved, continuous ranges are the easiest to handle. We started with `height` because it was simple. Sadly, however, many variables are not like `height`. Consider `gender`, a variable in `nhanes` which takes on two possible values: "Male" and "Female". In the same way that we would like to construct a model which explains or predicts `height`, we would like to build a model which explains or predicts `gender`. We want to answer questions like:
@@ -967,7 +872,7 @@ That 5 or 6 women is the most likely number is very consistent with the answer t
 
 <!-- DK: Discuss meaning of "Posterior" in all plot titles. Show the key code examples. -->
 
-The next five chapters will follow the same process we have just completed here. We start with a decision we have to make. With luck, we will have some data to guide us. (Without data, even the best data scientist will struggle to make progress.) *Wisdom* asks us: "Is the data we have close enough to the decision we face to make using that data helpful?" Often times, the answer is "No." Even if we do have data, and the ability to make a model, Wisdom will tap us on the shoulder and say, "Even if you can make a model, don't forget to ask yourself if you should." Ethics matter.
+The next five chapters will follow the same process we have just completed here. We start with a decision we have to make. With luck, we will have some data to guide us. (Without data, even the best data scientist will struggle to make progress.) *Wisdom* asks us: "Is the data we have close enough to the decision we face to make using that data helpful?" Often times, the answer is "No." 
 
 Once we start to build the model, *Justice* will guide us. Is the model descriptive or causal? What is the mathematical relationship between the dependent variable we are trying to explain and the independent variables we can use to explain it? What assumptions are we making about distribution of the error term?
 
