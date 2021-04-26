@@ -23,30 +23,35 @@ library(fivethirtyeight)
 
 Getting data into and out of R is a major part of any real world data science project. 
 
+
 ### CSV files
 
 "CSV" stands for **c**omma **s**eparated **v**alue. In other words, csv files are files whose values are separated by commas. Each comma from the csv file corresponds to a column, and the column names are taken from the first line of the file. The function then "guesses" an appropriate data type for each of the columns.
 
-* `write_csv()` saves data as a csv file in R. This function has two main arguments: `x` and `path`. The `x` argument is the data set that you want to save. The `file` argument is the file path where you want to save the file. The end of the path argument is the name that you want to use for the file. 
+In the real word, you often want to write a data frame that has changed (either through filtering, selecting, mutating or summarizing) to a file to share it with others. We use `write_csv()` to save a data frame to a .csv file. `write_csv()` has two main arguments: `x` and `path`. The `x` argument is the data set that you want to save. The `file` argument is the file path where you want to save the file. The end of the path argument is the name that you want to use for the file. 
 
-* `read_csv()`, which is from the **readr** package, reads a file back into R. The `read_csv` has one main argument: `file`, which is the file path to the file that you are wanting to read into R.
+<!-- Does there need to be an example here? -->
 
-For example, the link below is for a file containing faculty gender data across departments at Harvard University. Note, the `file` argument of the `read_csv()` function is very flexible. Below, it takes a url. `file` can also be the absolute or relative path for a file saved locally on your computer. 
+We use `read_csv()` from the **readr** package to load the data into R, and in that call we specify the relative path to the file
+
+Consider the following csv file "test_2.csv". 
 
 ```{r}
 file_1 <- "https://raw.githubusercontent.com/PPBDS/primer.tutorials/master/inst/www/test_2.csv"
 
-read_csv(file = file_1)
+read_csv(file_1)
 ```
 
-We need to "skip" the first two rows of the file because there are code comments at the top, which has nothing to do with the actual data.
+As you can see, there is text at the top of this file. Often times information about how data was collected, or other relevant information, is included at the top of the data file. This does not allow us to correctly load the data into R, and it is not intended to be shown.
+
+We can use the `skip` argument to skip the text lines.
 
 ```{r}
 read_csv(file = file_1,
          skip = 2)
 ```
 
-Do you see the column specification message? As of now, R "guesses" an appropriate data type for each of the columns. To get rid of this message, we tell R the column data types.
+Do you see the column specification message? As of now, R "guesses" an appropriate data type for each of the columns. To get rid of this message, we use the `col_types()` argument and specify the data types.
 
 ```{r}
 read_csv(file = file_1,
@@ -57,21 +62,27 @@ read_csv(file = file_1,
 
 ```
 
-`read_csv()` reads files whose values are separated by commas, i.e. delimited by commas. However, in the real world, some data may use different delimiters other than commas such as pipes. In this case, we can use `read_delim()` to read the file. The function `read_delim()` takes the arguments as `read_csv()`. The only difference is the `delim` argument needs to be specified. 
 
+When our tabular data comes in a different format, we can use the `read_delim()` function instead. For example, a different version of "test_2.csv" could exist that has no column names and uses tabs as the delimiter instead of commas.
 
+With `read_delim()`, we specify the first argument as the path to the file (as done with read_csv). Then we provide values to the `delim` argument (could be a tab, which we represent by "\t").
 
 ### Excel Files
 
-Excel is a spreadsheet program that use tables to analyze, store, or manipulate data. The tables are composed of cells which include text, numbers, or formulas.
+Excel is a spreadsheet program that use tables to analyze, store, or manipulate data. The tables are composed of cells which include text, numbers, or formulas .Excel files have the filename extension .xlsx. They store additional things that you cannot store in a .csv file such as fonts, text formatting, graphics, etc.
 
-In order to write excel files you have to install complex packages, and they are hard to create. Writing excel files is beyond the scope of Primer. However, reading excel files is easy. To do so, we use the `read_excel()` function from the **readxl** package.
+In order to write excel files you have to install complex packages, and they are hard to create. Writing excel files is beyond the scope of Primer. 
 
+Reading excel files is easy. To do so, we use the `read_excel()` function from the **readxl** package.
+
+
+<!-- How do we read in excel files? -->
 
 ```{r}
 library(readxl)
-# need example 
 ```
+
+If the .xlsx file has multiple sheets, you have to use the sheet argument to specify the sheet number or name. 
 
 
 ### RDS
@@ -80,7 +91,7 @@ rds files store a single R object within a file.
 
 When we save to a rds file, we use the function `write_rds()`. Just like `write_csv()`, this function has two main arguments: `x` and `file`.  The `x` argument is the data set that you want to save. The `file` argument is the file path where you want to save the file. The end of the path argument is the name that you want to use for the file. 
 
-`read_rds()` reads the file back into R. Just like `read_csv()` `read_rds` has one main argument: `file`, which is the file path to the file that you are wanting to read into R.
+`read_rds()` reads the file back into R. Just like `read_csv()` `read_rds` has one main argument, which is the path to the file that you are wanting to read into R.
 
 ```{r}
 # need example here
@@ -124,26 +135,16 @@ fromJSON(json_format_ex)
 
 ## Webscraping
 
-### HTML
+Web scraping, or web harvesting, is the process of extracting data from a website. The information used by a browser to render web pages is received as a text file from a server. The text is code written in **H**yper **T**ext **M**arkup **L**anguage (HTML). HTML is the standard language behind almost every document on the Internet. It provides the structure of the page such as images, text, and hyperlinks.
 
-
-The data we need to answer a question is not always in a handy csv file. For example, we can find interesting data about murders in the US in [this Wikipedia page](https://en.wikipedia.org/w/index.php?title=Gun_violence_in_the_United_States_by_state): 
+Consider the following webpage that contains interesting data about murders in the US in [this Wikipedia page](https://en.wikipedia.org/w/index.php?title=Gun_violence_in_the_United_States_by_state): 
 
 
 ```{r, echo = FALSE}
 knitr::include_graphics("03-data/images/murders-data-wiki-page.png")
 ```
 
-To get this data, we need to do some web scraping, a process which begins with a URL, a **u**niform **r**esource **l**ocator. 
-
-```{r}
-url <- paste0("https://en.wikipedia.org/w/index.php?title=",
-              "Gun_violence_in_the_United_States_by_state",
-              "&direction=prev&oldid=810166167")
-```
-
-
-Web scraping, or web harvesting, is the process of extracting data from a website. The information used by a browser to render web pages is received as a text file from a server. The text is code written in **H**yper **T**ext **M**arkup **L**anguage (HTML). Every browser has a way to show the html source code for a page. 
+Every browser has a way to show the html source code for a page. Here is the HTML for the webpage shown above. 
 
 ```{r, echo = FALSE}
 knitr::include_graphics("03-data/images/html-code.png")
