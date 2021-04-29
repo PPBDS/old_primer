@@ -203,46 +203,46 @@ SQLite is probably the simplest relational database that one can use in combinat
 
 The first thing you need to do to read data into R from a database is to connect to the database. We do that using `dbConnect()` function from the **DBI** (database interface) package. This does not read in the data, but simply tells R where the database is and opens up a communication channel.
 
-```{r}
-library(DBI)
-con_lang_data <- dbConnect(RSQLite::SQLite(), "data/can_lang.db")
-```
+<!-- ```{r} -->
+<!--  library(DBI) -->
+<!--  con_lang_data <- dbConnect(RSQLite::SQLite(), "data/can_lang.db") -->
+<!-- ``` -->
 
 Often relational databases have many tables, and their power comes from the useful ways they can be joined. Thus anytime you want to access data from a relational database, you need to know the table names. You can get the names of all the tables in the database using `dbListTables()`.
 
-```{r}
-tables <- dbListTables(con_lang_data)
-tables
-```
+<!-- ```{r} -->
+<!-- tables <- dbListTables(con_lang_data) -->
+<!-- tables -->
+<!-- ``` -->
 
 We only get one table name returned,  which tells us that there is only one table in this database. To reference a table in the database to do things like select columns and filter rows, we use the `tbl()` function from the **dbplyr** package. The package **dbplyr** allows us to work with data stored in databases as if they were local data frames, which is useful because we can do a lot with big datasets without actually having to bring these vast amounts of data into your computer! 
 
-```{r}
-library(dbplyr)
-lang_db <- tbl(con_lang_data, "lang")
-lang_db
-```
+<!-- ```{r} -->
+<!-- library(dbplyr) -->
+<!-- lang_db <- tbl(con_lang_data, "lang") -->
+<!-- lang_db -->
+<!-- ``` -->
 
 Although it looks like we just got a data frame from the database, we didn't! It's a *reference*, showing us data that is still in the SQLite database (note the first two lines of the output). It does this because databases are often more efficient at selecting, filtering and joining large data sets than R. And typically, the database will not even be stored on your computer, but rather a more powerful machine somewhere on the web. So R is lazy and waits to bring this data into memory until you explicitly tell it. To do so, we use the `collect()` function. 
 
 Here we will filter for only rows in the Aboriginal languages category according to the 2016 Canada Census, and then use `collect()` to finally bring this data into R as a data frame. 
 
-```{r}
-aboriginal_lang_db <- filter(lang_db, category == "Aboriginal languages")
-aboriginal_lang_db
-```
+<!-- ```{r} -->
+<!-- aboriginal_lang_db <- filter(lang_db, category == "Aboriginal languages") -->
+<!-- aboriginal_lang_db -->
+<!-- ``` -->
 
-```{r}
-aboriginal_lang_data <- collect(aboriginal_lang_db)
-aboriginal_lang_data
-```
+<!-- ```{r} -->
+<!-- aboriginal_lang_data <- collect(aboriginal_lang_db) -->
+<!-- aboriginal_lang_data -->
+<!-- ``` -->
 
 Why bother to use the `collect()` function? The data looks pretty similar in both outputs shown above. And **dbplyr** provides lots of functions similar to `filter()` that you can use to directly feed the database reference (i.e. what `tbl()` gives you) into downstream analysis functions (e.g., `ggplot2` for data visualization and `lm` for linear regression modeling). However, this does not work in every case; look what happens when we try to use `nrow` to count rows in a data frame:
 
-```{r}
-nrow(aboriginal_lang_db)
-```
- 
+<!-- ```{r} -->
+<!-- nrow(aboriginal_lang_db) -->
+<!-- ``` -->
+
 or `tail` to preview the last 6 rows of a data frame:
 
 ```
@@ -505,5 +505,86 @@ Are we done? Not quite... If you look at the data closely you see that the data 
 
 ## Working with APIs
 
+<!-- source used here: https://bookdown.org/rdpeng/RProgDA/reading-web-based-data.html -->
+
+"API" stands for Application Program Interface. They allow us to access open data from government agencies, companies, and other organizations. API provides the rules for software applications to interact with one another. Open data APIs provide the rules you need to know to write R code to request and pull data from the organization’s web server into R. Usually, some of the computational burden of querying and subsetting the data is taken on by the source’s server, to create the subset of requested data to pass to your computer. In practice, this means you can often pull the subset of data you want from a very large available dataset without having to download the full dataset and load it locally into your R session.
+
+As an overview, the basic steps for accessing and using data from a web API when working in R are:
+
+* Figure out the API rules for HTTP requests
+* Write R code to create a request in the proper format
+* Send the request using GET or POST HTTP methods
+* Once you get back data from the request, parse it into an easier-to-use format if necessary
+
+To get the data from an API, you should first read the organization’s API documentation. An organization will post details on what data is available through their API(s), as well as how to set up HTTP requests to get that data. To request the data through the API, you will typically need to send the organization’s web server an HTTP request using a GET or POST method. The API documentation details will typically show an example GET or POST request for the API, including the base URL to use and the possible query parameters that can be used to customize the dataset request.
+
+Here is an example:
+
+The National Aeronautics and Space Administration (NASA) has an API for pulling the [Astronomy Picture of the Day](https://apod.nasa.gov/apod/astropix.html). In their API documentation, they specify that the base URL for the API request should be **https://api.nasa.gov/planetary/apod** and that you can include parameters to specify the date of the daily picture you want, whether to pull a high-resolution version of the picture, and a NOAA API key you have requested from NOAA.
+
+Many organizations will require you to get an *API key* and use this key in each of your API requests. This key allows the organization to control API access, including enforcing rate limits per user. API rate limits restrict how often you can request data (such as an hourly limit of 1,000 requests per user for NASA APIs).
+
+API keys should be kept private, so if you are writing code that includes an API key, be very careful not to include the actual key in any code that is public (even any code in public GitHub repositories). To ensure privacy, save the value of your key in a file named .Renviron in your home directory. This file should be a plain text file and must end in a blank line. Once you’ve saved your API key to a global variable in that file (e.g., with a line added to the .Renviron file like NOAA_API_KEY = "abdafjsiopnab038"), you can assign the key value to an R object in an R session using the Sys.getenv function (e.g., noaa_api_key <- Sys.getenv("NOAA_API_KEY")), and then use the object `noaa_api_key` anywhere you would otherwise have used the character string with your API key.
+
+To find more R packages for accessing and exploring open data, check out the [Open Data CRAN task view](https://github.com/ropensci/opendata). You can also browse through the [ROpenSci packages](https://ropensci.org/packages/), all of which have GitHub repositories where you can further explore how each package works! ROpenSci is an organization with the mission to create open software tools for science. If you create your own package to access data relevant to scientific research through an API, consider submitting it for peer-review through ROpenSci.
+
+The **riem** package, developed by Maelle Salmon and an ROpenSci package, is an excellent and straightforward example of how you can use R to pull open data through a web API. This package allows you to pull weather data from airports around the world directly from the Iowa Environmental Mesonet. To show you how to pull data into R through an API, in this section we will walk you through code in the **riem** package or code based closely on code in the package.
+
+To get a certain set of weather data from the Iowa Environmental Mesonet, you can send an HTTP request specifying a base URL, **https://mesonet.agron.iastate.edu/cgi-bin/request/asos.py/**, as well as some parameters describing the subset of dataset you want (e.g., date ranges, weather variables, output format). Once you know the rules for the names and possible values of these parameters (more on that below), you can submit an HTTP GET request using the function` GET()` from the **httr** package.
+
+When you are making an HTTP request using the `GET()` or `POST()` functions from the **httr** package, you can include the key-value pairs for any query parameters as a list object in the `query` argument of the function. For example, suppose you want to get wind speed in miles per hour (data = "sped") for Denver, CO, (station = "DEN") for the month of June 2016 (year1 = "2016", month1 = "6", etc.) in Denver’s local time zone (tz = "America/Denver") and in a comma-separated file (format = "comma"). To get this weather dataset, you can run:
+
+```{r}
+library(httr)
+meso_url <- "https://mesonet.agron.iastate.edu/cgi-bin/request/asos.py/"
+denver <- GET(url = meso_url,
+                    query = list(station = "DEN",
+                                 data = "sped",
+                                 year1 = "2016",
+                                 month1 = "6",
+                                 day1 = "1",
+                                 year2 = "2016",
+                                 month2 = "6",
+                                 day2 = "30",
+                                 tz = "America/Denver",
+                                 format = "comma")) %>%
+  content() %>% 
+  read_csv(skip = 5, na = "M")
+
+# There are 9,106 rows of data to look at! Let's just look at subset for our purposes.
+denver %>% 
+  slice(1:3)
+
+```
+
+The `content()` call extracts the content from the response to the HTTP request sent by the `GET()` function. The Iowa Environmental Mesonet API offers the option to return the requested data in a comma-separated file (format = "comma" in the GET request), so here content and `read_csv()` are used to extract and read in that csv file. Usually, data will be returned in a JSON format instead.
+
+The only tricky part of this process is figuring out the available parameter names (e.g., station) and possible values for each (e.g., "DEN" for Denver). Currently, the details you can send in an HTTP request through Iowa Environmental Mesonet’s API include:
+
+* A four-character weather station identifier (`station`)
+* The weather variables (e.g., temperature, wind speed) to include (`data`)
+* Starting and ending dates describing the range for which you’d like to pull data (`year1`, `month1`, `day1`, `year2`, `month2`, `day2`)
+* The time zone to use for date-times for the weather observations (`tz`)
+* Different formatting options (e.g., delimiter to use in the resulting data file [`format`], whether to include longitude and latitude)
+
+Typically, these parameter names and possible values are explained in the API documentation. In some cases, however, the documentation will be limited. In that case, you may be able to figure out possible values, especially if the API specifies a GET rather than POST method, by playing around with the website’s point-and-click interface and then looking at the url for the resulting data pages. For example, if you look at the [Iowa Environmental Mesonet’s page](https://mesonet.agron.iastate.edu/request/download.phtml?network=IN__ASOS) for accessing this data, you’ll notice that the point-and-click web interface allows you the options in the list above, and if you click through to access a dataset using this interface, the web address of the data page includes these parameter names and values.
+
+The **riem** package implements all these ideas in three very clean and straightforward functions. You can explore the code behind this package and see how these ideas can be incorporated into a small R package, in the /R directory of the [package’s GitHub page](https://github.com/ropensci/riem).
+
+R packages already exist for many open data APIs. If an R package already exists for an API, you can use functions from that package directly, rather than writing your own code using the API protocols and httr functions. Other examples of existing R packages to interact with open data APIs include:
+
+1. twitteR: Twitter
+1. rnoaa: National Oceanic and Atmospheric Administration
+1. Quandl: Quandl (financial data)
+1. RGoogleAnalytics: Google Analytics
+1. censusr, acs: United States Census
+1. WDI, wbstats: World Bank
+1. GuardianR, rdian: The Guardian Media Group
+1. blsAPI: Bureau of Labor Statistics
+1. rtimes: New York Times
+1. dataRetrieval, waterData: United States Geological Survey
+If an R package doesn’t exist for an open API and you’d like to write your own package, find out more about writing API packages with [this vignette for the httr package](https://cran.r-project.org/web/packages/httr/vignettes/api-packages.html). This document includes advice on error handling within R code that accesses data through an open API.
+
+Information for this section on API's was taken from *Mastering Software Development in R* textbook, authored by Roger D. Peng, Sean Kross, and Brooke Anderson. 
 
 ## Summary
