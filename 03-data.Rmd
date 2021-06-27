@@ -1,18 +1,19 @@
 # Data {#data}
 
-*This chapter is a draft.*
-
 *You can never look at the data too much.* -- Mark Engerman
 
 ## Introduction
 
 <!-- TODO: -->
 
-<!-- Rewrite entire webscraping section. Delete everything you don't like. Look closely at the current version of the tutorial. Rewrite this section so that it will be easy to fold the tutorial questions into it at some point in the future. DONE -->
+<!-- Add skimr() and skim() to chapter 2. Simple one time use on a tibble. Explain what it does. At end of chapter before Summary. -->
 
-<!-- Start of chapter, mention that all the files we are working on live in this directory, called `file_dir <- "https://raw.githubusercontent.com/PPBDS/primer.tutorials/master/inst/www/"`. Then, define `file_1 <- paste0(file_dir, "test_1.csv")` or whatever. DONE -->
+<!-- Use janitor::clean_names() in chapter 3. Simple example with a file with variable names like `my var` and `1-var`.  Read this in without fixing. Show how to use backticks to refer to those variables. Point out that this is annoying. Fix with clean_names(). -->
 
-<!-- The tutorial includes a lot of arguments like na and comment, but that makes the book feel like it's really long once it's actually put into text form with paragraphs and stuff. True! So, what do we include and what do we not? I I don't know, I don't really have any feelings either way. It makes sense to have it in the book though since people will likely refer to the book rather than the documentation when they have problems. DONE -->
+<!-- Change all the files used so that they always have one blank line at the bottom to make that warning go away. Get rid of "warn" argument.  -->
+
+<!-- Fix references. -->
+
 
 Start by loading the packages which we will need in this chapter.
 
@@ -23,7 +24,6 @@ library(primer.data)
 library(lubridate)
 library(dbplyr)
 library(janitor)
-library(skimr)
 ```
 
 ## Writing and reading files
@@ -94,7 +94,7 @@ Sometimes, CSV files will not be what you want. Maybe they have the wrong column
 
 Consider the following csv file: `test_2.csv`. Here's what it looks like as a text file:
 
-<!-- AG: I fixed the error in TODO.txt, the problem was that the CSV files don't have an ending line. This can be avoided by doing `warn = FALSE` -->
+
 
 ```{r, echo = FALSE}
 # I made it so that it doesn't show this line of code This is so it doesn't
@@ -228,12 +228,10 @@ readLines(delim_1, warn = FALSE)
 With `read_delim()`, we specify the first argument as the path to the file, as done with `read_csv()`. Then we provide values to the `delim` argument to have the code use `|` as the separator instead of the comma.
 
 ```{r}
-# Because delim_1 uses pipes to separate values, 
-# we can just use that as our delim value.
-# However, for more complex symbols like tab, 
-# we use something different like "\\t"
-# This varies for every symbol, but you can 
-# find most delim values on the internet.
+# Because delim_1 uses pipes to separate values, we can just use that as our
+# delim value. However, for more complex symbols like tab, we use something
+# different like "\\t" This varies for every symbol, but you can find most delim
+# values on the internet.
 
 delim_1 <- paste0(github_url, "delim_1.txt")
 
@@ -241,6 +239,8 @@ read_delim(delim_1, delim = "|")
 ```
 
 You can often find CSV files on websites like [kaggle](https://kaggle.com) as well as by exporting from an Excel spreadsheet. Keep in mind that data imported off of the internet is often very messy, so try to use some of the functions listed here to clean it up. For a full list of arguments and in-depth documentation about the `read_csv()` function, please visit this [website](https://readr.tidyverse.org/reference/read_delim.html).
+
+<!-- DK: Put clean_names() example here or wherever you like. -->
 
 ### Excel files
 
@@ -600,7 +600,6 @@ slice(band_albums, 1:10)
 
 This is possible in an SQL database. There are a couple of ways to run SQL code in R, but the easiest way is by using the `dbGetQuery()` function from the **DBI** library.
 
-<!-- AG: This is my first time doing SQL code and I'm more experienced with Java/Python, so I formatted it like how Java and Python are formatted with the parentheses acting as brackets instead. This may be heresy in the SQL world, so please tell me if I have to fix it. I did some research and found an online SQL formatter here: https://sqlformat.org/ I'm just going to use this syntax because there are a lot of conflicting things and this is the one .org website I found.-->
 
 ```{r}
 # This code is just copy-pasted and reformatted from the earlier dbplyr code so 
@@ -771,7 +770,6 @@ Before we jump into scraping, let's learn a little bit about what the "source co
 
 #### Website structure
 
-<!-- AG: I noticed that David Kane is never actually listed anywhere in the book, is it ok to have your name in a meme like the one below? -->
 
 ```{r, echo = FALSE, fig.cap = "A little bit of HTML editing can bring you a long way."}
 knitr::include_graphics("03-data/images/nobel.png")
@@ -792,7 +790,7 @@ Hello World
 
 looks like this in the result:
 
-<!-- AG: I added some CSS rules so that I can keep HTML in a box instead of leaving it out in the open. This knitted on my computer, but please tell me if it causes problems in the final build. -->
+<!-- AG: I added some CSS rules so that I can keep HTML in a box instead of leaving it out in the open. This knitted on my computer, but please tell me if it causes problems in the final build. [Change this to be declaritive.] ->
 
 ```{css, echo = FALSE}
 .artificial-html-div {
@@ -931,7 +929,7 @@ Now, let's say we want to get all of the information in the table but we don't w
 
 We can do this by only looking at the table (the `<table>` tag) and then getting the cells (the `<td>` tag). We'll also save this to a variable for later.
 
-<!-- AG: This just feels wrong, but it doesn't run any other way. So if I want to keep the HTML code syntax without going miles off screen, I'm going to be doing this. The error that it gives me is: `Error: unexpected `<` in "<"`. It's weird, dumb, and stops me from using the proper syntax without having to circumvent it. -->
+<!-- AG: This just feels wrong, but it doesn't run any other way. So if I want to keep the HTML code syntax without going miles off screen, I'm going to be doing this. The error that it gives me is: `Error: unexpected `<` in "<"`. It's weird, dumb, and stops me from using the proper syntax without having to circumvent it. Check out R string constants. Cut, cut, cut! What really matters is the ability to grab data from a table on the web. -->
 
 ```{r}
 # We're using a trick here where every line of HTML is pasted together, allowing
@@ -1247,7 +1245,7 @@ source: https://www.craigslist.org/about/terms.of.use
 
 > Want to learn more about the legalities of web scraping and crawling? Read this interesting blog post titled ["Web Scraping and Crawling Are Perfectly Legal, Right?" by Benoit Bernard](https://benbernardblog.com/web-scraping-and-crawling-are-perfectly-legal-right/) (this is optional, not required reading).
 
-<!-- AG: I'm kind of conflicted here because there's a perfectly good video that shows exactly how we can use SelectorGadget on Wikipedia pages, but it doesn't line up with the tutorials. For now, I'm going to comment out the video for future reference and just follow along with the tutorial. -->
+<!-- AG: I'm kind of conflicted here because there's a perfectly good video that shows exactly how we can use SelectorGadget on Wikipedia pages, but it doesn't line up with the tutorials. For now, I'm going to comment out the video for future reference and just follow along with the tutorial. So maybe make them line up? -->
 
 So what to do now? Well, we can't scrape Craigslist, so we should find something else that allows you to scrape. Let's use a database from [Open Secrets about foreign-connected PACs within our country](https://www.opensecrets.org/political-action-committees-pacs/foreign-connected-pacs/2020).
 
@@ -1255,7 +1253,6 @@ So what to do now? Well, we can't scrape Craigslist, so we should find something
 
 #### Scraping from actual websites
 
-<!-- AG: This counts as noncommercial use right? OpenSecrets says it's open to noncommercial use, but we have to request permission for commercial use. -->
 
 Now, earlier we only scraped from pre-written HTML code, but you can do this from websites as well. We can do this just by plugging in the URL to the website and using `read_html()` instead of `minimal_html()`.
 
