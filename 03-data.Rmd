@@ -94,6 +94,8 @@ Sometimes, CSV files will not be what you want. Maybe they have the wrong column
 
 Consider the following csv file: `test_2.csv`. Here's what it looks like as a text file:
 
+<!-- AG: I fixed the error in TODO.txt, the problem was that the CSV files don't have an ending line. This can be avoided by doing `warn = FALSE` -->
+
 ```{r, echo = FALSE}
 # I made it so that it doesn't show this line of code This is so it doesn't
 # confuse the readers And it lines up with the introduction that I used without
@@ -102,7 +104,7 @@ Consider the following csv file: `test_2.csv`. Here's what it looks like as a te
 
 file_2 <- paste0(github_url, "test_2.csv")
   
-readLines(file_2)
+readLines(file_2, warn = FALSE)
 ```
 
 As you can see, there is text at the top of this file. Often times information about how data was collected, or other relevant information, is included at the top of the data file. However, `read_csv()` can't differentiate between this text and the data that we want to read, causing it to fail and output gibberish.
@@ -199,7 +201,7 @@ read_csv(file_5,
 You can also tell the code to ignore comment lines, which may be common in a csv file that was written by a human and as such has comments in it. `test_6.csv` is a perfect example of this. Here's what it looks like:
 ```{r, echo = FALSE}
 file_6 <- paste0(github_url, "test_6.csv")
-readLines(file_6)
+readLines(file_6, warn = FALSE)
 ```
 
 By setting the `comment` argument, we're able to skip lines that have a certain starting point.
@@ -220,7 +222,7 @@ Here's another file named `delim_1`, which uses the `|` to separate the lines in
 ```{r, echo = FALSE}
 delim_1 <- paste0(github_url, "delim_1.txt")
 
-readLines(delim_1)
+readLines(delim_1, warn = FALSE)
 ```
 
 With `read_delim()`, we specify the first argument as the path to the file, as done with `read_csv()`. Then we provide values to the `delim` argument to have the code use `|` as the separator instead of the comma.
@@ -719,6 +721,7 @@ WHERE (`num_albums` > 3.0)
   ORDER  BY `num_albums` DESC
 LIMIT 10;
 ```
+
 ```{r}
 # You can't see this, but output.var = "band_albums_sql" in the chunk above this.
 # So we're outputting our data into band_albums_sql
@@ -789,13 +792,33 @@ Hello World
 
 looks like this in the result:
 
-<br>
+<!-- AG: I added some CSS rules so that I can keep HTML in a box instead of leaving it out in the open. This knitted on my computer, but please tell me if it causes problems in the final build. -->
+
+```{css, echo = FALSE}
+.artificial-html-div {
+  border-style: solid;
+  border-width: thin;
+  padding-left: 10px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  padding-right: 10px;
+}
+
+.artificial-paragraph {
+  margin-left: 0;
+  margin-top: 0;
+  margin-bottom: 0;
+  margin-right: 0;
+}
+```
+
 <html>
-<p style="background-color:lightgray">
+<div class = "artificial-html-div">
+<p class = "artificial-paragraph">
 Hello World
 </p>
+</div>
 </html>
-<br>
 
 Each tag defines an **element**, or a part of a website. For example, we used the `<p>` tag to define a paragraph element in HTML. We then close the paragraph by using the `</p>` tag, ending the paragraph. You can find a full list of HTML tags and elements [here](https://developer.mozilla.org/en-US/docs/Web/HTML/Element).
 
@@ -878,31 +901,31 @@ For example, doing this in HTML:
 
 Creates a table and a paragraph that looks like this:
 
-<br>
+<div class = "artificial-html-div">
 <html>
-  <table>
-    <tr>
-      <td>
-        This is some important info.
-      </td>
-      <td>
-        This is some other important info.
-      </td>
-    </tr>
-    <tr>
-      <td>
-        This is really important info.
-      </td>
-      <td>
-        This is some useful information.
-      </td>
-    </tr>
-  </table>
-  <p>
-    This is so useless, you shouldn't even be reading it.
-  </p>
+    <table>
+      <tr>
+        <td>
+          This is some important info.
+        </td>
+        <td>
+          This is some other important info.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          This is really important info.
+        </td>
+        <td>
+          This is some useful information.
+        </td>
+      </tr>
+    </table>
+    <p class = "artificial-paragraph">
+      This is so useless, you shouldn't even be reading it.
+    </p>
 </html>
-<br>
+</div>
 
 Now, let's say we want to get all of the information in the table but we don't want to get the useless description at the end.
 
@@ -988,14 +1011,16 @@ We can then use that ID in the HTML code.
 </html>
 ```
 
+<div class = "artificial-html-div">
 <html>
-<p> This is not red :( </p>
-<p> This is not red :( </p>
-<p id = 'red-id'> Amazing! </p>
-<p> This is not red :( </p>
-<p> This is not red :( </p>
-<p> This is not red :( </p>
+<p class = "artificial-paragraph"> This is not red :( </p>
+<p class = "artificial-paragraph"> This is not red :( </p>
+<p class = "artificial-paragraph" id = 'red-id'> Amazing! </p>
+<p class = "artificial-paragraph"> This is not red :( </p>
+<p class = "artificial-paragraph"> This is not red :( </p>
+<p class = "artificial-paragraph"> This is not red :( </p>
 </html>
+</div>
 
 Now, there's a really clever trick that we can use here. Let's say that we only want that one piece of text that's colored red, but we don't know exactly where it is. We can actually use that CSS id to get that piece of text, using the same function `html_element()`. Just plug in the ID of the element that you want with a `#` in front to tell R that it's an ID.
 
@@ -1039,15 +1064,17 @@ CSS classes are a way for multiple elements to have the same style, rather than 
 </html>
 ```
 
+<div class = "artificial-html-div">
 <html>
-<p class = 'green-bg'> This is green :) </p>
-<p class = 'red-class'> This is red :) </p>
-<p class = 'red-class green-bg'> Amazing! </p>
-<p class = 'red-class'> This is red :) </p>
-<p> This is not red :( </p>
-<p class = 'green-bg'> This is green :) </p>
-<p> This is not red :( </p>
+<p class = 'green-bg  artificial-paragraph'> This is green :) </p>
+<p class = 'red-class  artificial-paragraph'> This is red :) </p>
+<p class = 'red-class green-bg  artificial-paragraph'> Amazing! </p>
+<p class = 'red-class  artificial-paragraph'> This is red :) </p>
+<p class = 'artificial-paragraph'> This is not red :( </p>
+<p class = 'green-bg  artificial-paragraph'> This is green :) </p>
+<p class = 'artificial-paragraph'> This is not red :( </p>
 </html>
+</div>
 
 We can do the same thing with classes that we did with IDs, using `html_elements()` to sort through them. You use a `.` instead of a `#` to show that it's a class. In order to sort by multiple classes, just combine the statements together. If you want to get all of the elements from multiple classes, use a comma to separate them.
 
