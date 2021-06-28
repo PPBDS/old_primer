@@ -16,6 +16,10 @@
 
 <!-- Start joins with left_join, since it is most important. -->
 
+<!-- AM: Suggest combining 2.2 Characters, 2.3 Factors, and 2.5 Date-Times under its own part called "Object types", and 2.1 Tibbles and 2.4 Lists under its own part called "Data frame types", or something similar to that. Or just make it so that Lists isn't right in the middle of Factors and Date-Times -->
+
+<!-- AM: The most important wrangling functions are already done in Chapter 1 and may be better-suited for their most in-depth use at chapter 2. -->
+
 *Data science is data cleaning.*
 
 Start by loading the packages which we will need in this chapter.
@@ -30,9 +34,12 @@ library(gapminder)
 library(fivethirtyeight)
 ```
 
+<!-- AM: Users may be missing a few of these packages. -->
+<!-- AM: skimr does not seem as though it is used at all in this chapter. -->
 
 The **tidyverse** package will be used in every chapter. Loading it makes the 8 packages from the "Tidyverse" available. **primer.data** is the data package created specifically for this *Primer*. **lubridate** is a package for working with dates and times.   **skimr** contains functions that are useful for providing summary statistics, especially `skim()`.  **nycflights13** includes data associated with flights out of New York City's three major airports. **gapminder** has annual data for countries going back more than 50 years. We used this data in Chapter \@ref(visualization). **fivethirtyeight** cleans up data from the [FiveThirtyEight](https://fivethirtyeight.com/) team.
 
+<!-- AM: List these as bulleted lists so that they are easier to read. -->
 
 ## Tibbles
 
@@ -46,6 +53,8 @@ tibble(a = 2.1, b = "Hello", c = TRUE, d = 9L)
 ```
 
 In our code, we specify the variable names (or the names of columns) as , `a`, `b`, and `c`. Under each variable, we give a different value. Under each variable name, the data type is specified for the data within that column. A tibble can consist of one or more atomic vectors, the most important types of which are double, character, logical, and integer. The tibble above includes a variable of each type. (The "L" in "9L" tells R that we want `d` to be an integer rather than the default, which would be a double.)  When you print out a tibble, the variable type is shown below the variable name.
+
+<!-- AM: Is this entire tangent about having a number or space in the variable name necessary? Most programmers already go out of their way to avoid either. -->
 
 Variables should not begin with a number (like `54abc`) or include spaces (like `my var`). If you insist on using variable names like that, you must include backticks around each name when you reference it.
 
@@ -233,6 +242,7 @@ tbl_fruit %>%
 <!-- DK: Add back quantifiers? -->
 
 <!-- DK: Show some raw string examples or cut this out. -->
+<!-- AM: I say remove the raw strings part entirely. I'm not sure what purpose it serves. -->
 
 ### Raw strings
 
@@ -259,6 +269,8 @@ As you can see, a backslash is used to escape the initial backslash.
 ## Factors
 
 Factors are *categorical* variables that only take on a specified set of values. To manipulate factors we will use the **forcats** package, a core package in the Tidyverse. 
+
+<!-- AM: What in the "Tidyverse"? Awkward wording here -->
 
 It is easy to make factors with either `factor()`, `as.factor()` or `parse_factor()`.
 
@@ -762,6 +774,8 @@ Note how easy it is to use `tribble()`, from the **tibble** package (part of the
 
 #### `inner_join()`
 
+<!-- AM: Instead show a diagram of left_join() and briefly cover the rest of the joins, as left_join() is by far the most commonly-used join method -->
+
 `inner_join(x, y)`: Return all rows from `x` where there are matching values in `y`, and all columns from `x` and `y`. If there are multiple matches between `x` and `y`, all combination of the matches are returned. 
 
 ```{r, echo= FALSE, fig.cap = "Inner join."}
@@ -863,6 +877,7 @@ We keep only publisher Image now (and the variables found in `x = publishers`).
 
 Consider the relationships among the tibbles in the **nycflights** package:
 
+<!-- AM: nycflights13* -->
 
 ```{r, echo = FALSE, fig.cap = "Relationships among nycflights tables"}
 knitr::include_graphics("02-wrangling/images/relational-nycflights.png")
@@ -875,6 +890,8 @@ In both the `flights` and `airlines` data frames, the key variable we want to jo
 flights %>% 
   inner_join(airlines, by = "carrier")
 ```
+
+<!-- AM: Is this "code is equivalent to" part really necessary?  -->
 
 This is our first example of using a join function with a pipe. `flights` is fed as the first argument to `inner_join()`. That is what the pipe does. The above code is equivalent to:
 
@@ -1041,6 +1058,8 @@ There are other ways of storing the data in this vector. Instead of recording ev
 ```{r}
 table(rolls)
 ```
+
+<!-- AM: values*  -->
 
 In this case, with only 10 vlaues, it is actually less efficient to store the data like this. But what happens when we have 10,000 rolls.
 
