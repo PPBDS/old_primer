@@ -1,29 +1,25 @@
 # Probability {#probability}
 
+<!-- When building the chapter, we don't want rayshader images to pop up? -->
 
-<!-- Make a bunch of comments with your initials. -->
+<!-- Make this warning go away: Warning in make_shadow(heightmap, shadowdepth, shadowwidth, background, : -->
+<!-- ## `magick` package required for smooth shadow--using basic shadow instead. -->
 
-<!-- Skim chapter 4. Read chapters 6 and 7. -->
-
-<!-- Understand the code. Learn a bit about https://www.tylermw.com/3d-ggplots-with-rayshader/. -->
-
-
-<!-- Old comments to discuss: -->
-
-<!-- Start thinking about how to expand the tutorials. What should they cover so that students start to think about probability and distributions easily and naturally? Check out the chapter 4 tutorials. -->
+<!-- Start thinking about how to expand the tutorials. What should they cover so that students start to think about probability and distributions easily and naturally? Do the chapter 4 tutorials. Including the written answers.  -->
 
 <!-- Introduce the concepts of population and, maybe, exchangeability. Need to set the stage for making an assumption about one population in chapter 6. -->
 
 <!-- Explain map_* functions. Maybe we don't need list-columns? Or should we keep them? Or maybe we should change the code around so that they are not necessary? -->
 
-<!-- Prevent the rayshader images from popping up when Chapter 5 is knitted on your machine. -->
+<!-- Learn about movies in rayshader. -->
 
-
-<!-- Consider the parallel structure of the 2-model, 3-model, and n-model case. First, we should always begin by discussing how to create the joint distribution of possible models and possible experimental results. This is done by, first, assuming that one of the models is true and then, second, show the variation in the world which results. That is, even if we know for a fact that you do not have the disease, there is still a chance that you test will come back positive. So, we should do that for one model. Then, we create the joint distribution by doing that same thing for all possible models. (We show all this code.) The joint distribution is a tibble which we are happy to look at. It always has two columns: the first is the possible models and the second is one possible result (which will vary) if that model is true. So, each possible model will have 1,000 (or at least 100) rows in the joint distribution. -->
+<!-- Consider the parallel structure of the 2-model, 3-model, and n-model case. First, we should always begin by discussing how to create the joint distribution of possible models and possible experimental results. This is done by, first, assuming that one of the models is true and then, second, show the variation in the world which results. That is, even if we know for a fact that you do not have the disease, there is still a chance that you test will come back positive. So, we should do that for one model. Then, we create the joint distribution by doing that same thing for all possible models. (We show all this code.) The joint distribution is a tibble which we are happy to look at. It always has two columns: the first is the possible models and the second is one possible result (which will vary) if that model is true. So, each possible model will have 1,000 (or at least 100) rows in the joint distribution. Do you agree that we have done this? If so, rewrite this comment and place it as a comment at the start of two models so that future authors know what we are doing. And the next two comments as well. -->
 
 <!-- Having create the joint distribution, we graph it in two dimensions. (We show the code for that.) Then, we graph it in three dimensions with rayshader. (Maybe there is a movie. Maybe we swoop in and fly around it.) Then, we take a "slice" of that joint distribution via rayshader. Move that slice around. Et cetera. Not sure how to do all that . . . Note that you can make rayshader objects interactive with rgl::rglwidget(). The ggral (sp?) package might also be useful. -->
 
 <!-- After rayshader, we then use the joint distribution to make two graphics, showing the posterior distribution for the model. The first is unnormalized and the second is normalized. In both cases, we begin with the joint distribution --- an object we have saved --- and then use filter to get our slice. Maybe all this can be done in a rayshader movie as well. -->
+
+<!-- Enough for today. -->
 
 <!-- Should each section also do something with the resulting posterior? Use it to answer a question. Yes! Again, the N Model example is currently the best example. Note how this connects to the Temperance examples in each chapter. Maybe make this explicit? -->
 
@@ -83,6 +79,9 @@ x[[1]]
 ```
 
 There are a number of built-in R functions that output lists. For example, the ***ggplot*** objects you have been making store all of the plot information in lists. Any function that returns multiple values can be used to create a list output by wrapping that returned object with `list()`.
+
+<!-- YW : I think this is my first time learning about ggplot information in lists (maybe I have seen an error because of that) So maybe adding parts in Visualization unit that foreshadow this part. -->
+
 
 ```{r}
 x <- rnorm(10)
@@ -188,9 +187,13 @@ This allows us to make the following statements:
 
 For the purposes of this *Primer*, a *probability distribution* is a mathematical object that covers a set of outcomes, where each distinct outcome has a chance of occurring between 0 and 1 inclusive. The chances must sum to 1. The set of possible outcomes --- heads or tails for the coin, 1 through 6 for a single die, 2 through 12 for a pair of dice --- can be either discrete or continuous. This set of outcomes is the *domain* of the probability distribution. There are three types of probability distributions: mathematical, empirical, and posterior. 
 
+
+<!-- YW:Not sure what is "can be either discrete or continuous" means in this content? Is it like scale_x_discrete, or something else? DK: So fix it! -->
+
 The key difference between a distribution, as we have explored them Section \@ref(distributions), and a *probability* distribution is the requirement that the sum of the probabilities of the individual outcomes must be exactly 1. There is no such requirement in a distribution. But any distribution can be turned into a probability distribution by "normalizing" it, as we will explore.  In this context, we will often refer to a distribution which is not (yet) a probability distribution as an "unnormalized" distribution.  
 
 Pay attention to notation. Whenever we are talking about a specific probability (represented by a single value), we will use $\rho$ (the Greek letter "rho" but spoken aloud as "p" by us) with a *subscript* which specifies the exact outcome of which it is the probability. For instance, $\rho_h = 0.5$ denotes the probability of getting heads on a coin toss when the coin is fair. $\rho_t$ --- spoken as "PT" or "P sub T" or "P tails" --- denotes the probability of getting tails on a coin toss. However, when we are referring to the entire probability distribution over a set of outcomes, we will use $\text{Prob}()$. For example, the probability distribution of a coin toss is $\text{Prob}(\text{coin})$. That is, $\text{Prob}(\text{coin})$ is composed of the two specific probabilities (50% and 50%) mapped from the two values in the domain (Heads and Tails). Similarly, $\text{Prob}(\text{sum of two dice})$ is the probability distribution over the set of 11 outcomes (2 through 12) which are possible when you take the sum of two dice. $\text{Prob}(\text{sum of two dice})$ is made up of 11 numbers --- $\rho_2$,  $\rho_3$, ..., $\rho_{12}$ --- each representing the unknown probability that the sum will equal their value. That is, $\rho_2$ is the probability of rolling a 2.
+
 
 <!-- DK: Above is not clear. Explain this better by showing that a distribution is just a vector. A probability distribution is a vector in which each element of the vector is mapped to a 0--1 probability, the sum of which is one. Need to connect this more clearly to joint distribution discussion. Update: This isn't quite right either. -->
 
@@ -198,6 +201,7 @@ Pay attention to notation. Whenever we are talking about a specific probability 
 ### Flipping a coin
 
 A *mathematical distribution* is based on a mathematical formula. Assuming that the coin is perfectly fair, we should, on average, get heads as often as we get tails.
+
 
 ```{r, echo = FALSE}
 
@@ -224,7 +228,13 @@ ggplot(mydata, aes(x = results)) +
 
 An *empirical distribution* is based on data. You can think of this as the probability distribution created by running a simulation. In theory, if we increase the number of coins we flip in our simulation, the empirical distribution will look more and more similar to the mathematical distribution. The probability distribution is the Platonic form. The empirical distribution will often look like the mathematical probability distribution, but it will rarely be exactly the same.
 
+<!-- YW: Elaborate more on "The probability distribution is the Platonic Form" I found it hard to understand, I would say either explain more or simply deleted. Agreed! Elaborate! -->
+
 In this simulation, there are 56 heads and 44 tails. The outcome will vary every time we run the simulation, but the proportion of heads to tails should not be too different if this coin is fair.
+
+<!-- YW: "The proportion of heads to tails should not be too difference if this coin is fair" I get the point, I think it would be better if connects to the large chunk of explanation of $\rho$ and specific probability in this discussion. Agreed! -->
+
+
 
 ```{r}
 # We are flipping one fair coin a hundreds times. We need to get the same result
@@ -256,6 +266,7 @@ A *posterior distribution* is based on beliefs and expectations. It displays you
 In the case of the coin toss, the posterior distribution changes depending on your beliefs. For instance, let's say your friend brought a coin to school and asked to bet you. If the result is heads, you have to pay them $5. 
 
 This makes you suspicious. Your posterior distribution would reflect this. You might believe that $\rho_h$ is 0.95 and $\rho_t$ is 0.05.
+
 
 ```{r, echo = FALSE}
 
@@ -289,6 +300,7 @@ The full terminology is mathematical (or empirical or posterior) *probability* d
 
 Our *mathematical distribution* tells us that, with a fair dice, the probability of getting 1, 2, 3, 4, 5, and 6 are equal: there is a 1/6 chance of each. When we roll two dice at the same time and sum the numbers, the values closest to the middle are more common than values at the edge because there are more combinations of numbers that add up to the middle values.
 
+
 ```{r, echo = FALSE}
 tibble(sum = c(rep(c(2, 12), 1), 
                rep(c(3, 11), 2),
@@ -311,6 +323,8 @@ tibble(sum = c(rep(c(2, 12), 1),
 ```
 
 We get an *empirical distribution* by rolling two dice a hundred times, either by hand or with a computer simulation. The result is not identical to the mathematical distribution because of the inherent randomness of the real world and/or of simulation. 
+
+<!-- YW: Empirical distribution-data based on trial/simulation -->
 
 ```{r}
 # In the coin example, we create the vector ahead of time, and then assigned
@@ -343,6 +357,8 @@ We might consider labeling the y-axis in plots of empirical distributions as "Pr
 
 
 The *posterior distribution* for rolling two dice a hundred times depends on your beliefs. If you take the dice from your Monopoly set, you have reason to believe that the assumptions underlying the mathematical distribution are true. However, if you walk into a crooked casino and a host asks you to play craps, you might be suspicious. In craps, a come-out roll of 7 and 11 is a "natural," resulting in a win for the "shooter" and a loss for the casino. You might expect those numbers to occur less often than they would with fair dice. Meanwhile, a come-out roll of 2, 3 or 12 is a loss for the shooter. You might also expect values like 2, 3 and 12 to occur more frequently. Your posterior distribution might look like this:
+
+<!-- YW: Posterior distribution based on beliefs and existing hypothethis.  -->
 
 ```{r, echo = FALSE}
 # Hard code our posterior about the crooked casino.
@@ -398,6 +414,7 @@ ggplot(data = result, aes(total)) +
 
 ```
 
+<!-- YW:Ev means number of electoral college vote for states for example rep(3,8) means there are 8 states in the US that have the electoral college vote of 3 votes. -->
 
 We know that campaign platforms, donations, charisma, and many other factors will contribute to a candidate's success. Elections are more complicated than coin tosses. We also know that many presidential elections in history have resulted in much bigger victories or defeats than this distribution seems to allow for.
 
@@ -500,6 +517,7 @@ The three examples above are all *discrete* probability distributions, meaning t
 All the characteristics for discrete probability distributions which we reviewed above apply just as much to continuous probability distributions. For example, we can create mathematical, empirical and posterior probability distributions for continuous outcomes just as we did for discrete outcomes. For example, a posterior probability distribution for $p$, the percentage of US citizens who approve of Biden, might look like:
 
 
+
 ```{r, echo = FALSE}
 tibble(p = rbeta(1000000, 200, 180)) %>% 
   ggplot(aes(x = p)) +
@@ -528,6 +546,7 @@ Comments:
 
 Don't worry about the distinctions between discrete and continuous outcomes, or between the discrete and continuous probability distributions which we will use to summarize our beliefs about those outcomes. The basic intuition is the same in both cases.
 
+<!-- YW: A little overwhelmed by the above. -->
 
 ### Working with probability distributions
 
@@ -606,6 +625,7 @@ key_stats <- draws %>%
 key_stats
 ```
 
+<!-- YW:Maybe elaborate little on what those number mean in the context of presedential election.  -->
 
 Calculate a 95% interval directly:
 
@@ -659,7 +679,7 @@ emp_dist_dice
 
 The two plots --- unnormalized and normalized --- have the exact same shape. In many ways, they are the same object. Yet normalization is required if we want to work with a probability distribution.
 
-
+<!-- YW: Normalization is used when we convert an data that is cannot be expressed by probability into something that we can expressed by probability? -->
 
 ### Joint distributions
 
@@ -667,12 +687,15 @@ The two plots --- unnormalized and normalized --- have the exact same shape. In 
 
 Recall that $\text{Prob}(\text{coin})$ is the probability distribution for the result of a coin toss. It includes two parts, the probability of heads ($\rho_h$) and the probability of tails ($\rho_t$). This is a *univariate* distribution because there is only one outcome, which can be heads or tails. If there is more than one outcome, then we have a *joint* distribution.
 
+<!-- YW : Joint distribution is used when we have more than one outcome for an distribution. -->
+
 <!-- DK: Use of "outcome" is sloppy. Does a single die roll have one outcome or 6? -->
 
 Joint distributions are also mathematical objects that cover a set of outcomes, where each distinct outcome has a chance of occurring between 0 and 1 and the sum of all chances must equal 1. The key to a joint distribution is it measures the chance that both events A and B will occur. The notation is $\text{Prob}(A, B)$.
 
 Let's say that you are rolling two six-sided dice simultaneously. Die 1 is weighted so that there is a 50% chance of rolling a 6 and a 10% chance of each of the other values. Die 2 is weighted so there is a 50% chance of rolling a 5 and a 10% chance of rolling each of the other values. Let's roll both dice 1,000 times. In previous examples involving two dice, we cared about the sum of results and not the outcomes of the first versus the second die of each simulation. With a joint distributions, the order matters; so instead of 11 possible outcomes on the x-axis of our distribution plot (ranging from 2 to 12), we have 36. Furthermore, a 2D probability distribution is not sufficient to represent all of the variables involved, so the joint distribution for this example is displayed using a 3D plot.
 
+<!-- YW: Why we need a 3D plot is it why 2D isn't sufficient enough, abit confused here why is it not sufficient?. -->
 ```{r, echo = FALSE}
 # DK: Revisit and clean up this code.
 
@@ -736,6 +759,8 @@ What if you flipped two coins in a row, one after the other? You know that the p
 * *If* we got heads the first time, then we go up the top branch. The probability of getting heads again is 0.5.
 * *If* we got tails the first time, then we go down the bottom branch. The probability of getting heads is 0.5.
 
+<!-- YW : So that the probability for some combination decreased as the tree branch out.  -->
+
 Notice how regardless of what we get the first time we flip the coin, the probability of getting heads is 0.5 throughout. Coin flips, in this scenario, are **independent**. The result of one coin flip does not impact the next coin flip. 
 
 <!-- DK: Should we create these decision trees on the fly, perhaps using https://github.com/malcolmbarrett/ggdag  or maybe straight dagitty? For now, what we have is fine. -->
@@ -763,6 +788,7 @@ We decide to go down the top branch *if* our random person has the disease. We g
 
 How would you express this in statistical notation? $\text{Prob}(A|B)$ is the same thing as the probability of A *given* B. $\text{Prob}(A|B)$ essentially means the probability of A *if* we know for sure the value of B. Note that $\text{Prob}(A|B)$ is not the same thing as $\text{Prob}(B|A)$.
 
+<!-- YW: I kinda see where this is going, p(A|B) is difference from p(B|A) if I remember right that is part of the Bayes Theorem right?-->
 
 <!-- DK: The above write up is not impressive. What are we trying to accomplish? Also, we might add some simple coding/simulation examples to illustrate these points.  -->
 
@@ -784,6 +810,15 @@ $$ \text{Prob}(\text{Disease | Test = Postive} ) $$
 To answer this question, we need to use the tools of joint and conditional probability that we have learned earlier in this Chapter. We begin by building, by hand, the joint distribution of the possible models (you have the Probophobia or you do not) and of the possible outcomes (you test positive or negative). Building the joint distribution involves *assuming* that each model is true and then creating the distribution of outcomes which might occur if that assumption is true. 
 
 For example, assume you have Probophobia. There is then a 95% chance that you test positive and a 5% chance you test negative. Similarly, if we assume that the second model is true --- that you don't have Probophobia --- then there is 5% chance you test positive and a 95% you chance negative. Of course, for you (or any individual) we do not know for sure what is happening. We do not know if you have the disease. We do not know what your test will show. But we can use these relationships to construct the joint distribution.
+
+<!-- YW: If I understand correctly the scenario here is 1st, "what is the probability that you actually have the disease if you test positive?" which is P(disease | Test=positive) = 95% as well as "What is the probability that you actually don't have the disease if you test negative?" which is P(No diseases| Test=negative) = 95%, vice verse, so if I understand it correctly there is four possibility.  -->
+<!-- YW: P(Disease | Test=positive)=95% -->
+<!-- YW: P(Disease | Test=negative)= 5% -->
+
+<!-- YW: P(No Disease | Test=positive)= 5% -->
+<!-- YW: P(No Disease | Test=negative)=95% -->
+<!-- YW: Where each of the two branches added up to 100%. -->
+
 
 <!-- DK: Above is a a bit awkward. Not sure that the below works. It certainly needs to be explained! Could also do this with n = 10000 and then unnest(). Would that be clearer? -->
 
@@ -858,6 +893,8 @@ jd_disease %>%
 ```
 
 Below is a joint distribution displayed in 3D. Instead of using the "jitter" feature in R to unstack the dots, we are using a 3D plot to visualize the number of dots in each box. The number of people who correctly test negative is far greater than of the other categories. There are far fewer false positives and true positives -- and only a handful of false negatives. This is why we can barely see the 3D bar coming from those combinations.
+
+<!-- YW: Why we need 3D for this one? I found that the 4 box in the plot easier to understand than the rayshader plot. -->
 
 ```{r, echo = FALSE}
 
@@ -1089,6 +1126,8 @@ jd_marbles %>%
 ```
 
 Next, let's normalize the distribution.
+
+<!-- YW:Making it into probability -->
 
 ```{r}
 jd_marbles %>% 
@@ -1433,7 +1472,10 @@ As you may have noticed, if you calculated the value using the first method, you
 
 ## Cardinal Virtues
 
+
 The four [Cardinal Virtues](https://en.wikipedia.org/wiki/Cardinal_virtues) are Wisdom, Justice, Courage, and Temperance. Because data science is, ultimately, a moral act, we use these virtues to guide our work.  
+
+<!-- YW: Never heard of it before this course but good to know! -->
 
 * *Wisdom* begins with the ideal Preceptor Table. What data, if we had it, would allow us to answer our question easily? Then, we explore the data we have. Are the data we have close enough to the data we want that we can consider all the data as coming from the same *population*? If not, we can't proceed further. 
 
@@ -1513,6 +1555,8 @@ Note:
 
 * In this simple case, we are fortunate that the parameter $\rho_h$ has such a (mostly!) simple analog to a real world quantity. Much of the time, parameters are not so easy to interpret. In a more complex model, especially with one with interaction terms, we focus less on parameters and more on actual predictions.
 
+<!-- YW:Giving hand to the next few chapter. -->
+
 * Wisdom allowed us to assume that all the rows in the actual Preceptor Table come from the same population. If that is true, then it is also true that the mathematical relationship between outcomes and covariates is consistent across these rows.
 
 Second, we should check how "representative" the data we have is of the entire population. 
@@ -1552,6 +1596,7 @@ But some, often most, of the uncertainty comes from forces that are, by assumpti
 
 *Some randomness is intrinsic in this fallen world.* 
 
+<!-- YW:Okay but a little vague, don't know where but feeling unclear.  -->
 
 ### Temperance
 
@@ -1611,4 +1656,4 @@ If you are keen to learn more about probability, here is a video featuring Profe
 ```{r, echo = FALSE}
 knitr::include_app("https://www.youtube.com/embed/6C7yRBfh2ok")
 ```
-
+<!-- YW: Cool, I would say that this chapter contained a whole lot of theory and mathematics stuff, rather than direct application like the visualisation Unit. I found the some of the models pretty confusing and it sometimes take me a while to determine what each variable in p(a|b) is. Not sure the Cardinal Virtues should be put here. Needs better connection with the next and later chapters, maybe us good to introduce sampling or at least foreshadow it at somepoint.Chap.6 done a great job of including parts of chapter 5 like Joint distribution, posterior distribution, etc. Both Chap 6 and Chap 7 has refer back to the Cardinal Virtue so I guess it's not a good idea to switch the position as it is used throughout later chapters.  -->
