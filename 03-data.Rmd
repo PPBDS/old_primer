@@ -6,21 +6,16 @@
 
 <!-- TODO: -->
 
-<!-- Add skimr() and skim() to chapter 2. Simple one time use on a tibble. Explain what it does. At end of chapter before Summary. -->
-
-<!-- Use janitor::clean_names() in chapter 3. Simple example with a file with variable names like `my var` and `1-var`.  Read this in without fixing. Show how to use backticks to refer to those variables. Point out that this is annoying. Fix with clean_names(). -->
-
-<!-- Change all the files used so that they always have one blank line at the bottom to make that warning go away. Get rid of "warn" argument.  -->
+<!-- Change all the files used so that they always have one blank line at the bottom to make that warning go away. Get rid of "warn" argument. DONE -->
 
 <!-- * Deal with this message we get when knitting the chapter: -->
 
 <!-- Output created: /Users/davidkane/Desktop/projects/primer/junk/data.html -->
 <!-- Warning message: -->
 <!-- In readLines(file) : -->
-<!--   incomplete final line found on '/var/folders/mk/lh99bg295msg8myvcf5yczkc0000gn/T//Rtmpghqre9/file19e544177c18' -->
+<!--   incomplete final line found on '/var/folders/mk/lh99bg295msg8myvcf5yczkc0000gn/T//Rtmpghqre9/file19e544177c18' Goes with befinning and done. -->
 
-<!-- Fix references. -->
-
+<!-- Fix references. DONE -->
 
 Start by loading the packages which we will need in this chapter.
 
@@ -28,7 +23,6 @@ Start by loading the packages which we will need in this chapter.
 ```{r, message = FALSE}
 library(tidyverse)
 library(primer.data)
-library(lubridate)
 library(dbplyr)
 library(janitor)
 ```
@@ -47,22 +41,24 @@ You can find most of the files that we use for this chapter [here](https://githu
 github_url <- "https://raw.githubusercontent.com/PPBDS/primer.tutorials/master/inst/www/"
 ```
 
-### CSV files
+### Text files
 
-"CSV" stands for **c**omma **s**eparated **v**alue. In other words, csv files are files whose values are separated by commas. Each comma from the csv file corresponds to a column, and the column names are, by default, taken from the first line of the file.
+The most common type of data text file is "CSV," which stands for **c**omma **s**eparated **v**alue. In other words, csv files are files whose values are separated by commas. Each comma from the csv file corresponds to a column, and the column names are, by default, taken from the first line of the file.
 
 CSV files (and their counterparts) are easily transferable between computers and programming languages and are extremely simple because they're effectively just text files that have a special format. Additionally, they're very easy to parse through small amounts of data because they're easily readable by humans and computers. 
 However, due to their simple nature, CSV files are only able to move basic data and only as text values. They also have poor support for special characters like commas, which can make the dataset harder to organize and understand by adding a new column for a few specific entries. This make CSV files good for sharing data between computers and languages, but not efficient for transporting or saving large amounts of data.
+
+In this section, we'll be going over the common file formats and how we can pull data from these files into R.
 
 #### Reading and writing from a CSV file
 
 Here's an example of a CSV file and what it looks like. Use `read_csv()` from the **readr** package --- which is one of the main packages within the **tidyverse** collection of packages --- to load the data into R. The `file` argument is the file path for the CSV file.
 
 ```{r}
-# We can access files either by using their URL or their file path.
-# In this case, we're using the GitHub URL to access the database.
-# This is done by pasting the file name into our URL using the paste0() command
-# This does the same thing as creating the URL below.
+# We can access files either by using their URL or their file path. In this
+# case, we're using the GitHub URL to access the database. This is done by
+# pasting the file name into our URL using the paste0() command This does the
+# same thing as creating the URL below.
 # https://raw.githubusercontent.com/PPBDS/primer.tutorials/master/inst/www/test_1.csv
 
 file_1 <- paste0(github_url, "test_1.csv")
@@ -95,13 +91,11 @@ When you want to remove a file from your system, use `file.remove()`.
 file.remove("my_csv.csv")
 ```
 
-#### Arguments for CSV files
-
 Sometimes, CSV files will not be what you want. Maybe they have the wrong column names, have information at the top of the file, or have comments interspersed within the file.
 
+#### `skip`
+
 Consider the following csv file: `test_2.csv`. Here's what it looks like as a text file:
-
-
 
 ```{r, echo = FALSE}
 # I made it so that it doesn't show this line of code This is so it doesn't
@@ -110,8 +104,8 @@ Consider the following csv file: `test_2.csv`. Here's what it looks like as a te
 # on the web.
 
 file_2 <- paste0(github_url, "test_2.csv")
-  
-readLines(file_2, warn = FALSE)
+
+readLines(file_2)
 ```
 
 As you can see, there is text at the top of this file. Often times information about how data was collected, or other relevant information, is included at the top of the data file. However, `read_csv()` can't differentiate between this text and the data that we want to read, causing it to fail and output gibberish.
@@ -134,6 +128,8 @@ read_csv(file = file_2,
 
 Now that we've gotten rid of the warnings, let's look at the other message R sends: the column specification message. 
 
+#### `col_types`
+
 The column specification message is a message that R sends to tell you what data types it is using for the column.
 
 Data types are the types discussed in Chapter 2 Wrangling, such as characters, factors, integers, and dates.
@@ -151,47 +147,81 @@ read_csv(file = file_2,
 
 You can also change the column arguments so that you get the data type that you want.
 Take `test_7.csv`.
-```{r}
-file_3 <- paste0(github_url, "test_7.csv")
 
-read_csv(file_3)
+```{r}
+test_7 <- paste0(github_url, "test_7.csv")
+
+read_csv(test_7)
 ```
 
 Let's try parsing this so that the `student` column is a factor and the `grade` column is an integer.
+
 ```{r}
-read_csv(file_3,
+read_csv(test_7,
          col_types = cols(grade = col_integer(),
                           student = col_factor()))
 ```
+
 By being clever with the columns, we can make our lives easier down the line when we graph the data.
 
 We can also manipulate other arguments for CSV files.
+
+#### `col_names` and `clean_names()`
 
 Let's try changing the column names in the `test_3.csv` file.
 
 As you can see below, the file doesn't have any column names, resulting in the first row being considered as the names for the rest of the file.
 
 ```{r}
-file_4 <- paste0(github_url, "test_3.csv")
+file_3 <- paste0(github_url, "test_3.csv")
 
-read_csv(file_4)
+read_csv(file_3)
 ```
 
 We can fix this by changing the `col_names` argument.
 ```{r}
-read_csv(file_4, col_names = c("a", "b", "c"))
+read_csv(file_3, col_names = c("a", "b", "c"))
 ```
 
 You can also create names automatically by setting `col_names` to FALSE
 ```{r}
-read_csv(file_4, col_names = FALSE)
+read_csv(file_3, col_names = FALSE)
 ```
 
 Changing the names of the columns allows for you to call on the columns later when the data is actually a tibble. Setting the column names to something that you can understand makes it much easier to understand your code later on.
 
+But what if we have good column names, they just aren't formatted correctly? Let's look at `test_4.csv` for an example.
+
+
+```{r}
+file_4 <- paste0(github_url, "test_4.csv")
+
+file_4_tibble <- read_csv(file_4)
+
+file_4_tibble
+```
+
+As you can see, while the function does compile the names aren't easy to access. It's possible to access the column by using the ` tickmark like below:
+
+```{r}
+file_4_tibble$`one powers`
+```
+
+But that can still cause problems down the line and it's just annoying to use the backticks every time you want a column name. This is when we can use the `clean_names()` function from the **janitor** package. It essentially formats the column names so that they follow the [underscore separated naming convention](https://en.wikipedia.org/wiki/Snake_case#:~:text=Snake%20case%20(stylized%20as%20snake_case,subroutine%20names%2C%20and%20for%20filenames.) and are all unique.
+
+```{r}
+file_4_tibble %>% 
+  clean_names()
+```
+
+This cleans the column names, saving you time when your file has a large amount of columns or you need to type a lot of column names. These issues are more common when you're pulling data off of the internet as that's normally dirty data and can have a lot of columns formatted in weird ways.
+
 <!-- The tutorial includes a lot of arguments like na and comment, but that makes the book feel like it's really long once it's actually put into text form with paragraphs and stuff. -->
 
-Another feature is the `na` argument.
+#### `na`
+
+Another feature of `read_csv()` is the `na` argument.
+
 ```{r}
 file_5 <- paste0(github_url, "test_5.csv")
 
@@ -205,10 +235,13 @@ read_csv(file_5,
          na = ".")
 ```
 
+#### `comment`
+
 You can also tell the code to ignore comment lines, which may be common in a csv file that was written by a human and as such has comments in it. `test_6.csv` is a perfect example of this. Here's what it looks like:
+
 ```{r, echo = FALSE}
 file_6 <- paste0(github_url, "test_6.csv")
-readLines(file_6, warn = FALSE)
+readLines(file_6)
 ```
 
 By setting the `comment` argument, we're able to skip lines that have a certain starting point.
@@ -220,6 +253,8 @@ read_csv(file_6, comment = "#")
 
 If you ever want to skip certain lines, just use the `comment` argument in order to designate it as something to be skipped. This is best used with cases where the `read_csv()` command will not compile without it.
 
+#### `read_delim()`
+
 So far, we've covered how we can organize CSV data, but at it's core we're working with comma separated values. But what happens when we want to read data from something that doesn't use commas to separate the values?
 
 When our tabular data comes in a different format, we can use the `read_delim()` function instead. For example, a different version of `test_6.csv` could exist that has no column names and uses pipes (`|`) as the delimiter instead of commas.
@@ -229,7 +264,7 @@ Here's another file named `delim_1`, which uses the `|` to separate the lines in
 ```{r, echo = FALSE}
 delim_1 <- paste0(github_url, "delim_1.txt")
 
-readLines(delim_1, warn = FALSE)
+readLines(delim_1)
 ```
 
 With `read_delim()`, we specify the first argument as the path to the file, as done with `read_csv()`. Then we provide values to the `delim` argument to have the code use `|` as the separator instead of the comma.
@@ -237,8 +272,8 @@ With `read_delim()`, we specify the first argument as the path to the file, as d
 ```{r}
 # Because delim_1 uses pipes to separate values, we can just use that as our
 # delim value. However, for more complex symbols like tab, we use something
-# different like "\\t" This varies for every symbol, but you can find most delim
-# values on the internet.
+# different like "\\t". This varies for every symbol, but you can find most
+# delim values on the internet.
 
 delim_1 <- paste0(github_url, "delim_1.txt")
 
@@ -247,11 +282,11 @@ read_delim(delim_1, delim = "|")
 
 You can often find CSV files on websites like [kaggle](https://kaggle.com) as well as by exporting from an Excel spreadsheet. Keep in mind that data imported off of the internet is often very messy, so try to use some of the functions listed here to clean it up. For a full list of arguments and in-depth documentation about the `read_csv()` function, please visit this [website](https://readr.tidyverse.org/reference/read_delim.html).
 
-<!-- DK: Put clean_names() example here or wherever you like. -->
+<!-- DK: Put clean_names() example here or wherever you like. DONE-->
 
 ### Excel files
 
-Excel is a spreadsheet program that use tables to analyze, store, or manipulate data. The tables are composed of cells which include text, numbers, or formulas. Excel files have the filename extension .xlsx. They store additional things that you cannot store in a .csv file such as fonts, text formatting, graphics, etc.
+Excel is a spreadsheet program that use tables to analyze, store, or manipulate data. The tables are composed of cells which include text, numbers, or formulas. Excel files have the filename extensions .xls or .xlsx, and they're capable of storing additional things that you cannot store in a .csv file such as fonts, text formatting, graphics, etc.
 
 In order to write excel files you have to install complex packages, and they are hard to create. Writing excel files is beyond the scope of Primer.
 
@@ -288,17 +323,16 @@ read_excel(path = "example_excel.xlsx")
 file.remove("example_excel.xlsx")
 ```
 
-
 If the .xlsx file has multiple sheets, you have to use the `sheet` argument to specify the sheet number or name. 
-The `read_excel()` function has arguments similar to the `read_csv()` function such as `col_names`, `col_types`, and `na`.
+The `read_excel()` function also has arguments similar to the `read_csv()` function such as `col_names`, `col_types`, and `na`.
 
 ### RDS files
 
 One very important aspect of R is saving objects into  RDS  files, which store a single R object into a file.
 These files allow us to save R objects such as plots and tibbles into R and then reload the object that it contains later without re-running the code that made it.
-This is especially useful for when you're dealing with bulk data and want to save the plot that comes with it for later.
+This is especially useful for when you're dealing with bulk data and want to save the plot that comes with it for later so that you don't have to do all of the data wrangling and plotting again.
 With a RDS file, you save the entire object, allowing you to do more things with it later without having to go through all of the code.
-However, RDS files are limited to R projects only, and they're often incomprehensible both to human eyes and to other programming languages. This makes RDS files ideal for saving objects temporarily in your own project or for sharing objects to other R users.
+However, RDS files are limited to R projects only, and they're incomprehensible both to human eyes and to other programming languages. This makes RDS files ideal for saving objects temporarily in your own project or for sharing objects to other R users.
 
 Take the following R object, a graph of the `iris` data set.
 
@@ -312,7 +346,7 @@ iris_p <- iris %>%
 iris_p
 ```
 
-When we save to a RDS file, we use the function `write_rds()`. Just like `write_csv()`, this function has two main arguments: `x` and `file`.  The `x` argument is the object that you want to save. The `file` argument is the file path where you want to save the file. The end of the path argument is the name that you want to use for the file.
+When we save to a RDS file, we use the function `write_rds()`. Just like `write_csv()`, this function has two main arguments: `x` and `file`.  The `x` argument is the object that you want to save. The `file` argument is the file path where you want to save the file. This determines the name that you use for the file.
 
 ```{r}
 write_rds(x = iris_p, file = "iris_p.rds")
@@ -397,6 +431,8 @@ Databases are one of the most common methods of storing data, as they are capabl
 A relational database is a database that has the tables interact with one another based on common data, allowing you to create custom tables from an existing set of records. For example, a relational database may hold multiple tables that use the same ID to keep track of different information, like one table having an ID and a movie name while another has the ID and the rating. You can then combine those two in your code, creating a table with the ID, name, and rating. This allows the person who made the database to easily put in new data as well as allow you to pull out some data at a time without loading the entire database.
 
 It's common to use and interact with these databases in the real world due to most businesses using relational databases to keep track of their data and to update it at their leisure. It's not uncommon for databases to hold thousands or even millions of rows due to the need to keep track of data.
+
+In this section, we'll be going over how to pull data from these databases and how to interact with the data without using the entire database.
 
 ### Reading data from a SQLite database
 
@@ -530,8 +566,9 @@ The **dbpylr** package allows you to use many of the same functions from the **t
 Here's an example of using the **dbpylr** package to get the number of albums each artist has created.
 
 ```{r} 
-# You can keep a column during the summarize() if you just put the name equal to itself.
-# This code is deliberately long in order to show the common functions that we use.
+# You can keep a column during the summarize() if you just put the name equal to
+# itself. This code is deliberately long in order to show the common functions
+# that we use.
 
 band_albums <- tbl(con, "albums") %>%
                  inner_join(tbl(con, "artists"), by = "ArtistId") %>%
@@ -571,6 +608,7 @@ FROM albums;
 ```
 
 You can then modify these queries to do operations like joins.
+
 ```{sql, connection = con}
 -- This does the same thing as the inner join from Chapter 2 Wrangling
 -- Here we're joining the albums and the artists table by the ArtistId column
@@ -607,9 +645,8 @@ slice(band_albums, 1:10)
 
 This is possible in an SQL database. There are a couple of ways to run SQL code in R, but the easiest way is by using the `dbGetQuery()` function from the **DBI** library.
 
-
 ```{r}
-# This code is just copy-pasted and reformatted from the earlier dbplyr code so 
+# This code is just copy-pasted and reformatted from the earlier dbplyr code so
 # you can best understand it.
 
 dbGetQuery(con, "
@@ -729,8 +766,8 @@ LIMIT 10;
 ```
 
 ```{r}
-# You can't see this, but output.var = "band_albums_sql" in the chunk above this.
-# So we're outputting our data into band_albums_sql
+# You can't see this, but output.var = "band_albums_sql" in the chunk above
+# this. So we're outputting our data into band_albums_sql
 band_albums_sql
 ```
 
@@ -769,7 +806,7 @@ knitr::include_graphics("03-data/images/tags.png")
 
 In the first part of this chapter, we learned how to read in data from plain text files that are usually "rectangular" in shape using the **tidyverse** `read_*` functions. Sadly, not all data comes in this simple format, but we can happily use many other tools to read in more messy/wild data formats. The formal name for gathering non-rectangular data from the web and transforming it into a more useful format for data analysis is **web scraping**.
 
-We can do web scraping through r by using the **`rvest`** library, which is a library that allows us to look at HTML and CSS selectors, then pick them apart to get the data we want. Let's look at what this means.
+We can do web scraping through r by using the **rvest** library, which is a library that allows us to look at HTML and CSS selectors, then pick them apart to get the data we want. Let's look at what this means.
 
 ### HTML and CSS selectors
 
@@ -777,27 +814,31 @@ Before we jump into scraping, let's learn a little bit about what the "source co
 
 #### Website structure
 
-
 ```{r, echo = FALSE, fig.cap = "A little bit of HTML editing can bring you a long way."}
 knitr::include_graphics("03-data/images/nobel.png")
 ```
 
-Websites are coded in a language called **HTML**, or **H**yper**T**ext **M**arkup **L**anguage. This is the code that puts all of the information on the website, such as the numbers and text. These are the files created when we "knit" our .Rmd files and it's what makes them put information on the screen. When we're webscraping, we can look at the information on the website by looking at the HTML code.
+Websites are coded in a language called **HTML**, or **H**yper**T**ext **M**arkup **L**anguage. This is the code that puts all of the information on the website, such as the numbers and text. These are the files created when we "knit" our .Rmd files and it's what makes them put information on the screen. When we're webscraping, we can look at the information on the website by looking at the HTML code. You can try this out by yourself! Just go to any website and right-click, then press "Inspect". You'll be able to see the HTML code behind the website and even edit it to your liking!
 
-HTML uses many nested "tags" to organize the structure. For example, an html file like this:
+```{r, fig.cap="You can see the HTML code of a website and even edit it temporarily by inspecting the HTML code of the in"}
+knitr::include_graphics("03-data/images/html_inspect.gif")
+```
+
+HTML uses many nested "tags" to organize the structure. For example, an HTML file like this:
+
 ```{.html}
 <!-- This is using the HTML language. You don't actually put this in a chunk if 
 you want to put this in an Rmarkdown file, you can just type it straight in.-->
 <html>
-<p>
-Hello World
-</p>
+  <p>
+    Hello World
+  </p>
 </html>
 ```
 
 looks like this in the result:
 
-<!-- AG: I added some CSS rules so that I can keep HTML in a box instead of leaving it out in the open. This knitted on my computer, but please tell me if it causes problems in the final build. [Change this to be declaritive.] ->
+<!-- These are CSS rules that allow you to draw a box around HTML elements. This helps to make them stand out from the rest of the primer and actually look like an output from a program rather than just plain text. -->
 
 ```{css, echo = FALSE}
 .artificial-html-div {
@@ -827,11 +868,9 @@ Hello World
 
 Each tag defines an **element**, or a part of a website. For example, we used the `<p>` tag to define a paragraph element in HTML. We then close the paragraph by using the `</p>` tag, ending the paragraph. You can find a full list of HTML tags and elements [here](https://developer.mozilla.org/en-US/docs/Web/HTML/Element).
 
-<!-- AG: I'm pretty sure I can link to the rest of the book like what I did here. Just making sure since I'm not really sure about how to style a link to the rest of the book. -->
+Now, we're doing data science. And let's say you find some really cool website off of the internet that has a lot of really useful data, but there's no download file (and [it's legal to scrape from that website](#legal-to-scrape)). That means that you have to pull the information from the HTML code.
 
-Now, we're doing data science. And let's say you find some really cool website off of the internet that has a lot of really useful data, but there's no download file ([and it's legal to scrape off of it](https://ppbds.github.io/primer/data.html#are-you-allowed-to-scrape-that-website)). That means that you have to pull the information from the HTML code.
-
-We can do this by using the **`rvest`** package like I talked about earlier. This is essentially a package that allows you to scrape information from HTML code, allowing you to scrape the information off of the website overall.
+We can do this by using the **rvest** package like I talked about earlier. This is essentially a package that allows you to scrape information from HTML code, allowing you to scrape the information off of the complete website.
 
 ```{r, message = FALSE}
 library(rvest)
@@ -839,13 +878,14 @@ library(rvest)
 
 Let's try scraping the `Hello World` from the earlier HTML code.
 
-First off, we need to use the `minimal_html()` function so that we can get an R object that we can then work on. Think about it like changing the information from HTML code into something that R can understand.
+First off, we need to use the `minimal_html()` function so that we can get an R object that we can then work on. This is a temporary use because we're trying to  Think about it like changing the information from HTML code into something that R can understand.
 
 ```{r}
-# You can't use HTML code that's structured properly in R, so we condense it 
-# into one line, like what's shown below.
-
-raw_html_1 <- "<html><p>Hello World</p></html>"
+raw_html_1 <- "<html>
+                 <p>
+                   Hello World
+                 </p>
+               </html>"
 raw_html_1 %>%
   minimal_html()
 ```
@@ -876,8 +916,6 @@ But websites, especially ones with useful data, don't just exist to state "Hello
 
 For example, doing this in HTML:
 
-<!-- AG: I'm wondering how closely I should stick to the tutorial problems. I know that we're going to be integrating them into each other soon, but the tutorial problems don't have as much information as I would like (such as the paragraph tags) and they're not as reusable (I can do both examples with one piece of code vs the two used in the tutorial). Right now, I'm going to use my own examples because I feel like it makes the section more understandable. Also, the tutorials shouldn't be too close to the primer since we're likely not going to be combining them too soon (I think) and I personally don't think that they should cover the exact same things with the exact same examples, especially for something as in-depth as HTML code. -->
-
 ```{.html}
 <html>
   <table>
@@ -886,7 +924,7 @@ For example, doing this in HTML:
         This is some important info.
       </td>
       <td>
-        This is some other important info.
+        This is some unimportant info.
       </td>
     </tr>
     <tr>
@@ -894,7 +932,7 @@ For example, doing this in HTML:
         This is really important info.
       </td>
       <td>
-        This is some useful information.
+        This is some other unimportant information.
       </td>
     </tr>
   </table>
@@ -908,27 +946,27 @@ Creates a table and a paragraph that looks like this:
 
 <div class = "artificial-html-div">
 <html>
-    <table>
-      <tr>
-        <td>
-          This is some important info.
-        </td>
-        <td>
-          This is some other important info.
-        </td>
-      </tr>
-      <tr>
-        <td>
-          This is really important info.
-        </td>
-        <td>
-          This is some useful information.
-        </td>
-      </tr>
-    </table>
-    <p class = "artificial-paragraph">
-      This is so useless, you shouldn't even be reading it.
-    </p>
+  <table>
+    <tr>
+      <td>
+        This is some important info.
+      </td>
+      <td>
+        This is some unimportant info.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        This is really important info.
+      </td>
+      <td>
+        This is some other unimportant information.
+      </td>
+    </tr>
+  </table>
+  <p class = "artificial-paragraph">
+    This is so useless, you shouldn't even be reading it.
+  </p>
 </html>
 </div>
 
@@ -936,35 +974,31 @@ Now, let's say we want to get all of the information in the table but we don't w
 
 We can do this by only looking at the table (the `<table>` tag) and then getting the cells (the `<td>` tag). We'll also save this to a variable for later.
 
-<!-- AG: This just feels wrong, but it doesn't run any other way. So if I want to keep the HTML code syntax without going miles off screen, I'm going to be doing this. The error that it gives me is: `Error: unexpected `<` in "<"`. It's weird, dumb, and stops me from using the proper syntax without having to circumvent it. Check out R string constants. Cut, cut, cut! What really matters is the ability to grab data from a table on the web. -->
-
 ```{r}
-# We're using a trick here where every line of HTML is pasted together, allowing
-# us to keep the original syntax even though the line is super long.
-
-raw_html_2 <- paste0("<html>",
-                       "<table>",
-                         "<tr>",
-                           "<td>", 
-                             "This is some important info.",
-                           "</td>",
-                           "<td>",
-                             "This is some other important info.",
-                           "</td>",
-                         "</tr>",
-                         "<tr>",
-                           "<td>",
-                             "This is really important info.",
-                           "</td>",
-                           "<td>",
-                             "This is some useful information.",
-                           "</td>",
-                         "</tr>",
-                       "</table>",
-                       "<p>",
-                         "This is so useless, you shouldn't even be reading it.",
-                       "</p>",
-                     "</html>")
+raw_html_2 <- "<html>
+                 <table>
+                   <tr>
+                     <td>
+                       This is some important info.
+                     </td>
+                     <td>
+                       This is some unimportant info.
+                     </td>
+                   </tr>
+                   <tr>
+                     <td>
+                       This is really important info.
+                     </td>
+                     <td>
+                       This is some other unimportant information.
+                     </td>
+                   </tr>
+                 </table>
+                 <p>
+                   This is so useless, you shouldn't even be reading it.
+                 </p>
+               </html>"
+raw_html_2
 
 # We use html_elements() to get all of the elements in the HTML file.
 
@@ -982,141 +1016,169 @@ td_tags[[2]] %>%
   html_text2()
 ```
 
-However, what if we want only a specific column or type of tag? That's what CSS selectors are for.
+This method is what you'd use if you just wanted to get all of the information inside of a specific table without filtering any data out. This is because pulling directly from the HTML makes a lot more sense in this scenario than fiddling around with other junk. Just pull the data and go, no fancy things.
+
+However, what if we want only the important information in that table? That's what CSS selectors are for.
 
 #### CSS selectors
 
-**CSS**, or **C**ascading **S**tyle **S**heets, is a coding language that defines the style of webpages. You may have noticed earlier that the HTML code we output earlier was drab and boring. But websites aren't drab and boring, they're fun and exciting! They do this by using CSS to add special rules to specific elements.
+**CSS**, or **C**ascading **S**tyle **S**heets, is a coding language that defines the style of webpages. You may have noticed earlier that the HTML code we output earlier was just black and white. But websites aren't black and white, they have colors and other cool things. They do this by using CSS to add special rules to specific elements.
 
-Now, there are a number of ways to do this. The first one is by using an **ID** to tell the webpage that they want this specific element to be a specific style. We can see an example of this below, where we set the element with the ID `red-id` to be red.
+Now, there are a number of ways to do this. The first one is by using a **class** to tell the webpage that you want all of these elements to have the same style. CSS classes are a way for multiple elements to have the same style, rather than being limited to a unique ID. We can see an example of this below, where we set the elements with the class `good-info` to be green and the class `amazing-info` to have a pale red background.
 
-<!-- AG: This is a version that's very different from that of the tutorial because the examples there aren't great for explaining CSS selectors. There's no explanation and you end up just following the tutorial without really understanding anything (at least that's what I felt like, and what my experience as a TF showed). As such, I'm using custom examples and I'm only going to use the tutorial explanation at the end. This may interfere with future work though. -->
 
 ```{css}
 /*This uses the `css` language instead of the R language. You can use this
   code in an Rmarkdown file by substituting the "r" for "css" in the top 
   brackets*/
   
-#red-id {
-  color: red
+.good-info {
+  color: green
+}
+  
+.amazing-info {
+  background-color: lightpink
 }
 ```
 
-We can then use that ID in the HTML code.
+We can then use that class in the HTML code.
 
 ```{.html}
 <html>
-<p> This is not red :( </p>
-<p> This is not red :( </p>
-<p id = 'red-id'> Amazing! </p>
-<p> This is not red :( </p>
-<p> This is not red :( </p>
-<p> This is not red :( </p>
-<p> This is not red :( </p>
+  <table>
+    <tr>
+      <td class = 'good-info'>
+        This is some important info.
+      </td>
+      <td>
+        This is some unimportant info.
+      </td>
+    </tr>
+    <tr>
+      <td class = 'good-info amazing-info'>
+        This is really important info.
+      </td>
+      <td>
+        This is some other unimportant information.
+      </td>
+    </tr>
+  </table>
+  <p>
+    This is so useless, you shouldn't even be reading it.
+  </p>
 </html>
 ```
 
 <div class = "artificial-html-div">
 <html>
-<p class = "artificial-paragraph"> This is not red :( </p>
-<p class = "artificial-paragraph"> This is not red :( </p>
-<p class = "artificial-paragraph" id = 'red-id'> Amazing! </p>
-<p class = "artificial-paragraph"> This is not red :( </p>
-<p class = "artificial-paragraph"> This is not red :( </p>
-<p class = "artificial-paragraph"> This is not red :( </p>
+  <table>
+    <tr>
+      <td class = 'good-info'>
+        This is some important info.
+      </td>
+      <td>
+        This is some unimportant info.
+      </td>
+    </tr>
+    <tr>
+      <td class = 'good-info amazing-info'>
+        This is really important info.
+      </td>
+      <td>
+        This is some other unimportant information.
+      </td>
+    </tr>
+  </table>
+  <p class = "artificial-paragraph">
+    This is so useless, you shouldn't even be reading it.
+  </p>
 </html>
 </div>
+<br>
 
-Now, there's a really clever trick that we can use here. Let's say that we only want that one piece of text that's colored red, but we don't know exactly where it is. We can actually use that CSS id to get that piece of text, using the same function `html_element()`. Just plug in the ID of the element that you want with a `#` in front to tell R that it's an ID.
+Now, there's a really clever trick that we can use here. Let's say that we only want the table cells that are important, but we don't know exactly where they are (we only know their class). Well in most cases, the data you want will be a different color, like what we see in the data above. Think about it like making **important information** have a bold font to make it stand out. CSS makes all of the **information** bold by assigning it a specific class, so we can just look for everything that has that class and pull it out so that we only get the **important** information. We can do this by using `html_elements()`. Just plug in the class of the element that you want with a `.` in front to tell R that it's an class.
 
 ```{r}
-raw_html_3 <- paste0("<p> This is not red :( </p>",
-                     "<p> This is not red :( </p>",
-                     "<p id = 'red-id'> Amazing! </p>",
-                     "<p> This is not red :( </p>",
-                     "<p> This is not red :( </p>",
-                     "<p> This is not red :( </p>",
-                     "<p> This is not red :( </p>")
+raw_html_3 <- "<html>
+                 <table>
+                   <tr>
+                     <td class = 'good-info'>
+                       This is some important info.
+                     </td>
+                     <td>
+                       This is some unimportant info.
+                     </td>
+                   </tr>
+                   <tr>
+                     <td class = 'good-info amazing-info'>
+                       This is really important info.
+                     </td>
+                     <td>
+                       This is some other unimportant information.
+                     </td>
+                   </tr>
+                 </table>
+                 <p>
+                   This is so useless, you shouldn't even be reading it.
+                 </p>
+               </html>"
+
 raw_html_3 %>%
   minimal_html() %>%
-  html_element("#red-id") %>%
+  html_elements(".good-info") %>%
   html_text2()
 ```
 
-Now, we talked about using IDs for getting an element, but what about if we want multiple elements to be formatted the same way? We can just use classes!
+You can sort by multiple classes by just chaining them together.
 
-CSS classes are a way for multiple elements to have the same style, rather than being limited to a unique ID. Elements can also have multiple classes that combine all of the styles together.
+```{r}
+raw_html_3 %>%
+  minimal_html() %>%
+  html_elements(".good-info.amazing-info") %>%
+  html_text2()
+```
+
+Webpages will also use something called an **ID** to change the color of a specific element. Do the same thing but this time with a "#" at the beginning to signify that it's a symbol.
 
 ```{css}
-.red-class {
+.red-id {
   color: red
-}
-
-.green-bg {
-  background-color: palegreen
 }
 ```
 
 ```{.html}
 <html>
-<p class = 'green-bg'> This is green :) </p>
-<p class = 'red-class'> This is red :) </p>
-<p class = 'red-class green-bg'> Amazing! </p>
-<p class = 'red-class'> This is red :) </p>
-<p> This is not red :( </p>
-<p class = 'green-bg'> This is green :) </p>
-<p> This is not red :( </p>
+<p id = "red-id"> This is red! </p>
+<p> This is not red. </p>
 </html>
 ```
 
 <div class = "artificial-html-div">
 <html>
-<p class = 'green-bg  artificial-paragraph'> This is green :) </p>
-<p class = 'red-class  artificial-paragraph'> This is red :) </p>
-<p class = 'red-class green-bg  artificial-paragraph'> Amazing! </p>
-<p class = 'red-class  artificial-paragraph'> This is red :) </p>
-<p class = 'artificial-paragraph'> This is not red :( </p>
-<p class = 'green-bg  artificial-paragraph'> This is green :) </p>
-<p class = 'artificial-paragraph'> This is not red :( </p>
+<p id = "red-id" class = "artificial-paragraph"> This is red! </p>
+<p class = "artificial-paragraph"> This is not red. </p>
 </html>
 </div>
-
-We can do the same thing with classes that we did with IDs, using `html_elements()` to sort through them. You use a `.` instead of a `#` to show that it's a class. In order to sort by multiple classes, just combine the statements together. If you want to get all of the elements from multiple classes, use a comma to separate them.
-
-```{r}
-raw_html_4 <- paste0("<html>",
-                     "<p class = 'green-bg'> This is green :) </p>",
-                     "<p class = 'red-class'> This is red :) </p>",
-                     "<p class = 'red-class green-bg'> Amazing! </p>",
-                     "<p class = 'red-class'> This is red :) </p>",
-                     "<p> This is not red :( </p>",
-                     "<p class = 'green-bg'> This is green :) </p>",
-                     "<p> This is not red :( </p>",
-                     "</html>")
-
-raw_html_4 %>%
-  minimal_html() %>%
-  html_elements(".red-class") %>%
-  html_text2()
-
-raw_html_4 %>%
-  minimal_html() %>%
-  html_elements(".red-class.green-bg") %>%
-  html_text2()
-
-raw_html_4 %>%
-  minimal_html() %>%
-  html_elements(".red-class, .green-bg") %>%
-  html_text2()
-```
+<br>
 
 So far, we've covered 3 ways to find the parts of a website through it's HTML code: the element (`<p>`), the ID (`#red-id`), and the class (`.red-class`). However, we can also mix-and-match these tags. Take the following HTML element:
 
 ```{.html}
+<html>
 <a href="https://ppbds.github.io/primer/index.html" id="abcd1234" class="hello hi">
 link to primer
 </a>
+</html>
 ```
+
+<div class = "artificial-html-div">
+<html>
+<a href="https://ppbds.github.io/primer/index.html" id="abcd1234" class="hello hi artificial-paragraph">
+link to primer
+</a>
+</html>
+</div>
+<br>
 
 We can try accessing it through the normal methods, like so:
 
@@ -1135,13 +1197,16 @@ raw_html_5 %>%
 
 raw_html_5 %>%
   minimal_html() %>%
-  html_element(".hello.hi") %>%
+  html_element(".hello") %>%
   html_text2()
 ```
 
 Or we can mix and match them to make an even more narrow search by chaining them together.
 
 ```{r}
+# Keep in mind that IDs (the # part) are usually unique to that element only, so
+# there's not really a point in filtering it even more when it's already unique.
+
 raw_html_5 %>%
   minimal_html() %>%
   html_element("a#abcd1234") %>%
@@ -1160,6 +1225,11 @@ raw_html_5 %>%
 raw_html_5 %>%
   minimal_html() %>%
   html_element(".hello#abcd1234") %>%
+  html_text2()
+
+raw_html_5 %>%
+  minimal_html() %>%
+  html_element("a.hello.hi#abcd1234") %>%
   html_text2()
 ```
 
@@ -1242,7 +1312,7 @@ From installing and using the selectorgadget as shown in the video above, we get
 
 However, when we're scraping from actual websites we need to take more than just the size of the code into consideration. We also need to take the legal aspects into account,
 
-#### Are you allowed to scrape that website?
+#### Are you allowed to scrape that website? {#legal-to-scrape}
 
 **BEFORE** scraping data from the web, you should always check whether or not you are **ALLOWED** to scrape it! There are two documents that are important for this: the robots.txt file (found by adding `/robots.txt` to the end of a URL like [so](https://www.craigslist.org/robots.txt)) and reading the website's Terms of Service document. The website's Terms of Service document is far and away the more important of the two because it's actually legally binding, so you should look there first. What happens when we look at Craigslist's Terms of Service document? Well we read this:
 
@@ -1251,8 +1321,6 @@ However, when we're scraping from actual websites we need to take more than just
 source: https://www.craigslist.org/about/terms.of.use
 
 > Want to learn more about the legalities of web scraping and crawling? Read this interesting blog post titled ["Web Scraping and Crawling Are Perfectly Legal, Right?" by Benoit Bernard](https://benbernardblog.com/web-scraping-and-crawling-are-perfectly-legal-right/) (this is optional, not required reading).
-
-<!-- AG: I'm kind of conflicted here because there's a perfectly good video that shows exactly how we can use SelectorGadget on Wikipedia pages, but it doesn't line up with the tutorials. For now, I'm going to comment out the video for future reference and just follow along with the tutorial. So maybe make them line up? -->
 
 So what to do now? Well, we can't scrape Craigslist, so we should find something else that allows you to scrape. Let's use a database from [Open Secrets about foreign-connected PACs within our country](https://www.opensecrets.org/political-action-committees-pacs/foreign-connected-pacs/2020).
 
@@ -1306,8 +1374,6 @@ raw_data_wiki
 
 Past this point, you can work with the data just like you would normal data. Here's an example graph of how states that have a denser population experience more consistent gun deaths than states with a less dense population.
 
-<!-- AG: I'm just providing the straight-up graph in this case so that the rest of the tutorial can just be copy-pasted into here. There's a lot of graph building exercises in the tutorial that honestly doesn't really fit in this chapter of the book, which is all about data. -->
-
 ```{r}
 clean_data <- raw_data_wiki %>%
                 rename("population" = "Population (total inhabitants) (2015) [1]",
@@ -1337,6 +1403,10 @@ ggplot(clean_data, aes(x = pop_tile, y = percent_rate)) +
 Webscraping is a powerful tool to gain data directly from the internet, but make sure that you're following the proper protocols so that you don't break the law and actually get the information that you need.
 
 ## Working with APIs
+
+```{r, echo = FALSE}
+knitr::include_graphics("03-data/images/api.png")
+```
 
 <!-- source used here: https://bookdown.org/rdpeng/RProgDA/reading-web-based-data.html -->
 
@@ -1432,3 +1502,26 @@ Information for this section on API's was taken from *Mastering Software Develop
 ## Summary
 
 <!-- One paragraph for each subsection. Each paragraph tries to provide a brief summary, including package names and key commands. -->
+
+*Pulling data into and out of R is a key factor in the data science process.*
+
+*Use files like CSV, Excel, RDS, JSON, and SQL files/databases to organize and share your data.*
+
+*Use SelectorGadget to pull data off of websites, but make sure it's legal to.*
+
+*Use an API when to get data from government agencies*
+
+This chapter is all about pulling data into R. It's not about graphing that data, cleaning it, wrangling it, or anything like that, it's just about pulling that data in without losing your mind.
+
+In this chapter, we looked at a few common file formats and used the **readr** package to read them and pull data from them so that we can use that data in our plots. This allowed us to download data from websites like [kaggle.com](https://kaggle.com) and use it in our dataset.
+
+We also looked at databases and how we can pull in a few select pieces of data from them so that we aren't overloading our computers with thousands or millions of data rows. We went over how we can write SQL queries so that we can acheive some special effects without causing errors or detonating our computers.
+
+And finally, we looked at how we can pull data from websites both through webscraping and through APIs, letting us pull data from the internet quickly and easily. This lets us find data for our projects and load it into our R session without having to create it ourselves or download a file from the internet.
+
+In the end, this chapter is about getting data from other people and using it inside your own projects. And make sure to use up to date data.
+
+```{r, echo = FALSE}
+knitr::include_graphics("03-data/images/suckville.png")
+```
+
