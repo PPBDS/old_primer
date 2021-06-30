@@ -1,6 +1,16 @@
 # Five Parameters {#five-parameters}
 
+<!-- All our cool new way of doing Cardinal Virtues needs to be added. -->
+
 <!-- Testing section makes no sense. -->
+
+<!-- Do we need the centering nonsense anymore, given that we explain it in chapter 9? No. So, don't center age. But, at some point (when showing simople model with just age) mention that the intercept for the line is at age = 0. -->
+
+<!-- At end of Justice section, review with math and plots what we have learned so far. No fitted models. No stan_glm(). No code for ho you made the plots. Do sex first and then age then parallel lines (like chapter 9) and then non-parallel lines.  Maybe we don't fit the first three of these. We just show the plots (and we don't even show the code which generates the plots). -->
+
+<!-- Courage is like other courage sections, first introduction of an interaction model. -->
+
+<!-- Show data and fitted values for simple gender model, like we do with age. -->
 
 <!-- Clean up all the plots, especially the legends. Huh? -->
 
@@ -168,7 +178,7 @@ All of these populations are different, so each has a different $\mu$. Which $\m
 Even though the original question is about "political candidates" in general, and does not specifically refer to either the United States or to elections for governor, we will assume that the data we have for US governors is, uh, *representative enough* of the population we are interested in (global politicians) that the exercise is useful. If we did not believe that, then we should stop right now. *The major part of Wisdom is deciding what questions you can't answer because of the data you just don't have.*
 
 
-<!-- DK: Add more? Connect to ideal Preceptor Table? -->
+<!-- DK: Add more? Connect to Preceptor Table. -->
 
 
 ## Justice and Courage
@@ -463,7 +473,7 @@ posterior_epred(fit_2a,
   ggplot(aes(`1`)) + 
     geom_histogram(aes(y = after_stat(count/sum(count))),
                    bins = 100) +
-    labs(title = "Posterior Distribution of Average Male Candidate Yeas Left",
+    labs(title = "Posterior Distribution of Average Male Candidate Years Left",
          y = "Probability",
          x = "Years To Live After the Election") + 
     scale_x_continuous(labels = scales::number_format()) +
@@ -689,67 +699,7 @@ fit_4 %>%
 
 This posterior distribution shows the average slope values for men and women. You can see that men have a steeper slope, while the slope for women is practically 0! *If you are trying to forecast the number of years that a women will live after the election, you may ignore the number of years that she has already lived.* This is definitely not true for men. Why the difference?
 
-### What is $\beta_0$?
 
-Attentive readers will have noticed that the meaning of $\beta_0$ is identical for the last two models and, at the same time, our estimate for its posterior are very different. How can that be?
-
-Recall the math:
-
-$$ lived\_after_i =  \beta_0 + \beta_1 male_i + \beta_2 c\_election\_age_i + \epsilon_i $$
-
-$$ lived\_after_i =  \beta_0 + \beta_1 male_i + \beta_2 c\_election\_age_i + \\ \beta_3 male_i *  c\_election\_age_i + \epsilon_i$$
-In both cases, $\beta_0$ has the same meaning. It is the average number of years lived after the election for women, who on the day of election, have been alive the average number of years of all candidates. Plug in 0 for $male_i$ and 0 for $c\_election\_age_i$ and both equations simplify to:
-
-$$ lived\_after_i =  \beta_0 + \epsilon_i $$
-So far, so good. But, despite the fact that we are using the same data, the posterior probability distributions for $\beta_0$ are meaningfully different between the two models:
-
-```{r}
-m_3 <- fit_3 %>% 
-  as_tibble() %>%
-  select(`(Intercept)`) %>% 
-  rename(`No Interaction Term` = `(Intercept)`)
-
-m_4 <- fit_4 %>% 
-  as_tibble() %>%
-  select(`(Intercept)`) %>% 
-  rename(`With Interaction Term` = `(Intercept)`)
-
-bind_cols(m_3, m_4) %>% 
-  select(`No Interaction Term`, `With Interaction Term`) %>% 
-  pivot_longer(cols = `No Interaction Term`:`With Interaction Term`, 
-               names_to = "Model",
-               values_to = "years") %>% 
-  ggplot(aes(years, fill = Model)) +
-    geom_histogram(aes(y = after_stat(count/sum(count))),
-                   alpha = 0.5, 
-                   bins = 100, 
-                   position = "identity") +
-    labs(title = "Posterior Probability Distributions",
-         subtitle = "For intercept in two different models",
-         x = "Additional Years Lived Post Election",
-         y = "Probability") + 
-    scale_x_continuous(labels = scales::number_format()) +
-    scale_y_continuous(labels = scales::percent_format()) +
-    theme_classic()
-```
-
-There is enough overlap between the two distributions that they aren't completely incompatible. If, in truth, $\beta_0 = 20$, neither posterior distribution is "wrong."
-
-The meaning of any parameter, including $\beta_0$, is conditional on two assumptions: the population for which we seek to make inferences and the structure of the model. In this case, we assume that the population of interest is the same. But the models are different, albeit only by one interaction term. But that is enough of a difference to make $\beta_0$ in the first model a different "thing" that $\beta_0$ in the second model, even if one "interpretation" of what they mean is the same.
-
-The trick is that an individual interpretation of the meaning of a parameter just captures one characteristic of the meaning of that parameter. It is just a single view of the "thing." That view is fine, as far as it goes, but it can't show us all aspects of the parameter. A picture of the full moon tells us little about what appears on its dark side.
-
-Consider a different question: What is the expected value for male candidates who are 1 year older than average:
-
-* Without an interaction term: $\beta_0 + \beta_1 + \beta_2 1$.
-
-* With an interaction term: $\beta_0 + \beta_1 + \beta_2 1 + \beta_3 1$. 
-
-We shouldn't be surprised that different models generate different formulas for this question. Yet note how $\beta_0$ appears in both. In other words, $\beta_0$ is not *only* the average number of years lived after the election for women, who on the day of election, have been alive the average number of years of all candidates. It is also part of a multitude of other estimates. 
-
-*The only way to understand all of what is wrapped up in $\beta_0$ is to see it in the context of the full mathematical formula.* Since we have two different models, defined by two different formulas, it is hardly surprising that the posterior probability distributions for $beta_0$ will differ, even though one specific interpretation --- one out of many --- is the same.
-
-Our advice: Spend less time thinking about what parameters *mean* and more time using `posterior_epred()` and `posterior_predict()` to examine the implications of your models. Those posteriors are the real substance of your model.
 
 ### Interaction model
 
