@@ -2,22 +2,24 @@
 
 <!-- When building the chapter, we don't want rayshader images to pop up? -->
 
-<!-- Make this warning go away: Warning in make_shadow(heightmap, shadowdepth, shadowwidth, background, : -->
-<!-- ## `magick` package required for smooth shadow--using basic shadow instead. -->
-
-<!-- Start thinking about how to expand the tutorials. What should they cover so that students start to think about probability and distributions easily and naturally? Do the chapter 4 tutorials. Including the written answers.  -->
-
-<!-- Introduce the concepts of population and, maybe, exchangeability. Need to set the stage for making an assumption about one population in chapter 6. -->
-
-<!-- Explain map_* functions. Maybe we don't need list-columns? Or should we keep them? Or maybe we should change the code around so that they are not necessary? -->
-
 <!-- Learn about movies in rayshader. -->
 
-<!-- Consider the parallel structure of the 2-model, 3-model, and n-model case. First, we should always begin by discussing how to create the joint distribution of possible models and possible experimental results. This is done by, first, assuming that one of the models is true and then, second, show the variation in the world which results. That is, even if we know for a fact that you do not have the disease, there is still a chance that you test will come back positive. So, we should do that for one model. Then, we create the joint distribution by doing that same thing for all possible models. (We show all this code.) The joint distribution is a tibble which we are happy to look at. It always has two columns: the first is the possible models and the second is one possible result (which will vary) if that model is true. So, each possible model will have 1,000 (or at least 100) rows in the joint distribution. Do you agree that we have done this? If so, rewrite this comment and place it as a comment at the start of two models so that future authors know what we are doing. And the next two comments as well. -->
+<!-- Introduce the concepts of population and, maybe, exchangeability. Need to set the stage for making an assumption about one population in chapter 6
+Could includes population in two models where we simulate the results for 100,000 people of testing data for the disease (prolophobia), the 100,000 people is the size of our population which is also the N in chapter 6 . -->
 
-<!-- Having create the joint distribution, we graph it in two dimensions. (We show the code for that.) Then, we graph it in three dimensions with rayshader. (Maybe there is a movie. Maybe we swoop in and fly around it.) Then, we take a "slice" of that joint distribution via rayshader. Move that slice around. Et cetera. Not sure how to do all that . . . Note that you can make rayshader objects interactive with rgl::rglwidget(). The ggral (sp?) package might also be useful. -->
+<!-- Make this warning go away: Warning in make_shadow(heightmap, shadowdepth, shadowwidth, background, : `magick` package required for smooth shadow--using basic shadow instead. Done.-->
 
-<!-- After rayshader, we then use the joint distribution to make two graphics, showing the posterior distribution for the model. The first is unnormalized and the second is normalized. In both cases, we begin with the joint distribution --- an object we have saved --- and then use filter to get our slice. Maybe all this can be done in a rayshader movie as well. -->
+<!-- Start thinking about how to expand the tutorials. What should they cover so that students start to think about probability and distributions easily and naturally? Do the chapter 4 tutorials. Including the written answers.Done.-->
+
+<!-- Explain map_* functions. Maybe we don't need list-columns? Or should we keep them? Or maybe we should change the code around so that they are not necessary?
+map function and map_* functions could turn an data (vector or list) and always results in lists (list Column) there are two parts in the map() function as well as map_*() function the .x and .f, the '.x' and '.f' placed in the map functions and map_* like this map(.x,.f) where .x as could either be a list or a vector, and .f either be a direct function like .f=mean, or an formula like .f= ~mean(.x), remember to put the "~" if you are using like an formula, the difference between map and map_* function is when you know and want the outcome of the data to be specific data vector like (double, logical,character,integer) rather than an general (list) in map(), you can use map_* instead of map to organized your list_column.  Done.-->
+
+<!-- Consider the parallel structure of the 2-model, 3-model, and n-model case. First, we should always begin by discussing how to create the joint distribution of possible models and possible experimental results. This is done by, first, assuming that one of the models is true and then, second, show the variation in the world which results. That is, even if we know for a fact that you do not have the disease, there is still a chance that you test will come back positive. Good
+So, we should do that for one model. Then, we create the joint distribution by doing that same thing for all possible models. (We show all this code.) The joint distribution is a tibble which we are happy to look at. It always has two columns: the first is the possible models and the second is one possible result (which will vary) if that model is true. So, each possible model will have 1,000 (or at least 100) rows in the joint distribution. Do you agree that we have done this? If so, rewrite this comment and place it as a comment at the start of two models so that future authors know what we are doing. And the next two comments as well. Yes we have it,  rewrite and paste front of two models. Done.-->
+
+<!-- Having create the joint distribution, we graph it in two dimensions. (We show the code for that.) Then, we graph it in three dimensions with rayshader. (Maybe there is a movie. Maybe we swoop in and fly around it.) Then, we take a "slice" of that joint distribution via rayshader. Move that slice around. Et cetera. Not sure how to do all that . . . Note that you can make rayshader objects interactive with rgl::rglwidget(). The ggral (sp?) package might also be useful (Did not use ggral yet to create rayshader 3D).Done. -->
+
+<!-- After rayshader, we then use the joint distribution to make two graphics, showing the posterior distribution for the model. The first is unnormalized and the second is normalized. In both cases, we begin with the joint distribution --- an object we have saved --- and then use filter to get our slice. Maybe all this can be done in a rayshader movie as well. Yes we have that, Done.-->
 
 <!-- Enough for today. -->
 
@@ -61,6 +63,8 @@ library(tidyverse)
 
 library(rayshader)
 library(rgl)
+library(tidyverse)
+library(magick)
 ```
 
 ## List-columns and map functions
@@ -114,6 +118,8 @@ tibble(col_1 = list(range(x))) %>%
 `map_*` functions, like `map_dbl()` in this example, take two key arguments, `.x` (the data which will be acted on) and `.f` (the function which will act on this data). Here, `.x` is the data in `col_1`, which is a list-column. `.f` is the function `sum()`. However, we can not simply write `map_dbl(col_1, sum)`. Instead, each use of `map_*` functions requires the use of a tilde --- a `~` --- to indicate the start of the function and the use of a dot --- a `.` --- to specify where the data goes in the function.
 
 `map_*` functions are a family of functions, with the suffix specifying the type of the object to be returned. `map()` itself returns a list. `map_dbl()` returns a double. `map_int()` returns an integer. `map_chr()` returns a character, and so on.
+
+
 
 
 ```{r}
@@ -323,8 +329,6 @@ tibble(sum = c(rep(c(2, 12), 1),
 ```
 
 We get an *empirical distribution* by rolling two dice a hundred times, either by hand or with a computer simulation. The result is not identical to the mathematical distribution because of the inherent randomness of the real world and/or of simulation. 
-
-<!-- YW: Empirical distribution-data based on trial/simulation -->
 
 ```{r}
 # In the coin example, we create the vector ahead of time, and then assigned
@@ -695,7 +699,6 @@ Joint distributions are also mathematical objects that cover a set of outcomes, 
 
 Let's say that you are rolling two six-sided dice simultaneously. Die 1 is weighted so that there is a 50% chance of rolling a 6 and a 10% chance of each of the other values. Die 2 is weighted so there is a 50% chance of rolling a 5 and a 10% chance of rolling each of the other values. Let's roll both dice 1,000 times. In previous examples involving two dice, we cared about the sum of results and not the outcomes of the first versus the second die of each simulation. With a joint distributions, the order matters; so instead of 11 possible outcomes on the x-axis of our distribution plot (ranging from 2 to 12), we have 36. Furthermore, a 2D probability distribution is not sufficient to represent all of the variables involved, so the joint distribution for this example is displayed using a 3D plot.
 
-<!-- YW: Why we need a 3D plot is it why 2D isn't sufficient enough, abit confused here why is it not sufficient?. -->
 ```{r, echo = FALSE}
 # DK: Revisit and clean up this code.
 
@@ -733,7 +736,7 @@ plot_gg(mtplot,
         sunangle = 225, # Angle of sunshine for shadows (0-360°)
         soliddepth = -50, # Thickness of pane (always <0, the smaller the thicker)
         windowsize = c(2048,1536)) # Resolution
-
+Sys.sleep(0.2)
 
 # Step 4: Embed plot in Rmd file.
 
@@ -794,6 +797,15 @@ How would you express this in statistical notation? $\text{Prob}(A|B)$ is the sa
 
 
 ## Two models
+
+<!-- Consider the parallel structure of the 2-model, 3-model, and n-model case. First, we  begin by discussing how to create the joint distribution of possible models and possible experimental results. This is done by, first, assuming that one of the models is true and then, second, show the variation in the world which results. That is, even if we know for a fact that you do not have the disease, there is still a chance that you test will come back positive.
+
+ Then, we create the joint distribution by doing that same thing for all possible models. (We show all this code.) The joint distribution is a tibble which we are happy to look at. It always has two columns: the first is the possible models (have disease) and the second is one possible result (test_positive) if that model is true. And that each possible model have at least 1,000 rows in the joint distribution.. -->
+
+
+<!-- Having create the joint distribution, we graph it in two dimensions. (We show the code for that.) Then, we graph it in three dimensions with rayshader. (We have a rough movie.) Then, we take a "slice" of that joint distribution via rayshader (Have the movie but needs improvement). Move that slice around. Et cetera. Not sure how to do all that . . . Note that you can make rayshader objects interactive with rgl::rglwidget(). The ggral (sp?) package might also be useful (Did not use ggral yet to create rayshader 3D). -->
+
+<!-- After rayshader, we then use the joint distribution to make two graphics, showing the posterior distribution for the model. The first is unnormalized and the second is normalized. In both cases, we begin with the joint distribution --- an object we have saved --- and then use filter to get our slice. Both graph and unromalized and normalized were made in 2D, could considered using rayshader/movie. -->
 
 The simplest possible setting for inference involves two models --- meaning two possible states of the world --- and two outcomes from an experiment. Imagine that there is a disease --- *Probophobia*, an irrational fear of probability --- which you either have or don't have. We don't know if you have the diseases, but we do assume that there are only two possibilities. We also know that 1% of the people in the population suffer from Probophobia. Woe is them!
 
