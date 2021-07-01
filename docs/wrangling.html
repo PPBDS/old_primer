@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Chapter 2 Wrangling | Primer for Bayesian Data Science</title>
+<title>Chapter 2 Wrangling | Preceptor’s Primer for Bayesian Data Science</title>
 <meta name="author" content="David Kane">
 <!-- JS --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.2"></script><script src="https://kit.fontawesome.com/6ecbd6c532.js" crossorigin="anonymous"></script><script src="libs/header-attrs-2.8/header-attrs.js"></script><script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="libs/bootstrap-4.6.0/bootstrap.min.css" rel="stylesheet">
@@ -22,7 +22,7 @@
 
     <div class="d-flex align-items-start justify-content-between">
       <h1>
-        <a href="index.html" title="">Primer for Bayesian Data Science</a>
+        <a href="index.html" title="">Preceptor’s Primer for Bayesian Data Science</a>
       </h1>
       <button class="btn btn-outline-primary d-lg-none ml-2 mt-1" type="button" data-toggle="collapse" data-target="#main-nav" aria-expanded="true" aria-controls="main-nav"><i class="fas fa-bars"></i><span class="sr-only">Show table of contents</span></button>
     </div>
@@ -53,6 +53,8 @@
 <li><a class="" href="maps.html">Maps</a></li>
 <li><a class="" href="ipums.html">IPUMS</a></li>
 <li><a class="" href="animation.html">Animation</a></li>
+<li><a class="" href="python.html">Python</a></li>
+<li><a class="" href="set-up-for-working-on-the-primer.html">Set Up for Working on The Primer</a></li>
 <li><a class="" href="references.html">References</a></li>
 </ul>
 
@@ -65,22 +67,30 @@
 <h1>
 <span class="header-section-number">2</span> Wrangling<a class="anchor" aria-label="anchor" href="#wrangling"><i class="fas fa-link"></i></a>
 </h1>
-<!-- Replace flights with fec16? airlines are boring. Git rid of 538?  -->
-<!-- Rewrite the whole data gather section when rvest 1.0 comes out. -->
+<!-- Read the chapter very closely. Look again at the tutorials. Write lots of comments in the chapter.  -->
+<!-- Read R For Data Science, especially parts directly relevant to this chapter: tibbles, characters, factors, dates/times, joining.  -->
+<!-- Read Wrangling chapter in Modern Dive. -->
+<!-- Take a look at our Chapter 5. Does our Distributions section help set the stage? -->
+<!-- Add skimr::skim(). -->
+<!-- Replace flights with fec16? airlines are boring. Got rid of 538?  -->
 <!-- Add in other join diagrams, like the one used for for inner join. -->
 <!-- Start joins with left_join, since it is most important. -->
+<!-- AM: Suggest combining 2.2 Characters, 2.3 Factors, and 2.5 Date-Times under its own part called "Object types", and 2.1 Tibbles and 2.4 Lists under its own part called "Data frame types", or something similar to that. Or just make it so that Lists isn't right in the middle of Factors and Date-Times -->
+<!-- AM: The most important wrangling functions are already done in Chapter 1 and may be better-suited for their most in-depth use at chapter 2. -->
 <p><em>Data science is data cleaning.</em></p>
 <p>Start by loading the packages which we will need in this chapter.</p>
 <div class="sourceCode" id="cb126"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyverse.tidyverse.org">tidyverse</a></span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">primer.data</span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://lubridate.tidyverse.org">lubridate</a></span><span class="op">)</span>
-<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/sfirke/janitor">janitor</a></span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://docs.ropensci.org/skimr/">skimr</a></span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/hadley/nycflights13">nycflights13</a></span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/jennybc/gapminder">gapminder</a></span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/rudeboybert/fivethirtyeight">fivethirtyeight</a></span><span class="op">)</span></code></pre></div>
-<p>The <strong>tidyverse</strong> package will be used in every chapter. Loading it makes the 8 packages from the “Tidyverse” available. <strong>primer.data</strong> is the data package created specifically for this <em>Primer</em>. <strong>lubridate</strong> is a package for working with dates and times. <strong>janitor</strong> offers functions for cleaning up dirty data, the most important of which is <code><a href="https://rdrr.io/pkg/janitor/man/clean_names.html">clean_names()</a></code>. <strong>skimr</strong> contains functions that are useful for providing summary statistics, especially <code><a href="https://docs.ropensci.org/skimr/reference/skim.html">skim()</a></code>. <strong>nycflights13</strong> includes data associated with flights out of New York City’s three major airports. <strong>gapminder</strong> has annual data for countries going back more than 50 years. We used this data in Chapter <a href="visualization.html#visualization">1</a>. <strong>fivethirtyeight</strong> cleans up data from the <a href="https://fivethirtyeight.com/">FiveThirtyEight</a> team.</p>
+<!-- AM: Users may be missing a few of these packages. -->
+<!-- AM: skimr does not seem as though it is used at all in this chapter. -->
+<p>The <strong>tidyverse</strong> package will be used in every chapter. Loading it makes the 8 packages from the “Tidyverse” available. <strong>primer.data</strong> is the data package created specifically for this <em>Primer</em>. <strong>lubridate</strong> is a package for working with dates and times. <strong>skimr</strong> contains functions that are useful for providing summary statistics, especially <code><a href="https://docs.ropensci.org/skimr/reference/skim.html">skim()</a></code>. <strong>nycflights13</strong> includes data associated with flights out of New York City’s three major airports. <strong>gapminder</strong> has annual data for countries going back more than 50 years. We used this data in Chapter <a href="visualization.html#visualization">1</a>. <strong>fivethirtyeight</strong> cleans up data from the <a href="https://fivethirtyeight.com/">FiveThirtyEight</a> team.</p>
+<!-- AM: List these as bulleted lists so that they are easier to read. -->
 <div id="tibbles" class="section level2" number="2.1">
 <h2>
 <span class="header-section-number">2.1</span> Tibbles<a class="anchor" aria-label="anchor" href="#tibbles"><i class="fas fa-link"></i></a>
@@ -97,6 +107,7 @@
 ##   &lt;dbl&gt; &lt;chr&gt; &lt;lgl&gt; &lt;int&gt;
 ## 1   2.1 Hello TRUE      9</code></pre>
 <p>In our code, we specify the variable names (or the names of columns) as , <code>a</code>, <code>b</code>, and <code>c</code>. Under each variable, we give a different value. Under each variable name, the data type is specified for the data within that column. A tibble can consist of one or more atomic vectors, the most important types of which are double, character, logical, and integer. The tibble above includes a variable of each type. (The “L” in “9L” tells R that we want <code>d</code> to be an integer rather than the default, which would be a double.) When you print out a tibble, the variable type is shown below the variable name.</p>
+<!-- AM: Is this entire tangent about having a number or space in the variable name necessary? Most programmers already go out of their way to avoid either. -->
 <p>Variables should not begin with a number (like <code>54abc</code>) or include spaces (like <code>my var</code>). If you insist on using variable names like that, you must include backticks around each name when you reference it.</p>
 <div class="sourceCode" id="cb129"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">tibble</span><span class="op">(</span>`54abc` <span class="op">=</span> <span class="fl">1</span>, `my var` <span class="op">=</span> <span class="fl">2</span>, c <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></code></pre></div>
@@ -168,7 +179,7 @@
 <span class="header-section-number">2.2</span> Characters<a class="anchor" aria-label="anchor" href="#characters"><i class="fas fa-link"></i></a>
 </h2>
 <div class="figure">
-<span id="fig:unnamed-chunk-119"></span>
+<span id="fig:unnamed-chunk-121"></span>
 <img src="02-wrangling/images/nasty.gif" alt="Real data is nasty." width="100%"><p class="caption">
 FIGURE 2.1: Real data is nasty.
 </p>
@@ -185,16 +196,16 @@ FIGURE 2.1: Real data is nasty.
 <code class="sourceCode R"><span class="va">tbl_fruit</span> <span class="op">%&gt;%</span> 
   <span class="fu">slice_sample</span><span class="op">(</span>n <span class="op">=</span> <span class="fl">8</span><span class="op">)</span></code></pre></div>
 <pre><code>## # A tibble: 8 x 1
-##   fruit     
-##   &lt;chr&gt;     
-## 1 physalis  
-## 2 papaya    
-## 3 elderberry
-## 4 ugli fruit
-## 5 raspberry 
-## 6 lime      
-## 7 watermelon
-## 8 jujube</code></pre>
+##   fruit    
+##   &lt;chr&gt;    
+## 1 durian   
+## 2 avocado  
+## 3 feijoa   
+## 4 banana   
+## 5 apricot  
+## 6 jackfruit
+## 7 tangerine
+## 8 cherimoya</code></pre>
 <p>Note that <code>slice_sample()</code> selects a random set of rows from the tibble. If you use the argument <code>n</code>, as here, you get back that many rows. Use the argue <code>prop</code> to return a specific percentage of all the rows in the tibble.</p>
 <p><code>str_detect()</code> determines if a character vector matches a pattern. It returns a logical vector that is the same length as the input. Recall logicals are either <code>TRUE</code> or <code>FALSE</code>.</p>
 <p>Which fruit names actually include the letter “c?”</p>
@@ -349,13 +360,14 @@ FIGURE 2.1: Real data is nasty.
 ## 5 tamarillo</code></pre>
 <!-- DK: Add back quantifiers? -->
 <!-- DK: Show some raw string examples or cut this out. -->
+<!-- AM: I say remove the raw strings part entirely. I'm not sure what purpose it serves. -->
 </div>
 <div id="raw-strings" class="section level3" number="2.2.3">
 <h3>
 <span class="header-section-number">2.2.3</span> Raw strings<a class="anchor" aria-label="anchor" href="#raw-strings"><i class="fas fa-link"></i></a>
 </h3>
 <p>There are certain characters with special meaning in regexes, including <code>$ * + . ? [ ] ^ { } | ( ) \</code>. This makes things difficult when we want to use these characters within the strings instead of as regexes. Patterns which seek to match these characters, rather than use them as metacharacters, should make use of <code>r"()"</code>, the raw string constant in R. Consider:</p>
-<!-- DK: Very unclear, both string constants and bacl slashes. -->
+<!-- DK: Very unclear, both string constants and back slashes. -->
 <div class="sourceCode" id="cb156"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="st">r"(Do you use "airquotes" much?)"</span></code></pre></div>
 <pre><code>## [1] "Do you use \"airquotes\" much?"</code></pre>
@@ -372,6 +384,7 @@ FIGURE 2.1: Real data is nasty.
 <span class="header-section-number">2.3</span> Factors<a class="anchor" aria-label="anchor" href="#factors"><i class="fas fa-link"></i></a>
 </h2>
 <p>Factors are <em>categorical</em> variables that only take on a specified set of values. To manipulate factors we will use the <strong>forcats</strong> package, a core package in the Tidyverse.</p>
+<!-- AM: What in the "Tidyverse"? Awkward wording here -->
 <p>It is easy to make factors with either <code><a href="https://rdrr.io/r/base/factor.html">factor()</a></code>, <code><a href="https://rdrr.io/r/base/factor.html">as.factor()</a></code> or <code>parse_factor()</code>.</p>
 <div class="sourceCode" id="cb160"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">tibble</span><span class="op">(</span>X <span class="op">=</span> <span class="va">letters</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span><span class="op">)</span> <span class="op">%&gt;%</span> 
@@ -480,7 +493,7 @@ FIGURE 2.1: Real data is nasty.
   <span class="fu"><a href="https://rdrr.io/r/base/levels.html">levels</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <pre><code>## [1] "Oceania"  "Americas" "Europe"   "Asia"     "Africa"</code></pre>
 <p>These two barcharts of frequency by continent differ only in the order of the continents. Which do you prefer? We show the code for just the second one.</p>
-<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-142-1.png" width="100%"></div>
+<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-144-1.png" width="100%"></div>
 <div class="sourceCode" id="cb188"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">gapminder</span> <span class="op">%&gt;%</span> 
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>continent <span class="op">=</span> <span class="fu">fct_infreq</span><span class="op">(</span><span class="va">continent</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
@@ -488,7 +501,7 @@ FIGURE 2.1: Real data is nasty.
   <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">continent</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
     <span class="fu">geom_bar</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
     <span class="fu">coord_flip</span><span class="op">(</span><span class="op">)</span></code></pre></div>
-<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-143-1.png" width="100%"></div>
+<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-145-1.png" width="100%"></div>
 <p>Let’s now order <code>country</code> by another variable, forwards and backwards. This other variable is usually quantitative and you will order the factor according to a grouped summary. The factor is the grouping variable and the default summarizing function is <code><a href="https://rdrr.io/r/stats/median.html">median()</a></code> but you can specify something else.</p>
 <div class="sourceCode" id="cb189"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># Order countries by median life expectancy</span>
@@ -526,7 +539,7 @@ FIGURE 2.1: Real data is nasty.
          <span class="va">continent</span> <span class="op">==</span> <span class="st">"Americas"</span><span class="op">)</span> <span class="op">%&gt;%</span> 
   <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">lifeExp</span>, y <span class="op">=</span> <span class="va">country</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> 
     <span class="fu">geom_point</span><span class="op">(</span><span class="op">)</span></code></pre></div>
-<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-145-1.png" width="100%"></div>
+<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-147-1.png" width="100%"></div>
 <div class="sourceCode" id="cb196"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">gapminder</span> <span class="op">%&gt;%</span> 
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span><span class="op">(</span><span class="va">year</span> <span class="op">==</span> <span class="fl">2007</span>, 
@@ -534,7 +547,7 @@ FIGURE 2.1: Real data is nasty.
   <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">lifeExp</span>, 
              y <span class="op">=</span> <span class="fu">fct_reorder</span><span class="op">(</span><span class="va">country</span>, <span class="va">lifeExp</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> 
     <span class="fu">geom_point</span><span class="op">(</span><span class="op">)</span></code></pre></div>
-<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-146-1.png" width="100%"></div>
+<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-148-1.png" width="100%"></div>
 <!-- Use `fct_reorder2()` when you have a line chart of a quantitative x against another quantitative y and your factor provides the color. This way the legend appears in the same order as the data! Note, the order is taken by the right side of the plot (not the left). Contrast the legend on the left with the one on the right.  -->
 <!-- ```{r legends-made-for-humans, fig.show = 'hold', out.width = '49%', out.height="80%", echo = FALSE} -->
 <!-- h_countries <- c("Egypt", "Haiti", "Romania", "Thailand", "Venezuela") -->
@@ -584,7 +597,7 @@ FIGURE 2.1: Real data is nasty.
 <span class="header-section-number">2.4</span> Lists<a class="anchor" aria-label="anchor" href="#lists"><i class="fas fa-link"></i></a>
 </h2>
 <div class="figure">
-<span id="fig:unnamed-chunk-148"></span>
+<span id="fig:unnamed-chunk-150"></span>
 <img src="02-wrangling/images/lists-subsetting.png" alt="Subsetting a list, visually." width="100%"><p class="caption">
 FIGURE 2.2: Subsetting a list, visually.
 </p>
@@ -710,10 +723,10 @@ as <code>&lt;dttm&gt;</code>.</p></li>
 <p>To get the current date or date-time you can use <code><a href="http://lubridate.tidyverse.org/reference/now.html">today()</a></code> or <code><a href="http://lubridate.tidyverse.org/reference/now.html">now()</a></code>:</p>
 <div class="sourceCode" id="cb225"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="http://lubridate.tidyverse.org/reference/now.html">today</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
-<pre><code>## [1] "2021-06-27"</code></pre>
+<pre><code>## [1] "2021-06-28"</code></pre>
 <div class="sourceCode" id="cb227"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="http://lubridate.tidyverse.org/reference/now.html">now</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
-<pre><code>## [1] "2021-06-27 06:34:52 EDT"</code></pre>
+<pre><code>## [1] "2021-06-28 23:30:06 EDT"</code></pre>
 <p>Otherwise, there are three ways you’re likely to create a date/time:</p>
 <ol style="list-style-type: decimal">
 <li>From a string.</li>
@@ -800,10 +813,10 @@ as <code>&lt;dttm&gt;</code>.</p></li>
 <p>You may want to switch between a date-time and a date. That’s the job of <code><a href="http://lubridate.tidyverse.org/reference/as_date.html">as_datetime()</a></code> and <code><a href="http://lubridate.tidyverse.org/reference/as_date.html">as_date()</a></code>:</p>
 <div class="sourceCode" id="cb247"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="http://lubridate.tidyverse.org/reference/as_date.html">as_datetime</a></span><span class="op">(</span><span class="fu"><a href="http://lubridate.tidyverse.org/reference/now.html">today</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></code></pre></div>
-<pre><code>## [1] "2021-06-27 UTC"</code></pre>
+<pre><code>## [1] "2021-06-28 UTC"</code></pre>
 <div class="sourceCode" id="cb249"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="http://lubridate.tidyverse.org/reference/as_date.html">as_date</a></span><span class="op">(</span><span class="fu"><a href="http://lubridate.tidyverse.org/reference/now.html">now</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></code></pre></div>
-<pre><code>## [1] "2021-06-27"</code></pre>
+<pre><code>## [1] "2021-06-28"</code></pre>
 <p>Sometimes you’ll get date/times as numeric offsets from the “Unix Epoch,” 1970-01-01. If the offset is in seconds, use <code><a href="http://lubridate.tidyverse.org/reference/as_date.html">as_datetime()</a></code>; if it’s in days, use <code><a href="http://lubridate.tidyverse.org/reference/as_date.html">as_date()</a></code>.</p>
 <div class="sourceCode" id="cb251"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="http://lubridate.tidyverse.org/reference/as_date.html">as_datetime</a></span><span class="op">(</span><span class="fl">60</span> <span class="op">*</span> <span class="fl">60</span> <span class="op">*</span> <span class="fl">10</span><span class="op">)</span></code></pre></div>
@@ -885,7 +898,7 @@ as <code>&lt;dttm&gt;</code>.</p></li>
 </h2>
 <p>There are many ways to bring data together.</p>
 <div class="figure">
-<span id="fig:unnamed-chunk-174"></span>
+<span id="fig:unnamed-chunk-176"></span>
 <img src="02-wrangling/images/wrangling.gif" alt="Combining data is often tricky." width="100%"><p class="caption">
 FIGURE 2.3: Combining data is often tricky.
 </p>
@@ -933,9 +946,10 @@ FIGURE 2.3: Combining data is often tricky.
 <h4>
 <span class="header-section-number">2.6.1.1</span> <code>inner_join()</code><a class="anchor" aria-label="anchor" href="#inner_join"><i class="fas fa-link"></i></a>
 </h4>
+<!-- AM: Instead show a diagram of left_join() and briefly cover the rest of the joins, as left_join() is by far the most commonly-used join method -->
 <p><code>inner_join(x, y)</code>: Return all rows from <code>x</code> where there are matching values in <code>y</code>, and all columns from <code>x</code> and <code>y</code>. If there are multiple matches between <code>x</code> and <code>y</code>, all combination of the matches are returned.</p>
 <div class="figure">
-<span id="fig:unnamed-chunk-177"></span>
+<span id="fig:unnamed-chunk-179"></span>
 <img src="02-wrangling/images/join-inner.png" alt="Inner join." width="100%"><p class="caption">
 FIGURE 2.4: Inner join.
 </p>
@@ -1067,8 +1081,9 @@ FIGURE 2.4: Inner join.
 <span class="header-section-number">2.6.2</span> Example<a class="anchor" aria-label="anchor" href="#example"><i class="fas fa-link"></i></a>
 </h3>
 <p>Consider the relationships among the tibbles in the <strong>nycflights</strong> package:</p>
+<!-- AM: nycflights13* -->
 <div class="figure">
-<span id="fig:unnamed-chunk-188"></span>
+<span id="fig:unnamed-chunk-190"></span>
 <img src="02-wrangling/images/relational-nycflights.png" alt="Relationships among nycflights tables" width="100%"><p class="caption">
 FIGURE 2.5: Relationships among nycflights tables
 </p>
@@ -1094,6 +1109,7 @@ FIGURE 2.5: Relationships among nycflights tables
 ## #   carrier &lt;chr&gt;, flight &lt;int&gt;, tailnum &lt;chr&gt;, origin &lt;chr&gt;, dest &lt;chr&gt;,
 ## #   air_time &lt;dbl&gt;, distance &lt;dbl&gt;, hour &lt;dbl&gt;, minute &lt;dbl&gt;, time_hour &lt;dttm&gt;,
 ## #   name &lt;chr&gt;</code></pre>
+<!-- AM: Is this "code is equivalent to" part really necessary?  -->
 <p>This is our first example of using a join function with a pipe. <code>flights</code> is fed as the first argument to <code>inner_join()</code>. That is what the pipe does. The above code is equivalent to:</p>
 <div class="sourceCode" id="cb306"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">inner_join</span><span class="op">(</span><span class="va">flights</span>, <span class="va">airlines</span>, by <span class="op">=</span> <span class="st">"carrier"</span><span class="op">)</span></code></pre></div>
@@ -1137,7 +1153,7 @@ FIGURE 2.5: Relationships among nycflights tables
 ## #   air_time &lt;dbl&gt;, distance &lt;dbl&gt;, hour &lt;dbl&gt;, minute &lt;dbl&gt;, time_hour &lt;dttm&gt;,
 ## #   name &lt;chr&gt;, lat &lt;dbl&gt;, lon &lt;dbl&gt;, alt &lt;dbl&gt;, tz &lt;dbl&gt;, dst &lt;chr&gt;,
 ## #   tzone &lt;chr&gt;</code></pre>
-<p>Let’s construct the chain of pipe operators <code><a href="https://rdrr.io/pkg/janitor/man/pipe.html">%&gt;%</a></code> that computes the number of flights from NYC to each destination, but also includes information about each destination airport:</p>
+<p>Let’s construct the chain of pipe operators <code><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></code> that computes the number of flights from NYC to each destination, but also includes information about each destination airport:</p>
 <div class="sourceCode" id="cb311"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">flights</span> <span class="op">%&gt;%</span>
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html">group_by</a></span><span class="op">(</span><span class="va">dest</span><span class="op">)</span> <span class="op">%&gt;%</span>
@@ -1301,6 +1317,7 @@ FIGURE 2.5: Relationships among nycflights tables
 <pre><code>## rolls
 ## 1 2 4 5 6 
 ## 2 2 1 4 1</code></pre>
+<!-- AM: values*  -->
 <p>In this case, with only 10 vlaues, it is actually less efficient to store the data like this. But what happens when we have 10,000 rolls.</p>
 <div class="sourceCode" id="cb325"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">more_rolls</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span><span class="op">(</span><span class="va">rolls</span>, <span class="fl">1000</span><span class="op">)</span>
@@ -1310,10 +1327,10 @@ FIGURE 2.5: Relationships among nycflights tables
 ## 2000 2000 1000 4000 1000</code></pre>
 <p>Instead of keeping around a vector of length 10,000, we can just keep 10 values, without losing any information.</p>
 <p>This example also highlights the fact that, graphically, two distributions can be identical even if they are of very different lengths.</p>
-<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-204-1.png" width="100%"></div>
+<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-206-1.png" width="100%"></div>
 <p>The two vectors — <code>rolls</code> and <code>more_rolls</code> — have the exact same shape because, even though their lengths differ, they are the same thing. <em>The total count for each value does not matter. What matters is the relative proportions.</em></p>
 <p>Since shape is what matters, we will often “normalize” distributions so that the sum of the counts equals one, meaning that the y-axis is a percentage of the total. Example:</p>
-<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-205-1.png" width="100%"></div>
+<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-207-1.png" width="100%"></div>
 </div>
 <div id="sample" class="section level3" number="2.8.2">
 <h3>
@@ -1353,7 +1370,7 @@ FIGURE 2.5: Relationships among nycflights tables
     <span class="fu">scale_x_continuous</span><span class="op">(</span>breaks <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">6</span>,
                        labels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html">as.character</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">6</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
     <span class="fu">scale_y_continuous</span><span class="op">(</span>labels <span class="op">=</span> <span class="fu">scales</span><span class="fu">::</span><span class="fu"><a href="https://scales.r-lib.org/reference/label_number.html">comma_format</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></code></pre></div>
-<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-210-1.png" width="100%"></div>
+<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-212-1.png" width="100%"></div>
 <p>This makes the <em>dual nature of distributions</em> more clear. A distribution is the “thing” you see in this plot. A mathematical object with several different parts, including a set of possible values (1 through 6, in this case) and a record of the number of times each value appears. A distribution is <em>also</em> the simple vector of numbers we used to create this plot.</p>
 <p>In general, we travel back-and-forth between <em>distribution as a thing</em> and <em>distribution as a vector of draws</em> from the thing, depending on what we are trying to accomplish.</p>
 <p><code><a href="https://rdrr.io/r/base/sample.html">sample()</a></code> is just one of many functions for creating draws — or, more colloquially, “drawing” — from a distribution. Three of the most important functions are: <code><a href="https://rdrr.io/r/stats/Uniform.html">runif()</a></code>, <code><a href="https://rdrr.io/r/stats/Binomial.html">rbinom()</a></code>, and <code><a href="https://rdrr.io/r/stats/Normal.html">rnorm()</a></code>.</p>
@@ -1392,7 +1409,7 @@ FIGURE 2.5: Relationships among nycflights tables
          y <span class="op">=</span> <span class="st">"Count"</span><span class="op">)</span> <span class="op">+</span>
     <span class="fu">scale_x_continuous</span><span class="op">(</span>breaks <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span>,
                        labels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Tails"</span>, <span class="st">"Heads"</span><span class="op">)</span><span class="op">)</span></code></pre></div>
-<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-213-1.png" width="100%"></div>
+<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-215-1.png" width="100%"></div>
 <p>In our graph above, we use the function <code>scale_x_continuous()</code> because our x-axis variable is continuous, meaning it can take on any real values. The <code>breaks</code> argument to <code>scale_x_continuous()</code> converts our x-axis to having two different “tick marks.” There is a fairly even distribution of Tails and Heads. More draws would typically result in an even more equal split.</p>
 <p>Randomness creates (inevitable) tension between distribution as a “thing” and distribution as a vector of draws from that thing. In this case, the vector of draws is not balanced between Tails and Heads. Yet, we “know” that it should be since the coin is, by definition, fair. In a sense, the mathematics require an even split. Yet, randomness means that the vector of draws will rarely match the mathematically “true” result. And that is OK! First, randomness is an intrinsic property of the real world. Second, we can make the effect of randomness be as small as we want by increasing the number of draws.</p>
 <!-- DK: Could do a little example of that, showing the convergence to 50% as n increases. -->
@@ -1406,7 +1423,7 @@ FIGURE 2.5: Relationships among nycflights tables
          y <span class="op">=</span> <span class="st">"Count"</span><span class="op">)</span> <span class="op">+</span>
     <span class="fu">scale_x_continuous</span><span class="op">(</span>breaks <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span>,
                        labels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Tails"</span>, <span class="st">"Heads"</span><span class="op">)</span><span class="op">)</span></code></pre></div>
-<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-214-1.png" width="100%"></div>
+<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-216-1.png" width="100%"></div>
 <p>The distribution — the imaginary urn — from which we draw the results of a coin flip for a fair coin is a different distribution — a different imaginary urn — from the distribution for a biased coin. In fact, there are an infinite number of distributions. <em>Yet as long as we can draw values from a distribution, we can work with it.</em> Mathematics:</p>
 <p><span class="math display">\[y_i \sim B(n, p)\]</span>.</p>
 <p>Each value for <span class="math inline">\(y\)</span> is drawn from a binomial distribution with parameters <span class="math inline">\(n\)</span> for the number of trials and <span class="math inline">\(p\)</span> for the probability of success.</p>
@@ -1421,7 +1438,7 @@ FIGURE 2.5: Relationships among nycflights tables
          x <span class="op">=</span> <span class="st">"Total Number of Heads in Ten Flips"</span>,
          y <span class="op">=</span> <span class="st">"Count"</span><span class="op">)</span> <span class="op">+</span>
     <span class="fu">scale_x_continuous</span><span class="op">(</span>breaks <span class="op">=</span> <span class="fl">0</span><span class="op">:</span><span class="fl">10</span><span class="op">)</span></code></pre></div>
-<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-215-1.png" width="100%"></div>
+<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-217-1.png" width="100%"></div>
 </div>
 <div id="normal" class="section level3" number="2.8.5">
 <h3>
@@ -1439,8 +1456,8 @@ FIGURE 2.5: Relationships among nycflights tables
 <li>The dashed normal curve has mean <span class="math inline">\(\mu = 15\)</span> &amp; standard deviation <span class="math inline">\(\sigma = 2\)</span>.</li>
 </ol>
 <div class="figure">
-<span id="fig:unnamed-chunk-216"></span>
-<img src="book_temp_files/figure-html/unnamed-chunk-216-1.png" alt="Three normal distributions." width="100%"><p class="caption">
+<span id="fig:unnamed-chunk-218"></span>
+<img src="book_temp_files/figure-html/unnamed-chunk-218-1.png" alt="Three normal distributions." width="100%"><p class="caption">
 FIGURE 2.6: Three normal distributions.
 </p>
 </div>
@@ -1459,8 +1476,8 @@ FIGURE 2.6: Three normal distributions.
 <li>The middle six segments represent the interval -3 to 3. The shaded area above this interval represents 2.35% + 13.5% + 34% + 34% + 13.5% + 2.35% = 99.7% of the area under the curve. In other words, 99.7% of values.</li>
 </ol>
 <div class="figure">
-<span id="fig:unnamed-chunk-217"></span>
-<img src="book_temp_files/figure-html/unnamed-chunk-217-1.png" alt="Rules of thumb about areas under normal curves." width="100%"><p class="caption">
+<span id="fig:unnamed-chunk-219"></span>
+<img src="book_temp_files/figure-html/unnamed-chunk-219-1.png" alt="Rules of thumb about areas under normal curves." width="100%"><p class="caption">
 FIGURE 2.7: Rules of thumb about areas under normal curves.
 </p>
 </div>
@@ -1473,18 +1490,18 @@ FIGURE 2.7: Rules of thumb about areas under normal curves.
 <code class="sourceCode R"><span class="fu">tibble</span><span class="op">(</span>value <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html">rnorm</a></span><span class="op">(</span><span class="fl">10</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
   <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">value</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> 
     <span class="fu">geom_histogram</span><span class="op">(</span>bins <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></code></pre></div>
-<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-220-1.png" width="100%"></div>
+<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-222-1.png" width="100%"></div>
 <p>As you can see, it is not as symmetrical as the one displayed above. This is not surprising! If you just draw 10 beads from the urn, you can not possibly have a very good sense of what all the numbers on all the beads in the urn look like. What if we draw 100 values? What about 100,000?</p>
 <div class="sourceCode" id="cb344"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">tibble</span><span class="op">(</span>value <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html">rnorm</a></span><span class="op">(</span><span class="fl">100</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
   <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">value</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
     <span class="fu">geom_histogram</span><span class="op">(</span>bins <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></code></pre></div>
-<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-221-1.png" width="100%"></div>
+<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-223-1.png" width="100%"></div>
 <div class="sourceCode" id="cb345"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">tibble</span><span class="op">(</span>value <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html">rnorm</a></span><span class="op">(</span><span class="fl">100000</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
   <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">value</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
     <span class="fu">geom_histogram</span><span class="op">(</span>bins <span class="op">=</span> <span class="fl">1000</span><span class="op">)</span></code></pre></div>
-<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-222-1.png" width="100%"></div>
+<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-224-1.png" width="100%"></div>
 <p>Now it’s looking a lot more similar to the “truth,” although still imperfect.</p>
 <p>Now, let’s compare normal distributions with varying means and standard deviations, which can be set using the mean and sd arguments included with the function.</p>
 <div class="sourceCode" id="cb346"><pre class="downlit sourceCode r">
@@ -1500,7 +1517,7 @@ FIGURE 2.7: Rules of thumb about areas under normal curves.
          fill <span class="op">=</span> <span class="st">"Distribution"</span>,
          x <span class="op">=</span> <span class="st">"Value"</span>,
          y <span class="op">=</span> <span class="st">"Density"</span><span class="op">)</span></code></pre></div>
-<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-223-1.png" width="100%"></div>
+<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-225-1.png" width="100%"></div>
 </div>
 <div id="working-with-draws" class="section level3" number="2.8.6">
 <h3>
@@ -1561,7 +1578,7 @@ FIGURE 2.7: Rules of thumb about areas under normal curves.
          subtitle <span class="op">=</span> <span class="st">"You can sum distributions just like you sum numbers"</span>,
          x <span class="op">=</span> <span class="st">"Value"</span>,
          y <span class="op">=</span> <span class="st">"Probability"</span><span class="op">)</span></code></pre></div>
-<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-228-1.png" width="100%"></div>
+<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-230-1.png" width="100%"></div>
 <p>Drawing from a distribution also allows us to answer questions via <em>simulation.</em> For example, imagine that A and B are both flipping fair coins. A flips the coin 3 times. B flips the coin 6 times. What is the probability that A flips more heads than B?</p>
 <p>It is obvious that B will win this game more often than A. It is also obvious that A will win some of the time. But in order to estimate the chances of A winning, we can simply simulate playing the game 1,000 times.</p>
 <div class="sourceCode" id="cb363"><pre class="downlit sourceCode r">
@@ -1830,7 +1847,7 @@ FIGURE 2.7: Rules of thumb about areas under normal curves.
 <footer class="bg-primary text-light mt-5"><div class="container"><div class="row">
 
   <div class="col-12 col-md-6 mt-3">
-    <p>"<strong>Primer for Bayesian Data Science</strong>" was written by David Kane. </p>
+    <p>"<strong>Preceptor’s Primer for Bayesian Data Science</strong>" was written by David Kane. </p>
   </div>
 
   <div class="col-12 col-md-6 mt-3">
