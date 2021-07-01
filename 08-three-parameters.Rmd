@@ -1,17 +1,15 @@
 # Three Parameters {#three-parameters}
 
 
-<!-- Read 5.7 again. -->
-
-<!-- Add lots of comments to this Rmd with initials MM: -->
-
 <!-- Do tutorials for chapter 4 and for chapter 8. -->
 
-<!-- Old comments: -->
+<!-- Read chapter 11 for one take on the Cardinal Virtue approach. -->
 
-<!-- Where is the best place to modify income and discuss it? -->
+<!-- Do Wisdom and Justice at the top. -->
 
-<!-- Review concept of dummy variables in the context of the intercept model with categorical predictor. -->
+<!-- DK: Where is the best place to modify income and discuss it? -->
+
+<!-- DK: Review concept of dummy variables in the context of the intercept model with categorical predictor. Or not? -->
 
 
 Models have parameters. In Chapter \@ref(one-parameter) we created models with a single parameter $p$, the proportion of red beads in an urn. In Chapter \@ref(two-parameters), we used models with two parameters: $\mu$ (the average height in the population, generically known as a model "intercept") and $\sigma$ (the variation in height in the population). Here --- can you guess where this is going? --- we will build models with three parameters: $\sigma$ (which serves the same role throughout the book) and two coefficients. In models which relate a continuous predictor to the outcome, those two parameters will be labeled $\beta_0$ and $\beta_1$. In models which estimate two averages, the parameters will be $\beta_1$ and $\beta_2$. All this notation is confusing, not least because different academic fields use inconsistent schemes. Follow the Cardinal Virtues and tackle your problem step by step.
@@ -38,8 +36,9 @@ knitr::include_graphics("other/images/Wisdom.jpg")
 
 Wisdom begins with a look at your data.
 
-#### EDA for `trains`
+<!-- Discuss to Preceptor Tables and ideal data to answer our questions -->
 
+#### EDA for `trains`
 
 *Always explore your data.* To demonstrate modeling with three parameters, we will use the `trains` data set from the **primer.data** package. Recall the discussion from Chapter \@ref(rubin-causal-model). @enos2014 randomly placed Spanish-speaking confederates on nine train platforms around Boston, Massachusetts. Exposure to Spanish-speakers -- the `treatment` -- influenced attitudes toward immigration. These reactions were measured through changes in answers to three survey questions. Load the necessary libraries and look at the data.
 
@@ -55,6 +54,8 @@ glimpse(trains)
 ```
 
 The data include information about each respondent's gender, political affiliations, age, income and so on. `treatment` indicates whether a subject was in the control or treatment group. The key outcomes are their attitudes toward immigration both before (`att_start`) and after (`att_end`) the experiment. We also have a measure of their ideology before and after the experiment, but there is little change. Type `?trains` to read the help page for more information about each variable. Let's restrict attention to a subset of the variables.
+
+<!-- Tie above paragraph to selecting data that is relevant to the research question. Think about increasing levels of sophistication in dealing with the "population" question, and discussing examples of what can go wrong. -->
 
 ```{r}
 ch8 <- trains %>% 
@@ -83,7 +84,6 @@ ch8 %>%
 ```
 
 `skim()` shows us what the different values of `treatment` are because it is a factor. Unfortunately, it does not do the same for character variables like `party`. The ranges for `age` and `att_end` seem reasonable. Recall that participants were asked three questions about immigration issues, each of which allowed for an answer indicated strength of agreement on a scale form 1 to 5, with higher values indicating more agreement with conservative viewpoints. `att_end` is the sum of the responses to the three questions, so the most liberal possible value is 3 and the most conservative is 15.
-<!-- MM: Was info on data discussed earlier? -->
 
 Always plot your data.
 
@@ -107,6 +107,12 @@ The data that we have are very limited. There are only 115 observations, all fro
 
 The key concept is the idea of a "population." From which larger population is the data we have being (conceptually) drawn? If we were only interested in the age of individuals in our data set, we would have no need for inference. *We know everyone's ages already.* We only need tools like `stan_glm()` if we seek to understand individuals not in our data. Only if our data is "representative," at least to some extent, of that larger population can we use our data to answer our questions.
 
+<!-- Relate back to research questions and the population for them -->
+
+<!-- Discuss whether the data comes from the same population as preceptor table -->
+
+<!-- This sections ends with the Population  Table. -->
+
 
 
 
@@ -117,6 +123,8 @@ knitr::include_graphics("other/images/Justice.jpg")
 ```
 
 Justice, in data science, consists of three topics: predictive versus causal modeling, the Preceptor Table, and a mathematical formulation of the model. 
+
+<!-- Ch.5 states key aspects are representativeness, validity, and data generating mechanism. Correct! This is all garbage! -->
 
 
 Any model with age as its dependent variable will be predictive, not causal, for the simple reason that nothing, other than time, can change your age. You are X years old. It would not matter if you changed your party registration from Democrat to Republican or vice versa. Your age is your age.
@@ -191,6 +199,7 @@ Don't panic dear poets and philosophers, the whole thing is easier than it looks
 
 * The model in Chapter \@ref(two-parameters) is sometimes called "intercept-only" because the only (interesting) parameter is the intercept. Here we have a "two intercept" model because, instead of estimating an average for the whole population, we are estimating two averages.
 
+<!-- MM: Reinforce representativeness and validity of the data -->
 
 
 ### Courage
@@ -261,7 +270,7 @@ The unknown parameters $\beta_1$ (partyDemocrat) and $\beta_2$ (partyRepublican)
 
 * The phrase "in the population" is doing a great deal of work because we have not said what, precisely, we mean by the "population." Is it the set of people on those commuter platforms on those days in 2012 when the experiment was done? Is it the set of people on all platforms, including ones never visited? Is it the set of all Boston commuter? All Massachusetts residents? All US residents? Does it include people today, or can we only draw inferences for 2012? We will explore these questions in every model we create.
 
-<!-- MM: touched on in the wisdom section in ch. 7, does it belong there? -->
+<!-- MM: touched on in the wisdom section in ch. 5, as well as justice in terms of representativeness does it belong there? -->
 
 * The parameters $\beta_1$ and $\beta_2$ can be interpreted in two ways. First, like all parameters, they are a part of the model. We need to estimate them. But, in many cases, we don't really care what the value of the parameter is. The exact value of $\sigma$, for example, does not really matter. Second, some parameters have a substantive interpretaion, as with $\beta_1$ and $\beta_2$ being the average ages in the population. But this will often not be the case! Fortunately, with such models, we can use functions like `posterior_epred()` and `posterior_predict()` to answer our questions.
 
@@ -501,6 +510,8 @@ Models help us answer questions better than we could without those models, but o
 knitr::include_graphics("other/images/Wisdom.jpg")
 ```
 
+<!-- MM: ideal preceptor table, what kind of data would we need, then look at data? -->
+
 *Look at your data!* Before making a model which seeks to explain `att_end`, we should plot `att_end` and the variable we think is connected to it.
 
 ```{r}
@@ -531,9 +542,13 @@ knitr::include_graphics("other/images/Justice.jpg")
 
 The two elements of Justice in a data science project remain the same: the Preceptor Table and the  mathematical formula.
 
+<!-- MM: should be three elements: representativeness, validity, and formula -->
+
 A Preceptor Table for this model would look very similar to the one in the first half of this chapter, except that we have now possible outcomes for each individual: `att_end` if they are exposed to treatment and `att_end` if they are exposed to control. 
 
 <!-- DK: We need to add Preceptor Tables here and elsewhere. The below one is wrong because it does not show two potential outcomes.  Should use proper potential outcome notation, as introduced in chapter 4. -->
+
+<!-- MM: Agree: Preceptor tables need to be added here as well as in wisdom -->
 
 
 The math for this model is exactly the same as the math for the predictive model in the first part of this chapter, although we change the notation a bit for clarity.
@@ -548,6 +563,8 @@ $$\epsilon_i \sim N(0, \sigma^2)$$
 <!-- DK: make these sections much more similar across the chapters, always separating out the data and the paramters -->
 
 Nothing has changed, except for the meaning of the data items and the interpretations of the parameters. 
+
+<!-- MM: Possibly directly compare to add clarity to how meaning/interpretations change -->
 
 * On the left-hand side we have the outcome, $y_i$, which is the variable to be explained. In our case, this is a person's attitude toward immigration after the experiment is complete.  $y_i$ takes on integer values between 3 and 15 inclusive.
 
@@ -644,7 +661,9 @@ outcome + fitted + res +
 
 The smaller the spread of the residuals, the better a job the model is doing of explaining the outcomes.
 
-<!-- DK: more details! MM: agree -->
+<!-- DK: more details! -->
+
+<!-- MM: Add explanation of fit similar to how it was done previously? -->
 
 ### Temperance
 
@@ -676,6 +695,8 @@ fit_2 %>%
 ```
 
 Could the true value of the average treatment effect be as much as 2 or as little as 1? Of course! The most likely value is around 1.5, but the variation in the data and the smallness of our sample cause the estimate to be imprecise. However, it is quite unlikely that the true average treatment effect is below zero.
+
+<!-- MM: establish that approximate 1.5 difference can be seen by the attitude posterior from courage -->
 
 We can use `posterior_epred()` to answer this question. Create a tibble and use it as we have done before:
 
@@ -768,6 +789,8 @@ knitr::include_graphics("other/images/Wisdom.jpg")
 
 Before making a model which seeks to explain `income`, we should plot it and the variable we think is connected to it.
 
+<!-- MM: Relate to ideal Preceptor tables -->
+
 ```{r}
 ch8 %>%
   ggplot(aes(x = age, y = income)) + 
@@ -781,8 +804,12 @@ ch8 %>%
 
 Is that data believable? Maybe? One could imagine that income was not recorded exactly and that, therefore, it is not surprising that many people had exactly the same income. Rounding makes different numbers the same, after all. But what about the (almost) complete lack of people reporting income between \$150,000 and \$250,000? In a real data science project, this puzzle would require further investigation. For now, we ignore the issue and blithely press on.
 
+<!-- MM: population? -->
+
 
 ### Justice
+
+<!-- MM: Add representativeness and validity -->
 
 ```{r echo = FALSE, fig.cap = "Justice"}
 knitr::include_graphics("other/images/Justice.jpg")
@@ -878,6 +905,8 @@ There are scores of different fitted values. Indeed, there are a greater number 
 
 <!-- DK: Some more discussion! And some plots. Explain what the residuals are. And predicted values! Talk about sigma. More could be done. -->
 
+<!-- MM: Agree, some discussion could possibly be one earlier with residuals and predicted values and reinforced throughout -->
+
 
 ### Temperance
 
@@ -933,6 +962,8 @@ So far in this chapter, we have only considered *continuous* outcome variables. 
 
 ### Wisdom
 
+<!-- MM: Ideal preceptor table -->
+
 Look at our data.
 
 
@@ -949,6 +980,8 @@ ch8 %>%
 
 Why is there only one observation with an income between $135,000 and $250,000? We don't know. The important thing is to notice it, to explore the variables you are using in the model.
 
+<!-- MM: Is the data of the same population or close enough? Ch.5 states representativeness is in Justice -->
+
 The second part of Wisdom is examining whether the data we have is representative of the overall population about which we seek to draw inferences. Our data is from 2012 and includes only Boston-area commuters. Our questions are, apparently, about today. Are they for the world, the US, the Boston-area, or just commuters at these select train stations? We don't know! The questions are not very precise. 
 
 One of the key jobs of a data scientist is to guide people --- our colleagues, bosses and clients --- toward asking precise questions. We must help them to translate English into inference. That translation requires precision. In this case, let's assume that the questions reference Boston-area commuters in 2021.
@@ -957,6 +990,8 @@ So, is the data we have from 2012 representative of the data from 2021 about whi
 
 
 ### Justice
+
+<!-- MM: Add representativeness and validity -->
 
 Recall the discussion in Section \@ref(zero-one-outcomes) about the logistic regression model which we use whenever the outcome or dependent variable is binary/logical. The math is there, if you care about math. We don't, at least not too much. Reminder:
 
@@ -1027,6 +1062,7 @@ pe %>%
     theme_classic()
 ```
 
+<!-- MM: Mini discussion of graph? -->
 
 *Assume we have a group of eight people, two of whom make $100,000, two $200,000, two $300,000 and two $400,000. How many will be liberal?*
 
