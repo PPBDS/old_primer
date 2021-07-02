@@ -1,19 +1,13 @@
 # Probability {#probability}
 
-<!-- When building the chapter, we don't want rayshader images to pop up? -->
+<!-- We need a fourth example, after Presidential elections, which is continuous. Presumably normal distribution. Perhaps using heigh of adults from nhanes for empirical. Then posterior is height at basketball court. -->
+
+<!-- Add truth is out there image. Done.-->
+
+<!-- When building the chapter, we don't want rayshader images to pop up! -->
 
 <!-- Learn about movies in rayshader.  -->
 
-<!-- Joint distribution in disease example and marble example are wrong. Change disease example so that we have 50% accurate if you have the diseases and 99% accurate if you don't. Done. -->
-
-<!-- Introduce the concepts of population and, maybe, exchangeability. Need to set the stage for making an assumption about one population in chapter 6 Done. Include population in two models -->
-
-<!-- Testing for PR -->
-
-<!-- Should each section also do something with the resulting posterior? Use it to answer a question. Yes! Again, the N Model example is currently the best example. Note how this connects to the Temperance examples in each chapter. Maybe make this explicit? -->
-
-
-<!-- Maybe add, after N models, a section on Infinity models, meaning a continuous parameter p. Note that we have a continuous distribution section now. Want to set the stage for Chapter 6, in which we are generating a posterior for p which we may think of as taking an infite number of values. This is a key dimension on which chapter 5 and 6 need to connect. -->
 
 <!-- Also good to get into the *scaling* of distributions, and the arbitrariness thereof. For example, trains$age is a distribution. Fine. What about rep(trains$age, 2)? What about rep(trains$age, 100)? Well, if any vector is a distribution, then all three of these are distributions. In fact, they are the same distribution, just scaled differently.  -->
 
@@ -29,6 +23,7 @@
 <!-- Rethinking Chapter 2. Garden of forking data is just excellent stuff. -->
 <!-- Bayesian Workshop -->
 
+<!-- Wait on this. Maybe add, after N models, a section on Infinity models, meaning a continuous parameter p. Note that we have a continuous distribution section now. Want to set the stage for Chapter 6, in which we are generating a posterior for p which we may think of as taking an infinite number of values. This is a key dimension on which chapter 5 and 6 need to connect. Maybe not necessary? -->
 
 
 > The usual touchstone of whether what someone asserts is mere persuasion or at least a subjective conviction, i.e., firm belief, is betting. Often someone pronounces his propositions with such confident and inflexible defiance that he seems to have entirely laid aside all concern for error. A bet disconcerts him. Sometimes he reveals that he is persuaded enough for one ducat but not for ten. For he would happily bet one, but at ten he suddenly becomes aware of what he had not previously noticed, namely that it is quite possible that he has erred. -— Immanuel Kant, *Critique of Pure Reason*
@@ -52,6 +47,7 @@ library(rayshader)
 library(rgl)
 library(tidyverse)
 library(magick)
+library(primer.data)
 ```
 
 ## List-columns and map functions
@@ -70,8 +66,6 @@ x[[1]]
 ```
 
 There are a number of built-in R functions that output lists. For example, the ***ggplot*** objects you have been making store all of the plot information in lists. Any function that returns multiple values can be used to create a list output by wrapping that returned object with `list()`.
-
-<!-- YW : I think this is my first time learning about ggplot information in lists (maybe I have seen an error because of that) So maybe adding parts in Visualization unit that foreshadow this part. -->
 
 
 ```{r}
@@ -178,10 +172,7 @@ This allows us to make the following statements:
 
 <!-- DK: What is the difference between a distribution and a probability distribution? After all, we can define them both with draws. And the draws can look like anything. And you can turn any distribution into a probability distribution via normalization. -->
 
-For the purposes of this *Primer*, a *probability distribution* is a mathematical object that covers a set of outcomes, where each distinct outcome has a chance of occurring between 0 and 1 inclusive. The chances must sum to 1. The set of possible outcomes --- heads or tails for the coin, 1 through 6 for a single die, 2 through 12 for a pair of dice --- can be either discrete or continuous. This set of outcomes is the *domain* of the probability distribution. There are three types of probability distributions: mathematical, empirical, and posterior. 
-
-
-<!-- YW:Not sure what is "can be either discrete or continuous" means in this content? Is it like scale_x_discrete, or something else? DK: So fix it! -->
+For the purposes of this *Primer*, a *probability distribution* is a mathematical object that covers a set of outcomes, where each distinct outcome has a chance of occurring between 0 and 1 inclusive. The chances must sum to 1. The set of possible outcomes --- heads or tails for the coin, 1 through 6 for a single die, 2 through 12 for a pair of dice --- can be either discrete or continuous. Remember, discrete data is information where we can only take certain value. On the other hand, continuous data is data we can take any values, like height and weight they are in a sense "continuous". This set of outcomes is the *domain* of the probability distribution. There are three types of probability distributions: mathematical, empirical, and posterior. 
 
 The key difference between a distribution, as we have explored them Section \@ref(distributions), and a *probability* distribution is the requirement that the sum of the probabilities of the individual outcomes must be exactly 1. There is no such requirement in a distribution. But any distribution can be turned into a probability distribution by "normalizing" it, as we will explore.  In this context, we will often refer to a distribution which is not (yet) a probability distribution as an "unnormalized" distribution.  
 
@@ -219,9 +210,7 @@ ggplot(mydata, aes(x = results)) +
 
 ```
 
-An *empirical distribution* is based on data. You can think of this as the probability distribution created by running a simulation. In theory, if we increase the number of coins we flip in our simulation, the empirical distribution will look more and more similar to the mathematical distribution. The probability distribution is the Platonic form. The empirical distribution will often look like the mathematical probability distribution, but it will rarely be exactly the same.
-
-<!-- YW: Elaborate more on "The probability distribution is the Platonic Form" I found it hard to understand, I would say either explain more or simply deleted. Agreed! Elaborate! -->
+An *empirical distribution* is based on data. You can think of this as the probability distribution created by running a simulation. In theory, if we increase the number of coins we flip in our simulation, the empirical distribution will look more and more similar to the mathematical distribution. The mathematical distribution is the Platonic form. The empirical distribution will often look like the mathematical probability distribution, but it will rarely be exactly the same.
 
 In this simulation, there are 56 heads and 44 tails. The outcome will vary every time we run the simulation, but the proportion of heads to tails should not be too different if this coin is fair.
 
@@ -349,8 +338,6 @@ We might consider labeling the y-axis in plots of empirical distributions as "Pr
 
 The *posterior distribution* for rolling two dice a hundred times depends on your beliefs. If you take the dice from your Monopoly set, you have reason to believe that the assumptions underlying the mathematical distribution are true. However, if you walk into a crooked casino and a host asks you to play craps, you might be suspicious. In craps, a come-out roll of 7 and 11 is a "natural," resulting in a win for the "shooter" and a loss for the casino. You might expect those numbers to occur less often than they would with fair dice. Meanwhile, a come-out roll of 2, 3 or 12 is a loss for the shooter. You might also expect values like 2, 3 and 12 to occur more frequently. Your posterior distribution might look like this:
 
-<!-- YW: Posterior distribution based on beliefs and existing hypothethis.  -->
-
 ```{r, echo = FALSE}
 # Hard code our posterior about the crooked casino.
 
@@ -405,7 +392,7 @@ ggplot(data = result, aes(total)) +
 
 ```
 
-<!-- YW:Ev means number of electoral college vote for states for example rep(3,8) means there are 8 states in the US that have the electoral college vote of 3 votes. -->
+
 
 We know that campaign platforms, donations, charisma, and many other factors will contribute to a candidate's success. Elections are more complicated than coin tosses. We also know that many presidential elections in history have resulted in much bigger victories or defeats than this distribution seems to allow for.
 
@@ -413,13 +400,15 @@ The *empirical distribution* in this case could involve looking into past electi
 
 However, this model is enough to suggest that the assumptions of the mathematical probability distribution above do not work for electoral votes. The model assumes that the Democrats have a 50% chance of receiving each of the 538 votes. Just looking at the mathematical probability distribution, we can observe that receiving 13 or 17 or 486 votes out of 538 would be extreme and almost impossible under this mathematical model. However, our empirical distribution tells us that those were real election results.
 
-<!-- DK: Need to add 2020 -->
+
 
 ```{r, echo = FALSE}
 # Votes are since 1964, for Democratic candidate
 
 mydata <- tibble(electoral_votes = c(486,191,17,297,49,13,111,370,379,
                       266,251,365,332,227,306))
+
+#306 is electoral votes for Joe Biden in 2020 presidential election.
 
 ggplot(mydata, aes(x = electoral_votes)) +
   geom_histogram(aes(y = after_stat(count/sum(count))), 
@@ -496,36 +485,53 @@ There are many political science questions you could explore with posterior dist
 * Present: What are the total campaign donations from Harvard faculty?
 * Future: How many electoral votes will the Democratic candidate for president win in 2024?
 
-
-### Continuous distributions
-
-<!-- DK: More details? -->
+### Height
 
 The three examples above are all *discrete* probability distributions, meaning that the outcome variable can only take on a limited set of values. A coin flip has two outcomes. The sum of a pair of dice has 11 outcomes. The total electoral votes for the Democratic candidate has 539 possible outcomes. In the limit, we can also create *continuous* probability distributions which have an *infinite* number of possible outcomes. For example, the average height for an American male could be any real number between 0 inches and 100 inches. (Of course, an average value anywhere near 0 or 100 is absurd. The point is that the average could be 68.564, 68.5643, 68.56432 68.564327, or any real number.)
 
-<!-- DK: Change this example to heights, something that is truly continuous. -->
+All the characteristics for discrete probability distributions which we reviewed above apply just as much to continuous probability distributions. For example, we can create mathematical, empirical and posterior probability distributions for continuous outcomes just as we did for discrete outcomes.
 
-All the characteristics for discrete probability distributions which we reviewed above apply just as much to continuous probability distributions. For example, we can create mathematical, empirical and posterior probability distributions for continuous outcomes just as we did for discrete outcomes. For example, a posterior probability distribution for $p$, the percentage of US citizens who approve of Biden, might look like:
+A good mathematical distribution for the height of adult men is the normal distribution.
 
+Mathematical
 
+```{r}
+height_data <-nhanes%>%
+  filter(age >= 18) %>%
+  select(height,age)%>%
+  drop_na() %>%
+  arrange(age) %>%
+  group_by(age) %>%
+  summarize(height_average = mean(height))
 
-```{r, echo = FALSE}
-tibble(p = rbeta(1000000, 200, 180)) %>% 
-  ggplot(aes(x = p)) +
-    geom_histogram(aes(y = after_stat(count/sum(count))), 
-                   bins = 500) +
-    labs(title = "Posterior Probability Distribution",
-         subtitle = "Percentage of Americans who approve of President Biden",
-         x = "Outcome\nPresidential Approval",
-         y = "Probability") +
-    scale_y_continuous(labels = 
-                         scales::percent_format()) +
-    theme_classic()
+  # mutate(height_average= mean(height)) %>%
+  # summarise(age,height_average) %>%
+  # summarise_all(funs(unique(.[.!='']))) 
+
+ height_data
 ```
+
+
+```{r}
+height_data %>%
+  ggplot(aes(age,height_average))+
+  geom_col()
+  
+```
+
+
+
+<!-- DK: Insert here mathematical, empirical and posterior examples. -->
 
 Comments:
 
-<!-- DK: Need X Files poster -->
+<!-- Need X Files poster -->
+
+
+```{r, echo = FALSE, fig.cap = "The truth is out there"}
+knitr::include_graphics("05-probability/images/truth_out_there.jpg")
+```
+ 
 
 * *The truth is out there.* If we asked all 300+ million Americans whether or not they approve of President Biden, we could know $p$ exactly. Alas, we can't do that. We use a posterior probability distribution to summarize are beliefs about the true value of $p$, a truth we can never confirm.
 
@@ -533,11 +539,109 @@ Comments:
 
 * The math of continuous probability distributions can be tricky. Read [a book](https://drive.google.com/file/d/1VmkAAGOYCTORq1wxSQqy255qLJjTNvBI/view) on  mathematical probability for all the messy details. Little of that matters in applied work.
 
-* The most important difference is that, with discrete distributions, it makes sense to estimate the probability of a specific outcome. What is the probability of rolling a 9? With continuous distributions, this makes no sense because there are an infinite number of possible outcomes. *With continuous variables, we only estimate intervals.* What is the probability that Biden's true approval percentage is between 50% and 55%? 
+* The most important difference is that, with discrete distributions, it makes sense to estimate the probability of a specific outcome. What is the probability of rolling a 9? With continuous distributions, this makes no sense because there are an infinite number of possible outcomes. *With continuous variables, we only estimate intervals.* 
+
+<!-- DK: This is important. Give an example. Answer the question. -->
 
 Don't worry about the distinctions between discrete and continuous outcomes, or between the discrete and continuous probability distributions which we will use to summarize our beliefs about those outcomes. The basic intuition is the same in both cases.
 
-<!-- YW: A little overwhelmed by the above. -->
+
+### Unnormalized distributions
+
+Remember that *probability distributions are mathematical objects that cover a set of outcomes, where each outcome in the domain is mapped to a probability value between 0 and 1 inclusive and the sum of all mappings is 1.* Sometimes, you may see distributions similar to probability distributions, only the y-axis displays raw counts instead of proportions. Unnormalized distributions are not probability distributions, but it is easy to convert between the two. You simply divide all the outcome counts on the y-axis by the sum of all outcome counts to "normalize" the unnormalized distribution. Unnormalized distributions are often an intermediary step; it is sometimes handy to work with counts until the very end.
+
+<!-- DK: Do we really need this?  -->
+
+For instance, we can generate the following unnormalized distribution for the sum of rolling two dice. (This uses the same code as above, but without the normalization step.)
+
+```{r, echo = FALSE}
+set.seed(1)
+
+tibble(ID = 1:100) %>% 
+  mutate(die_1 = map_dbl(ID, ~ sample(c(1:6), size = 1))) %>% 
+  mutate(die_2 = map_dbl(ID, ~ sample(c(1:6), size = 1))) %>% 
+  mutate(sum = die_1 + die_2) %>% 
+  ggplot(aes(x = sum)) +
+    geom_histogram(binwidth = 1, color = "white") +
+    labs(title = "Empirical Unnormalized Distribution",
+         subtitle = "Sum from rolling two dice one hundred times",
+         x = "Outcome\nSum of Two Die",
+         y = "Count") +
+    scale_x_continuous(breaks = seq(0, 12, 1), labels = 0:12) +
+    theme_classic()
+```
+
+Notice that the shape of the distribution is the same as the empirical probability distribution we generated earlier, except that the y-axis is labeled differently.
+
+```{r, echo = FALSE}
+emp_dist_dice
+```
+
+
+The two plots --- unnormalized and normalized --- have the exact same shape. In many ways, they are the same object. Yet normalization is required if we want to work with a probability distribution.
+
+
+### Joint distributions
+
+<!-- DK: Should be p(A). Discuss p(A, B). Find a better example.  -->
+
+Recall that $\text{Prob}(\text{coin})$ is the probability distribution for the result of a coin toss. It includes two parts, the probability of heads ($\rho_h$) and the probability of tails ($\rho_t$). This is a *univariate* distribution because there is only one outcome, which can be heads or tails. If there is more than one outcome, then we have a *joint* distribution.
+
+<!-- DK: Use of "outcome" is sloppy. Does a single die roll have one outcome or 6? -->
+
+Joint distributions are also mathematical objects that cover a set of outcomes, where each distinct outcome has a chance of occurring between 0 and 1 and the sum of all chances must equal 1. The key to a joint distribution is it measures the chance that both events A and B will occur. The notation is $\text{Prob}(A, B)$.
+
+Let's say that you are rolling two six-sided dice simultaneously. Die 1 is weighted so that there is a 50% chance of rolling a 6 and a 10% chance of each of the other values. Die 2 is weighted so there is a 50% chance of rolling a 5 and a 10% chance of rolling each of the other values. Let's roll both dice 1,000 times. In previous examples involving two dice, we cared about the sum of results and not the outcomes of the first versus the second die of each simulation. With a joint distributions, the order matters; so instead of 11 possible outcomes on the x-axis of our distribution plot (ranging from 2 to 12), we have 36. Furthermore, a 2D probability distribution is not sufficient to represent all of the variables involved, so the joint distribution for this example is displayed using a 3D plot.
+
+```{r, echo = FALSE}
+# DK: Revisit and clean up this code.
+
+# Step 1: Create and organize the data.
+
+mydata <- tibble(die.1 = sample(1:6, size = 1000, prob =
+                                  c(0.1,0.1,0.1,0.1,0.1,0.5), replace = TRUE),
+                 die.2 = sample(1:6, size = 1000, prob =
+                                  c(0.1,0.1,0.1,0.1,0.5,0.1), replace = TRUE)) %>%
+          group_by(die.1, die.2) %>%
+          summarize(total = n(),
+                    .groups = "drop")
+
+die1_factor <- as.factor(mydata$die.1)
+die2_factor <- as.factor(mydata$die.2)
+
+
+# Step 2: Create a ggplot object.
+
+mtplot <-  ggplot(mydata) +
+              geom_point(aes(x = die1_factor, y = die2_factor, color = total)) +
+              scale_color_continuous(limits = c(0,100)) +
+              labs(x = "Die 1", y = "Die 2") +
+              theme(legend.position = "none")
+
+
+# Step 3: Turn it into a 3D plot. This takes a bit of time and
+# will open an interactive "RGL Device" window with the plot.
+
+plot_gg(mtplot,
+        width = 3.5, # Plot width
+        zoom = 0.65, # How close view on plot should be (1=normal, <1=closer)
+        theta = 25, # From which direction to view plot (0-360°)
+        phi = 30, # How "steep" view on plot should be (0-90°)
+        sunangle = 225, # Angle of sunshine for shadows (0-360°)
+        soliddepth = -50, # Thickness of pane (always <0, the smaller the thicker)
+        windowsize = c(2048,1536)) # Resolution
+Sys.sleep(0.2)
+
+# Step 4: Embed plot in Rmd file.
+
+rglwidget()
+
+
+# Step 5: Close the "RGL Device" window by running this command. Do
+# this EVERY time before you try to create a new 3D plot.
+
+rgl.close()
+```
 
 ### Working with probability distributions
 
@@ -616,7 +720,6 @@ key_stats <- draws %>%
 key_stats
 ```
 
-<!-- YW:Maybe elaborate little on what those number mean in the context of presedential election.  -->
 
 Calculate a 95% interval directly:
 
@@ -636,105 +739,6 @@ c(key_stats$md - 2 * key_stats$mad,
 In this case, using the mean and standard deviation produces a 95%  interval which is closer to the true interval. In other cases, the median and scaled median absolute deviation will do better. Either approximation is generally "good enough" for most work. But, if you need to know the exact 95% interval, you must use `quantile()`.
 
 
-### Unnormalized distributions
-
-Remember that *probability distributions are mathematical objects that cover a set of outcomes, where each outcome in the domain is mapped to a probability value between 0 and 1 inclusive and the sum of all mappings is 1.* Sometimes, you may see distributions similar to probability distributions, only the y-axis displays raw counts instead of proportions. Unnormalized distributions are not probability distributions, but it is easy to convert between the two. You simply divide all the outcome counts on the y-axis by the sum of all outcome counts to "normalize" the unnormalized distribution. Unnormalized distributions are often an intermediary step; it is sometimes handy to work with counts until the very end.
-
-<!-- DK: Do we really need this?  -->
-
-For instance, we can generate the following unnormalized distribution for the sum of rolling two dice. (This uses the same code as above, but without the normalization step.)
-
-```{r, echo = FALSE}
-set.seed(1)
-
-tibble(ID = 1:100) %>% 
-  mutate(die_1 = map_dbl(ID, ~ sample(c(1:6), size = 1))) %>% 
-  mutate(die_2 = map_dbl(ID, ~ sample(c(1:6), size = 1))) %>% 
-  mutate(sum = die_1 + die_2) %>% 
-  ggplot(aes(x = sum)) +
-    geom_histogram(binwidth = 1, color = "white") +
-    labs(title = "Empirical Unnormalized Distribution",
-         subtitle = "Sum from rolling two dice one hundred times",
-         x = "Outcome\nSum of Two Die",
-         y = "Count") +
-    scale_x_continuous(breaks = seq(0, 12, 1), labels = 0:12) +
-    theme_classic()
-```
-
-Notice that the shape of the distribution is the same as the empirical probability distribution we generated earlier, except that the y-axis is labeled differently.
-
-```{r, echo = FALSE}
-emp_dist_dice
-```
-
-
-The two plots --- unnormalized and normalized --- have the exact same shape. In many ways, they are the same object. Yet normalization is required if we want to work with a probability distribution.
-
-<!-- YW: Normalization is used when we convert an data that is cannot be expressed by probability into something that we can expressed by probability? -->
-
-### Joint distributions
-
-<!-- DK: Should be p(A). Discuss p(A, B). Find a better example.  -->
-
-Recall that $\text{Prob}(\text{coin})$ is the probability distribution for the result of a coin toss. It includes two parts, the probability of heads ($\rho_h$) and the probability of tails ($\rho_t$). This is a *univariate* distribution because there is only one outcome, which can be heads or tails. If there is more than one outcome, then we have a *joint* distribution.
-
-<!-- YW : Joint distribution is used when we have more than one outcome for an distribution. -->
-
-<!-- DK: Use of "outcome" is sloppy. Does a single die roll have one outcome or 6? -->
-
-Joint distributions are also mathematical objects that cover a set of outcomes, where each distinct outcome has a chance of occurring between 0 and 1 and the sum of all chances must equal 1. The key to a joint distribution is it measures the chance that both events A and B will occur. The notation is $\text{Prob}(A, B)$.
-
-Let's say that you are rolling two six-sided dice simultaneously. Die 1 is weighted so that there is a 50% chance of rolling a 6 and a 10% chance of each of the other values. Die 2 is weighted so there is a 50% chance of rolling a 5 and a 10% chance of rolling each of the other values. Let's roll both dice 1,000 times. In previous examples involving two dice, we cared about the sum of results and not the outcomes of the first versus the second die of each simulation. With a joint distributions, the order matters; so instead of 11 possible outcomes on the x-axis of our distribution plot (ranging from 2 to 12), we have 36. Furthermore, a 2D probability distribution is not sufficient to represent all of the variables involved, so the joint distribution for this example is displayed using a 3D plot.
-
-```{r, echo = FALSE}
-# DK: Revisit and clean up this code.
-
-# Step 1: Create and organize the data.
-
-mydata <- tibble(die.1 = sample(1:6, size = 1000, prob =
-                                  c(0.1,0.1,0.1,0.1,0.1,0.5), replace = TRUE),
-                 die.2 = sample(1:6, size = 1000, prob =
-                                  c(0.1,0.1,0.1,0.1,0.5,0.1), replace = TRUE)) %>%
-          group_by(die.1, die.2) %>%
-          summarize(total = n(),
-                    .groups = "drop")
-
-die1_factor <- as.factor(mydata$die.1)
-die2_factor <- as.factor(mydata$die.2)
-
-
-# Step 2: Create a ggplot object.
-
-mtplot <-  ggplot(mydata) +
-              geom_point(aes(x = die1_factor, y = die2_factor, color = total)) +
-              scale_color_continuous(limits = c(0,100)) +
-              labs(x = "Die 1", y = "Die 2") +
-              theme(legend.position = "none")
-
-
-# Step 3: Turn it into a 3D plot. This takes a bit of time and
-# will open an interactive "RGL Device" window with the plot.
-
-plot_gg(mtplot,
-        width = 3.5, # Plot width
-        zoom = 0.65, # How close view on plot should be (1=normal, <1=closer)
-        theta = 25, # From which direction to view plot (0-360°)
-        phi = 30, # How "steep" view on plot should be (0-90°)
-        sunangle = 225, # Angle of sunshine for shadows (0-360°)
-        soliddepth = -50, # Thickness of pane (always <0, the smaller the thicker)
-        windowsize = c(2048,1536)) # Resolution
-Sys.sleep(0.2)
-
-# Step 4: Embed plot in Rmd file.
-
-rglwidget()
-
-
-# Step 5: Close the "RGL Device" window by running this command. Do
-# this EVERY time before you try to create a new 3D plot.
-
-rgl.close()
-```
 
 ## Tree diagrams
 
@@ -749,7 +753,6 @@ What if you flipped two coins in a row, one after the other? You know that the p
 * *If* we got heads the first time, then we go up the top branch. The probability of getting heads again is 0.5.
 * *If* we got tails the first time, then we go down the bottom branch. The probability of getting heads is 0.5.
 
-<!-- YW : So that the probability for some combination decreased as the tree branch out.  -->
 
 Notice how regardless of what we get the first time we flip the coin, the probability of getting heads is 0.5 throughout. Coin flips, in this scenario, are **independent**. The result of one coin flip does not impact the next coin flip. 
 
@@ -778,7 +781,6 @@ We decide to go down the top branch *if* our random person has the disease. We g
 
 How would you express this in statistical notation? $\text{Prob}(A|B)$ is the same thing as the probability of A *given* B. $\text{Prob}(A|B)$ essentially means the probability of A *if* we know for sure the value of B. Note that $\text{Prob}(A|B)$ is not the same thing as $\text{Prob}(B|A)$.
 
-<!-- YW: I kinda see where this is going, p(A|B) is difference from p(B|A) if I remember right that is part of the Bayes Theorem right?-->
 
 <!-- DK: The above write up is not impressive. What are we trying to accomplish? Also, we might add some simple coding/simulation examples to illustrate these points.  -->
 
@@ -804,22 +806,11 @@ More generally, we are estimating a *conditional probability*. Conditional on th
 
 $$ \text{Prob}(\text{Disease | Test = Postive} ) $$
 
-<!-- DK: Not sure if this math is correct. Use it? If so, use it for each model? -->
 
 To answer this question, we need to use the tools of joint and conditional probability that we have learned earlier in this Chapter. We begin by building, by hand, the joint distribution of the possible models (you have the Probophobia or you do not) and of the possible outcomes (you test positive or negative). Building the joint distribution involves *assuming* that each model is true and then creating the distribution of outcomes which might occur if that assumption is true. 
 
 For example, assume you have Probophobia. There is then a 50% chance that you test positive and a 50% chance you test negative. Similarly, if we assume that the second model is true --- that you don't have Probophobia --- then there is 1% chance you test positive and a 99% you chance negative. Of course, for you (or any individual) we do not know for sure what is happening. We do not know if you have the disease. We do not know what your test will show. But we can use these relationships to construct the joint distribution.
 
-<!-- YW: If I understand correctly the scenario here is 1st, "what is the probability that you actually have the disease if you test positive?" which is P(disease | Test=positive) = 95% as well as "What is the probability that you actually don't have the disease if you test negative?" which is P(No diseases| Test=negative) = 95%, vice verse, so if I understand it correctly there is four possibility.  -->
-<!-- YW: P(Disease | Test=positive)=95% -->
-<!-- YW: P(Disease | Test=negative)= 5% -->
-
-<!-- YW: P(No Disease | Test=positive)= 5% -->
-<!-- YW: P(No Disease | Test=negative)=95% -->
-<!-- YW: Where each of the two branches added up to 100%. -->
-
-
-<!-- DK: Above is a a bit awkward. Not sure that the below works. It certainly needs to be explained! Could also do this with n = 10000 and then unnest(). Would that be clearer? -->
 
 ```{r, echo = FALSE}
 set.seed(9)
@@ -827,50 +818,10 @@ set.seed(9)
 
 
 ```{r}
-# It is often handy to bring out a key parameter rather than searching for it in
-# the code every time you want to change it. When testing this code, we would
-# set `sims` to a number like 3, just to make sure everything is working.
-
-sims <- 10000
-
 # Pipes generally start with tibbles, so we start with a tibble which just
 # includes an ID variable. We don't really use ID. It is just handy for getting
-# organized. We call this object `jd_disease`, where the `jd` standds for
-# *j*oint *d*istribution.
-
-  
-  # For each ID, we (randomly!) determine whether or not the person has
-  # Probophobia. In the population, the rate is only 1%, thus explaining the
-  # `prob` value of 0.01. Note that the call to `rbinom()` does not use the
-  # value of the `ID` variable. 
-  
-  # mutate(disease_yes = map_int(ID, ~ rbinom(n = 1,
-  #                                            size = 1,
-  #                                            prob = 0.50))) %>%
-  # mutate(disease_no = map_int(ID, ~ rbinom(n = 1,
-  #                                            size = 1,
-  #                                            prob = 0.01)))
-
-  
-  # For each person, we (randomly!) decide whether or not their test comes back
-  # positive. The test is 95% accurate, explaining the use of 0.95 in
-  # `rbinom()`. Then the hackery begins! rbinom() returns 1 or 0, which
-  # `ifelse()` treats as TRUE or FALSE. For TRUE, `test_positive` is assigned
-  # the same value as `have_disease`, which is what we want. The test was
-  # accurate. This is the single `.`. But 5% of the time, rbinom() will return a
-  # 0, meaning FALSE, meaning that we assign the opposite value --- generated by
-  # `! .` --- of `have_disease`. The use of `map_int()` ensures that we get a 0
-  # or 1 as the return value.
-
-  
-
- #mutate(no_disease = map_int(have_disease,
-                                 #~ ifelse(rbinom(n = 1, 
-                                          #size = 1, 
-                                          #prob = 0.50),
-                                          #.,
-                                          #! .)))
-
+# organized. We call this object `jd_disease`, where the `jd` stands for
+# joint distribution.
 
 jd_disease <- tibble(p = rep(seq(0.01, 0.5, 0.49), 10000)) %>%
   mutate(disease = map_int(p, ~ rbinom(n = 1, size = 1, p = .)))
@@ -878,8 +829,6 @@ jd_disease <- tibble(p = rep(seq(0.01, 0.5, 0.49), 10000)) %>%
 
 jd_disease
 ```
-
-<!-- Most values for `have_diseases` are zero since 99% of the population does not suffer from Probophobia. Most of those will have a negative test result, meaning `test_positive = 0`. However, because the test is not perfect, some of those, like `ID = 8`,  will have a "false positive" result. Other individuals, like `ID = 10`, will have the diseases, and 95% of those will have a "true positive" result, as `10` does. -->
 
 The first step is to simply create an tibble that consists of the simulated data we need to plot our distribution. Keep in mind that in the setting we have two different probabilities and they are completely separate from each other and we want to keep the two probabilities and the disease results in two and only two columns so that we can graph using the `ggplot()` function. And that's why we used the `rep` and `seq` functions when creating the table, we used the `seq` function to set the sequence we wants, in this case is only two numbers, 0.01 (99% accuracy for testing negative if no disease, therefore 1% for testing positive if no disease) and 0.5 (50% accuracy for testing positive/negative if have disease), then we used the `rep` functions to repeat the process 10,000 times for each probability, in total 20,000 times. Note that this number "20,000" also represent the population in our simulated data, we simulated 20,000 results from testing, where 10,000 results from the have-disease group and 10,000 for the no-disease group, we often use the capital N to represent the population, in this simulated data N=20,000.
 
@@ -900,7 +849,6 @@ jd_disease %>%
   scale_y_discrete(breaks = c(0.01, 0.5), 
                    labels = c("No Disease", "Have Disease")) +
   theme_classic()
-
 ```
 
 Below is a joint distribution displayed in 3D. Instead of using the "jitter" feature in R to unstack the dots, we are using a 3D plot to visualize the number of dots in each box. The number of people who correctly test negative is far greater than of the other categories. The 3D plot shows the total number of cases for each section (True positive, True negative, False positive, False negative),the 3D bar coming from those combinations. Now,pay attention to the two rows of the 3D graph, if you trying to add up the length of the 3D bar for the top two sections and the bottom two sections, they should be equal to each other, where each have 10,000 case. This is because we simulate the experience in two independent and separate world one in the have-disease world and one in the no-disease world.
@@ -961,7 +909,7 @@ jd_disease %>%
   filter(disease == 1)
 ```
 
-**Most people who test positive do not have the disease!** This is a common result for rare diseases. We can easily create an unnormalized conditional distribution with:
+**Most people test positive are infected** This is a result for common diseases like cold. We can easily create an unnormalized conditional distribution with:
 
 ```{r}
 jd_disease %>% 
@@ -999,7 +947,11 @@ jd_disease %>%
     theme_classic()  
 ```
 
-With a positive test, you can be almost 100% sure that you have Probophobia.
+Now recalled the question we asked at the start of the session:
+*If you test positive, what is the probability that you have Probophobia?*
+
+By looking at the posterior graph we just create, we can answer this question easily:
+*With a positive test, you can be almost 100% sure that you have Probophobia.*
 
 <!-- DK: Insert a use of this posterior? How many positive tests before you have at least 10 sick people? -->
 
@@ -1018,9 +970,16 @@ knitr::include_app("https://www.youtube.com/embed/by3_weGwnMg")
 knitr::include_graphics("05-probability/images/marble.jpg")
 ```
 
-Imagine that your friend gives you a bag with two marbles. There could either be two white marbles, two black marbles, or one of each color. Thus, the bag could contain 0% white marbles, 50% white marbles, or 100% white marbles. The proportion, $p$, of white marbles could be 0, 0.5, or 1.
+Imagine that your friend gives you a bag with two marbles. There could either be two white marbles, two black marbles, or one of each color. Thus, the bag could contain 0% white marbles, 50% white marbles, or 100% white marbles. Respectively, the proportion, $p$, of white marbles could be 0, 0.5, or 1.
 
-Let's say you take a marble out of the bag, record whether it's black or white, then return it to the bag. You repeat this three times, observing the number of white marbles you see out of three trials. You could get three whites, two whites, one white, or zero whites as a result of this trial. Let's make what we call a Bayes scatterplot out of this. We have three models (three different proportions of white marbles in the bag) and four possible experimental results. Let's create 3,000 draws from this joint distribution:
+Question: *What is the chance of the bag contains exactly two white marbles, given that when we selected the white marbles three times, everytime we select a white marble?*
+
+$$ \text{Prob}(\text{2 Marbles in bag | White Marble Select=3} ) $$
+Just as during the *Probophobia* models, in order to answer this question, we need to start up with the simulated data and then graphing out the joint distribution of this sinerio because we need to considered all possible outcomes of this model, and then based on the joint distribution we can slice out the the part we want (Conditional distribution) in the end making an posterior graph as well as normalizing it to see the probability.
+
+Step 1: Simulate the data into an tibble
+
+Let's say you take a marble out of the bag, record whether it's black or white, then return it to the bag. You repeat this three times, observing the number of white marbles you see out of three trials. You could get three whites, two whites, one white, or zero whites as a result of this trial. We have three models (three different proportions of white marbles in the bag) and four possible experimental results. Let's create 3,000 draws from this joint distribution:
 
 ```{r}
 # Create the joint distribution of the number of white marbles in the bag
@@ -1053,8 +1012,7 @@ jd_marbles <- tibble(ID = 1:sims) %>%
 jd_marbles
 ```
 
-
-Plot the joint distribution:
+Step 2: Plot the joint distribution:
 
 ```{r}
 # The distribution is unnormalized. All we see is the number of outcomes in each
@@ -1082,7 +1040,7 @@ jd_marbles_plot <- jd_marbles %>%
             .groups = "drop") %>% 
   mutate(in_sample = as.factor(in_sample)) %>% 
   mutate(in_bag = as.factor(in_bag)) %>% 
-  ggplot(aes(in_sample, in_bag, color = total)) +
+  ggplot(aes(x=in_sample, y=in_bag, color = total)) +
     geom_point() +
     scale_color_continuous() +
     labs(x = "White Marbles Selected",
@@ -1113,7 +1071,9 @@ rgl.close()
 
 The y-axes of both the scatterplot and the 3D visualization are labeled "Number of White Marbles in the Bag." *Each value on the y-axis is a model, a belief about the world.* For instance, when the model is 0, we have no white marbles in the bag, meaning that none of the marbles we pull out in the sample will be white.
 
-Let's say we draw out three white marbles. We isolate the slice where the result of the simulation involves three white marbles and zero black ones. Here is the unnormalized probability distribution.
+Now recalls the question, we essentially only care about the fourth column in the joint distribution (x-axis=3) because the question is asking us to create a conditional distribution *given* that fact that 3 marbles were selected. Therefore, we could isolate the slice where the result of the simulation involves three white marbles and zero black ones. Here is the unnormalized probability distribution.
+
+Step 3: Plot the unnormalized conditional distribution.
 
 ```{r}
 # The key step is the filter. Creating a conditional distribution from a joint
@@ -1135,9 +1095,8 @@ jd_marbles %>%
 
 ```
 
+Step 4: Plot the normalize posterior distribution.
 Next, let's normalize the distribution.
-
-<!-- YW:Making it into probability -->
 
 ```{r}
 jd_marbles %>% 
@@ -1160,6 +1119,11 @@ jd_marbles %>%
 
 This plot makes sense because when all three marbles you draw out of the bag are white, there is a pretty good chance that there are no black marbles in the bag. But you can't be certain! It is possible to draw three white even if the bag contains one white and one black. However, it is impossible that there are zero white marbles in the bag.
 
+Lastly let's answer the question:
+*What is the chance of the bag contains exactly two white marbles, given that when we selected the white marbles three times, everytime we select a white marble?*
+
+Answer:
+*As the Posterior Probability Distribution shows (x-axis=2), the chance of the bag contains exactly two white marbles given that we select 3 white marbles out of three tries is about 85%.*
 
 
 ## N models
@@ -1177,6 +1141,8 @@ knitr::include_graphics("05-probability/images/heads.jpg")
 Assume that there is a coin with $\rho_h$. We guarantee that there are only 11 possible values of $\rho_h$: $0, 0.1, 0.2, ..., 0.9, 1$. In other words, there are 11 possible models, 11 things which might be true about the world. This is just like situations we have previously discussed, except that there are more models to consider.
 
 We are going to run an experiment in which you flip the coin 20 times and record the number of heads. What does this result tell you about the value of $\rho_h$? Ultimately, we will want to calculate a posterior distribution of $\rho_h$, which is written as p($\rho_h$). 
+
+Question: *What most likely be probability of a certain coin for getting exactly 8 heads out of 20 tosses. ?*
 
 To start, it is useful to consider all the things which might happen if, for example, $\rho_h = 0.4$. Fortunately, the R functions for simulating random variables makes this easy.
 
@@ -1404,10 +1370,11 @@ jd_coin %>%
   theme_classic()
 
 ```
+Solution :
+*The most likely value of $\rho_h$ is 0.4, as before. But, it is much more likely that $p$ is either 0.3 or 0.5. And there is about an 8% chance that $\rho_h \ge 0.6$.*
 
-The most likely value of $\rho_h$ is still 0.4, as before. But, it is much more likely that $p$ is either 0.3 or 0.5. And there is about an 8% chance that $\rho_h \ge 0.6$.
-
-You might be wondering: what is the use of a model? Well, let's say we toss the coin 20 times and get 8 heads again. Given this result, what is the probability that future samples of 20 flips will result in 10 or more heads?
+You might be wondering: what is the use of a model? Well, let's say we toss the coin 20 times and get 8 heads again. 
+Given this result, Question: *what is the probability that future samples of 20 flips will result in 10 or more heads?*
 
 There are three main ways you could go about solving this problem with simulations.
 
@@ -1419,12 +1386,33 @@ sims <- 10000000
 
 odds <- tibble(sim_ID = 1:sims) %>%
   mutate(heads = map_int(sim_ID, ~ rbinom(n = 1, size = 20, p = .4))) %>% 
-  mutate(result = ifelse(heads >= 10, TRUE, FALSE)) %>% 
-  summarize(success = sum(result)/sims)
+  mutate(above_ten = ifelse(heads >= 10, TRUE, FALSE))
 
 odds
 
 ```
+
+```{r}
+odds %>%
+  ggplot(aes(x=heads,fill=above_ten))+
+           geom_histogram(aes(y = after_stat(count/sum(count))),bins = 50)+
+  scale_fill_manual(values = c('grey50', 'red'))+
+  labs(title = "Posterior Probability Distribution (Wrong Way)",
+         subtitle = "Number of heads in 20 tosses",
+         x = "Number of heads",
+         y = "Probability",
+         fill = "Above ten heads") + 
+    scale_x_continuous(labels = scales::number_format(accuracy = 1)) +
+    scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
+    theme_classic()
+```
+
+Using this Posterior distribution derived from the (wrong way) simulated data, the probability results in 10 or more head is
+```{r}
+odds %>%
+summarize(success = sum(above_ten)/sims)
+```
+about 24.5%
 
 The second method involves sampling the whole posterior distribution vector we previously created. This would lead to the following correct code.
 
@@ -1434,14 +1422,35 @@ p_draws <- tibble(p = rep(seq(0, 1, 0.1), 1000)) %>%
   mutate(heads = map_int(p, ~ rbinom(n = 1, size = 20, p = .))) %>%
   filter(heads == 8)
   
-odds <- tibble(p = sample(p_draws$p, size = sims, replace = TRUE)) %>%
+odds_2nd <- tibble(p = sample(p_draws$p, size = sims, replace = TRUE)) %>%
   mutate(heads = map_int(p, ~ rbinom(n = 1, size = 20, p = .))) %>% 
-  mutate(result = ifelse(heads >= 10, TRUE, FALSE)) %>% 
-  summarize(success = sum(result)/sims)
+  mutate(above_ten = ifelse(heads >= 10, TRUE, FALSE)) 
 
-odds
+odds_2nd
+
 
 ```
+
+```{r}
+odds_2nd %>%
+  ggplot(aes(x = heads,fill = above_ten))+
+           geom_histogram(aes(y = after_stat(count/sum(count))),bins = 50)+
+  scale_fill_manual(values = c('grey50', 'red'))+
+  labs(title = "Posterior Probability Distribution (Right Way 1st)",
+         subtitle = "Number of heads in 20 tosses",
+         x = "Number of heads",
+         y = "Probability",
+         fill = "Above ten heads") + 
+    scale_x_continuous(labels = scales::number_format(accuracy = 1)) +
+    scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
+    theme_classic()
+```
+Using this Posterior distribution derived from the (right way 1st) simulated data, the probability results in 10 or more head is
+```{r}
+odds_2nd %>%
+summarize(success = sum(above_ten)/sims)
+```
+about 32.8%
 
 Third way is to sample from the actual distribution, which is a small dataset with just a few rows, but it includes both $\rho_h$ and the probability of each $\rho_h$. This also gives the correct answer.
 
@@ -1452,21 +1461,44 @@ p_posterior <- jd_coin %>%
   summarize(total = n(), .groups = "drop") %>%
   mutate(probs = total/sum(total))
 
-odds <- tibble(p = sample(p_posterior$p, 
+odds_3rd <- tibble(p = sample(p_posterior$p, 
                           size = sims, 
                           prob = p_posterior$probs, 
                           replace = TRUE)) %>%
   mutate(heads = map_int(p, ~ rbinom(n = 1, 
                                      size = 20, 
                                      p = .))) %>% 
-  mutate(result = ifelse(heads >= 10, 
+  mutate(above_ten = ifelse(heads >= 10, 
                          TRUE, 
-                         FALSE)) %>% 
-  summarize(success = sum(result)/sims)
+                         FALSE)) 
 
-odds
+odds_3rd
 
 ```
+
+
+```{r}
+odds_3rd %>%
+  ggplot(aes(x = heads,fill = above_ten))+
+           geom_histogram(aes(y = after_stat(count/sum(count))),bins = 50)+
+  scale_fill_manual(values = c('grey50', 'red'))+
+  labs(title = "Posterior Probability Distribution (Right Way 3rd)",
+         subtitle = "Number of heads in 20 tosses",
+         x = "Number of heads",
+         y = "Probability",
+         fill = "Above ten heads") + 
+    scale_x_continuous(labels = scales::number_format(accuracy = 1)) +
+    scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
+    theme_classic()
+```
+
+Using this Posterior distribution derived from the (right way 2nd) simulated data, the probability results in 10 or more head is
+```{r}
+odds_3rd %>%
+summarize(success = sum(above_ten)/sims)
+```
+about 32% which is pretty close to the second method.
+
 
 As you may have noticed, if you calculated the value using the first method, you would believe that getting 10 or more heads is less likely than it really is. If you were to run a casino based on these assumptions, you will lose all your money. It is very important to be careful about the assumptions you are making. We tossed a coin 20 times and got 8 heads. However, you would be wrong to assume that $\rho_h$ = 0.4 just based on this result.
 
@@ -1484,8 +1516,6 @@ As you may have noticed, if you calculated the value using the first method, you
 
 
 The four [Cardinal Virtues](https://en.wikipedia.org/wiki/Cardinal_virtues) are Wisdom, Justice, Courage, and Temperance. Because data science is, ultimately, a moral act, we use these virtues to guide our work.  
-
-<!-- YW: Never heard of it before this course but good to know! -->
 
 * *Wisdom* begins with the ideal Preceptor Table. What data, if we had it, would allow us to answer our question easily? Then, we explore the data we have. Are the data we have close enough to the data we want that we can consider all the data as coming from the same *population*? If not, we can't proceed further. 
 
@@ -1565,7 +1595,6 @@ Note:
 
 * In this simple case, we are fortunate that the parameter $\rho_h$ has such a (mostly!) simple analog to a real world quantity. Much of the time, parameters are not so easy to interpret. In a more complex model, especially with one with interaction terms, we focus less on parameters and more on actual predictions.
 
-<!-- YW:Giving hand to the next few chapter. -->
 
 * Wisdom allowed us to assume that all the rows in the actual Preceptor Table come from the same population. If that is true, then it is also true that the mathematical relationship between outcomes and covariates is consistent across these rows.
 
@@ -1605,8 +1634,6 @@ A parameter is something which does not exist in the real world. (If it did, or 
 But some, often most, of the uncertainty comes from forces that are, by assumption, not in the model. For example, if the coin is fair, we expect $T_i$ to equal 10. But, often, it will be different, even if we are correct and $\rho_h$ equals exactly 0.5. 
 
 *Some randomness is intrinsic in this fallen world.* 
-
-<!-- YW:Okay but a little vague, don't know where but feeling unclear.  -->
 
 ### Temperance
 
@@ -1666,4 +1693,3 @@ If you are keen to learn more about probability, here is a video featuring Profe
 ```{r, echo = FALSE}
 knitr::include_app("https://www.youtube.com/embed/6C7yRBfh2ok")
 ```
-<!-- YW: Cool, I would say that this chapter contained a whole lot of theory and mathematics stuff, rather than direct application like the visualisation Unit. I found the some of the models pretty confusing and it sometimes take me a while to determine what each variable in p(a|b) is. Not sure the Cardinal Virtues should be put here. Needs better connection with the next and later chapters, maybe us good to introduce sampling or at least foreshadow it at somepoint.Chap.6 done a great job of including parts of chapter 5 like Joint distribution, posterior distribution, etc. Both Chap 6 and Chap 7 has refer back to the Cardinal Virtue so I guess it's not a good idea to switch the position as it is used throughout later chapters.  -->
