@@ -73,20 +73,11 @@
 <span class="header-section-number">3.1</span> Introduction<a class="anchor" aria-label="anchor" href="#introduction"><i class="fas fa-link"></i></a>
 </h2>
 <!-- TODO: -->
-<!-- Add skimr() and skim() to chapter 2. Simple one time use on a tibble. Explain what it does. At end of chapter before Summary. -->
-<!-- Use janitor::clean_names() in chapter 3. Simple example with a file with variable names like `my var` and `1-var`.  Read this in without fixing. Show how to use backticks to refer to those variables. Point out that this is annoying. Fix with clean_names(). -->
-<!-- Change all the files used so that they always have one blank line at the bottom to make that warning go away. Get rid of "warn" argument.  -->
-<!-- * Deal with this message we get when knitting the chapter: -->
-<!-- Output created: /Users/davidkane/Desktop/projects/primer/junk/data.html -->
-<!-- Warning message: -->
-<!-- In readLines(file) : -->
-<!--   incomplete final line found on '/var/folders/mk/lh99bg295msg8myvcf5yczkc0000gn/T//Rtmpghqre9/file19e544177c18' -->
-<!-- Fix references. -->
+<!-- Add one paragraph Distill section, including links, like from Bootcamp page. Point toward tutorial. -->
 <p>Start by loading the packages which we will need in this chapter.</p>
-<div class="sourceCode" id="cb390"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb387"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyverse.tidyverse.org">tidyverse</a></span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">primer.data</span><span class="op">)</span>
-<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://lubridate.tidyverse.org">lubridate</a></span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://dbplyr.tidyverse.org/">dbplyr</a></span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/sfirke/janitor">janitor</a></span><span class="op">)</span></code></pre></div>
 </div>
@@ -97,25 +88,26 @@
 <div class="inline-figure"><img src="03-data/images/file_extensions.png" width="100%"></div>
 <p>Getting data into and out of R is a major part of any real world data science project. There are multiple data formats that you use to transport this data, each with their own positives and negatives.</p>
 <p>You can find most of the files that we use for this chapter <a href="https://github.com/PPBDS/primer.tutorials/tree/master/inst/www">here</a>. We can also access these files by saving the URL to R and then using it so that we can download and access the files located on the internet.</p>
-<div class="sourceCode" id="cb391"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb388"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">github_url</span> <span class="op">&lt;-</span> <span class="st">"https://raw.githubusercontent.com/PPBDS/primer.tutorials/master/inst/www/"</span></code></pre></div>
-<div id="csv-files" class="section level3" number="3.2.1">
+<div id="text-files" class="section level3" number="3.2.1">
 <h3>
-<span class="header-section-number">3.2.1</span> CSV files<a class="anchor" aria-label="anchor" href="#csv-files"><i class="fas fa-link"></i></a>
+<span class="header-section-number">3.2.1</span> Text files<a class="anchor" aria-label="anchor" href="#text-files"><i class="fas fa-link"></i></a>
 </h3>
-<p>“CSV” stands for <strong>c</strong>omma <strong>s</strong>eparated <strong>v</strong>alue. In other words, csv files are files whose values are separated by commas. Each comma from the csv file corresponds to a column, and the column names are, by default, taken from the first line of the file.</p>
+<p>The most common type of data text file is “CSV,” which stands for <strong>c</strong>omma <strong>s</strong>eparated <strong>v</strong>alue. In other words, csv files are files whose values are separated by commas. Each comma from the csv file corresponds to a column, and the column names are, by default, taken from the first line of the file.</p>
 <p>CSV files (and their counterparts) are easily transferable between computers and programming languages and are extremely simple because they’re effectively just text files that have a special format. Additionally, they’re very easy to parse through small amounts of data because they’re easily readable by humans and computers.
 However, due to their simple nature, CSV files are only able to move basic data and only as text values. They also have poor support for special characters like commas, which can make the dataset harder to organize and understand by adding a new column for a few specific entries. This make CSV files good for sharing data between computers and languages, but not efficient for transporting or saving large amounts of data.</p>
+<p>In this section, we’ll be going over the common file formats and how we can pull data from these files into R.</p>
 <div id="reading-and-writing-from-a-csv-file" class="section level4" number="3.2.1.1">
 <h4>
 <span class="header-section-number">3.2.1.1</span> Reading and writing from a CSV file<a class="anchor" aria-label="anchor" href="#reading-and-writing-from-a-csv-file"><i class="fas fa-link"></i></a>
 </h4>
 <p>Here’s an example of a CSV file and what it looks like. Use <code>read_csv()</code> from the <strong>readr</strong> package — which is one of the main packages within the <strong>tidyverse</strong> collection of packages — to load the data into R. The <code>file</code> argument is the file path for the CSV file.</p>
-<div class="sourceCode" id="cb392"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co"># We can access files either by using their URL or their file path.</span>
-<span class="co"># In this case, we're using the GitHub URL to access the database.</span>
-<span class="co"># This is done by pasting the file name into our URL using the paste0() command</span>
-<span class="co"># This does the same thing as creating the URL below.</span>
+<div class="sourceCode" id="cb389"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="co"># We can access files either by using their URL or their file path. In this</span>
+<span class="co"># case, we're using the GitHub URL to access the database. This is done by</span>
+<span class="co"># pasting the file name into our URL using the paste0() command This does the</span>
+<span class="co"># same thing as creating the URL below.</span>
 <span class="co"># https://raw.githubusercontent.com/PPBDS/primer.tutorials/master/inst/www/test_1.csv</span>
 
 <span class="va">file_1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="va">github_url</span>, <span class="st">"test_1.csv"</span><span class="op">)</span>
@@ -135,7 +127,7 @@ However, due to their simple nature, CSV files are only able to move basic data 
 ## 2     4     5     6</code></pre>
 <!-- the path argument is deprecated, use file instead -->
 <p>Use <code>write_csv()</code> to save a tibble to a csv file. <code>write_csv()</code> has two main arguments: <code>x</code> and <code>file</code>. The <code>x</code> argument is the data set that you want to save. The <code>file</code> argument is the file path to which you want to save the file. The end of the <code>file</code> argument is the name that you want to use for the file.</p>
-<div class="sourceCode" id="cb395"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb392"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">csv_data</span> <span class="op">&lt;-</span> <span class="fu">tribble</span><span class="op">(</span>
   <span class="op">~</span> <span class="va">`a`</span>, <span class="op">~</span> <span class="va">`b`</span>, <span class="op">~</span> <span class="va">`c`</span>,
       <span class="fl">1</span>,     <span class="fl">2</span>,     <span class="fl">3</span>,
@@ -143,7 +135,7 @@ However, due to their simple nature, CSV files are only able to move basic data 
 
 <span class="fu">write_csv</span><span class="op">(</span>x <span class="op">=</span> <span class="va">csv_data</span>, file <span class="op">=</span> <span class="st">"my_csv.csv"</span><span class="op">)</span></code></pre></div>
 <p>When we read the csv file again, the data shows up. This is useful for saving information both to share and for your own projects.</p>
-<div class="sourceCode" id="cb396"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb393"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">read_csv</span><span class="op">(</span><span class="st">"my_csv.csv"</span><span class="op">)</span></code></pre></div>
 <pre><code>## 
 ## ── Column specification ────────────────────────────────────────────────────────
@@ -158,15 +150,15 @@ However, due to their simple nature, CSV files are only able to move basic data 
 ## 1     1     2     3
 ## 2     4     5     6</code></pre>
 <p>When you want to remove a file from your system, use <code><a href="https://rdrr.io/r/base/files.html">file.remove()</a></code>.</p>
-<div class="sourceCode" id="cb399"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb396"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/files.html">file.remove</a></span><span class="op">(</span><span class="st">"my_csv.csv"</span><span class="op">)</span></code></pre></div>
 <pre><code>## [1] TRUE</code></pre>
-</div>
-<div id="arguments-for-csv-files" class="section level4" number="3.2.1.2">
-<h4>
-<span class="header-section-number">3.2.1.2</span> Arguments for CSV files<a class="anchor" aria-label="anchor" href="#arguments-for-csv-files"><i class="fas fa-link"></i></a>
-</h4>
 <p>Sometimes, CSV files will not be what you want. Maybe they have the wrong column names, have information at the top of the file, or have comments interspersed within the file.</p>
+</div>
+<div id="skip" class="section level4" number="3.2.1.2">
+<h4>
+<span class="header-section-number">3.2.1.2</span> <code>skip</code><a class="anchor" aria-label="anchor" href="#skip"><i class="fas fa-link"></i></a>
+</h4>
 <p>Consider the following csv file: <code>test_2.csv</code>. Here’s what it looks like as a text file:</p>
 <pre><code>## [1] "Top two rows consist of junk which"        
 ## [2] "we don't care about. Data starts on row 3."
@@ -174,7 +166,7 @@ However, due to their simple nature, CSV files are only able to move basic data 
 ## [4] "9,8,7"                                     
 ## [5] "4,5,6"</code></pre>
 <p>As you can see, there is text at the top of this file. Often times information about how data was collected, or other relevant information, is included at the top of the data file. However, <code>read_csv()</code> can’t differentiate between this text and the data that we want to read, causing it to fail and output gibberish.</p>
-<div class="sourceCode" id="cb402"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb399"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># You can also get a csv file by using the URL of the file. This won't work for</span>
 <span class="co"># all file types though.</span>
 
@@ -199,7 +191,7 @@ However, due to their simple nature, CSV files are only able to move basic data 
 ## 3 9                                         
 ## 4 4</code></pre>
 <p>We can use the <code>skip</code> argument to skip the first 2 text lines and allow <code>read_csv()</code> to work.</p>
-<div class="sourceCode" id="cb406"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb403"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">read_csv</span><span class="op">(</span>file <span class="op">=</span> <span class="va">file_2</span>,
          skip <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></code></pre></div>
 <pre><code>## 
@@ -215,11 +207,16 @@ However, due to their simple nature, CSV files are only able to move basic data 
 ## 1     9     8     7
 ## 2     4     5     6</code></pre>
 <p>Now that we’ve gotten rid of the warnings, let’s look at the other message R sends: the column specification message.</p>
+</div>
+<div id="col_types" class="section level4" number="3.2.1.3">
+<h4>
+<span class="header-section-number">3.2.1.3</span> <code>col_types</code><a class="anchor" aria-label="anchor" href="#col_types"><i class="fas fa-link"></i></a>
+</h4>
 <p>The column specification message is a message that R sends to tell you what data types it is using for the column.</p>
 <p>Data types are the types discussed in Chapter 2 Wrangling, such as characters, factors, integers, and dates.
 When we use a tibble, each column has to have a specific type of data. In this example, all of the columns have numbers in them. If there are characters in the column, the columns are going to have a character data type.</p>
 <p>To get rid of the column specification message, use the <code>col_types()</code> argument and specify the data types. You can do this by just copying the column specification message and putting it as the <code>col_types()</code> argument.</p>
-<div class="sourceCode" id="cb409"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb406"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">read_csv</span><span class="op">(</span>file <span class="op">=</span> <span class="va">file_2</span>,
          skip <span class="op">=</span> <span class="fl">2</span>,
          col_types <span class="op">=</span> <span class="fu">cols</span><span class="op">(</span>a <span class="op">=</span> <span class="fu">col_double</span><span class="op">(</span><span class="op">)</span>,
@@ -232,10 +229,10 @@ When we use a tibble, each column has to have a specific type of data. In this e
 ## 2     4     5     6</code></pre>
 <p>You can also change the column arguments so that you get the data type that you want.
 Take <code>test_7.csv</code>.</p>
-<div class="sourceCode" id="cb411"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">file_3</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="va">github_url</span>, <span class="st">"test_7.csv"</span><span class="op">)</span>
+<div class="sourceCode" id="cb408"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">test_7</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="va">github_url</span>, <span class="st">"test_7.csv"</span><span class="op">)</span>
 
-<span class="fu">read_csv</span><span class="op">(</span><span class="va">file_3</span><span class="op">)</span></code></pre></div>
+<span class="fu">read_csv</span><span class="op">(</span><span class="va">test_7</span><span class="op">)</span></code></pre></div>
 <pre><code>## 
 ## ── Column specification ────────────────────────────────────────────────────────
 ## cols(
@@ -248,8 +245,8 @@ Take <code>test_7.csv</code>.</p>
 ## 1     1 Sam    
 ## 2     5 Becca</code></pre>
 <p>Let’s try parsing this so that the <code>student</code> column is a factor and the <code>grade</code> column is an integer.</p>
-<div class="sourceCode" id="cb414"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu">read_csv</span><span class="op">(</span><span class="va">file_3</span>,
+<div class="sourceCode" id="cb411"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu">read_csv</span><span class="op">(</span><span class="va">test_7</span>,
          col_types <span class="op">=</span> <span class="fu">cols</span><span class="op">(</span>grade <span class="op">=</span> <span class="fu">col_integer</span><span class="op">(</span><span class="op">)</span>,
                           student <span class="op">=</span> <span class="fu">col_factor</span><span class="op">(</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <pre><code>## # A tibble: 2 x 2
@@ -259,12 +256,17 @@ Take <code>test_7.csv</code>.</p>
 ## 2     5 Becca</code></pre>
 <p>By being clever with the columns, we can make our lives easier down the line when we graph the data.</p>
 <p>We can also manipulate other arguments for CSV files.</p>
+</div>
+<div id="col_names-and-clean_names" class="section level4" number="3.2.1.4">
+<h4>
+<span class="header-section-number">3.2.1.4</span> <code>col_names</code> and <code>clean_names()</code><a class="anchor" aria-label="anchor" href="#col_names-and-clean_names"><i class="fas fa-link"></i></a>
+</h4>
 <p>Let’s try changing the column names in the <code>test_3.csv</code> file.</p>
 <p>As you can see below, the file doesn’t have any column names, resulting in the first row being considered as the names for the rest of the file.</p>
-<div class="sourceCode" id="cb416"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">file_4</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="va">github_url</span>, <span class="st">"test_3.csv"</span><span class="op">)</span>
+<div class="sourceCode" id="cb413"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">file_3</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="va">github_url</span>, <span class="st">"test_3.csv"</span><span class="op">)</span>
 
-<span class="fu">read_csv</span><span class="op">(</span><span class="va">file_4</span><span class="op">)</span></code></pre></div>
+<span class="fu">read_csv</span><span class="op">(</span><span class="va">file_3</span><span class="op">)</span></code></pre></div>
 <pre><code>## 
 ## ── Column specification ────────────────────────────────────────────────────────
 ## cols(
@@ -277,8 +279,8 @@ Take <code>test_7.csv</code>.</p>
 ##   &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
 ## 1     4     5     6</code></pre>
 <p>We can fix this by changing the <code>col_names</code> argument.</p>
-<div class="sourceCode" id="cb419"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu">read_csv</span><span class="op">(</span><span class="va">file_4</span>, col_names <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"a"</span>, <span class="st">"b"</span>, <span class="st">"c"</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<div class="sourceCode" id="cb416"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu">read_csv</span><span class="op">(</span><span class="va">file_3</span>, col_names <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"a"</span>, <span class="st">"b"</span>, <span class="st">"c"</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <pre><code>## 
 ## ── Column specification ────────────────────────────────────────────────────────
 ## cols(
@@ -292,8 +294,8 @@ Take <code>test_7.csv</code>.</p>
 ## 1    11    21    33
 ## 2     4     5     6</code></pre>
 <p>You can also create names automatically by setting <code>col_names</code> to FALSE</p>
-<div class="sourceCode" id="cb422"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu">read_csv</span><span class="op">(</span><span class="va">file_4</span>, col_names <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></code></pre></div>
+<div class="sourceCode" id="cb419"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu">read_csv</span><span class="op">(</span><span class="va">file_3</span>, col_names <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></code></pre></div>
 <pre><code>## 
 ## ── Column specification ────────────────────────────────────────────────────────
 ## cols(
@@ -307,9 +309,52 @@ Take <code>test_7.csv</code>.</p>
 ## 1    11    21    33
 ## 2     4     5     6</code></pre>
 <p>Changing the names of the columns allows for you to call on the columns later when the data is actually a tibble. Setting the column names to something that you can understand makes it much easier to understand your code later on.</p>
-<!-- The tutorial includes a lot of arguments like na and comment, but that makes the book feel like it's really long once it's actually put into text form with paragraphs and stuff. -->
-<p>Another feature is the <code>na</code> argument.</p>
+<p>But what if we have good column names, they just aren’t formatted correctly? Let’s look at <code>test_4.csv</code> for an example.</p>
+<div class="sourceCode" id="cb422"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">file_4</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="va">github_url</span>, <span class="st">"test_4.csv"</span><span class="op">)</span>
+
+<span class="va">file_4_tibble</span> <span class="op">&lt;-</span> <span class="fu">read_csv</span><span class="op">(</span><span class="va">file_4</span><span class="op">)</span></code></pre></div>
+<pre><code>## Warning: Duplicated column names deduplicated: 'Two_Powers' =&gt;
+## 'Two_Powers_1' [4]</code></pre>
+<pre><code>## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   `one powers` = col_double(),
+##   Two_Powers = col_double(),
+##   `3_Powers` = col_double(),
+##   Two_Powers_1 = col_double()
+## )</code></pre>
 <div class="sourceCode" id="cb425"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">file_4_tibble</span></code></pre></div>
+<pre><code>## # A tibble: 3 x 4
+##   `one powers` Two_Powers `3_Powers` Two_Powers_1
+##          &lt;dbl&gt;      &lt;dbl&gt;      &lt;dbl&gt;        &lt;dbl&gt;
+## 1            1          2          3            2
+## 2            1          4         81            5
+## 3            1          8         27            8</code></pre>
+<p>As you can see, while the function does compile the names aren’t easy to access. It’s possible to access the column by using the ` tickmark like below:</p>
+<div class="sourceCode" id="cb427"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">file_4_tibble</span><span class="op">$</span><span class="va">`one powers`</span></code></pre></div>
+<pre><code>## [1] 1 1 1</code></pre>
+<p>But that can still cause problems down the line and it’s just annoying to use the backticks every time you want a column name. This is when we can use the <code><a href="https://rdrr.io/pkg/janitor/man/clean_names.html">clean_names()</a></code> function from the <strong>janitor</strong> package. It essentially formats the column names so that they follow the [underscore separated naming convention](<a href="https://en.wikipedia.org/wiki/Snake_case#" class="uri">https://en.wikipedia.org/wiki/Snake_case#</a>:~:text=Snake%20case%20(stylized%20as%20snake_case,subroutine%20names%2C%20and%20for%20filenames.) and are all unique.</p>
+<div class="sourceCode" id="cb429"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">file_4_tibble</span> <span class="op">%&gt;%</span> 
+  <span class="fu"><a href="https://rdrr.io/pkg/janitor/man/clean_names.html">clean_names</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
+<pre><code>## # A tibble: 3 x 4
+##   one_powers two_powers x3_powers two_powers_1
+##        &lt;dbl&gt;      &lt;dbl&gt;     &lt;dbl&gt;        &lt;dbl&gt;
+## 1          1          2         3            2
+## 2          1          4        81            5
+## 3          1          8        27            8</code></pre>
+<p>This cleans the column names, saving you time when your file has a large amount of columns or you need to type a lot of column names. These issues are more common when you’re pulling data off of the internet as that’s normally dirty data and can have a lot of columns formatted in weird ways.</p>
+<!-- The tutorial includes a lot of arguments like na and comment, but that makes the book feel like it's really long once it's actually put into text form with paragraphs and stuff. -->
+</div>
+<div id="na" class="section level4" number="3.2.1.5">
+<h4>
+<span class="header-section-number">3.2.1.5</span> <code>na</code><a class="anchor" aria-label="anchor" href="#na"><i class="fas fa-link"></i></a>
+</h4>
+<p>Another feature of <code>read_csv()</code> is the <code>na</code> argument.</p>
+<div class="sourceCode" id="cb431"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">file_5</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="va">github_url</span>, <span class="st">"test_5.csv"</span><span class="op">)</span>
 
 <span class="fu">read_csv</span><span class="op">(</span><span class="va">file_5</span><span class="op">)</span></code></pre></div>
@@ -326,7 +371,7 @@ Take <code>test_7.csv</code>.</p>
 ## 1     1 .         3
 ## 2     4 5         6</code></pre>
 <p><code>test_5.csv</code> is missing a value, and it uses a <code>.</code> as a substitute. This makes the computer think that the period is the actual value of the data point, which is obviously not true (we want numbers instead). By default, <code>read_csv()</code> treats white space like spaces or tabs as a missing value, but you can set this argument directly as well.</p>
-<div class="sourceCode" id="cb428"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb434"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">read_csv</span><span class="op">(</span><span class="va">file_5</span>,
          na <span class="op">=</span> <span class="st">"."</span><span class="op">)</span></code></pre></div>
 <pre><code>## 
@@ -341,13 +386,18 @@ Take <code>test_7.csv</code>.</p>
 ##   &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
 ## 1     1    NA     3
 ## 2     4     5     6</code></pre>
+</div>
+<div id="comment" class="section level4" number="3.2.1.6">
+<h4>
+<span class="header-section-number">3.2.1.6</span> <code>comment</code><a class="anchor" aria-label="anchor" href="#comment"><i class="fas fa-link"></i></a>
+</h4>
 <p>You can also tell the code to ignore comment lines, which may be common in a csv file that was written by a human and as such has comments in it. <code>test_6.csv</code> is a perfect example of this. Here’s what it looks like:</p>
 <pre><code>## [1] "a,b,c"                          "# This is a comment line"      
 ## [3] "98,99,100"                      "# Here is another comment line"
 ## [5] "4,5,6"</code></pre>
 <p>By setting the <code>comment</code> argument, we’re able to skip lines that have a certain starting point.
 In this case, the comment is the <code>#</code> sign, so we just need to include that in.</p>
-<div class="sourceCode" id="cb432"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb438"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">read_csv</span><span class="op">(</span><span class="va">file_6</span>, comment <span class="op">=</span> <span class="st">"#"</span><span class="op">)</span></code></pre></div>
 <pre><code>## 
 ## ── Column specification ────────────────────────────────────────────────────────
@@ -362,16 +412,21 @@ In this case, the comment is the <code>#</code> sign, so we just need to include
 ## 1    98    99   100
 ## 2     4     5     6</code></pre>
 <p>If you ever want to skip certain lines, just use the <code>comment</code> argument in order to designate it as something to be skipped. This is best used with cases where the <code>read_csv()</code> command will not compile without it.</p>
+</div>
+<div id="read_delim" class="section level4" number="3.2.1.7">
+<h4>
+<span class="header-section-number">3.2.1.7</span> <code>read_delim()</code><a class="anchor" aria-label="anchor" href="#read_delim"><i class="fas fa-link"></i></a>
+</h4>
 <p>So far, we’ve covered how we can organize CSV data, but at it’s core we’re working with comma separated values. But what happens when we want to read data from something that doesn’t use commas to separate the values?</p>
 <p>When our tabular data comes in a different format, we can use the <code>read_delim()</code> function instead. For example, a different version of <code>test_6.csv</code> could exist that has no column names and uses pipes (<code><a href="https://rdrr.io/r/base/Logic.html">|</a></code>) as the delimiter instead of commas.</p>
 <p>Here’s another file named <code>delim_1</code>, which uses the <code><a href="https://rdrr.io/r/base/Logic.html">|</a></code> to separate the lines instead of a comma like a normal CSV file.</p>
 <pre><code>## [1] "population|town"   "150|Cambridge, MA" "92|Newton, MA"</code></pre>
 <p>With <code>read_delim()</code>, we specify the first argument as the path to the file, as done with <code>read_csv()</code>. Then we provide values to the <code>delim</code> argument to have the code use <code><a href="https://rdrr.io/r/base/Logic.html">|</a></code> as the separator instead of the comma.</p>
-<div class="sourceCode" id="cb436"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb442"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># Because delim_1 uses pipes to separate values, we can just use that as our</span>
 <span class="co"># delim value. However, for more complex symbols like tab, we use something</span>
-<span class="co"># different like "\\t" This varies for every symbol, but you can find most delim</span>
-<span class="co"># values on the internet.</span>
+<span class="co"># different like "\\t". This varies for every symbol, but you can find most</span>
+<span class="co"># delim values on the internet.</span>
 
 <span class="va">delim_1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="va">github_url</span>, <span class="st">"delim_1.txt"</span><span class="op">)</span>
 
@@ -388,18 +443,18 @@ In this case, the comment is the <code>#</code> sign, so we just need to include
 ## 1        150 Cambridge, MA
 ## 2         92 Newton, MA</code></pre>
 <p>You can often find CSV files on websites like <a href="https://kaggle.com">kaggle</a> as well as by exporting from an Excel spreadsheet. Keep in mind that data imported off of the internet is often very messy, so try to use some of the functions listed here to clean it up. For a full list of arguments and in-depth documentation about the <code>read_csv()</code> function, please visit this <a href="https://readr.tidyverse.org/reference/read_delim.html">website</a>.</p>
-<!-- DK: Put clean_names() example here or wherever you like. -->
+<!-- DK: Put clean_names() example here or wherever you like. DONE-->
 </div>
 </div>
 <div id="excel-files" class="section level3" number="3.2.2">
 <h3>
 <span class="header-section-number">3.2.2</span> Excel files<a class="anchor" aria-label="anchor" href="#excel-files"><i class="fas fa-link"></i></a>
 </h3>
-<p>Excel is a spreadsheet program that use tables to analyze, store, or manipulate data. The tables are composed of cells which include text, numbers, or formulas. Excel files have the filename extension .xlsx. They store additional things that you cannot store in a .csv file such as fonts, text formatting, graphics, etc.</p>
+<p>Excel is a spreadsheet program that use tables to analyze, store, or manipulate data. The tables are composed of cells which include text, numbers, or formulas. Excel files have the filename extensions .xls or .xlsx, and they’re capable of storing additional things that you cannot store in a .csv file such as fonts, text formatting, graphics, etc.</p>
 <p>In order to write excel files you have to install complex packages, and they are hard to create. Writing excel files is beyond the scope of Primer.</p>
 <p>This makes Excel files valuable because they’re commonly accepted and usable (Microsoft Excel is a very common program), but they’re also hard to use because you can’t write new data into them. This makes Excel files more common for data that was originally in Excel, like accounting data or other spreadsheet applications.</p>
 <p>Reading Excel files is easy. To do so, we use the <code><a href="https://readxl.tidyverse.org/reference/read_excel.html">read_excel()</a></code> function from the <strong>readxl</strong> package.</p>
-<div class="sourceCode" id="cb439"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb445"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://readxl.tidyverse.org">readxl</a></span><span class="op">)</span>
 
 <span class="co"># Unfortunately, it is not possible to read Excel files directly from the web.</span>
@@ -423,7 +478,7 @@ In this case, the comment is the <code>#</code> sign, so we just need to include
 ## 1     1     2     3
 ## 2     4     5     6</code></pre>
 <p>If the .xlsx file has multiple sheets, you have to use the <code>sheet</code> argument to specify the sheet number or name.
-The <code><a href="https://readxl.tidyverse.org/reference/read_excel.html">read_excel()</a></code> function has arguments similar to the <code>read_csv()</code> function such as <code>col_names</code>, <code>col_types</code>, and <code>na</code>.</p>
+The <code><a href="https://readxl.tidyverse.org/reference/read_excel.html">read_excel()</a></code> function also has arguments similar to the <code>read_csv()</code> function such as <code>col_names</code>, <code>col_types</code>, and <code>na</code>.</p>
 </div>
 <div id="rds-files" class="section level3" number="3.2.3">
 <h3>
@@ -431,11 +486,11 @@ The <code><a href="https://readxl.tidyverse.org/reference/read_excel.html">read_
 </h3>
 <p>One very important aspect of R is saving objects into RDS files, which store a single R object into a file.
 These files allow us to save R objects such as plots and tibbles into R and then reload the object that it contains later without re-running the code that made it.
-This is especially useful for when you’re dealing with bulk data and want to save the plot that comes with it for later.
+This is especially useful for when you’re dealing with bulk data and want to save the plot that comes with it for later so that you don’t have to do all of the data wrangling and plotting again.
 With a RDS file, you save the entire object, allowing you to do more things with it later without having to go through all of the code.
-However, RDS files are limited to R projects only, and they’re often incomprehensible both to human eyes and to other programming languages. This makes RDS files ideal for saving objects temporarily in your own project or for sharing objects to other R users.</p>
+However, RDS files are limited to R projects only, and they’re incomprehensible both to human eyes and to other programming languages. This makes RDS files ideal for saving objects temporarily in your own project or for sharing objects to other R users.</p>
 <p>Take the following R object, a graph of the <code>iris</code> data set.</p>
-<div class="sourceCode" id="cb441"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb447"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">iris_p</span> <span class="op">&lt;-</span> <span class="va">iris</span> <span class="op">%&gt;%</span> 
   <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">Sepal.Length</span>, y <span class="op">=</span> <span class="va">Sepal.Width</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">geom_jitter</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
@@ -443,22 +498,22 @@ However, RDS files are limited to R projects only, and they’re often incompreh
        x <span class="op">=</span> <span class="st">"Sepal Length"</span>,
        y <span class="op">=</span> <span class="st">"Sepal Width"</span><span class="op">)</span>
 <span class="va">iris_p</span></code></pre></div>
-<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-270-1.png" width="100%"></div>
-<p>When we save to a RDS file, we use the function <code>write_rds()</code>. Just like <code>write_csv()</code>, this function has two main arguments: <code>x</code> and <code>file</code>. The <code>x</code> argument is the object that you want to save. The <code>file</code> argument is the file path where you want to save the file. The end of the path argument is the name that you want to use for the file.</p>
-<div class="sourceCode" id="cb442"><pre class="downlit sourceCode r">
+<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-272-1.png" width="100%"></div>
+<p>When we save to a RDS file, we use the function <code>write_rds()</code>. Just like <code>write_csv()</code>, this function has two main arguments: <code>x</code> and <code>file</code>. The <code>x</code> argument is the object that you want to save. The <code>file</code> argument is the file path where you want to save the file. This determines the name that you use for the file.</p>
+<div class="sourceCode" id="cb448"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">write_rds</span><span class="op">(</span>x <span class="op">=</span> <span class="va">iris_p</span>, file <span class="op">=</span> <span class="st">"iris_p.rds"</span><span class="op">)</span></code></pre></div>
 <p><code>read_rds()</code> reads the file back into R. Just like <code>read_csv()</code> <code>read_rds()</code> has one main argument, which is the path to the file that you are wanting to read into R.</p>
-<div class="sourceCode" id="cb443"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb449"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">read_rds</span><span class="op">(</span>file <span class="op">=</span> <span class="st">"iris_p.rds"</span><span class="op">)</span></code></pre></div>
-<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-272-1.png" width="100%"></div>
+<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-274-1.png" width="100%"></div>
 <p>We can then use that R object in more operations, such as adding a trend line.</p>
-<div class="sourceCode" id="cb444"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb450"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">rds_p</span> <span class="op">&lt;-</span> <span class="fu">read_rds</span><span class="op">(</span>file <span class="op">=</span> <span class="st">"iris_p.rds"</span><span class="op">)</span>
 <span class="va">rds_p</span> <span class="op">+</span> 
   <span class="fu">geom_smooth</span><span class="op">(</span>method <span class="op">=</span> <span class="st">"loess"</span>,
               formula <span class="op">=</span> <span class="va">y</span> <span class="op">~</span> <span class="va">x</span>,
               se <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></code></pre></div>
-<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-273-1.png" width="100%"></div>
+<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-275-1.png" width="100%"></div>
 <p>By saving the <code>iris_p</code> plot in a RDS file, we eliminate the time needed to calculate and generate that plot again because we can use the saved information. We can then use the object by reading the file back into r and using it like any normal plot, adding new layers and doing new operations.</p>
 <p>There are also .Rdata files which can store multiple objects, but RDS files can accomplish a similar task. This makes it much easier to use RDS files for anything that you want to keep in R.</p>
 </div>
@@ -469,10 +524,10 @@ However, RDS files are limited to R projects only, and they’re often incompreh
 <p>An increasingly common format for sharing data is <strong>J</strong>avaScript <strong>O</strong>bject <strong>N</strong>otation or JSON. Because this format is very general, it is nothing like a spreadsheet. Note that JSON files are often made available via the internet. Several organizations provide a JSON API or a web service that you can connect directly to and from which you can obtain data.</p>
 <p>JSON files are a minimal readable format that structures data, and they’re commonly used to transmit data between a server and a web application like a website. For people familiar with the Javascript coding language, you’ll likely see the similarities between the JSON file format and the Javascript syntax. This makes JSON files ideal for internet transport, but they don’t see much use within a project like RDS files do.</p>
 <p>The functions <code><a href="https://rdrr.io/pkg/jsonlite/man/fromJSON.html">fromJSON()</a></code> and <code><a href="https://rdrr.io/pkg/jsonlite/man/fromJSON.html">toJSON()</a></code> allow you to convert between R objects and JSON. Both functions come from the <strong>jsonlite</strong> package.</p>
-<div class="sourceCode" id="cb445"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb451"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://arxiv.org/abs/1403.2805">jsonlite</a></span><span class="op">)</span></code></pre></div>
 <p>The function <code><a href="https://rdrr.io/pkg/jsonlite/man/fromJSON.html">toJSON()</a></code> converts a tibble to JSON format. Consider the <code>example_1</code> tibble:</p>
-<div class="sourceCode" id="cb446"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb452"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">example_1</span> <span class="op">&lt;-</span> <span class="fu">tibble</span><span class="op">(</span>name<span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Miguel"</span>, <span class="st">"Sofia"</span>, <span class="st">"Aya"</span>, <span class="st">"Cheng"</span><span class="op">)</span>, 
                     student_id <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">4</span>, exam_1 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">85</span>, <span class="fl">94</span>, <span class="fl">87</span>, <span class="fl">90</span><span class="op">)</span>, 
                     exam_2 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">86</span>, <span class="fl">93</span>, <span class="fl">88</span>, <span class="fl">91</span><span class="op">)</span><span class="op">)</span>
@@ -485,7 +540,7 @@ However, RDS files are limited to R projects only, and they’re often incompreh
 ## 2 Sofia           2     94     93
 ## 3 Aya             3     87     88
 ## 4 Cheng           4     90     91</code></pre>
-<div class="sourceCode" id="cb448"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb454"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># The pretty argument adds indentation and whitespace when TRUE.</span>
 
 <span class="fu"><a href="https://rdrr.io/pkg/jsonlite/man/fromJSON.html">toJSON</a></span><span class="op">(</span><span class="va">example_1</span>, pretty <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> </code></pre></div>
@@ -516,7 +571,7 @@ However, RDS files are limited to R projects only, and they’re often incompreh
 ##   }
 ## ]</code></pre>
 <p>The function <code><a href="https://rdrr.io/pkg/jsonlite/man/fromJSON.html">fromJSON()</a></code> converts JSON format to a tibble.</p>
-<div class="sourceCode" id="cb450"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb456"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">json_format_ex</span> <span class="op">&lt;-</span>
 <span class="st">'[
   {"Name" : "Mario", "Age" : 32, "Occupation" : "Plumber"}, 
@@ -539,7 +594,7 @@ However, RDS files are limited to R projects only, and they’re often incompreh
 <span class="header-section-number">3.3</span> Databases<a class="anchor" aria-label="anchor" href="#databases"><i class="fas fa-link"></i></a>
 </h2>
 <div class="figure">
-<span id="fig:unnamed-chunk-279"></span>
+<span id="fig:unnamed-chunk-281"></span>
 <img src="03-data/images/exploits_of_a_mom.png" alt="DROP TABLE is a particularly infamous SQL command." width="100%"><p class="caption">
 FIGURE 3.1: DROP TABLE is a particularly infamous SQL command.
 </p>
@@ -547,13 +602,14 @@ FIGURE 3.1: DROP TABLE is a particularly infamous SQL command.
 <p>Databases are one of the most common methods of storing data, as they are capable of storing large amounts of data while also allowing for multiple people to access and change them at the same time. Think of these like a giant book with a bunch of tables that hold data. These are useful by themselves, but with the advent of computers we are now able to use relational databases.</p>
 <p>A relational database is a database that has the tables interact with one another based on common data, allowing you to create custom tables from an existing set of records. For example, a relational database may hold multiple tables that use the same ID to keep track of different information, like one table having an ID and a movie name while another has the ID and the rating. You can then combine those two in your code, creating a table with the ID, name, and rating. This allows the person who made the database to easily put in new data as well as allow you to pull out some data at a time without loading the entire database.</p>
 <p>It’s common to use and interact with these databases in the real world due to most businesses using relational databases to keep track of their data and to update it at their leisure. It’s not uncommon for databases to hold thousands or even millions of rows due to the need to keep track of data.</p>
+<p>In this section, we’ll be going over how to pull data from these databases and how to interact with the data without using the entire database.</p>
 <div id="reading-data-from-a-sqlite-database" class="section level3" number="3.3.1">
 <h3>
 <span class="header-section-number">3.3.1</span> Reading data from a SQLite database<a class="anchor" aria-label="anchor" href="#reading-data-from-a-sqlite-database"><i class="fas fa-link"></i></a>
 </h3>
 <p>SQLite is probably the simplest relational database that one can use in combination with R. SQLite databases are self-contained and usually stored and accessed locally on one computer, instead of on the internet or through the cloud. Data is usually stored in a file with a <code>.db</code> extension. Similar to Excel files, these are not plain text files and cannot be read in a plain text editor.</p>
 <p>The first thing you need to do to read data into R from a database is to connect to the database. We do that using <code><a href="https://dbi.r-dbi.org/reference/dbConnect.html">dbConnect()</a></code> function from the <strong>DBI</strong> (database interface) package. This does not read in the data, but simply tells R where the database is and opens up a communication channel.</p>
-<div class="sourceCode" id="cb452"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb458"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://dbi.r-dbi.org">DBI</a></span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://rsqlite.r-dbi.org">RSQLite</a></span><span class="op">)</span>
 
@@ -564,12 +620,12 @@ FIGURE 3.1: DROP TABLE is a particularly infamous SQL command.
 
 <span class="va">con_lang_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dbi.r-dbi.org/reference/dbConnect.html">dbConnect</a></span><span class="op">(</span><span class="fu">RSQLite</span><span class="fu">::</span><span class="fu"><a href="https://rsqlite.r-dbi.org/reference/SQLite.html">SQLite</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"example_db.db"</span><span class="op">)</span></code></pre></div>
 <p>Often relational databases have many tables, and their power comes from the useful ways they can be joined. Thus anytime you want to access data from a relational database, you need to know the table names. You can get the names of all the tables in the database using <code><a href="https://dbi.r-dbi.org/reference/dbListTables.html">dbListTables()</a></code>.</p>
-<div class="sourceCode" id="cb453"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb459"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">tables</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dbi.r-dbi.org/reference/dbListTables.html">dbListTables</a></span><span class="op">(</span><span class="va">con_lang_data</span><span class="op">)</span>
 <span class="va">tables</span></code></pre></div>
 <pre><code>## [1] "lang"</code></pre>
 <p>We only get one table name returned, which tells us that there is only one table in this database. To reference a table in the database to do things like select columns and filter rows, we use the <code>tbl()</code> function from the <strong>dbplyr</strong> package. The package <strong>dbplyr</strong> allows us to work with data stored in databases as if they were local data frames, which is useful because we can do a lot with big datasets without actually having to bring these vast amounts of data into your computer!</p>
-<div class="sourceCode" id="cb455"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb461"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">lang_db</span> <span class="op">&lt;-</span> <span class="fu">tbl</span><span class="op">(</span><span class="va">con_lang_data</span>, <span class="st">"lang"</span><span class="op">)</span>
 <span class="va">lang_db</span></code></pre></div>
 <pre><code>## # Source:   table&lt;lang&gt; [?? x 6]
@@ -590,7 +646,7 @@ FIGURE 3.1: DROP TABLE is a particularly infamous SQL command.
 ## # … with more rows</code></pre>
 <p>Although it looks like we just got a data frame from the database, we didn’t! It’s a <em>reference</em>, showing us data that is still in the SQLite database (note the first two lines of the output). It does this because databases are often more efficient at selecting, filtering and joining large data sets than R. And typically, the database will not even be stored on your computer, but rather a more powerful machine somewhere on the web. So R is lazy and waits to bring this data into memory until you explicitly tell it. To do so, we use the <code>collect()</code> function.</p>
 <p>Here we will filter for only rows in the Aboriginal languages category according to the 2016 Canada Census, and then use <code>collect()</code> to finally bring this data into R as a data frame.</p>
-<div class="sourceCode" id="cb457"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb463"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">aboriginal_lang_db</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span><span class="op">(</span><span class="va">lang_db</span>, <span class="va">category</span> <span class="op">==</span> <span class="st">"Aboriginal languages"</span><span class="op">)</span>
 <span class="va">aboriginal_lang_db</span></code></pre></div>
 <pre><code>## # Source:   lazy query [?? x 6]
@@ -609,7 +665,7 @@ FIGURE 3.1: DROP TABLE is a particularly infamous SQL command.
 ##  9 Aboriginal … Carrier                1025          250           15       2100
 ## 10 Aboriginal … Cayuga                   45           10           10        125
 ## # … with more rows</code></pre>
-<div class="sourceCode" id="cb459"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb465"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">aboriginal_lang_data</span> <span class="op">&lt;-</span> <span class="fu">collect</span><span class="op">(</span><span class="va">aboriginal_lang_db</span><span class="op">)</span>
 <span class="va">aboriginal_lang_data</span></code></pre></div>
 <pre><code>## # A tibble: 67 x 6
@@ -627,17 +683,17 @@ FIGURE 3.1: DROP TABLE is a particularly infamous SQL command.
 ## 10 Aboriginal … Cayuga                   45           10           10        125
 ## # … with 57 more rows</code></pre>
 <p>Why bother to use the <code>collect()</code> function? The data looks pretty similar in both outputs shown above. And <strong>dbplyr</strong> provides lots of functions similar to <code><a href="https://dplyr.tidyverse.org/reference/filter.html">filter()</a></code> that you can use to directly feed the database reference (i.e. what <code>tbl()</code> gives you) into downstream analysis functions (e.g., <code>ggplot2</code> for data visualization and <code>lm</code> for linear regression modeling). However, this does not work in every case; look what happens when we try to use <code>nrow</code> to count rows in a data frame:</p>
-<div class="sourceCode" id="cb461"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb467"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/nrow.html">nrow</a></span><span class="op">(</span><span class="va">aboriginal_lang_db</span><span class="op">)</span></code></pre></div>
 <pre><code>## [1] NA</code></pre>
 <p>or <code>tail</code> to preview the last 6 rows of a data frame:</p>
 <pre><code><a href="https://rdrr.io/r/utils/head.html">tail(aboriginal_lang_db)</a></code></pre>
 <pre><code>## Error: tail() is not supported by sql sources</code></pre>
 <p>These functions only work when we use the version that we used collect() on:</p>
-<div class="sourceCode" id="cb465"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb471"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/nrow.html">nrow</a></span><span class="op">(</span><span class="va">aboriginal_lang_data</span><span class="op">)</span></code></pre></div>
 <pre><code>## [1] 67</code></pre>
-<div class="sourceCode" id="cb467"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb473"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/head.html">tail</a></span><span class="op">(</span><span class="va">aboriginal_lang_data</span><span class="op">)</span></code></pre></div>
 <pre><code>## # A tibble: 6 x 6
 ##   category     language       mother_tongue most_at_home most_at_work lang_known
@@ -649,7 +705,7 @@ FIGURE 3.1: DROP TABLE is a particularly infamous SQL command.
 ## 5 Aboriginal … Wakashan lang…            10            0            0         25
 ## 6 Aboriginal … Woods Cree              1840          800           75       2665</code></pre>
 <p>In order to delete and stop using an SQLite server, you need to first disconnect the file from the connection be using <code><a href="https://dbi.r-dbi.org/reference/dbDisconnect.html">dbDisconnect()</a></code> and passing in the connection object as an argument. You can then safely delete the database file from your computer by using <code><a href="https://rdrr.io/r/base/files.html">file.remove()</a></code>.</p>
-<div class="sourceCode" id="cb469"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb475"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbDisconnect.html">dbDisconnect</a></span><span class="op">(</span><span class="va">con_lang_data</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/base/files.html">file.remove</a></span><span class="op">(</span><span class="st">"example_db.db"</span><span class="op">)</span></code></pre></div>
 <p>Additionally, some operations will not work to extract columns or single values from the reference given by the <code>tbl</code> function. Thus, once you have finished your data wrangling of the <code>tbl()</code> database reference object, it is advisable to bring it into your local machine’s memory using <code>collect()</code> as a data frame.</p>
@@ -664,7 +720,7 @@ FIGURE 3.1: DROP TABLE is a particularly infamous SQL command.
 <p>Now that we’ve figured out how to get data from a database, let’s look at how to wrangle data within that database.</p>
 <p>Because databases normally contain large amounts of data, it’s advisable to do your wrangling before you use <code>collect()</code> to transform the database table into a tibble. This stops you from pulling large amounts of data onto your computer and just ignoring it.</p>
 <p>So let’s try pulling in a database and see how we can manipulate it.</p>
-<div class="sourceCode" id="cb470"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb476"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://dbi.r-dbi.org">DBI</a></span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://rsqlite.r-dbi.org">RSQLite</a></span><span class="op">)</span>
 
@@ -675,14 +731,14 @@ FIGURE 3.1: DROP TABLE is a particularly infamous SQL command.
 
 <span class="va">con</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dbi.r-dbi.org/reference/dbConnect.html">dbConnect</a></span><span class="op">(</span><span class="fu">RSQLite</span><span class="fu">::</span><span class="fu"><a href="https://rsqlite.r-dbi.org/reference/SQLite.html">SQLite</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"chinook.db"</span><span class="op">)</span></code></pre></div>
 <p>First off, look at what data this database holds.</p>
-<div class="sourceCode" id="cb471"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb477"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbListTables.html">dbListTables</a></span><span class="op">(</span><span class="va">con</span><span class="op">)</span></code></pre></div>
 <pre><code>##  [1] "albums"          "artists"         "customers"       "employees"      
 ##  [5] "genres"          "invoice_items"   "invoices"        "media_types"    
 ##  [9] "playlist_track"  "playlists"       "sqlite_sequence" "sqlite_stat1"   
 ## [13] "tracks"</code></pre>
 <p>There are 13 tables in this database. Let’s access the first couple of tables, just so that we can get a good look at them and see how they’re structured..</p>
-<div class="sourceCode" id="cb473"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb479"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">albums</span> <span class="op">&lt;-</span> <span class="fu">tbl</span><span class="op">(</span><span class="va">con</span>, <span class="st">"albums"</span><span class="op">)</span>
 <span class="va">albums</span></code></pre></div>
 <pre><code>## # Source:   table&lt;albums&gt; [?? x 3]
@@ -700,7 +756,7 @@ FIGURE 3.1: DROP TABLE is a particularly infamous SQL command.
 ##  9       9 Plays Metallica By Four Cellos               7
 ## 10      10 Audioslave                                   8
 ## # … with more rows</code></pre>
-<div class="sourceCode" id="cb475"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb481"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">artists</span> <span class="op">&lt;-</span> <span class="fu">tbl</span><span class="op">(</span><span class="va">con</span>, <span class="st">"artists"</span><span class="op">)</span>
 <span class="va">artists</span></code></pre></div>
 <pre><code>## # Source:   table&lt;artists&gt; [?? x 2]
@@ -728,9 +784,10 @@ FIGURE 3.1: DROP TABLE is a particularly infamous SQL command.
 <p>We’ve already seen how you can use the <strong>dbpylr</strong> package to get a table from a database, but let’s look at how you can also use it to do operations on databases as well.</p>
 <p>The <strong>dbpylr</strong> package allows you to use many of the same functions from the <strong>tidyverse</strong> like <code><a href="https://dplyr.tidyverse.org/reference/select.html">select()</a></code>, <code><a href="https://dplyr.tidyverse.org/reference/filter.html">filter()</a></code>, <code><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate()</a></code> without any issues, making it the easiest to do operations with.</p>
 <p>Here’s an example of using the <strong>dbpylr</strong> package to get the number of albums each artist has created.</p>
-<div class="sourceCode" id="cb477"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co"># You can keep a column during the summarize() if you just put the name equal to itself.</span>
-<span class="co"># This code is deliberately long in order to show the common functions that we use.</span>
+<div class="sourceCode" id="cb483"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="co"># You can keep a column during the summarize() if you just put the name equal to</span>
+<span class="co"># itself. This code is deliberately long in order to show the common functions</span>
+<span class="co"># that we use.</span>
 
 <span class="va">band_albums</span> <span class="op">&lt;-</span> <span class="fu">tbl</span><span class="op">(</span><span class="va">con</span>, <span class="st">"albums"</span><span class="op">)</span> <span class="op">%&gt;%</span>
                  <span class="fu">inner_join</span><span class="op">(</span><span class="fu">tbl</span><span class="op">(</span><span class="va">con</span>, <span class="st">"artists"</span><span class="op">)</span>, by <span class="op">=</span> <span class="st">"ArtistId"</span><span class="op">)</span> <span class="op">%&gt;%</span>
@@ -771,17 +828,17 @@ FIGURE 3.1: DROP TABLE is a particularly infamous SQL command.
 <p>SQL, or <strong>S</strong>tructured <strong>Q</strong>uery <strong>L</strong>anguage, is a coding language that works to build the relational databases that we’ve been using so far. SQLite is a special type of database that you can download onto your computer that uses SQL as its basic structure and basic language. Essentially, SQLite uses SQL code to do the things that it does.</p>
 <p>While you shouldn’t need to write SQL code in this primer, it’s very common to read from an SQL database in order to access data so that you can graph it.</p>
 <p>SQL runs through something known as a <strong>query</strong>, a line of code that pulls in information from the database. This is effectively asking the database for a specific set of data. This is what’s known as a <code>SELECT</code> command, which “selects” data from the database and brings it into your computer for your use.</p>
-<div class="sourceCode" id="cb479"><pre class="sourceCode sql"><code class="sourceCode sql"><span id="cb479-1"><a href="data.html#cb479-1" aria-hidden="true" tabindex="-1"></a><span class="co">-- This code is written in SQL syntax, so it won't work if you just put it into R. </span></span>
-<span id="cb479-2"><a href="data.html#cb479-2" aria-hidden="true" tabindex="-1"></a><span class="co">-- We'll be going over how to write SQL in R later in this section.</span></span>
-<span id="cb479-3"><a href="data.html#cb479-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb479-4"><a href="data.html#cb479-4" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> AlbumId,</span>
-<span id="cb479-5"><a href="data.html#cb479-5" aria-hidden="true" tabindex="-1"></a>       Title,</span>
-<span id="cb479-6"><a href="data.html#cb479-6" aria-hidden="true" tabindex="-1"></a>       ArtistId</span>
-<span id="cb479-7"><a href="data.html#cb479-7" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> albums;</span></code></pre></div>
+<div class="sourceCode" id="cb485"><pre class="sourceCode sql"><code class="sourceCode sql"><span id="cb485-1"><a href="data.html#cb485-1" aria-hidden="true" tabindex="-1"></a><span class="co">-- This code is written in SQL syntax, so it won't work if you just put it into R. </span></span>
+<span id="cb485-2"><a href="data.html#cb485-2" aria-hidden="true" tabindex="-1"></a><span class="co">-- We'll be going over how to write SQL in R later in this section.</span></span>
+<span id="cb485-3"><a href="data.html#cb485-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb485-4"><a href="data.html#cb485-4" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> AlbumId,</span>
+<span id="cb485-5"><a href="data.html#cb485-5" aria-hidden="true" tabindex="-1"></a>       Title,</span>
+<span id="cb485-6"><a href="data.html#cb485-6" aria-hidden="true" tabindex="-1"></a>       ArtistId</span>
+<span id="cb485-7"><a href="data.html#cb485-7" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> albums;</span></code></pre></div>
 <div class="knitsql-table">
 <div class="inline-table"><table class="table table-sm">
 <caption>
-<span id="tab:unnamed-chunk-292">TABLE 3.1: </span>Displaying records 1 - 10</caption>
+<span id="tab:unnamed-chunk-294">TABLE 3.1: </span>Displaying records 1 - 10</caption>
 <thead><tr class="header">
 <th align="left">AlbumId</th>
 <th align="left">Title</th>
@@ -842,22 +899,22 @@ FIGURE 3.1: DROP TABLE is a particularly infamous SQL command.
 </table></div>
 </div>
 <p>You can then modify these queries to do operations like joins.</p>
-<div class="sourceCode" id="cb480"><pre class="sourceCode sql"><code class="sourceCode sql"><span id="cb480-1"><a href="data.html#cb480-1" aria-hidden="true" tabindex="-1"></a><span class="co">-- This does the same thing as the inner join from Chapter 2 Wrangling</span></span>
-<span id="cb480-2"><a href="data.html#cb480-2" aria-hidden="true" tabindex="-1"></a><span class="co">-- Here we're joining the albums and the artists table by the ArtistId column</span></span>
-<span id="cb480-3"><a href="data.html#cb480-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb480-4"><a href="data.html#cb480-4" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> artistid,</span>
-<span id="cb480-5"><a href="data.html#cb480-5" aria-hidden="true" tabindex="-1"></a>       NAME,</span>
-<span id="cb480-6"><a href="data.html#cb480-6" aria-hidden="true" tabindex="-1"></a>       title</span>
-<span id="cb480-7"><a href="data.html#cb480-7" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span></span>
-<span id="cb480-8"><a href="data.html#cb480-8" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">SELECT</span> title,</span>
-<span id="cb480-9"><a href="data.html#cb480-9" aria-hidden="true" tabindex="-1"></a>          albums.artistid <span class="kw">AS</span> <span class="ot">"ArtistId"</span>,</span>
-<span id="cb480-10"><a href="data.html#cb480-10" aria-hidden="true" tabindex="-1"></a>          <span class="ot">"name"</span></span>
-<span id="cb480-11"><a href="data.html#cb480-11" aria-hidden="true" tabindex="-1"></a>   <span class="kw">FROM</span> albums</span>
-<span id="cb480-12"><a href="data.html#cb480-12" aria-hidden="true" tabindex="-1"></a>   <span class="kw">INNER</span> <span class="kw">JOIN</span> artists <span class="kw">ON</span> albums.artistid <span class="op">=</span> artists.artistid);</span></code></pre></div>
+<div class="sourceCode" id="cb486"><pre class="sourceCode sql"><code class="sourceCode sql"><span id="cb486-1"><a href="data.html#cb486-1" aria-hidden="true" tabindex="-1"></a><span class="co">-- This does the same thing as the inner join from Chapter 2 Wrangling</span></span>
+<span id="cb486-2"><a href="data.html#cb486-2" aria-hidden="true" tabindex="-1"></a><span class="co">-- Here we're joining the albums and the artists table by the ArtistId column</span></span>
+<span id="cb486-3"><a href="data.html#cb486-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb486-4"><a href="data.html#cb486-4" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> artistid,</span>
+<span id="cb486-5"><a href="data.html#cb486-5" aria-hidden="true" tabindex="-1"></a>       NAME,</span>
+<span id="cb486-6"><a href="data.html#cb486-6" aria-hidden="true" tabindex="-1"></a>       title</span>
+<span id="cb486-7"><a href="data.html#cb486-7" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span></span>
+<span id="cb486-8"><a href="data.html#cb486-8" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">SELECT</span> title,</span>
+<span id="cb486-9"><a href="data.html#cb486-9" aria-hidden="true" tabindex="-1"></a>          albums.artistid <span class="kw">AS</span> <span class="ot">"ArtistId"</span>,</span>
+<span id="cb486-10"><a href="data.html#cb486-10" aria-hidden="true" tabindex="-1"></a>          <span class="ot">"name"</span></span>
+<span id="cb486-11"><a href="data.html#cb486-11" aria-hidden="true" tabindex="-1"></a>   <span class="kw">FROM</span> albums</span>
+<span id="cb486-12"><a href="data.html#cb486-12" aria-hidden="true" tabindex="-1"></a>   <span class="kw">INNER</span> <span class="kw">JOIN</span> artists <span class="kw">ON</span> albums.artistid <span class="op">=</span> artists.artistid);</span></code></pre></div>
 <div class="knitsql-table">
 <div class="inline-table"><table class="table table-sm">
 <caption>
-<span id="tab:unnamed-chunk-293">TABLE 3.2: </span>Displaying records 1 - 10</caption>
+<span id="tab:unnamed-chunk-295">TABLE 3.2: </span>Displaying records 1 - 10</caption>
 <thead><tr class="header">
 <th align="right">ArtistId</th>
 <th align="left">name</th>
@@ -923,7 +980,7 @@ database through SQL, visit <a href="https://www.datacamp.com/community/tutorial
 </blockquote>
 <p>In fact, the <code>dbplyr</code> commands actually use SQL code to create their effect.
 You can run <code>show_query()</code> to see the SQL code, or the <em>query</em> that <code>dbplyr</code> produces.</p>
-<div class="sourceCode" id="cb481"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb487"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">show_query</span><span class="op">(</span><span class="va">band_albums</span><span class="op">)</span></code></pre></div>
 <pre><code>## &lt;SQL&gt;
 ## SELECT `artist_id`, `artist_name`, `num_albums`
@@ -943,8 +1000,8 @@ You can run <code>show_query()</code> to see the SQL code, or the <em>query</em>
 <pre><code><a href="https://dplyr.tidyverse.org/reference/slice.html">slice(band_albums, 1:10)</a></code></pre>
 <pre><code>## Error: slice() is not supported on database backends</code></pre>
 <p>This is possible in an SQL database. There are a couple of ways to run SQL code in R, but the easiest way is by using the <code><a href="https://dbi.r-dbi.org/reference/dbGetQuery.html">dbGetQuery()</a></code> function from the <strong>DBI</strong> library.</p>
-<div class="sourceCode" id="cb485"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co"># This code is just copy-pasted and reformatted from the earlier dbplyr code so </span>
+<div class="sourceCode" id="cb491"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="co"># This code is just copy-pasted and reformatted from the earlier dbplyr code so</span>
 <span class="co"># you can best understand it.</span>
 
 <span class="fu"><a href="https://dbi.r-dbi.org/reference/dbGetQuery.html">dbGetQuery</a></span><span class="op">(</span><span class="va">con</span>, <span class="st">"
@@ -1008,7 +1065,7 @@ WHERE (`num_albums` &gt; 3.0)
 ## SELECT * FROM albums
 ## ```</code></pre>
 <p>You can then use that variable in your R code.</p>
-<div class="sourceCode" id="cb490"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb496"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">your_variable_name</span><span class="op">)</span></code></pre></div>
 <pre><code>##   AlbumId                                 Title ArtistId
 ## 1       1 For Those About To Rock We Salute You        1
@@ -1018,47 +1075,47 @@ WHERE (`num_albums` &gt; 3.0)
 ## 5       5                              Big Ones        3
 ## 6       6                    Jagged Little Pill        4</code></pre>
 <p>Coding in SQL allows you to do the things that the <strong>dbplyr</strong> package doesn’t, such as only using certain rows. If you add <code>LIMIT 10;</code> at the end of the query (the first <code>SELECT</code> statement), you can limit the query to only the first 10 rows.</p>
-<div class="sourceCode" id="cb492"><pre class="sourceCode sql"><code class="sourceCode sql"><span id="cb492-1"><a href="data.html#cb492-1" aria-hidden="true" tabindex="-1"></a><span class="co">-- We're writing this code using the sql code chunk method. </span></span>
-<span id="cb492-2"><a href="data.html#cb492-2" aria-hidden="true" tabindex="-1"></a><span class="co">-- This is because it allows you to see what's highlighted and what's not.</span></span>
-<span id="cb492-3"><a href="data.html#cb492-3" aria-hidden="true" tabindex="-1"></a><span class="co">-- SQL code is also inconvenient because you can't just add a new line,</span></span>
-<span id="cb492-4"><a href="data.html#cb492-4" aria-hidden="true" tabindex="-1"></a><span class="co">-- Instead, you need to treat all of these lines of code as a single statement</span></span>
-<span id="cb492-5"><a href="data.html#cb492-5" aria-hidden="true" tabindex="-1"></a><span class="co">-- Then add in the command where you think that it would fit.</span></span>
-<span id="cb492-6"><a href="data.html#cb492-6" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> `artist_id`,</span>
-<span id="cb492-7"><a href="data.html#cb492-7" aria-hidden="true" tabindex="-1"></a>       `artist_name`,</span>
-<span id="cb492-8"><a href="data.html#cb492-8" aria-hidden="true" tabindex="-1"></a>       `num_albums`</span>
-<span id="cb492-9"><a href="data.html#cb492-9" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span></span>
-<span id="cb492-10"><a href="data.html#cb492-10" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">SELECT</span> `artistid`,</span>
-<span id="cb492-11"><a href="data.html#cb492-11" aria-hidden="true" tabindex="-1"></a>          `name`,</span>
-<span id="cb492-12"><a href="data.html#cb492-12" aria-hidden="true" tabindex="-1"></a>          `num_albums`,</span>
-<span id="cb492-13"><a href="data.html#cb492-13" aria-hidden="true" tabindex="-1"></a>          `artist_name`,</span>
-<span id="cb492-14"><a href="data.html#cb492-14" aria-hidden="true" tabindex="-1"></a>          `artistid` <span class="kw">AS</span> `artist_id`</span>
-<span id="cb492-15"><a href="data.html#cb492-15" aria-hidden="true" tabindex="-1"></a>   <span class="kw">FROM</span></span>
-<span id="cb492-16"><a href="data.html#cb492-16" aria-hidden="true" tabindex="-1"></a>     (<span class="kw">SELECT</span> `artistid`,</span>
-<span id="cb492-17"><a href="data.html#cb492-17" aria-hidden="true" tabindex="-1"></a>             `name`,</span>
-<span id="cb492-18"><a href="data.html#cb492-18" aria-hidden="true" tabindex="-1"></a>             `num_albums`,</span>
-<span id="cb492-19"><a href="data.html#cb492-19" aria-hidden="true" tabindex="-1"></a>             `name` <span class="kw">AS</span> `artist_name`</span>
-<span id="cb492-20"><a href="data.html#cb492-20" aria-hidden="true" tabindex="-1"></a>      <span class="kw">FROM</span></span>
-<span id="cb492-21"><a href="data.html#cb492-21" aria-hidden="true" tabindex="-1"></a>        (<span class="kw">SELECT</span> `artistid`,</span>
-<span id="cb492-22"><a href="data.html#cb492-22" aria-hidden="true" tabindex="-1"></a>                `name`,</span>
-<span id="cb492-23"><a href="data.html#cb492-23" aria-hidden="true" tabindex="-1"></a>                <span class="fu">Count</span>(<span class="op">*</span>) <span class="kw">AS</span> `num_albums`</span>
-<span id="cb492-24"><a href="data.html#cb492-24" aria-hidden="true" tabindex="-1"></a>         <span class="kw">FROM</span></span>
-<span id="cb492-25"><a href="data.html#cb492-25" aria-hidden="true" tabindex="-1"></a>           (<span class="kw">SELECT</span> `albumid`,</span>
-<span id="cb492-26"><a href="data.html#cb492-26" aria-hidden="true" tabindex="-1"></a>                   `artistid`,</span>
-<span id="cb492-27"><a href="data.html#cb492-27" aria-hidden="true" tabindex="-1"></a>                   `title`,</span>
-<span id="cb492-28"><a href="data.html#cb492-28" aria-hidden="true" tabindex="-1"></a>                   `name`</span>
-<span id="cb492-29"><a href="data.html#cb492-29" aria-hidden="true" tabindex="-1"></a>            <span class="kw">FROM</span></span>
-<span id="cb492-30"><a href="data.html#cb492-30" aria-hidden="true" tabindex="-1"></a>              (<span class="kw">SELECT</span> `albumid`,</span>
-<span id="cb492-31"><a href="data.html#cb492-31" aria-hidden="true" tabindex="-1"></a>                      `title`,</span>
-<span id="cb492-32"><a href="data.html#cb492-32" aria-hidden="true" tabindex="-1"></a>                      `LHS`.`artistid` <span class="kw">AS</span> `ArtistId`,</span>
-<span id="cb492-33"><a href="data.html#cb492-33" aria-hidden="true" tabindex="-1"></a>                      `name`</span>
-<span id="cb492-34"><a href="data.html#cb492-34" aria-hidden="true" tabindex="-1"></a>               <span class="kw">FROM</span> `albums` <span class="kw">AS</span> `LHS`</span>
-<span id="cb492-35"><a href="data.html#cb492-35" aria-hidden="true" tabindex="-1"></a>               <span class="kw">INNER</span> <span class="kw">JOIN</span> `artists` <span class="kw">AS</span> `RHS` <span class="kw">ON</span> (`LHS`.`artistid` <span class="op">=</span> `RHS`.`artistid`))) <span class="kw">GROUP</span>  <span class="kw">BY</span> `artistid`)))</span>
-<span id="cb492-36"><a href="data.html#cb492-36" aria-hidden="true" tabindex="-1"></a><span class="kw">WHERE</span> (`num_albums` <span class="op">&gt;</span> <span class="fl">3.0</span>)</span>
-<span id="cb492-37"><a href="data.html#cb492-37" aria-hidden="true" tabindex="-1"></a>  <span class="kw">ORDER</span>  <span class="kw">BY</span> `num_albums` <span class="kw">DESC</span></span>
-<span id="cb492-38"><a href="data.html#cb492-38" aria-hidden="true" tabindex="-1"></a><span class="kw">LIMIT</span> <span class="dv">10</span>;</span></code></pre></div>
-<div class="sourceCode" id="cb493"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co"># You can't see this, but output.var = "band_albums_sql" in the chunk above this.</span>
-<span class="co"># So we're outputting our data into band_albums_sql</span>
+<div class="sourceCode" id="cb498"><pre class="sourceCode sql"><code class="sourceCode sql"><span id="cb498-1"><a href="data.html#cb498-1" aria-hidden="true" tabindex="-1"></a><span class="co">-- We're writing this code using the sql code chunk method. </span></span>
+<span id="cb498-2"><a href="data.html#cb498-2" aria-hidden="true" tabindex="-1"></a><span class="co">-- This is because it allows you to see what's highlighted and what's not.</span></span>
+<span id="cb498-3"><a href="data.html#cb498-3" aria-hidden="true" tabindex="-1"></a><span class="co">-- SQL code is also inconvenient because you can't just add a new line,</span></span>
+<span id="cb498-4"><a href="data.html#cb498-4" aria-hidden="true" tabindex="-1"></a><span class="co">-- Instead, you need to treat all of these lines of code as a single statement</span></span>
+<span id="cb498-5"><a href="data.html#cb498-5" aria-hidden="true" tabindex="-1"></a><span class="co">-- Then add in the command where you think that it would fit.</span></span>
+<span id="cb498-6"><a href="data.html#cb498-6" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> `artist_id`,</span>
+<span id="cb498-7"><a href="data.html#cb498-7" aria-hidden="true" tabindex="-1"></a>       `artist_name`,</span>
+<span id="cb498-8"><a href="data.html#cb498-8" aria-hidden="true" tabindex="-1"></a>       `num_albums`</span>
+<span id="cb498-9"><a href="data.html#cb498-9" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span></span>
+<span id="cb498-10"><a href="data.html#cb498-10" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">SELECT</span> `artistid`,</span>
+<span id="cb498-11"><a href="data.html#cb498-11" aria-hidden="true" tabindex="-1"></a>          `name`,</span>
+<span id="cb498-12"><a href="data.html#cb498-12" aria-hidden="true" tabindex="-1"></a>          `num_albums`,</span>
+<span id="cb498-13"><a href="data.html#cb498-13" aria-hidden="true" tabindex="-1"></a>          `artist_name`,</span>
+<span id="cb498-14"><a href="data.html#cb498-14" aria-hidden="true" tabindex="-1"></a>          `artistid` <span class="kw">AS</span> `artist_id`</span>
+<span id="cb498-15"><a href="data.html#cb498-15" aria-hidden="true" tabindex="-1"></a>   <span class="kw">FROM</span></span>
+<span id="cb498-16"><a href="data.html#cb498-16" aria-hidden="true" tabindex="-1"></a>     (<span class="kw">SELECT</span> `artistid`,</span>
+<span id="cb498-17"><a href="data.html#cb498-17" aria-hidden="true" tabindex="-1"></a>             `name`,</span>
+<span id="cb498-18"><a href="data.html#cb498-18" aria-hidden="true" tabindex="-1"></a>             `num_albums`,</span>
+<span id="cb498-19"><a href="data.html#cb498-19" aria-hidden="true" tabindex="-1"></a>             `name` <span class="kw">AS</span> `artist_name`</span>
+<span id="cb498-20"><a href="data.html#cb498-20" aria-hidden="true" tabindex="-1"></a>      <span class="kw">FROM</span></span>
+<span id="cb498-21"><a href="data.html#cb498-21" aria-hidden="true" tabindex="-1"></a>        (<span class="kw">SELECT</span> `artistid`,</span>
+<span id="cb498-22"><a href="data.html#cb498-22" aria-hidden="true" tabindex="-1"></a>                `name`,</span>
+<span id="cb498-23"><a href="data.html#cb498-23" aria-hidden="true" tabindex="-1"></a>                <span class="fu">Count</span>(<span class="op">*</span>) <span class="kw">AS</span> `num_albums`</span>
+<span id="cb498-24"><a href="data.html#cb498-24" aria-hidden="true" tabindex="-1"></a>         <span class="kw">FROM</span></span>
+<span id="cb498-25"><a href="data.html#cb498-25" aria-hidden="true" tabindex="-1"></a>           (<span class="kw">SELECT</span> `albumid`,</span>
+<span id="cb498-26"><a href="data.html#cb498-26" aria-hidden="true" tabindex="-1"></a>                   `artistid`,</span>
+<span id="cb498-27"><a href="data.html#cb498-27" aria-hidden="true" tabindex="-1"></a>                   `title`,</span>
+<span id="cb498-28"><a href="data.html#cb498-28" aria-hidden="true" tabindex="-1"></a>                   `name`</span>
+<span id="cb498-29"><a href="data.html#cb498-29" aria-hidden="true" tabindex="-1"></a>            <span class="kw">FROM</span></span>
+<span id="cb498-30"><a href="data.html#cb498-30" aria-hidden="true" tabindex="-1"></a>              (<span class="kw">SELECT</span> `albumid`,</span>
+<span id="cb498-31"><a href="data.html#cb498-31" aria-hidden="true" tabindex="-1"></a>                      `title`,</span>
+<span id="cb498-32"><a href="data.html#cb498-32" aria-hidden="true" tabindex="-1"></a>                      `LHS`.`artistid` <span class="kw">AS</span> `ArtistId`,</span>
+<span id="cb498-33"><a href="data.html#cb498-33" aria-hidden="true" tabindex="-1"></a>                      `name`</span>
+<span id="cb498-34"><a href="data.html#cb498-34" aria-hidden="true" tabindex="-1"></a>               <span class="kw">FROM</span> `albums` <span class="kw">AS</span> `LHS`</span>
+<span id="cb498-35"><a href="data.html#cb498-35" aria-hidden="true" tabindex="-1"></a>               <span class="kw">INNER</span> <span class="kw">JOIN</span> `artists` <span class="kw">AS</span> `RHS` <span class="kw">ON</span> (`LHS`.`artistid` <span class="op">=</span> `RHS`.`artistid`))) <span class="kw">GROUP</span>  <span class="kw">BY</span> `artistid`)))</span>
+<span id="cb498-36"><a href="data.html#cb498-36" aria-hidden="true" tabindex="-1"></a><span class="kw">WHERE</span> (`num_albums` <span class="op">&gt;</span> <span class="fl">3.0</span>)</span>
+<span id="cb498-37"><a href="data.html#cb498-37" aria-hidden="true" tabindex="-1"></a>  <span class="kw">ORDER</span>  <span class="kw">BY</span> `num_albums` <span class="kw">DESC</span></span>
+<span id="cb498-38"><a href="data.html#cb498-38" aria-hidden="true" tabindex="-1"></a><span class="kw">LIMIT</span> <span class="dv">10</span>;</span></code></pre></div>
+<div class="sourceCode" id="cb499"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="co"># You can't see this, but output.var = "band_albums_sql" in the chunk above</span>
+<span class="co"># this. So we're outputting our data into band_albums_sql</span>
 <span class="va">band_albums_sql</span></code></pre></div>
 <pre><code>##    artist_id     artist_name num_albums
 ## 1         90     Iron Maiden         21
@@ -1097,7 +1154,7 @@ For example, <a href="https://www.internetlivestats.com/google-search-statistics
 </h2>
 <div class="inline-figure"><img src="03-data/images/tags.png" width="100%"></div>
 <p>In the first part of this chapter, we learned how to read in data from plain text files that are usually “rectangular” in shape using the <strong>tidyverse</strong> <code>read_*</code> functions. Sadly, not all data comes in this simple format, but we can happily use many other tools to read in more messy/wild data formats. The formal name for gathering non-rectangular data from the web and transforming it into a more useful format for data analysis is <strong>web scraping</strong>.</p>
-<p>We can do web scraping through r by using the <strong><code>rvest</code></strong> library, which is a library that allows us to look at HTML and CSS selectors, then pick them apart to get the data we want. Let’s look at what this means.</p>
+<p>We can do web scraping through r by using the <strong>rvest</strong> library, which is a library that allows us to look at HTML and CSS selectors, then pick them apart to get the data we want. Let’s look at what this means.</p>
 <div id="html-and-css-selectors" class="section level3" number="3.4.1">
 <h3>
 <span class="header-section-number">3.4.1</span> HTML and CSS selectors<a class="anchor" aria-label="anchor" href="#html-and-css-selectors"><i class="fas fa-link"></i></a>
@@ -1108,23 +1165,30 @@ For example, <a href="https://www.internetlivestats.com/google-search-statistics
 <span class="header-section-number">3.4.1.1</span> Website structure<a class="anchor" aria-label="anchor" href="#website-structure"><i class="fas fa-link"></i></a>
 </h4>
 <div class="figure">
-<span id="fig:unnamed-chunk-302"></span>
+<span id="fig:unnamed-chunk-304"></span>
 <img src="03-data/images/nobel.PNG" alt="A little bit of HTML editing can bring you a long way." width="100%"><p class="caption">
 FIGURE 3.2: A little bit of HTML editing can bring you a long way.
 </p>
 </div>
-<p>Websites are coded in a language called <strong>HTML</strong>, or <strong>H</strong>yper<strong>T</strong>ext <strong>M</strong>arkup <strong>L</strong>anguage. This is the code that puts all of the information on the website, such as the numbers and text. These are the files created when we “knit” our .Rmd files and it’s what makes them put information on the screen. When we’re webscraping, we can look at the information on the website by looking at the HTML code.</p>
-<p>HTML uses many nested “tags” to organize the structure. For example, an html file like this:</p>
-<div class="sourceCode" id="cb495"><pre class="sourceCode html"><code class="sourceCode html"><span id="cb495-1"><a href="data.html#cb495-1" aria-hidden="true" tabindex="-1"></a><span class="co">&lt;!-- This is using the HTML language. You don't actually put this in a chunk if </span></span>
-<span id="cb495-2"><a href="data.html#cb495-2" aria-hidden="true" tabindex="-1"></a><span class="co">you want to put this in an Rmarkdown file, you can just type it straight in.--&gt;</span></span>
-<span id="cb495-3"><a href="data.html#cb495-3" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;html&gt;</span></span>
-<span id="cb495-4"><a href="data.html#cb495-4" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;p&gt;</span></span>
-<span id="cb495-5"><a href="data.html#cb495-5" aria-hidden="true" tabindex="-1"></a>Hello World</span>
-<span id="cb495-6"><a href="data.html#cb495-6" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;/p&gt;</span></span>
-<span id="cb495-7"><a href="data.html#cb495-7" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;/html&gt;</span></span></code></pre></div>
+<p>Websites are coded in a language called <strong>HTML</strong>, or <strong>H</strong>yper<strong>T</strong>ext <strong>M</strong>arkup <strong>L</strong>anguage. This is the code that puts all of the information on the website, such as the numbers and text. These are the files created when we “knit” our .Rmd files and it’s what makes them put information on the screen. When we’re webscraping, we can look at the information on the website by looking at the HTML code. You can try this out by yourself! Just go to any website and right-click, then press “Inspect.” You’ll be able to see the HTML code behind the website and even edit it to your liking!</p>
+<div class="sourceCode" id="cb501"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/include_graphics.html">include_graphics</a></span><span class="op">(</span><span class="st">"03-data/images/html_inspect.gif"</span><span class="op">)</span></code></pre></div>
+<div class="figure">
+<span id="fig:unnamed-chunk-305"></span>
+<img src="03-data/images/html_inspect.gif" alt="You can see the HTML code of a website and even edit it temporarily by inspecting the HTML code of the in" width="100%"><p class="caption">
+FIGURE 3.3: You can see the HTML code of a website and even edit it temporarily by inspecting the HTML code of the in
+</p>
+</div>
+<p>HTML uses many nested “tags” to organize the structure. For example, an HTML file like this:</p>
+<div class="sourceCode" id="cb502"><pre class="sourceCode html"><code class="sourceCode html"><span id="cb502-1"><a href="data.html#cb502-1" aria-hidden="true" tabindex="-1"></a><span class="co">&lt;!-- This is using the HTML language. You don't actually put this in a chunk if </span></span>
+<span id="cb502-2"><a href="data.html#cb502-2" aria-hidden="true" tabindex="-1"></a><span class="co">you want to put this in an Rmarkdown file, you can just type it straight in.--&gt;</span></span>
+<span id="cb502-3"><a href="data.html#cb502-3" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;html&gt;</span></span>
+<span id="cb502-4"><a href="data.html#cb502-4" aria-hidden="true" tabindex="-1"></a>  <span class="kw">&lt;p&gt;</span></span>
+<span id="cb502-5"><a href="data.html#cb502-5" aria-hidden="true" tabindex="-1"></a>    Hello World</span>
+<span id="cb502-6"><a href="data.html#cb502-6" aria-hidden="true" tabindex="-1"></a>  <span class="kw">&lt;/p&gt;</span></span>
+<span id="cb502-7"><a href="data.html#cb502-7" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;/html&gt;</span></span></code></pre></div>
 <p>looks like this in the result:</p>
-<!-- AG: I added some CSS rules so that I can keep HTML in a box instead of leaving it out in the open. This knitted on my computer, but please tell me if it causes problems in the final build. [Change this to be declaritive.] ->
-
+<!-- These are CSS rules that allow you to draw a box around HTML elements. This helps to make them stand out from the rest of the primer and actually look like an output from a program rather than just plain text. -->
 <style type="text/css">
 .artificial-html-div {
   border-style: solid;
@@ -1142,37 +1206,33 @@ FIGURE 3.2: A little bit of HTML editing can bring you a long way.
   margin-right: 0;
 }
 </style>
-
-<html>
-<div class = "artificial-html-div">
-<p class = "artificial-paragraph">
+<div class="artificial-html-div">
+<p class="artificial-paragraph">
 Hello World
 </p>
 </div>
-</html>
 
-Each tag defines an **element**, or a part of a website. For example, we used the `<p>` tag to define a paragraph element in HTML. We then close the paragraph by using the `</p>` tag, ending the paragraph. You can find a full list of HTML tags and elements [here](https://developer.mozilla.org/en-US/docs/Web/HTML/Element).
-
-<!-- AG: I'm pretty sure I can link to the rest of the book like what I did here. Just making sure since I'm not really sure about how to style a link to the rest of the book. -->
-<p>Now, we’re doing data science. And let’s say you find some really cool website off of the internet that has a lot of really useful data, but there’s no download file (<a href="https://ppbds.github.io/primer/data.html#are-you-allowed-to-scrape-that-website">and it’s legal to scrape off of it</a>). That means that you have to pull the information from the HTML code.</p>
-<p>We can do this by using the <strong><code>rvest</code></strong> package like I talked about earlier. This is essentially a package that allows you to scrape information from HTML code, allowing you to scrape the information off of the website overall.</p>
-<div class="sourceCode" id="cb496"><pre class="downlit sourceCode r">
+<p>Each tag defines an <strong>element</strong>, or a part of a website. For example, we used the <code>&lt;p&gt;</code> tag to define a paragraph element in HTML. We then close the paragraph by using the <code>&lt;/p&gt;</code> tag, ending the paragraph. You can find a full list of HTML tags and elements <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element">here</a>.</p>
+<p>Now, we’re doing data science. And let’s say you find some really cool website off of the internet that has a lot of really useful data, but there’s no download file (and <a href="data.html#legal-to-scrape">it’s legal to scrape from that website</a>). That means that you have to pull the information from the HTML code.</p>
+<p>We can do this by using the <strong>rvest</strong> package like I talked about earlier. This is essentially a package that allows you to scrape information from HTML code, allowing you to scrape the information off of the complete website.</p>
+<div class="sourceCode" id="cb503"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://rvest.tidyverse.org/">rvest</a></span><span class="op">)</span></code></pre></div>
 <p>Let’s try scraping the <code>Hello World</code> from the earlier HTML code.</p>
-<p>First off, we need to use the <code><a href="https://rvest.tidyverse.org/reference/minimal_html.html">minimal_html()</a></code> function so that we can get an R object that we can then work on. Think about it like changing the information from HTML code into something that R can understand.</p>
-<div class="sourceCode" id="cb497"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co"># You can't use HTML code that's structured properly in R, so we condense it </span>
-<span class="co"># into one line, like what's shown below.</span>
-
-<span class="va">raw_html_1</span> <span class="op">&lt;-</span> <span class="st">"&lt;html&gt;&lt;p&gt;Hello World&lt;/p&gt;&lt;/html&gt;"</span>
+<p>First off, we need to use the <code><a href="https://rvest.tidyverse.org/reference/minimal_html.html">minimal_html()</a></code> function so that we can get an R object that we can then work on. This is a temporary use because we’re trying to Think about it like changing the information from HTML code into something that R can understand.</p>
+<div class="sourceCode" id="cb504"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">raw_html_1</span> <span class="op">&lt;-</span> <span class="st">"&lt;html&gt;
+                 &lt;p&gt;
+                   Hello World
+                 &lt;/p&gt;
+               &lt;/html&gt;"</span>
 <span class="va">raw_html_1</span> <span class="op">%&gt;%</span>
   <span class="fu"><a href="https://rvest.tidyverse.org/reference/minimal_html.html">minimal_html</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <pre><code>## {html_document}
 ## &lt;html&gt;
 ## [1] &lt;head&gt;\n&lt;meta http-equiv="Content-Type" content="text/html; charset=UTF-8 ...
-## [2] &lt;body&gt;&lt;p&gt;Hello World&lt;/p&gt;&lt;/body&gt;</code></pre>
+## [2] &lt;body&gt;\n&lt;p&gt;\n                   Hello World\n                 &lt;/p&gt;\n      ...</code></pre>
 <p>Then we need to filter by the elements that the HTML file contains. In this case, we’re looking for the paragraph tag, or <code>&lt;p&gt;</code>. That means that we can just use <code><a href="https://rvest.tidyverse.org/reference/html_element.html">html_element()</a></code> to get the first paragraph element.</p>
-<div class="sourceCode" id="cb499"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb506"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># Only use the letter part of the tag, not the &lt;, &gt;, or /</span>
 
 <span class="va">raw_html_1</span> <span class="op">%&gt;%</span>
@@ -1181,7 +1241,7 @@ Each tag defines an **element**, or a part of a website. For example, we used th
 <pre><code>## {html_node}
 ## &lt;p&gt;</code></pre>
 <p>This returns an HTML node, or the specific element that we chose. If we had more paragraphs in our HTML code, this would return more HTML nodes. Now, the interesting thing about these nodes is that they contain information that we can access using <code><a href="https://rvest.tidyverse.org/reference/html_text.html">html_text2()</a></code>. This lets us parse through the code without any problems.</p>
-<div class="sourceCode" id="cb501"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb508"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># html_text2() is different from the normal html_text() because it returns an</span>
 <span class="co"># actual string. This is normally what we want.</span>
 
@@ -1192,30 +1252,29 @@ Each tag defines an **element**, or a part of a website. For example, we used th
 <pre><code>## [1] "Hello World"</code></pre>
 <p>But websites, especially ones with useful data, don’t just exist to state “Hello World.” They’re much more complex than that. By layering different elements, you can create a website that contains a lot more information.</p>
 <p>For example, doing this in HTML:</p>
-<!-- AG: I'm wondering how closely I should stick to the tutorial problems. I know that we're going to be integrating them into each other soon, but the tutorial problems don't have as much information as I would like (such as the paragraph tags) and they're not as reusable (I can do both examples with one piece of code vs the two used in the tutorial). Right now, I'm going to use my own examples because I feel like it makes the section more understandable. Also, the tutorials shouldn't be too close to the primer since we're likely not going to be combining them too soon (I think) and I personally don't think that they should cover the exact same things with the exact same examples, especially for something as in-depth as HTML code. -->
-<div class="sourceCode" id="cb503"><pre class="sourceCode html"><code class="sourceCode html"><span id="cb503-1"><a href="data.html#cb503-1" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;html&gt;</span></span>
-<span id="cb503-2"><a href="data.html#cb503-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">&lt;table&gt;</span></span>
-<span id="cb503-3"><a href="data.html#cb503-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">&lt;tr&gt;</span></span>
-<span id="cb503-4"><a href="data.html#cb503-4" aria-hidden="true" tabindex="-1"></a>      <span class="kw">&lt;td&gt;</span></span>
-<span id="cb503-5"><a href="data.html#cb503-5" aria-hidden="true" tabindex="-1"></a>        This is some important info.</span>
-<span id="cb503-6"><a href="data.html#cb503-6" aria-hidden="true" tabindex="-1"></a>      <span class="kw">&lt;/td&gt;</span></span>
-<span id="cb503-7"><a href="data.html#cb503-7" aria-hidden="true" tabindex="-1"></a>      <span class="kw">&lt;td&gt;</span></span>
-<span id="cb503-8"><a href="data.html#cb503-8" aria-hidden="true" tabindex="-1"></a>        This is some other important info.</span>
-<span id="cb503-9"><a href="data.html#cb503-9" aria-hidden="true" tabindex="-1"></a>      <span class="kw">&lt;/td&gt;</span></span>
-<span id="cb503-10"><a href="data.html#cb503-10" aria-hidden="true" tabindex="-1"></a>    <span class="kw">&lt;/tr&gt;</span></span>
-<span id="cb503-11"><a href="data.html#cb503-11" aria-hidden="true" tabindex="-1"></a>    <span class="kw">&lt;tr&gt;</span></span>
-<span id="cb503-12"><a href="data.html#cb503-12" aria-hidden="true" tabindex="-1"></a>      <span class="kw">&lt;td&gt;</span></span>
-<span id="cb503-13"><a href="data.html#cb503-13" aria-hidden="true" tabindex="-1"></a>        This is really important info.</span>
-<span id="cb503-14"><a href="data.html#cb503-14" aria-hidden="true" tabindex="-1"></a>      <span class="kw">&lt;/td&gt;</span></span>
-<span id="cb503-15"><a href="data.html#cb503-15" aria-hidden="true" tabindex="-1"></a>      <span class="kw">&lt;td&gt;</span></span>
-<span id="cb503-16"><a href="data.html#cb503-16" aria-hidden="true" tabindex="-1"></a>        This is some useful information.</span>
-<span id="cb503-17"><a href="data.html#cb503-17" aria-hidden="true" tabindex="-1"></a>      <span class="kw">&lt;/td&gt;</span></span>
-<span id="cb503-18"><a href="data.html#cb503-18" aria-hidden="true" tabindex="-1"></a>    <span class="kw">&lt;/tr&gt;</span></span>
-<span id="cb503-19"><a href="data.html#cb503-19" aria-hidden="true" tabindex="-1"></a>  <span class="kw">&lt;/table&gt;</span></span>
-<span id="cb503-20"><a href="data.html#cb503-20" aria-hidden="true" tabindex="-1"></a>  <span class="kw">&lt;p&gt;</span></span>
-<span id="cb503-21"><a href="data.html#cb503-21" aria-hidden="true" tabindex="-1"></a>    This is so useless, you shouldn't even be reading it.</span>
-<span id="cb503-22"><a href="data.html#cb503-22" aria-hidden="true" tabindex="-1"></a>  <span class="kw">&lt;/p&gt;</span></span>
-<span id="cb503-23"><a href="data.html#cb503-23" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;/html&gt;</span></span></code></pre></div>
+<div class="sourceCode" id="cb510"><pre class="sourceCode html"><code class="sourceCode html"><span id="cb510-1"><a href="data.html#cb510-1" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;html&gt;</span></span>
+<span id="cb510-2"><a href="data.html#cb510-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">&lt;table&gt;</span></span>
+<span id="cb510-3"><a href="data.html#cb510-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">&lt;tr&gt;</span></span>
+<span id="cb510-4"><a href="data.html#cb510-4" aria-hidden="true" tabindex="-1"></a>      <span class="kw">&lt;td&gt;</span></span>
+<span id="cb510-5"><a href="data.html#cb510-5" aria-hidden="true" tabindex="-1"></a>        This is some important info.</span>
+<span id="cb510-6"><a href="data.html#cb510-6" aria-hidden="true" tabindex="-1"></a>      <span class="kw">&lt;/td&gt;</span></span>
+<span id="cb510-7"><a href="data.html#cb510-7" aria-hidden="true" tabindex="-1"></a>      <span class="kw">&lt;td&gt;</span></span>
+<span id="cb510-8"><a href="data.html#cb510-8" aria-hidden="true" tabindex="-1"></a>        This is some unimportant info.</span>
+<span id="cb510-9"><a href="data.html#cb510-9" aria-hidden="true" tabindex="-1"></a>      <span class="kw">&lt;/td&gt;</span></span>
+<span id="cb510-10"><a href="data.html#cb510-10" aria-hidden="true" tabindex="-1"></a>    <span class="kw">&lt;/tr&gt;</span></span>
+<span id="cb510-11"><a href="data.html#cb510-11" aria-hidden="true" tabindex="-1"></a>    <span class="kw">&lt;tr&gt;</span></span>
+<span id="cb510-12"><a href="data.html#cb510-12" aria-hidden="true" tabindex="-1"></a>      <span class="kw">&lt;td&gt;</span></span>
+<span id="cb510-13"><a href="data.html#cb510-13" aria-hidden="true" tabindex="-1"></a>        This is really important info.</span>
+<span id="cb510-14"><a href="data.html#cb510-14" aria-hidden="true" tabindex="-1"></a>      <span class="kw">&lt;/td&gt;</span></span>
+<span id="cb510-15"><a href="data.html#cb510-15" aria-hidden="true" tabindex="-1"></a>      <span class="kw">&lt;td&gt;</span></span>
+<span id="cb510-16"><a href="data.html#cb510-16" aria-hidden="true" tabindex="-1"></a>        This is some other unimportant information.</span>
+<span id="cb510-17"><a href="data.html#cb510-17" aria-hidden="true" tabindex="-1"></a>      <span class="kw">&lt;/td&gt;</span></span>
+<span id="cb510-18"><a href="data.html#cb510-18" aria-hidden="true" tabindex="-1"></a>    <span class="kw">&lt;/tr&gt;</span></span>
+<span id="cb510-19"><a href="data.html#cb510-19" aria-hidden="true" tabindex="-1"></a>  <span class="kw">&lt;/table&gt;</span></span>
+<span id="cb510-20"><a href="data.html#cb510-20" aria-hidden="true" tabindex="-1"></a>  <span class="kw">&lt;p&gt;</span></span>
+<span id="cb510-21"><a href="data.html#cb510-21" aria-hidden="true" tabindex="-1"></a>    This is so useless, you shouldn't even be reading it.</span>
+<span id="cb510-22"><a href="data.html#cb510-22" aria-hidden="true" tabindex="-1"></a>  <span class="kw">&lt;/p&gt;</span></span>
+<span id="cb510-23"><a href="data.html#cb510-23" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;/html&gt;</span></span></code></pre></div>
 <p>Creates a table and a paragraph that looks like this:</p>
 <div class="artificial-html-div">
 
@@ -1225,7 +1284,7 @@ Each tag defines an **element**, or a part of a website. For example, we used th
 This is some important info.
 </td>
 <td>
-This is some other important info.
+This is some unimportant info.
 </td>
 </tr>
 <tr>
@@ -1233,7 +1292,7 @@ This is some other important info.
 This is really important info.
 </td>
 <td>
-This is some useful information.
+This is some other unimportant information.
 </td>
 </tr>
 </table></div>
@@ -1244,36 +1303,34 @@ This is so useless, you shouldn’t even be reading it.
 </div>
 <p>Now, let’s say we want to get all of the information in the table but we don’t want to get the useless description at the end.</p>
 <p>We can do this by only looking at the table (the <code>&lt;table&gt;</code> tag) and then getting the cells (the <code>&lt;td&gt;</code> tag). We’ll also save this to a variable for later.</p>
-<!-- AG: This just feels wrong, but it doesn't run any other way. So if I want to keep the HTML code syntax without going miles off screen, I'm going to be doing this. The error that it gives me is: `Error: unexpected `<` in "<"`. It's weird, dumb, and stops me from using the proper syntax without having to circumvent it. Check out R string constants. Cut, cut, cut! What really matters is the ability to grab data from a table on the web. -->
-<div class="sourceCode" id="cb504"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co"># We're using a trick here where every line of HTML is pasted together, allowing</span>
-<span class="co"># us to keep the original syntax even though the line is super long.</span>
-
-<span class="va">raw_html_2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="st">"&lt;html&gt;"</span>,
-                       <span class="st">"&lt;table&gt;"</span>,
-                         <span class="st">"&lt;tr&gt;"</span>,
-                           <span class="st">"&lt;td&gt;"</span>, 
-                             <span class="st">"This is some important info."</span>,
-                           <span class="st">"&lt;/td&gt;"</span>,
-                           <span class="st">"&lt;td&gt;"</span>,
-                             <span class="st">"This is some other important info."</span>,
-                           <span class="st">"&lt;/td&gt;"</span>,
-                         <span class="st">"&lt;/tr&gt;"</span>,
-                         <span class="st">"&lt;tr&gt;"</span>,
-                           <span class="st">"&lt;td&gt;"</span>,
-                             <span class="st">"This is really important info."</span>,
-                           <span class="st">"&lt;/td&gt;"</span>,
-                           <span class="st">"&lt;td&gt;"</span>,
-                             <span class="st">"This is some useful information."</span>,
-                           <span class="st">"&lt;/td&gt;"</span>,
-                         <span class="st">"&lt;/tr&gt;"</span>,
-                       <span class="st">"&lt;/table&gt;"</span>,
-                       <span class="st">"&lt;p&gt;"</span>,
-                         <span class="st">"This is so useless, you shouldn't even be reading it."</span>,
-                       <span class="st">"&lt;/p&gt;"</span>,
-                     <span class="st">"&lt;/html&gt;"</span><span class="op">)</span>
-
-<span class="co"># We use html_elements() to get all of the elements in the HTML file.</span>
+<div class="sourceCode" id="cb511"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">raw_html_2</span> <span class="op">&lt;-</span> <span class="st">"&lt;html&gt;
+                 &lt;table&gt;
+                   &lt;tr&gt;
+                     &lt;td&gt;
+                       This is some important info.
+                     &lt;/td&gt;
+                     &lt;td&gt;
+                       This is some unimportant info.
+                     &lt;/td&gt;
+                   &lt;/tr&gt;
+                   &lt;tr&gt;
+                     &lt;td&gt;
+                       This is really important info.
+                     &lt;/td&gt;
+                     &lt;td&gt;
+                       This is some other unimportant information.
+                     &lt;/td&gt;
+                   &lt;/tr&gt;
+                 &lt;/table&gt;
+                 &lt;p&gt;
+                   This is so useless, you shouldn't even be reading it.
+                 &lt;/p&gt;
+               &lt;/html&gt;"</span>
+<span class="va">raw_html_2</span></code></pre></div>
+<pre><code>## [1] "&lt;html&gt;\n                 &lt;table&gt;\n                   &lt;tr&gt;\n                     &lt;td&gt;\n                       This is some important info.\n                     &lt;/td&gt;\n                     &lt;td&gt;\n                       This is some unimportant info.\n                     &lt;/td&gt;\n                   &lt;/tr&gt;\n                   &lt;tr&gt;\n                     &lt;td&gt;\n                       This is really important info.\n                     &lt;/td&gt;\n                     &lt;td&gt;\n                       This is some other unimportant information.\n                     &lt;/td&gt;\n                   &lt;/tr&gt;\n                 &lt;/table&gt;\n                 &lt;p&gt;\n                   This is so useless, you shouldn't even be reading it.\n                 &lt;/p&gt;\n               &lt;/html&gt;"</code></pre>
+<div class="sourceCode" id="cb513"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="co"># We use html_elements() to get all of the elements in the HTML file.</span>
 
 <span class="va">td_tags</span> <span class="op">&lt;-</span> <span class="va">raw_html_2</span> <span class="op">%&gt;%</span>
              <span class="fu"><a href="https://rvest.tidyverse.org/reference/minimal_html.html">minimal_html</a></span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span>
@@ -1281,174 +1338,176 @@ This is so useless, you shouldn’t even be reading it.
              <span class="fu"><a href="https://rvest.tidyverse.org/reference/html_element.html">html_elements</a></span><span class="op">(</span><span class="st">"td"</span><span class="op">)</span>
 <span class="va">td_tags</span></code></pre></div>
 <pre><code>## {xml_nodeset (4)}
-## [1] &lt;td&gt;This is some important info.&lt;/td&gt;\n
-## [2] &lt;td&gt;This is some other important info.&lt;/td&gt;
-## [3] &lt;td&gt;This is really important info.&lt;/td&gt;\n
-## [4] &lt;td&gt;This is some useful information.&lt;/td&gt;</code></pre>
+## [1] &lt;td&gt;\n                       This is some important info.\n               ...
+## [2] &lt;td&gt;\n                       This is some unimportant info.\n             ...
+## [3] &lt;td&gt;\n                       This is really important info.\n             ...
+## [4] &lt;td&gt;\n                       This is some other unimportant information.\ ...</code></pre>
 <p>Notice that this actually outputs a list of the elements and their text. That means that we can use the this output like a list in order to get the information that we want. Just use the <code>[[]]</code> syntax.</p>
-<div class="sourceCode" id="cb506"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb515"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">td_tags</span><span class="op">[[</span><span class="fl">2</span><span class="op">]</span><span class="op">]</span> <span class="op">%&gt;%</span>
   <span class="fu"><a href="https://rvest.tidyverse.org/reference/html_text.html">html_text2</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
-<pre><code>## [1] "This is some other important info."</code></pre>
-<p>However, what if we want only a specific column or type of tag? That’s what CSS selectors are for.</p>
+<pre><code>## [1] "This is some unimportant info."</code></pre>
+<p>This method is what you’d use if you just wanted to get all of the information inside of a specific table without filtering any data out. This is because pulling directly from the HTML makes a lot more sense in this scenario than fiddling around with other junk. Just pull the data and go, no fancy things.</p>
+<p>However, what if we want only the important information in that table? That’s what CSS selectors are for.</p>
 </div>
 <div id="css-selectors" class="section level4" number="3.4.1.2">
 <h4>
 <span class="header-section-number">3.4.1.2</span> CSS selectors<a class="anchor" aria-label="anchor" href="#css-selectors"><i class="fas fa-link"></i></a>
 </h4>
-<p><strong>CSS</strong>, or <strong>C</strong>ascading <strong>S</strong>tyle <strong>S</strong>heets, is a coding language that defines the style of webpages. You may have noticed earlier that the HTML code we output earlier was drab and boring. But websites aren’t drab and boring, they’re fun and exciting! They do this by using CSS to add special rules to specific elements.</p>
-<p>Now, there are a number of ways to do this. The first one is by using an <strong>ID</strong> to tell the webpage that they want this specific element to be a specific style. We can see an example of this below, where we set the element with the ID <code>red-id</code> to be red.</p>
-<!-- AG: This is a version that's very different from that of the tutorial because the examples there aren't great for explaining CSS selectors. There's no explanation and you end up just following the tutorial without really understanding anything (at least that's what I felt like, and what my experience as a TF showed). As such, I'm using custom examples and I'm only going to use the tutorial explanation at the end. This may interfere with future work though. -->
-<div class="sourceCode" id="cb508"><pre class="sourceCode css"><code class="sourceCode css"><span id="cb508-1"><a href="data.html#cb508-1" aria-hidden="true" tabindex="-1"></a><span class="co">/*This uses the `css` language instead of the R language. You can use this</span></span>
-<span id="cb508-2"><a href="data.html#cb508-2" aria-hidden="true" tabindex="-1"></a><span class="co">  code in an Rmarkdown file by substituting the "r" for "css" in the top </span></span>
-<span id="cb508-3"><a href="data.html#cb508-3" aria-hidden="true" tabindex="-1"></a><span class="co">  brackets*/</span></span>
-<span id="cb508-4"><a href="data.html#cb508-4" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb508-5"><a href="data.html#cb508-5" aria-hidden="true" tabindex="-1"></a><span class="pp">#red-id</span> {</span>
-<span id="cb508-6"><a href="data.html#cb508-6" aria-hidden="true" tabindex="-1"></a>  <span class="kw">color</span>: <span class="cn">red</span></span>
-<span id="cb508-7"><a href="data.html#cb508-7" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p><strong>CSS</strong>, or <strong>C</strong>ascading <strong>S</strong>tyle <strong>S</strong>heets, is a coding language that defines the style of webpages. You may have noticed earlier that the HTML code we output earlier was just black and white. But websites aren’t black and white, they have colors and other cool things. They do this by using CSS to add special rules to specific elements.</p>
+<p>Now, there are a number of ways to do this. The first one is by using a <strong>class</strong> to tell the webpage that you want all of these elements to have the same style. CSS classes are a way for multiple elements to have the same style, rather than being limited to a unique ID. We can see an example of this below, where we set the elements with the class <code>good-info</code> to be green and the class <code>amazing-info</code> to have a pale red background.</p>
+<div class="sourceCode" id="cb517"><pre class="sourceCode css"><code class="sourceCode css"><span id="cb517-1"><a href="data.html#cb517-1" aria-hidden="true" tabindex="-1"></a><span class="co">/*This uses the `css` language instead of the R language. You can use this</span></span>
+<span id="cb517-2"><a href="data.html#cb517-2" aria-hidden="true" tabindex="-1"></a><span class="co">  code in an Rmarkdown file by substituting the "r" for "css" in the top </span></span>
+<span id="cb517-3"><a href="data.html#cb517-3" aria-hidden="true" tabindex="-1"></a><span class="co">  brackets*/</span></span>
+<span id="cb517-4"><a href="data.html#cb517-4" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb517-5"><a href="data.html#cb517-5" aria-hidden="true" tabindex="-1"></a><span class="fu">.good-info</span> {</span>
+<span id="cb517-6"><a href="data.html#cb517-6" aria-hidden="true" tabindex="-1"></a>  <span class="kw">color</span>: <span class="cn">green</span></span>
+<span id="cb517-7"><a href="data.html#cb517-7" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb517-8"><a href="data.html#cb517-8" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb517-9"><a href="data.html#cb517-9" aria-hidden="true" tabindex="-1"></a><span class="fu">.amazing-info</span> {</span>
+<span id="cb517-10"><a href="data.html#cb517-10" aria-hidden="true" tabindex="-1"></a>  <span class="kw">background-color</span>: <span class="cn">lightpink</span></span>
+<span id="cb517-11"><a href="data.html#cb517-11" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
 <style type="text/css">
 /*This uses the `css` language instead of the R language. You can use this
   code in an Rmarkdown file by substituting the "r" for "css" in the top 
   brackets*/
   
-#red-id {
-  color: red
+.good-info {
+  color: green
+}
+  
+.amazing-info {
+  background-color: lightpink
 }
 </style>
-<p>We can then use that ID in the HTML code.</p>
-<div class="sourceCode" id="cb509"><pre class="sourceCode html"><code class="sourceCode html"><span id="cb509-1"><a href="data.html#cb509-1" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;html&gt;</span></span>
-<span id="cb509-2"><a href="data.html#cb509-2" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;p&gt;</span> This is not red :( <span class="kw">&lt;/p&gt;</span></span>
-<span id="cb509-3"><a href="data.html#cb509-3" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;p&gt;</span> This is not red :( <span class="kw">&lt;/p&gt;</span></span>
-<span id="cb509-4"><a href="data.html#cb509-4" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;p</span><span class="ot"> id</span> <span class="ot">=</span> <span class="st">'red-id'</span><span class="kw">&gt;</span> Amazing! <span class="kw">&lt;/p&gt;</span></span>
-<span id="cb509-5"><a href="data.html#cb509-5" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;p&gt;</span> This is not red :( <span class="kw">&lt;/p&gt;</span></span>
-<span id="cb509-6"><a href="data.html#cb509-6" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;p&gt;</span> This is not red :( <span class="kw">&lt;/p&gt;</span></span>
-<span id="cb509-7"><a href="data.html#cb509-7" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;p&gt;</span> This is not red :( <span class="kw">&lt;/p&gt;</span></span>
-<span id="cb509-8"><a href="data.html#cb509-8" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;p&gt;</span> This is not red :( <span class="kw">&lt;/p&gt;</span></span>
-<span id="cb509-9"><a href="data.html#cb509-9" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;/html&gt;</span></span></code></pre></div>
+<p>We can then use that class in the HTML code.</p>
+<div class="sourceCode" id="cb518"><pre class="sourceCode html"><code class="sourceCode html"><span id="cb518-1"><a href="data.html#cb518-1" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;html&gt;</span></span>
+<span id="cb518-2"><a href="data.html#cb518-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">&lt;table&gt;</span></span>
+<span id="cb518-3"><a href="data.html#cb518-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">&lt;tr&gt;</span></span>
+<span id="cb518-4"><a href="data.html#cb518-4" aria-hidden="true" tabindex="-1"></a>      <span class="kw">&lt;td</span><span class="ot"> class</span> <span class="ot">=</span> <span class="st">'good-info'</span><span class="kw">&gt;</span></span>
+<span id="cb518-5"><a href="data.html#cb518-5" aria-hidden="true" tabindex="-1"></a>        This is some important info.</span>
+<span id="cb518-6"><a href="data.html#cb518-6" aria-hidden="true" tabindex="-1"></a>      <span class="kw">&lt;/td&gt;</span></span>
+<span id="cb518-7"><a href="data.html#cb518-7" aria-hidden="true" tabindex="-1"></a>      <span class="kw">&lt;td&gt;</span></span>
+<span id="cb518-8"><a href="data.html#cb518-8" aria-hidden="true" tabindex="-1"></a>        This is some unimportant info.</span>
+<span id="cb518-9"><a href="data.html#cb518-9" aria-hidden="true" tabindex="-1"></a>      <span class="kw">&lt;/td&gt;</span></span>
+<span id="cb518-10"><a href="data.html#cb518-10" aria-hidden="true" tabindex="-1"></a>    <span class="kw">&lt;/tr&gt;</span></span>
+<span id="cb518-11"><a href="data.html#cb518-11" aria-hidden="true" tabindex="-1"></a>    <span class="kw">&lt;tr&gt;</span></span>
+<span id="cb518-12"><a href="data.html#cb518-12" aria-hidden="true" tabindex="-1"></a>      <span class="kw">&lt;td</span><span class="ot"> class</span> <span class="ot">=</span> <span class="st">'good-info amazing-info'</span><span class="kw">&gt;</span></span>
+<span id="cb518-13"><a href="data.html#cb518-13" aria-hidden="true" tabindex="-1"></a>        This is really important info.</span>
+<span id="cb518-14"><a href="data.html#cb518-14" aria-hidden="true" tabindex="-1"></a>      <span class="kw">&lt;/td&gt;</span></span>
+<span id="cb518-15"><a href="data.html#cb518-15" aria-hidden="true" tabindex="-1"></a>      <span class="kw">&lt;td&gt;</span></span>
+<span id="cb518-16"><a href="data.html#cb518-16" aria-hidden="true" tabindex="-1"></a>        This is some other unimportant information.</span>
+<span id="cb518-17"><a href="data.html#cb518-17" aria-hidden="true" tabindex="-1"></a>      <span class="kw">&lt;/td&gt;</span></span>
+<span id="cb518-18"><a href="data.html#cb518-18" aria-hidden="true" tabindex="-1"></a>    <span class="kw">&lt;/tr&gt;</span></span>
+<span id="cb518-19"><a href="data.html#cb518-19" aria-hidden="true" tabindex="-1"></a>  <span class="kw">&lt;/table&gt;</span></span>
+<span id="cb518-20"><a href="data.html#cb518-20" aria-hidden="true" tabindex="-1"></a>  <span class="kw">&lt;p&gt;</span></span>
+<span id="cb518-21"><a href="data.html#cb518-21" aria-hidden="true" tabindex="-1"></a>    This is so useless, you shouldn't even be reading it.</span>
+<span id="cb518-22"><a href="data.html#cb518-22" aria-hidden="true" tabindex="-1"></a>  <span class="kw">&lt;/p&gt;</span></span>
+<span id="cb518-23"><a href="data.html#cb518-23" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;/html&gt;</span></span></code></pre></div>
 <div class="artificial-html-div">
 
+<div class="inline-table"><table class="table table-sm">
+<tr>
+<td class="good-info">
+This is some important info.
+</td>
+<td>
+This is some unimportant info.
+</td>
+</tr>
+<tr>
+<td class="good-info amazing-info">
+This is really important info.
+</td>
+<td>
+This is some other unimportant information.
+</td>
+</tr>
+</table></div>
 <p class="artificial-paragraph">
-This is not red :(
-</p>
-<p class="artificial-paragraph">
-This is not red :(
-</p>
-<p class="artificial-paragraph" id="red-id">
-Amazing!
-</p>
-<p class="artificial-paragraph">
-This is not red :(
-</p>
-<p class="artificial-paragraph">
-This is not red :(
-</p>
-<p class="artificial-paragraph">
-This is not red :(
+This is so useless, you shouldn’t even be reading it.
 </p>
 
 </div>
-<p>Now, there’s a really clever trick that we can use here. Let’s say that we only want that one piece of text that’s colored red, but we don’t know exactly where it is. We can actually use that CSS id to get that piece of text, using the same function <code><a href="https://rvest.tidyverse.org/reference/html_element.html">html_element()</a></code>. Just plug in the ID of the element that you want with a <code>#</code> in front to tell R that it’s an ID.</p>
-<div class="sourceCode" id="cb510"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">raw_html_3</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="st">"&lt;p&gt; This is not red :( &lt;/p&gt;"</span>,
-                     <span class="st">"&lt;p&gt; This is not red :( &lt;/p&gt;"</span>,
-                     <span class="st">"&lt;p id = 'red-id'&gt; Amazing! &lt;/p&gt;"</span>,
-                     <span class="st">"&lt;p&gt; This is not red :( &lt;/p&gt;"</span>,
-                     <span class="st">"&lt;p&gt; This is not red :( &lt;/p&gt;"</span>,
-                     <span class="st">"&lt;p&gt; This is not red :( &lt;/p&gt;"</span>,
-                     <span class="st">"&lt;p&gt; This is not red :( &lt;/p&gt;"</span><span class="op">)</span>
+<p><br></p>
+<p>Now, there’s a really clever trick that we can use here. Let’s say that we only want the table cells that are important, but we don’t know exactly where they are (we only know their class). Well in most cases, the data you want will be a different color, like what we see in the data above. Think about it like making <strong>important information</strong> have a bold font to make it stand out. CSS makes all of the <strong>information</strong> bold by assigning it a specific class, so we can just look for everything that has that class and pull it out so that we only get the <strong>important</strong> information. We can do this by using <code><a href="https://rvest.tidyverse.org/reference/html_element.html">html_elements()</a></code>. Just plug in the class of the element that you want with a <code>.</code> in front to tell R that it’s an class.</p>
+<div class="sourceCode" id="cb519"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">raw_html_3</span> <span class="op">&lt;-</span> <span class="st">"&lt;html&gt;
+                 &lt;table&gt;
+                   &lt;tr&gt;
+                     &lt;td class = 'good-info'&gt;
+                       This is some important info.
+                     &lt;/td&gt;
+                     &lt;td&gt;
+                       This is some unimportant info.
+                     &lt;/td&gt;
+                   &lt;/tr&gt;
+                   &lt;tr&gt;
+                     &lt;td class = 'good-info amazing-info'&gt;
+                       This is really important info.
+                     &lt;/td&gt;
+                     &lt;td&gt;
+                       This is some other unimportant information.
+                     &lt;/td&gt;
+                   &lt;/tr&gt;
+                 &lt;/table&gt;
+                 &lt;p&gt;
+                   This is so useless, you shouldn't even be reading it.
+                 &lt;/p&gt;
+               &lt;/html&gt;"</span>
+
 <span class="va">raw_html_3</span> <span class="op">%&gt;%</span>
   <span class="fu"><a href="https://rvest.tidyverse.org/reference/minimal_html.html">minimal_html</a></span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span>
-  <span class="fu"><a href="https://rvest.tidyverse.org/reference/html_element.html">html_element</a></span><span class="op">(</span><span class="st">"#red-id"</span><span class="op">)</span> <span class="op">%&gt;%</span>
+  <span class="fu"><a href="https://rvest.tidyverse.org/reference/html_element.html">html_elements</a></span><span class="op">(</span><span class="st">".good-info"</span><span class="op">)</span> <span class="op">%&gt;%</span>
   <span class="fu"><a href="https://rvest.tidyverse.org/reference/html_text.html">html_text2</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
-<pre><code>## [1] "Amazing!"</code></pre>
-<p>Now, we talked about using IDs for getting an element, but what about if we want multiple elements to be formatted the same way? We can just use classes!</p>
-<p>CSS classes are a way for multiple elements to have the same style, rather than being limited to a unique ID. Elements can also have multiple classes that combine all of the styles together.</p>
-<div class="sourceCode" id="cb512"><pre class="sourceCode css"><code class="sourceCode css"><span id="cb512-1"><a href="data.html#cb512-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.red-class</span> {</span>
-<span id="cb512-2"><a href="data.html#cb512-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">color</span>: <span class="cn">red</span></span>
-<span id="cb512-3"><a href="data.html#cb512-3" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb512-4"><a href="data.html#cb512-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb512-5"><a href="data.html#cb512-5" aria-hidden="true" tabindex="-1"></a><span class="fu">.green-bg</span> {</span>
-<span id="cb512-6"><a href="data.html#cb512-6" aria-hidden="true" tabindex="-1"></a>  <span class="kw">background-color</span>: <span class="cn">palegreen</span></span>
-<span id="cb512-7"><a href="data.html#cb512-7" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<pre><code>## [1] "This is some important info."   "This is really important info."</code></pre>
+<p>You can sort by multiple classes by just chaining them together.</p>
+<div class="sourceCode" id="cb521"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">raw_html_3</span> <span class="op">%&gt;%</span>
+  <span class="fu"><a href="https://rvest.tidyverse.org/reference/minimal_html.html">minimal_html</a></span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span>
+  <span class="fu"><a href="https://rvest.tidyverse.org/reference/html_element.html">html_elements</a></span><span class="op">(</span><span class="st">".good-info.amazing-info"</span><span class="op">)</span> <span class="op">%&gt;%</span>
+  <span class="fu"><a href="https://rvest.tidyverse.org/reference/html_text.html">html_text2</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
+<pre><code>## [1] "This is really important info."</code></pre>
+<p>Webpages will also use something called an <strong>ID</strong> to change the color of a specific element. Do the same thing but this time with a “#” at the beginning to signify that it’s a symbol.</p>
+<div class="sourceCode" id="cb523"><pre class="sourceCode css"><code class="sourceCode css"><span id="cb523-1"><a href="data.html#cb523-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.red-id</span> {</span>
+<span id="cb523-2"><a href="data.html#cb523-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">color</span>: <span class="cn">red</span></span>
+<span id="cb523-3"><a href="data.html#cb523-3" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
 <style type="text/css">
-.red-class {
+.red-id {
   color: red
 }
-
-.green-bg {
-  background-color: palegreen
-}
 </style>
-<div class="sourceCode" id="cb513"><pre class="sourceCode html"><code class="sourceCode html"><span id="cb513-1"><a href="data.html#cb513-1" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;html&gt;</span></span>
-<span id="cb513-2"><a href="data.html#cb513-2" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;p</span><span class="ot"> class</span> <span class="ot">=</span> <span class="st">'green-bg'</span><span class="kw">&gt;</span> This is green :) <span class="kw">&lt;/p&gt;</span></span>
-<span id="cb513-3"><a href="data.html#cb513-3" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;p</span><span class="ot"> class</span> <span class="ot">=</span> <span class="st">'red-class'</span><span class="kw">&gt;</span> This is red :) <span class="kw">&lt;/p&gt;</span></span>
-<span id="cb513-4"><a href="data.html#cb513-4" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;p</span><span class="ot"> class</span> <span class="ot">=</span> <span class="st">'red-class green-bg'</span><span class="kw">&gt;</span> Amazing! <span class="kw">&lt;/p&gt;</span></span>
-<span id="cb513-5"><a href="data.html#cb513-5" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;p</span><span class="ot"> class</span> <span class="ot">=</span> <span class="st">'red-class'</span><span class="kw">&gt;</span> This is red :) <span class="kw">&lt;/p&gt;</span></span>
-<span id="cb513-6"><a href="data.html#cb513-6" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;p&gt;</span> This is not red :( <span class="kw">&lt;/p&gt;</span></span>
-<span id="cb513-7"><a href="data.html#cb513-7" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;p</span><span class="ot"> class</span> <span class="ot">=</span> <span class="st">'green-bg'</span><span class="kw">&gt;</span> This is green :) <span class="kw">&lt;/p&gt;</span></span>
-<span id="cb513-8"><a href="data.html#cb513-8" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;p&gt;</span> This is not red :( <span class="kw">&lt;/p&gt;</span></span>
-<span id="cb513-9"><a href="data.html#cb513-9" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;/html&gt;</span></span></code></pre></div>
+<div class="sourceCode" id="cb524"><pre class="sourceCode html"><code class="sourceCode html"><span id="cb524-1"><a href="data.html#cb524-1" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;html&gt;</span></span>
+<span id="cb524-2"><a href="data.html#cb524-2" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;p</span><span class="ot"> id</span> <span class="ot">=</span> <span class="st">"red-id"</span><span class="kw">&gt;</span> This is red! <span class="kw">&lt;/p&gt;</span></span>
+<span id="cb524-3"><a href="data.html#cb524-3" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;p&gt;</span> This is not red. <span class="kw">&lt;/p&gt;</span></span>
+<span id="cb524-4"><a href="data.html#cb524-4" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;/html&gt;</span></span></code></pre></div>
 <div class="artificial-html-div">
 
-<p class="green-bg  artificial-paragraph">
-This is green :)
-</p>
-<p class="red-class  artificial-paragraph">
-This is red :)
-</p>
-<p class="red-class green-bg  artificial-paragraph">
-Amazing!
-</p>
-<p class="red-class  artificial-paragraph">
-This is red :)
+<p id="red-id" class="artificial-paragraph">
+This is red!
 </p>
 <p class="artificial-paragraph">
-This is not red :(
-</p>
-<p class="green-bg  artificial-paragraph">
-This is green :)
-</p>
-<p class="artificial-paragraph">
-This is not red :(
+This is not red.
 </p>
 
 </div>
-<p>We can do the same thing with classes that we did with IDs, using <code><a href="https://rvest.tidyverse.org/reference/html_element.html">html_elements()</a></code> to sort through them. You use a <code>.</code> instead of a <code>#</code> to show that it’s a class. In order to sort by multiple classes, just combine the statements together. If you want to get all of the elements from multiple classes, use a comma to separate them.</p>
-<div class="sourceCode" id="cb514"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">raw_html_4</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="st">"&lt;html&gt;"</span>,
-                     <span class="st">"&lt;p class = 'green-bg'&gt; This is green :) &lt;/p&gt;"</span>,
-                     <span class="st">"&lt;p class = 'red-class'&gt; This is red :) &lt;/p&gt;"</span>,
-                     <span class="st">"&lt;p class = 'red-class green-bg'&gt; Amazing! &lt;/p&gt;"</span>,
-                     <span class="st">"&lt;p class = 'red-class'&gt; This is red :) &lt;/p&gt;"</span>,
-                     <span class="st">"&lt;p&gt; This is not red :( &lt;/p&gt;"</span>,
-                     <span class="st">"&lt;p class = 'green-bg'&gt; This is green :) &lt;/p&gt;"</span>,
-                     <span class="st">"&lt;p&gt; This is not red :( &lt;/p&gt;"</span>,
-                     <span class="st">"&lt;/html&gt;"</span><span class="op">)</span>
-
-<span class="va">raw_html_4</span> <span class="op">%&gt;%</span>
-  <span class="fu"><a href="https://rvest.tidyverse.org/reference/minimal_html.html">minimal_html</a></span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span>
-  <span class="fu"><a href="https://rvest.tidyverse.org/reference/html_element.html">html_elements</a></span><span class="op">(</span><span class="st">".red-class"</span><span class="op">)</span> <span class="op">%&gt;%</span>
-  <span class="fu"><a href="https://rvest.tidyverse.org/reference/html_text.html">html_text2</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
-<pre><code>## [1] "This is red :)" "Amazing!"       "This is red :)"</code></pre>
-<div class="sourceCode" id="cb516"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">raw_html_4</span> <span class="op">%&gt;%</span>
-  <span class="fu"><a href="https://rvest.tidyverse.org/reference/minimal_html.html">minimal_html</a></span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span>
-  <span class="fu"><a href="https://rvest.tidyverse.org/reference/html_element.html">html_elements</a></span><span class="op">(</span><span class="st">".red-class.green-bg"</span><span class="op">)</span> <span class="op">%&gt;%</span>
-  <span class="fu"><a href="https://rvest.tidyverse.org/reference/html_text.html">html_text2</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
-<pre><code>## [1] "Amazing!"</code></pre>
-<div class="sourceCode" id="cb518"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">raw_html_4</span> <span class="op">%&gt;%</span>
-  <span class="fu"><a href="https://rvest.tidyverse.org/reference/minimal_html.html">minimal_html</a></span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span>
-  <span class="fu"><a href="https://rvest.tidyverse.org/reference/html_element.html">html_elements</a></span><span class="op">(</span><span class="st">".red-class, .green-bg"</span><span class="op">)</span> <span class="op">%&gt;%</span>
-  <span class="fu"><a href="https://rvest.tidyverse.org/reference/html_text.html">html_text2</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
-<pre><code>## [1] "This is green :)" "This is red :)"   "Amazing!"         "This is red :)"  
-## [5] "This is green :)"</code></pre>
+<p><br></p>
 <p>So far, we’ve covered 3 ways to find the parts of a website through it’s HTML code: the element (<code>&lt;p&gt;</code>), the ID (<code>#red-id</code>), and the class (<code>.red-class</code>). However, we can also mix-and-match these tags. Take the following HTML element:</p>
-<div class="sourceCode" id="cb520"><pre class="sourceCode html"><code class="sourceCode html"><span id="cb520-1"><a href="data.html#cb520-1" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;a</span><span class="ot"> href=</span><span class="st">"https://ppbds.github.io/primer/index.html"</span><span class="ot"> id=</span><span class="st">"abcd1234"</span><span class="ot"> class=</span><span class="st">"hello hi"</span><span class="kw">&gt;</span></span>
-<span id="cb520-2"><a href="data.html#cb520-2" aria-hidden="true" tabindex="-1"></a>link to primer</span>
-<span id="cb520-3"><a href="data.html#cb520-3" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;/a&gt;</span></span></code></pre></div>
+<div class="sourceCode" id="cb525"><pre class="sourceCode html"><code class="sourceCode html"><span id="cb525-1"><a href="data.html#cb525-1" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;html&gt;</span></span>
+<span id="cb525-2"><a href="data.html#cb525-2" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;a</span><span class="ot"> href=</span><span class="st">"https://ppbds.github.io/primer/index.html"</span><span class="ot"> id=</span><span class="st">"abcd1234"</span><span class="ot"> class=</span><span class="st">"hello hi"</span><span class="kw">&gt;</span></span>
+<span id="cb525-3"><a href="data.html#cb525-3" aria-hidden="true" tabindex="-1"></a>link to primer</span>
+<span id="cb525-4"><a href="data.html#cb525-4" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;/a&gt;</span></span>
+<span id="cb525-5"><a href="data.html#cb525-5" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;/html&gt;</span></span></code></pre></div>
+<div class="artificial-html-div">
+
+<a href="https://ppbds.github.io/primer/index.html" id="abcd1234" class="hello hi artificial-paragraph">
+link to primer
+</a>
+
+</div>
+<p><br></p>
 <p>We can try accessing it through the normal methods, like so:</p>
-<div class="sourceCode" id="cb521"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb526"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">raw_html_5</span> <span class="op">&lt;-</span> <span class="st">'&lt;a href = "https://ppbds.github.io/primer/index.htm" id="abcd1234" class="hello hi"&gt;link to primer&lt;/a&gt;'</span>
 
 <span class="va">raw_html_5</span> <span class="op">%&gt;%</span>
@@ -1456,45 +1515,54 @@ This is not red :(
   <span class="fu"><a href="https://rvest.tidyverse.org/reference/html_element.html">html_element</a></span><span class="op">(</span><span class="st">"a"</span><span class="op">)</span> <span class="op">%&gt;%</span>
   <span class="fu"><a href="https://rvest.tidyverse.org/reference/html_text.html">html_text2</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <pre><code>## [1] "link to primer"</code></pre>
-<div class="sourceCode" id="cb523"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb528"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">raw_html_5</span> <span class="op">%&gt;%</span>
   <span class="fu"><a href="https://rvest.tidyverse.org/reference/minimal_html.html">minimal_html</a></span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span>
   <span class="fu"><a href="https://rvest.tidyverse.org/reference/html_element.html">html_element</a></span><span class="op">(</span><span class="st">"#abcd1234"</span><span class="op">)</span> <span class="op">%&gt;%</span>
   <span class="fu"><a href="https://rvest.tidyverse.org/reference/html_text.html">html_text2</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <pre><code>## [1] "link to primer"</code></pre>
-<div class="sourceCode" id="cb525"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb530"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">raw_html_5</span> <span class="op">%&gt;%</span>
   <span class="fu"><a href="https://rvest.tidyverse.org/reference/minimal_html.html">minimal_html</a></span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span>
-  <span class="fu"><a href="https://rvest.tidyverse.org/reference/html_element.html">html_element</a></span><span class="op">(</span><span class="st">".hello.hi"</span><span class="op">)</span> <span class="op">%&gt;%</span>
+  <span class="fu"><a href="https://rvest.tidyverse.org/reference/html_element.html">html_element</a></span><span class="op">(</span><span class="st">".hello"</span><span class="op">)</span> <span class="op">%&gt;%</span>
   <span class="fu"><a href="https://rvest.tidyverse.org/reference/html_text.html">html_text2</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <pre><code>## [1] "link to primer"</code></pre>
 <p>Or we can mix and match them to make an even more narrow search by chaining them together.</p>
-<div class="sourceCode" id="cb527"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">raw_html_5</span> <span class="op">%&gt;%</span>
+<div class="sourceCode" id="cb532"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="co"># Keep in mind that IDs (the # part) are usually unique to that element only, so</span>
+<span class="co"># there's not really a point in filtering it even more when it's already unique.</span>
+
+<span class="va">raw_html_5</span> <span class="op">%&gt;%</span>
   <span class="fu"><a href="https://rvest.tidyverse.org/reference/minimal_html.html">minimal_html</a></span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span>
   <span class="fu"><a href="https://rvest.tidyverse.org/reference/html_element.html">html_element</a></span><span class="op">(</span><span class="st">"a#abcd1234"</span><span class="op">)</span> <span class="op">%&gt;%</span>
   <span class="fu"><a href="https://rvest.tidyverse.org/reference/html_text.html">html_text2</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <pre><code>## [1] "link to primer"</code></pre>
-<div class="sourceCode" id="cb529"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb534"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">raw_html_5</span> <span class="op">%&gt;%</span>
   <span class="fu"><a href="https://rvest.tidyverse.org/reference/minimal_html.html">minimal_html</a></span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span>
   <span class="fu"><a href="https://rvest.tidyverse.org/reference/html_element.html">html_element</a></span><span class="op">(</span><span class="st">"a.hello"</span><span class="op">)</span> <span class="op">%&gt;%</span>
   <span class="fu"><a href="https://rvest.tidyverse.org/reference/html_text.html">html_text2</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <pre><code>## [1] "link to primer"</code></pre>
-<div class="sourceCode" id="cb531"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb536"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">raw_html_5</span> <span class="op">%&gt;%</span>
   <span class="fu"><a href="https://rvest.tidyverse.org/reference/minimal_html.html">minimal_html</a></span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span>
   <span class="fu"><a href="https://rvest.tidyverse.org/reference/html_element.html">html_element</a></span><span class="op">(</span><span class="st">"a.hello#abcd1234"</span><span class="op">)</span> <span class="op">%&gt;%</span>
   <span class="fu"><a href="https://rvest.tidyverse.org/reference/html_text.html">html_text2</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <pre><code>## [1] "link to primer"</code></pre>
-<div class="sourceCode" id="cb533"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb538"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">raw_html_5</span> <span class="op">%&gt;%</span>
   <span class="fu"><a href="https://rvest.tidyverse.org/reference/minimal_html.html">minimal_html</a></span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span>
   <span class="fu"><a href="https://rvest.tidyverse.org/reference/html_element.html">html_element</a></span><span class="op">(</span><span class="st">".hello#abcd1234"</span><span class="op">)</span> <span class="op">%&gt;%</span>
   <span class="fu"><a href="https://rvest.tidyverse.org/reference/html_text.html">html_text2</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <pre><code>## [1] "link to primer"</code></pre>
+<div class="sourceCode" id="cb540"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">raw_html_5</span> <span class="op">%&gt;%</span>
+  <span class="fu"><a href="https://rvest.tidyverse.org/reference/minimal_html.html">minimal_html</a></span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span>
+  <span class="fu"><a href="https://rvest.tidyverse.org/reference/html_element.html">html_element</a></span><span class="op">(</span><span class="st">"a.hello.hi#abcd1234"</span><span class="op">)</span> <span class="op">%&gt;%</span>
+  <span class="fu"><a href="https://rvest.tidyverse.org/reference/html_text.html">html_text2</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
+<pre><code>## [1] "link to primer"</code></pre>
 <p>We can also get the link that the node refers to rather than the text. In this case, the link is stored in the <code>href</code> attribute, so we use <code><a href="https://rvest.tidyverse.org/reference/html_attr.html">html_attr()</a></code> to access it.</p>
-<div class="sourceCode" id="cb535"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb542"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">raw_html_5</span> <span class="op">%&gt;%</span>
   <span class="fu"><a href="https://rvest.tidyverse.org/reference/minimal_html.html">minimal_html</a></span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span>
   <span class="fu"><a href="https://rvest.tidyverse.org/reference/html_element.html">html_element</a></span><span class="op">(</span><span class="st">"a.hello.hi#abcd1234"</span><span class="op">)</span> <span class="op">%&gt;%</span>
@@ -1560,9 +1628,9 @@ This is not red :(
 </iframe>
 <p>From installing and using the selectorgadget as shown in the video above, we get the two CSS selectors <code>.housing</code> and <code>.result-price</code> that we can use to scrape information about the square footage and the rental price, respectively. The selector gadget returns them to us as a comma separated list (here <code>.housing , .result-price</code>), which is exactly the format we need to provide to R.</p>
 <p>However, when we’re scraping from actual websites we need to take more than just the size of the code into consideration. We also need to take the legal aspects into account,</p>
-<div id="are-you-allowed-to-scrape-that-website" class="section level4" number="3.4.2.1">
+<div id="legal-to-scrape" class="section level4" number="3.4.2.1">
 <h4>
-<span class="header-section-number">3.4.2.1</span> Are you allowed to scrape that website?<a class="anchor" aria-label="anchor" href="#are-you-allowed-to-scrape-that-website"><i class="fas fa-link"></i></a>
+<span class="header-section-number">3.4.2.1</span> Are you allowed to scrape that website?<a class="anchor" aria-label="anchor" href="#legal-to-scrape"><i class="fas fa-link"></i></a>
 </h4>
 <p><strong>BEFORE</strong> scraping data from the web, you should always check whether or not you are <strong>ALLOWED</strong> to scrape it! There are two documents that are important for this: the robots.txt file (found by adding <code>/robots.txt</code> to the end of a URL like <a href="https://www.craigslist.org/robots.txt">so</a>) and reading the website’s Terms of Service document. The website’s Terms of Service document is far and away the more important of the two because it’s actually legally binding, so you should look there first. What happens when we look at Craigslist’s Terms of Service document? Well we read this:</p>
 <p><em>“You agree not to copy/collect CL content via robots, spiders, scripts, scrapers, crawlers, or any automated or manual equivalent (e.g., by hand).”</em></p>
@@ -1570,7 +1638,6 @@ This is not red :(
 <blockquote>
 <p>Want to learn more about the legalities of web scraping and crawling? Read this interesting blog post titled <a href="https://benbernardblog.com/web-scraping-and-crawling-are-perfectly-legal-right/">“Web Scraping and Crawling Are Perfectly Legal, Right?” by Benoit Bernard</a> (this is optional, not required reading).</p>
 </blockquote>
-<!-- AG: I'm kind of conflicted here because there's a perfectly good video that shows exactly how we can use SelectorGadget on Wikipedia pages, but it doesn't line up with the tutorials. For now, I'm going to comment out the video for future reference and just follow along with the tutorial. So maybe make them line up? -->
 <p>So what to do now? Well, we can’t scrape Craigslist, so we should find something else that allows you to scrape. Let’s use a database from <a href="https://www.opensecrets.org/political-action-committees-pacs/foreign-connected-pacs/2020">Open Secrets about foreign-connected PACs within our country</a>.</p>
 <!-- <iframe width="840" height="473" src="https://www.youtube.com/embed/O9HKbdhqYzk" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe> -->
 </div>
@@ -1579,7 +1646,7 @@ This is not red :(
 <span class="header-section-number">3.4.2.2</span> Scraping from actual websites<a class="anchor" aria-label="anchor" href="#scraping-from-actual-websites"><i class="fas fa-link"></i></a>
 </h4>
 <p>Now, earlier we only scraped from pre-written HTML code, but you can do this from websites as well. We can do this just by plugging in the URL to the website and using <code><a href="http://xml2.r-lib.org/reference/read_xml.html">read_html()</a></code> instead of <code><a href="https://rvest.tidyverse.org/reference/minimal_html.html">minimal_html()</a></code>.</p>
-<div class="sourceCode" id="cb538"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb545"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">web_url</span> <span class="op">&lt;-</span> <span class="st">"https://www.opensecrets.org/political-action-committees-pacs/foreign-connected-pacs/2020"</span>
 
 <span class="va">web_url</span> <span class="op">%&gt;%</span>
@@ -1589,7 +1656,7 @@ This is not red :(
 ## [1] &lt;head&gt;\n&lt;meta http-equiv="Content-Type" content="text/html; charset=UTF-8 ...
 ## [2] &lt;body&gt;\n\n    &lt;!-- Google Adsense Script --&gt;\n    &lt;script async src="//pa ...</code></pre>
 <p>In this case, we can use Selector Gadget to find the correct CSS selector “table.DataTable-Partial.” We then just proceed as normal, but we need to use <code><a href="https://rvest.tidyverse.org/reference/html_table.html">html_table()</a></code> because we’re trying to bring in a table and use it as a tibble.</p>
-<div class="sourceCode" id="cb540"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb547"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">web_url</span> <span class="op">%&gt;%</span>
   <span class="fu"><a href="http://xml2.r-lib.org/reference/read_xml.html">read_html</a></span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span>
   <span class="fu"><a href="https://rvest.tidyverse.org/reference/html_element.html">html_element</a></span><span class="op">(</span><span class="st">"table.DataTable-Partial"</span><span class="op">)</span> <span class="op">%&gt;%</span>
@@ -1611,7 +1678,7 @@ This is not red :(
 <p>This allows us to scrape tibbles from websites. We can then use those tibbles to create new graphs.</p>
 <p>Let’s try this by using a Wikipedia page about <a href="https://en.wikipedia.org/wiki/Gun_violence_in_the_United_States_by_state">gun violence in the United States</a>.</p>
 <p>First, we need to save the URL and read the HTML code from it into R.</p>
-<div class="sourceCode" id="cb542"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb549"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">wiki_url</span> <span class="op">&lt;-</span> <span class="st">"https://en.wikipedia.org/w/index.php?title=%22,%22Gun_violence_in_the_United_States_by_state%22,%22&amp;direction=prev&amp;oldid=810166167"</span>
 
 <span class="va">wiki_url</span> <span class="op">%&gt;%</span>
@@ -1622,7 +1689,7 @@ This is not red :(
 ## [2] &lt;body class="mediawiki ltr sitedir-ltr mw-hide-empty-elt ns-0 ns-subject  ...</code></pre>
 <p>We can then use SelectorGadget to find the correct CSS selector. If you can’t easily click on the table, you can also find a selector by reading the HTML code itself. You can do this by highlighting the table, right clicking, and pressing “Inspect.” While you’ll have to dig through the HTML in order to find the correct selector, this is a perfectly viable way to find selectors.</p>
 <p>We can then save the table provided into a variable known as <code>raw_data_wiki</code>.</p>
-<div class="sourceCode" id="cb544"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb551"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">raw_data_wiki</span> <span class="op">&lt;-</span> <span class="va">wiki_url</span> <span class="op">%&gt;%</span>
                    <span class="fu"><a href="http://xml2.r-lib.org/reference/read_xml.html">read_html</a></span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span>
                    <span class="fu"><a href="https://rvest.tidyverse.org/reference/html_element.html">html_element</a></span><span class="op">(</span><span class="st">"table.wikitable.sortable"</span><span class="op">)</span> <span class="op">%&gt;%</span>
@@ -1643,8 +1710,7 @@ This is not red :(
 ## 10 Florida  20,244,914           1,041                                       5.1
 ## # … with 41 more rows</code></pre>
 <p>Past this point, you can work with the data just like you would normal data. Here’s an example graph of how states that have a denser population experience more consistent gun deaths than states with a less dense population.</p>
-<!-- AG: I'm just providing the straight-up graph in this case so that the rest of the tutorial can just be copy-pasted into here. There's a lot of graph building exercises in the tutorial that honestly doesn't really fit in this chapter of the book, which is all about data. -->
-<div class="sourceCode" id="cb546"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb553"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">clean_data</span> <span class="op">&lt;-</span> <span class="va">raw_data_wiki</span> <span class="op">%&gt;%</span>
                 <span class="fu"><a href="https://dplyr.tidyverse.org/reference/rename.html">rename</a></span><span class="op">(</span><span class="st">"population"</span> <span class="op">=</span> <span class="st">"Population (total inhabitants) (2015) [1]"</span>,
                        <span class="st">"death_rate"</span> <span class="op">=</span> <span class="st">"Murder and Nonnegligent\nManslaughter Rate(per 100,000 inhabitants) (2015)"</span>,
@@ -1668,7 +1734,7 @@ This is not red :(
        x <span class="op">=</span> <span class="st">"Quantile by Population (least to most)"</span>,
        y <span class="op">=</span> <span class="st">"Percent of Average Death Rate"</span>,
        caption <span class="op">=</span> <span class="st">"Wikipedia: Gun Violence in the United States (2017)"</span><span class="op">)</span></code></pre></div>
-<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-322-1.png" width="100%"></div>
+<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-325-1.png" width="100%"></div>
 <p>Webscraping is a powerful tool to gain data directly from the internet, but make sure that you’re following the proper protocols so that you don’t break the law and actually get the information that you need.</p>
 </div>
 </div>
@@ -1677,6 +1743,7 @@ This is not red :(
 <h2>
 <span class="header-section-number">3.5</span> Working with APIs<a class="anchor" aria-label="anchor" href="#working-with-apis"><i class="fas fa-link"></i></a>
 </h2>
+<div class="inline-figure"><img src="03-data/images/api.png" width="100%"></div>
 <!-- source used here: https://bookdown.org/rdpeng/RProgDA/reading-web-based-data.html -->
 <p>“API” stands for Application Program Interface. They allow us to access open data from government agencies, companies, and other organizations. API provides the rules for software applications to interact with one another. Open data APIs provide the rules you need to know to write R code to request and pull data from the organization’s web server into R. Usually, some of the computational burden of querying and subsetting the data is taken on by the source’s server, to create the subset of requested data to pass to your computer. In practice, this means you can often pull the subset of data you want from a very large available dataset without having to download the full dataset and load it locally into your R session.</p>
 <p>As an overview, the basic steps for accessing and using data from a web API when working in R are:</p>
@@ -1695,9 +1762,9 @@ This is not red :(
 <p>The <strong>riem</strong> package, developed by Maelle Salmon and an ROpenSci package, is an excellent and straightforward example of how you can use R to pull open data through a web API. This package allows you to pull weather data from airports around the world directly from the Iowa Environmental Mesonet. To show you how to pull data into R through an API, in this section we will walk you through code in the <strong>riem</strong> package or code based closely on code in the package.</p>
 <p>To get a certain set of weather data from the Iowa Environmental Mesonet, you can send an HTTP request specifying a base URL, <strong><a href="https://mesonet.agron.iastate.edu/cgi-bin/request/asos.py/" class="uri">https://mesonet.agron.iastate.edu/cgi-bin/request/asos.py/</a></strong>, as well as some parameters describing the subset of dataset you want (e.g., date ranges, weather variables, output format). Once you know the rules for the names and possible values of these parameters (more on that below), you can submit an HTTP GET request using the function<code><a href="https://httr.r-lib.org/reference/GET.html">GET()</a></code> from the <strong>httr</strong> package.</p>
 <p>When you are making an HTTP request using the <code><a href="https://httr.r-lib.org/reference/GET.html">GET()</a></code> or <code><a href="https://httr.r-lib.org/reference/POST.html">POST()</a></code> functions from the <strong>httr</strong> package, you can include the key-value pairs for any query parameters as a list object in the <code>query</code> argument of the function. For example, suppose you want to get wind speed in miles per hour (data = “sped”) for Denver, CO, (station = “DEN”) for the month of June 2016 (year1 = “2016,” month1 = “6,” etc.) in Denver’s local time zone (tz = “America/Denver”) and in a comma-separated file (format = “comma”). To get this weather dataset, you can run:</p>
-<div class="sourceCode" id="cb547"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb554"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://httr.r-lib.org/">httr</a></span><span class="op">)</span></code></pre></div>
-<div class="sourceCode" id="cb548"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb555"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://httr.r-lib.org/">httr</a></span><span class="op">)</span>
 <span class="va">meso_url</span> <span class="op">&lt;-</span> <span class="st">"https://mesonet.agron.iastate.edu/cgi-bin/request/asos.py/"</span>
 <span class="va">denver</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://httr.r-lib.org/reference/GET.html">GET</a></span><span class="op">(</span>url <span class="op">=</span> <span class="va">meso_url</span>,
@@ -1757,6 +1824,16 @@ If an R package doesn’t exist for an open API and you’d like to write your o
 <span class="header-section-number">3.6</span> Summary<a class="anchor" aria-label="anchor" href="#summary-3"><i class="fas fa-link"></i></a>
 </h2>
 <!-- One paragraph for each subsection. Each paragraph tries to provide a brief summary, including package names and key commands. -->
+<p><em>Pulling data into and out of R is a key factor in the data science process.</em></p>
+<p><em>Use files like CSV, Excel, RDS, JSON, and SQL files/databases to organize and share your data.</em></p>
+<p><em>Use SelectorGadget to pull data off of websites, but make sure it’s legal to.</em></p>
+<p><em>Use an API when to get data from government agencies</em></p>
+<p>This chapter is all about pulling data into R. It’s not about graphing that data, cleaning it, wrangling it, or anything like that, it’s just about pulling that data in without losing your mind.</p>
+<p>In this chapter, we looked at a few common file formats and used the <strong>readr</strong> package to read them and pull data from them so that we can use that data in our plots. This allowed us to download data from websites like <a href="https://kaggle.com">kaggle.com</a> and use it in our dataset.</p>
+<p>We also looked at databases and how we can pull in a few select pieces of data from them so that we aren’t overloading our computers with thousands or millions of data rows. We went over how we can write SQL queries so that we can acheive some special effects without causing errors or detonating our computers.</p>
+<p>And finally, we looked at how we can pull data from websites both through webscraping and through APIs, letting us pull data from the internet quickly and easily. This lets us find data for our projects and load it into our R session without having to create it ourselves or download a file from the internet.</p>
+<p>In the end, this chapter is about getting data from other people and using it inside your own projects. And make sure to use up to date data.</p>
+<div class="inline-figure"><img src="03-data/images/suckville.png" width="100%"></div>
 
 </div>
 </div>
@@ -1770,7 +1847,7 @@ If an R package doesn’t exist for an open API and you’d like to write your o
 <li><a class="nav-link" href="#introduction"><span class="header-section-number">3.1</span> Introduction</a></li>
 <li>
 <a class="nav-link" href="#writing-and-reading-files"><span class="header-section-number">3.2</span> Writing and reading files</a><ul class="nav navbar-nav">
-<li><a class="nav-link" href="#csv-files"><span class="header-section-number">3.2.1</span> CSV files</a></li>
+<li><a class="nav-link" href="#text-files"><span class="header-section-number">3.2.1</span> Text files</a></li>
 <li><a class="nav-link" href="#excel-files"><span class="header-section-number">3.2.2</span> Excel files</a></li>
 <li><a class="nav-link" href="#rds-files"><span class="header-section-number">3.2.3</span> RDS files</a></li>
 <li><a class="nav-link" href="#json"><span class="header-section-number">3.2.4</span> JSON</a></li>

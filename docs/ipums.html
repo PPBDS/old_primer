@@ -71,7 +71,7 @@
 <h2>Getting Started<a class="anchor" aria-label="anchor" href="#getting-started-2"><i class="fas fa-link"></i></a>
 </h2>
 <p>We will use the <strong>tidyverse</strong> and <strong>ipumsr</strong> packages.</p>
-<div class="sourceCode" id="cb1063"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb1065"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyverse.tidyverse.org">tidyverse</a></span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://www.ipums.org">ipumsr</a></span><span class="op">)</span></code></pre></div>
 <p>Start at the <a href="https://ipums.org/">IPUMS home page</a> and select the survey you wish to explore via the ‘visit site’ option.</p>
@@ -89,7 +89,7 @@
 <div class="inline-figure"><img src="IPUMS/images/request_history_01.jpg" width="100%"></div>
 <p>Upon receiving the confirmation email for your request, return to the above window. You will need to first download the data via <code>Download.DAT</code>, then you will need to save the <code>DDI</code> link (via ‘save as’) in the <strong>same location</strong> as your <code>.dat.gz</code> file. Then select the <code>R</code> command file. The last step here will be to unpack / un-zip the <code>.dat.gz</code> file such that the <code>.gz</code> suffix is removed. The IPUMS <a href="https://usa.ipums.org/usa/extract_instructions.shtml">download instructions</a> recommend <a href="http://www.7-zip.org/download.html">7-zip</a> for those who don’t already have file decompression software on hand.</p>
 <p>The <code>R</code> command file link will show you a text file containing roughly the following steps to unpack your data extraction:</p>
-<div class="sourceCode" id="cb1064"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb1066"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="kw"><a href="https://rdrr.io/r/base/library.html">require</a></span><span class="op">(</span><span class="st"><a href="https://www.ipums.org">"ipumsr"</a></span><span class="op">)</span><span class="op">)</span> <span class="kw"><a href="https://rdrr.io/r/base/stop.html">stop</a></span><span class="op">(</span><span class="st">"Reading IPUMS data into R requires the ipumsr package. It can be installed using the following command: install.packages('ipumsr')"</span><span class="op">)</span>
 
 <span class="co"># this read_ipums_ddi and read_ipums_micro seem to require BOTH the .xml and</span>
@@ -101,7 +101,7 @@
 <pre><code>## Use of data from IPUMS USA is subject to conditions including that users should
 ## cite the data appropriately. Use command `ipums_conditions()` for more details.</code></pre>
 <p>A successful unpacking and proper saving of the <code>DDI</code> file should result in the ability to execute the code from the R command file as shown above. At this point you can access your ‘Big Data’ as you would any standard object. Below is an example extract from the U.S. census that has been imported in the background. Another useful feature of the <code>DDI</code> is that opening the link in your browser shows you more information about the variable abbreviations and the extract more broadly.</p>
-<div class="sourceCode" id="cb1066"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb1068"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">glimpse</span><span class="op">(</span><span class="va">census_tbl</span><span class="op">)</span></code></pre></div>
 <pre><code>## Rows: 12,800,619
 ## Columns: 40
@@ -161,7 +161,7 @@
 <p>If we look closely at the glimpse of our census data above you will notice that there are few columns with the haven_labelled classification. This feature tends to be more useful for different software applications such as Stata, but while working in R we need to recast these variables into something more useful and convenient. The first few haven variables we see are <code>SAMPLE</code>, <code>OCC</code>(occupation), and <code>IND</code>(industry). Each of these have thousands of unique positions to recode, so ideally we want to be able to automate this.</p>
 <p>To create a labeled variable, see <code><a href="https://haven.tidyverse.org/reference/labelled.html">haven::labelled()</a></code>, to manually recode an existing case, we would employ <code><a href="https://dplyr.tidyverse.org/reference/recode.html">dplyr::recode()</a></code>. You will find that the labels given to the <code>OCC</code> and <code>IND</code> variables aren’t particularly useful - in this case it only tells you what set of occupation/industry terms survey takers were given to choose from rather than the actual term. IPUMS thankfully provides us with a key file to make these integers into something more useful. Using occupation as the example case, IPUMS does provide you with access to the precise occupation in string format - though it takes a bit more work. <a href="https://usa.ipums.org/usa/volii/occ_ind.shtml">HERE</a> you can find the conversion ‘crosswalk’ files that IPUMS provides via their website, and <a href="https://www.census.gov/topics/employment/industry-occupation/guidance/code-lists.html">HERE</a> (also linked in the IPUMS crosswalk page) are some more recent crosswalk files provided by the Census Bureau itself. These files are often formatted inconveniently, and can be different year-to-year, so be intentional when you are converting them to your preferred format.</p>
 <p>With that said, there are cases where you may want to keep the integer levels of a variable irrespective of the labels attached. In this case, the workaround is much easier! Simply call <code><a href="https://forcats.tidyverse.org/reference/as_factor.html">as_factor()</a></code> on your labeled variable and you’re able to further manipulate the data as you would normally.</p>
-<div class="sourceCode" id="cb1068"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb1070"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/class.html">class</a></span><span class="op">(</span><span class="va">census_tbl</span><span class="op">$</span><span class="va">OCC</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>
 
 <span class="co"># returns: "haven_labelled"</span>
@@ -174,13 +174,13 @@
 
 <span class="co"># returns: "factor"</span></code></pre></div>
 <p>There is much more to the IPUMS offerings than just U.S. population statistics. Below you can see what an extract from the M.E.P.S. (Medical Expenditure Panel Survey) or International repositories could look like. Always bear in mind that with an individual access account, you can create almost any configuration you need. While the names and certainly the available interpretations are different, the process by which we import this new tibble and transform any weird variables into our preferred format is largely the same.</p>
-<div class="sourceCode" id="cb1069"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb1071"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">ddi_meps</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/ipumsr/man/read_ipums_ddi.html">read_ipums_ddi</a></span><span class="op">(</span><span class="st">"IPUMS/extracts/meps/meps_00003.xml"</span><span class="op">)</span>
 <span class="va">meps_tbl</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/ipumsr/man/read_ipums_micro.html">read_ipums_micro</a></span><span class="op">(</span><span class="va">ddi_meps</span><span class="op">)</span></code></pre></div>
 <pre><code>## Use of data from IPUMS MEPS is subject to conditions including that users
 ## should cite the data appropriately. Use command `ipums_conditions()` for more
 ## details.</code></pre>
-<div class="sourceCode" id="cb1071"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb1073"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">glimpse</span><span class="op">(</span><span class="va">meps_tbl</span><span class="op">)</span></code></pre></div>
 <pre><code>## Rows: 752,639
 ## Columns: 50
@@ -235,13 +235,13 @@
 ## $ RXEXPTOT   &lt;int&gt; 0, 49, 12, 217, 595, 1783, 0, 91, 0, 0, 0, 176, 995, 259, 6…
 ## $ VSEXPTOT   &lt;int&gt; 0, 0, 0, 0, 0, 0, 290, 0, 0, 0, 0, 251, 0, 0, 0, 0, 305, 29…</code></pre>
 <p>International data is also available.</p>
-<div class="sourceCode" id="cb1073"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb1075"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">ddi_intntl</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/ipumsr/man/read_ipums_ddi.html">read_ipums_ddi</a></span><span class="op">(</span><span class="st">"IPUMS/extracts/international/ipumsi_00001.xml"</span><span class="op">)</span>
 <span class="va">int_tbl</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/ipumsr/man/read_ipums_micro.html">read_ipums_micro</a></span><span class="op">(</span><span class="va">ddi_intntl</span><span class="op">)</span></code></pre></div>
 <pre><code>## Use of data from IPUMS-International is subject to conditions including that
 ## users should cite the data appropriately. Use command `ipums_conditions()` for
 ## more details.</code></pre>
-<div class="sourceCode" id="cb1075"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb1077"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">glimpse</span><span class="op">(</span><span class="va">int_tbl</span><span class="op">)</span></code></pre></div>
 <pre><code>## Rows: 12,193,602
 ## Columns: 30

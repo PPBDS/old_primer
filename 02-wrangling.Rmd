@@ -2,13 +2,15 @@
 
 <!-- Read the chapter very closely. Look again at the tutorials. Write lots of comments in the chapter.  -->
 
-<!-- Read R For Data Science, especially parts directly relevant to this chapter: tibbles, characters, factors, dates/times, joining.  -->
+<!-- Read Instructions on Writing Tutorials.  -->
 
-<!-- Read Wrangling chapter in Modern Dive. -->
+<!-- https://ppbds.github.io/primer.tutorials/articles/instructions.html -->
+
+<!-- Start adding comments as PRs to the current tutorials.  -->
 
 <!-- Take a look at our Chapter 5. Does our Distributions section help set the stage? -->
 
-<!-- Add skimr::skim(). -->
+
 
 <!-- Replace flights with fec16? airlines are boring. Got rid of 538?  -->
 
@@ -16,9 +18,6 @@
 
 <!-- Start joins with left_join, since it is most important. -->
 
-<!-- AM: Suggest combining 2.2 Characters, 2.3 Factors, and 2.5 Date-Times under its own part called "Object types", and 2.1 Tibbles and 2.4 Lists under its own part called "Data frame types", or something similar to that. Or just make it so that Lists isn't right in the middle of Factors and Date-Times -->
-
-<!-- AM: The most important wrangling functions are already done in Chapter 1 and may be better-suited for their most in-depth use at chapter 2. -->
 
 *Data science is data cleaning.*
 
@@ -34,14 +33,21 @@ library(gapminder)
 library(fivethirtyeight)
 ```
 
-<!-- AM: Users may be missing a few of these packages. -->
-<!-- AM: skimr does not seem as though it is used at all in this chapter. -->
+<!-- List these as bulleted lists so that they are easier to read. -->
+<!-- AM: I don't recall if all 8 Tidyverse sub-packages are used in this chapter, but I'd say here which ones are actually used (such as stringr) -->
+<!-- AM: 538's description is too vague - additionally, the actual usage of 538 in this chapter suggests more that it provides data, not that it cleans it up. I may be wrong, though. -->
 
-The **tidyverse** package will be used in every chapter. Loading it makes the 8 packages from the "Tidyverse" available. **primer.data** is the data package created specifically for this *Primer*. **lubridate** is a package for working with dates and times.   **skimr** contains functions that are useful for providing summary statistics, especially `skim()`.  **nycflights13** includes data associated with flights out of New York City's three major airports. **gapminder** has annual data for countries going back more than 50 years. We used this data in Chapter \@ref(visualization). **fivethirtyeight** cleans up data from the [FiveThirtyEight](https://fivethirtyeight.com/) team.
-
-<!-- AM: List these as bulleted lists so that they are easier to read. -->
+* The **tidyverse** package will be used in every chapter. Loading it makes the 8 packages from the "Tidyverse" available.
+* **primer.data** is the data package created specifically for the primer.
+* **lubridate** is a package for working with dates and times.
+* **skimr** contains functions that are useful for providing summary statistics, especially `skim()`.
+* **nycflights13** includes data associated with flights out of New York City's three major airports.
+* **gapminder** has annual data for countries going back more than 50 years, which we used in Chapter \@ref(visualization).
+* **fivethirtyeight** cleans up data from the [FiveThirtyEight](https://fivethirtyeight.com/) team.
 
 ## Tibbles
+
+<!-- AM: This description of a tibble is unnecessarily wordy. -->
 
 Tibbles are a kind of data frame, useful for storing data in which we have the same number of observations for each variable. We can use the `tibble()` function to create tibbles, which are composed of columns, each of which is a variable, and rows, each of which are a "unit" or "observation." Each column (i.e., each variable) can be of a different type: character, integer, factor, double, date and so on.
 
@@ -52,9 +58,11 @@ Tibbles are a kind of data frame, useful for storing data in which we have the s
 tibble(a = 2.1, b = "Hello", c = TRUE, d = 9L)
 ```
 
+<!-- AM: Also unnecessarily wordy. -->
+
 In our code, we specify the variable names (or the names of columns) as , `a`, `b`, and `c`. Under each variable, we give a different value. Under each variable name, the data type is specified for the data within that column. A tibble can consist of one or more atomic vectors, the most important types of which are double, character, logical, and integer. The tibble above includes a variable of each type. (The "L" in "9L" tells R that we want `d` to be an integer rather than the default, which would be a double.)  When you print out a tibble, the variable type is shown below the variable name.
 
-<!-- AM: Is this entire tangent about having a number or space in the variable name necessary? Most programmers already go out of their way to avoid either. -->
+<!-- Add note about data in the wild. -->
 
 Variables should not begin with a number (like `54abc`) or include spaces (like `my var`). If you insist on using variable names like that, you must include backticks around each name when you reference it.
 
@@ -80,65 +88,97 @@ tribble(
 
 The tildes --- as in `~ var1` --- specify which row has the column names. The formatting makes it easier, relative to specifying raw vectors, to see which values are from the same observation.
 
+## Lists
 
-<!-- ### `clean_names()` -->
+```{r, echo = FALSE, fig.cap = "Subsetting a list, visually."}
+knitr::include_graphics("02-wrangling/images/lists-subsetting.png")
+```
 
-<!-- Recall the `fac` tibble we created earlier in the Chapter. -->
+Earlier, we briefly introduced lists. Lists are a type of vector that is a step up in complexity from atomic vectors, because lists can contain other lists. This makes them suitable for representing hierarchical or tree-like structures. You create a list with the function `list()`:
 
-<!-- ```{r} -->
-<!-- fac -->
-<!-- ``` -->
+```{r}
+x <- list(1, 2, 3)
+x
+```
 
-<!-- Let's look at the department with 644 male professors. -->
+A very useful tool for working with lists is `str()` because it focuses on displaying the **str**ucture, not the contents.
 
-<!-- ```{r, error = TRUE, renv.ignore = TRUE} -->
-<!-- fac %>% -->
-<!--   filter(Professors M == 644) -->
-<!-- ``` -->
+```{r}
+str(x)
+x_named <- list(a = 1, b = 2, c = 3)
+str(x_named)
+```
 
-<!-- Notice that there is a space in the column name `Professors M`. Recall that we can solve this problem by using backticks. -->
+Unlike atomic vectors, `list()` can contain a mix of objects.
 
-<!-- ```{r, error = TRUE} -->
-<!-- fac %>% -->
-<!--   filter(`Professors M` == 644) -->
-<!-- ``` -->
+```{r}
+y <- list("a", 1L, 1.5, TRUE)
+str(y)
+```
 
-<!-- There is not a department called "Total." And backticks are annoying. So we run the `clean_names()` function, from the **janitor** package.   -->
+Lists can even contain other lists!
 
-<!-- ```{r, message = FALSE} -->
-<!-- library(janitor) -->
-<!-- fac %>% -->
-<!--   clean_names() -->
-<!-- ``` -->
+```{r}
+z <- list(list(1, 2), list(3, 4))
+str(z)
+```
 
-<!-- `clean_names()` fixes all our variable names. With a wide tibble (i.e., one with lots of variables), this is much easier than either renaming by hand or using backticks all the time. -->
+### Visualizing lists
 
+To explain more complicated list manipulation functions, it's helpful to have a visual representation of lists. For example, take these three lists:
 
-<!-- It seems that one row of the table takes the sum of each of the other rows. This is likely the last row of the dataframe. Use `tail()` to print the last rows of the dataframe to check the final row. -->
+```{r}
+x1 <- list(c(1, 2), c(3, 4))
+x2 <- list(list(1, 2), list(3, 4))
+x3 <- list(1, list(2, list(3)))
+```
 
-<!-- ```{r} -->
-<!-- tail(fac) -->
-<!-- ``` -->
+I'll draw them as follows:
 
-<!-- We remove the "Total" row because it will affect any dplyr functions we try to run later. Check the `tail()` of the dataframe again to make sure that the proper row was removed. -->
+```{r, echo = FALSE}
+knitr::include_graphics("02-wrangling/images/lists-structure.png")
+```
 
-<!-- ```{r} -->
-<!-- fac %>% -->
-<!--   filter(Concentration != "Total") %>% -->
-<!--   tail() -->
-<!-- ``` -->
+There are three principles:
 
-<!-- DK: Above could be more elegant. Why are we fixing messed up data in this section? -->
+1. Lists have rounded corners. Atomic vectors have square corners.
 
-<!-- ### `skim()` -->
+1. Children are drawn inside their parent, and have a slightly darker background to make it easier to see  the hierarchy.
 
-<!-- The `skim()` function from the **skimr** package provides a useful summary of a tibble   -->
+1. The orientation of the children (i.e. rows or columns) isn't important, so I'll pick a row or column orientation to either save space or illustrate an important property in the example.
 
-<!-- ```{r} -->
-<!-- skim(fac) -->
-<!-- ``` -->
+### Subsetting
 
-<!-- Take a quick look at the section containing numeric variables. This is of particular interest because the right-most column offers insight into the distribution of the data.  -->
+There are three ways to subset a list, which I'll illustrate with a list named `a`:
+
+```{r}
+a <- list(a = 1:3, b = "a string", c = pi, d = list(-1, -5))
+```
+
+`[ ]` extracts a sub-list. The result will always be a list.
+
+```{r}
+str(a[1:2])
+str(a[4])
+```
+
+Like with vectors, you can subset with a logical, integer, or character vector.
+    
+`[[ ]]` extracts a single component from a list. It removes a level of hierarchy from the list.
+
+```{r}
+str(a[[1]])
+str(a[[4]])
+```
+
+`$` is a shorthand for extracting named elements of a list. It works similarly to `[[ ]]` except that you don't need to use quotes.
+    
+```{r}
+a$a
+a[["a"]]
+```
+
+The distinction between `[ ]` and `[[ ]]` is really important for lists, because `[[ ]]` drills down into the list while `[ ]` returns a new, smaller list. Compare the code and output above with the visual representation.
 
 
 ## Characters 
@@ -146,6 +186,8 @@ The tildes --- as in `~ var1` --- specify which row has the column names. The fo
 ```{r, echo = FALSE, fig.cap = "Real data is nasty."}
 knitr::include_graphics("02-wrangling/images/nasty.gif")
 ```
+
+<!-- AM: These first three sentences should preface the chapter. -->
 
 So far, our tibbles have been clean and wholesome, like `gapminder` and `trains`. **Real data is nasty.** You will bring data into R from the outside world and discover there are problems. We will now discuss common remedial tasks for cleaning and transforming character data, also known as strings. A *string* is one or more characters that are enclosed inside a pair of matching 'single' or "double quotes".
 
@@ -239,38 +281,12 @@ tbl_fruit %>%
   filter(str_detect(fruit, pattern = "o$"))
 ```
 
-<!-- DK: Add back quantifiers? -->
-
-<!-- DK: Show some raw string examples or cut this out. -->
-<!-- AM: I say remove the raw strings part entirely. I'm not sure what purpose it serves. -->
-
-### Raw strings
-
-There are certain characters with special meaning in regexes, including `$ * + . ? [ ] ^ { } | ( ) \`. This makes things difficult when we want to use these characters within the strings instead of as regexes. Patterns which seek to match these characters, rather than use them as metacharacters, should make use of `r"()"`, the raw string constant in R. Consider:
-
-<!-- DK: Very unclear, both string constants and back slashes. -->
-
-```{r}
-r"(Do you use "airquotes" much?)"
-```
-
-The `\` preceding each quote is what is known as escaping. It signals to the computer that the quotations are part of the string. Now, what happens if we have a backslash within the string. 
-
-```{r echo = FALSE}
-knitr::include_graphics("https://imgs.xkcd.com/comics/backslashes.png")
-```
-
-```{r}
-r"(\)"
-```
-
-As you can see, a backslash is used to escape the initial backslash.  
+<!-- We cut our raw strings from here. Bring back?   -->
 
 ## Factors
 
 Factors are *categorical* variables that only take on a specified set of values. To manipulate factors we will use the **forcats** package, a core package in the Tidyverse. 
 
-<!-- AM: What in the "Tidyverse"? Awkward wording here -->
 
 It is easy to make factors with either `factor()`, `as.factor()` or `parse_factor()`.
 
@@ -480,97 +496,6 @@ i_gap$country %>%
 ```
 
 
-## Lists
-
-```{r, echo = FALSE, fig.cap = "Subsetting a list, visually."}
-knitr::include_graphics("02-wrangling/images/lists-subsetting.png")
-```
-
-Earlier, we briefly introduced lists. Lists are a type of vector that is a step up in complexity from atomic vectors, because lists can contain other lists. This makes them suitable for representing hierarchical or tree-like structures. You create a list with the function `list()`:
-
-```{r}
-x <- list(1, 2, 3)
-x
-```
-
-A very useful tool for working with lists is `str()` because it focuses on displaying the **str**ucture, not the contents.
-
-```{r}
-str(x)
-x_named <- list(a = 1, b = 2, c = 3)
-str(x_named)
-```
-
-Unlike atomic vectors, `list()` can contain a mix of objects.
-
-```{r}
-y <- list("a", 1L, 1.5, TRUE)
-str(y)
-```
-
-Lists can even contain other lists!
-
-```{r}
-z <- list(list(1, 2), list(3, 4))
-str(z)
-```
-
-### Visualizing lists
-
-To explain more complicated list manipulation functions, it's helpful to have a visual representation of lists. For example, take these three lists:
-
-```{r}
-x1 <- list(c(1, 2), c(3, 4))
-x2 <- list(list(1, 2), list(3, 4))
-x3 <- list(1, list(2, list(3)))
-```
-
-I'll draw them as follows:
-
-```{r, echo = FALSE}
-knitr::include_graphics("02-wrangling/images/lists-structure.png")
-```
-
-There are three principles:
-
-1. Lists have rounded corners. Atomic vectors have square corners.
-
-1. Children are drawn inside their parent, and have a slightly darker background to make it easier to see  the hierarchy.
-
-1. The orientation of the children (i.e. rows or columns) isn't important, so I'll pick a row or column orientation to either save space or illustrate an important property in the example.
-
-### Subsetting
-
-There are three ways to subset a list, which I'll illustrate with a list named `a`:
-
-```{r}
-a <- list(a = 1:3, b = "a string", c = pi, d = list(-1, -5))
-```
-
-`[ ]` extracts a sub-list. The result will always be a list.
-
-```{r}
-str(a[1:2])
-str(a[4])
-```
-
-Like with vectors, you can subset with a logical, integer, or character vector.
-    
-`[[ ]]` extracts a single component from a list. It removes a level of hierarchy from the list.
-
-```{r}
-str(a[[1]])
-str(a[[4]])
-```
-
-`$` is a shorthand for extracting named elements of a list. It works similarly to `[[ ]]` except that you don't need to use quotes.
-    
-```{r}
-a$a
-a[["a"]]
-```
-
-The distinction between `[ ]` and `[[ ]]` is really important for lists, because `[[ ]]` drills down into the list while `[ ]` returns a new, smaller list. Compare the code and output above with the visual representation.
 
 ## Date-Times 
 
@@ -774,7 +699,7 @@ Note how easy it is to use `tribble()`, from the **tibble** package (part of the
 
 #### `inner_join()`
 
-<!-- AM: Instead show a diagram of left_join() and briefly cover the rest of the joins, as left_join() is by far the most commonly-used join method -->
+<!-- Instead show a diagram of left_join() and briefly cover the rest of the joins, as left_join() is by far the most commonly-used join method. -->
 
 `inner_join(x, y)`: Return all rows from `x` where there are matching values in `y`, and all columns from `x` and `y`. If there are multiple matches between `x` and `y`, all combination of the matches are returned. 
 
@@ -875,9 +800,8 @@ We keep only publisher Image now (and the variables found in `x = publishers`).
 
 ### Example
 
-Consider the relationships among the tibbles in the **nycflights** package:
+Consider the relationships among the tibbles in the **nycflights13** package:
 
-<!-- AM: nycflights13* -->
 
 ```{r, echo = FALSE, fig.cap = "Relationships among nycflights tables"}
 knitr::include_graphics("02-wrangling/images/relational-nycflights.png")
@@ -890,8 +814,6 @@ In both the `flights` and `airlines` data frames, the key variable we want to jo
 flights %>% 
   inner_join(airlines, by = "carrier")
 ```
-
-<!-- AM: Is this "code is equivalent to" part really necessary?  -->
 
 This is our first example of using a join function with a pipe. `flights` is fed as the first argument to `inner_join()`. That is what the pipe does. The above code is equivalent to:
 
@@ -1059,9 +981,8 @@ There are other ways of storing the data in this vector. Instead of recording ev
 table(rolls)
 ```
 
-<!-- AM: values*  -->
 
-In this case, with only 10 vlaues, it is actually less efficient to store the data like this. But what happens when we have 10,000 rolls.
+In this case, with only 10 values, it is actually less efficient to store the data like this. But what happens when we have 10,000 rolls.
 
 ```{r}
 more_rolls <- rep(rolls, 1000)
