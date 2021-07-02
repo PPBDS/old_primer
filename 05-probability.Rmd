@@ -1,28 +1,5 @@
 # Probability {#probability}
 
-<!-- YW: Elaborate more on "The probability distribution is the Platonic Form" I found it hard to understand, I would say either explain more or simply deleted. Agreed! Elaborate! Stuff to talk about in the meetings (not good at philosophy), what is Platonic Form? something do with ideal version? How is that connected to probability and distribution?-->
-
-<<<<<<< HEAD
-<<<<<<< HEAD
-<!-- Delete code rather comment it out. Students see code! And we can always get back old stuff via Github. Done. -->
-=======
-<!-- Need to add electoral votes for 2020. -->
->>>>>>> 714b1813cac3a1a8826031bbe23691e5d3794bb6
-
-<!-- We need a fourth example, after Presidential elections, which is continuous. Presumably normal distribution. Perhaps using heigh of adults from nhanes for empirical. Then posterior is height at basketball court. -->
-
-<<<<<<< HEAD
-<!-- Each of 2(Done) and 3(Done) and N model(Done.) section should begin with a question. All data science problems begin with a question. Then, the answer to that question, is the posterior which we create. -- Done.>
-
-
-<!-- For the N model case only, we have a posterior and we should then use that posterior to do stuff, like what are the odds of at least 10 heads. Do it the way that chapter 6 does it by explicitly showing what it means to add up area under the curve. Done. -->
-=======
-<!-- Add truth is out there image. -->
-
-<!-- When building the chapter, we don't want rayshader images to pop up! -->
->>>>>>> 714b1813cac3a1a8826031bbe23691e5d3794bb6
-
-=======
 <!-- Need to add electoral votes for 2020. -->
 
 <!-- We need a fourth example, after Presidential elections, which is continuous. Presumably normal distribution. Perhaps using heigh of adults from nhanes for empirical. Then posterior is height at basketball court. -->
@@ -31,7 +8,6 @@
 
 <!-- When building the chapter, we don't want rayshader images to pop up! -->
 
->>>>>>> 28c2ed2de15f0a1278ef1ffbc158e9533c4d47db
 <!-- Learn about movies in rayshader.  -->
 
 
@@ -235,15 +211,7 @@ ggplot(mydata, aes(x = results)) +
 
 ```
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-An *empirical distribution* is based on data. You can think of this as the probability distribution created by running a simulation. In theory, if we increase the number of coins we flip in our simulation, the empirical distribution will look more and more similar to the mathematical distribution. The probability distribution is the Platonic form. The empirical distribution will often look like the mathematical probability distribution, but it will rarely be exactly the same.
-=======
 An *empirical distribution* is based on data. You can think of this as the probability distribution created by running a simulation. In theory, if we increase the number of coins we flip in our simulation, the empirical distribution will look more and more similar to the mathematical distribution. The mathematical distribution is the Platonic form. The empirical distribution will often look like the mathematical probability distribution, but it will rarely be exactly the same.
->>>>>>> 714b1813cac3a1a8826031bbe23691e5d3794bb6
-=======
-An *empirical distribution* is based on data. You can think of this as the probability distribution created by running a simulation. In theory, if we increase the number of coins we flip in our simulation, the empirical distribution will look more and more similar to the mathematical distribution. The mathematical distribution is the Platonic form. The empirical distribution will often look like the mathematical probability distribution, but it will rarely be exactly the same.
->>>>>>> 28c2ed2de15f0a1278ef1ffbc158e9533c4d47db
 
 In this simulation, there are 56 heads and 44 tails. The outcome will vary every time we run the simulation, but the proportion of heads to tails should not be too different if this coin is fair.
 
@@ -536,121 +504,11 @@ Comments:
 
 * The math of continuous probability distributions can be tricky. Read [a book](https://drive.google.com/file/d/1VmkAAGOYCTORq1wxSQqy255qLJjTNvBI/view) on  mathematical probability for all the messy details. Little of that matters in applied work.
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-* The most important difference is that, with discrete distributions, it makes sense to estimate the probability of a specific outcome. What is the probability of rolling a 9? With continuous distributions, this makes no sense because there are an infinite number of possible outcomes. *With continuous variables, we only estimate intervals.* What is the probability that Biden's true approval percentage is between 50% and 55%? 
-
-Don't worry about the distinctions between discrete and continuous outcomes, or between the discrete and continuous probability distributions which we will use to summarize our beliefs about those outcomes. The basic intuition is the same in both cases.
-
-
-### Working with probability distributions
-
-
-<!-- DK: Does this really belong here? Maybe at the end? -->
-
-```{r, echo = FALSE, out.width="60%", fig.align='center', fig.cap = 'Bruno de Finetti, an Italian statistician who wrote a famous treatise on the theory of probability that began with the statement "PROBABILITY DOES NOT EXIST." This is because probability only exists subjectively in our minds.'}
-
-knitr::include_graphics("05-probability/images/de_finetti.jpg")
-
-```
-
-A probability distribution is not always easy to work with. It is a complex object. And, in many contexts, we don't really care about all that complexity. So, instead of providing the full probability distribution, we often just use a summary measure, a number or two or three which captures those aspects of the entire distribution which are relevant to the matter at hand. Let's explore these issues using the 538 posterior probability distribution, as of August 13, 2020, for the number of electoral votes which will be won by Joe Biden. Here is a tibble with 1,000,000 draws from that distribution:
-=======
-* The most important difference is that, with discrete distributions, it makes sense to estimate the probability of a specific outcome. What is the probability of rolling a 9? With continuous distributions, this makes no sense because there are an infinite number of possible outcomes. *With continuous variables, we only estimate intervals.* 
->>>>>>> 714b1813cac3a1a8826031bbe23691e5d3794bb6
-
-<!-- DK: This is important. Give an example. Answer the question. -->
-
-<<<<<<< HEAD
-```{r, echo = FALSE}
-# DK: This code is a mess! Please fix!
-
-z <- read_csv("https://raw.githubusercontent.com/PPBDS/primer/master/05-probability/data/election-forecasts-2020/prez_1.csv", 
-              col_types = cols(cycle = col_double(),
-                               branch = col_character(),
-                               model = col_character(),
-                               modeldate = col_character(),
-                               candidate_inc = col_character(),
-                               candidate_chal = col_character(),
-                               candidate_3rd = col_logical(),
-                               evprob_inc = col_double(),
-                               evprob_chal = col_double(),
-                               evprob_3rd = col_logical(),
-                               total_ev = col_double(),
-                               timestamp = col_character(),
-                               simulations = col_double()
-                               )) %>%
-       select(evprob_chal, total_ev)  %>% 
-       rename(prob = evprob_chal, electoral_votes = total_ev) %>% 
-       mutate(obs = round(prob * 1000000))  %>% 
-       select(-prob) %>% 
-       uncount(weights = obs) %>% 
-       pull(electoral_votes)
-
-
-
-draws <- tibble(ID = 1:1000000,
-                electoral_votes = as.integer(sample(z)))                     
-                          
-```
-
-```{r}
-draws
-```
-
-*A distribution and a sample of draws from that distribution are different things.* But, if you squint, they are sort of the same thing, at least for our purposes. For example, if you want to know the mean of the distribution, then the mean of the draws will be a fairly good estimate, especially if the number of draws is large enough.
-
-<!-- DK: Need more here. Connect to the discussion in Section 2.9 -->
-
-Recall from Chapter \@ref(wrangling) how we can draw randomly from specified probability distributions:
-
-```{r}
-rnorm(10)
-```
-
-```{r}
-runif(10)
-```
-
-The elements of these vectors are all "draws" from the specified probability distributions. In most applied situations, our tools will produce draws rather than summary objects. Fortunately, a vector of draws is very easy to work with. Start with summary statistics:
-
-
-```{r}
-key_stats <- draws %>% 
-  summarize(mn = mean(electoral_votes),
-            md = median(electoral_votes),
-            sd = sd(electoral_votes),
-            mad = mad(electoral_votes))
-
-key_stats
-```
-
-
-Calculate a 95% interval directly:
-
-```{r}
-quantile(draws$electoral_votes, probs = c(0.025, 0.975))
-```
-
-Approximate the 95% interval in two ways:
-
-```{r}
-c(key_stats$mn - 2 * key_stats$sd, 
-  key_stats$mn + 2 * key_stats$sd)
-c(key_stats$md - 2 * key_stats$mad, 
-  key_stats$md + 2 * key_stats$mad)
-```
-=======
-Don't worry about the distinctions between discrete and continuous outcomes, or between the discrete and continuous probability distributions which we will use to summarize our beliefs about those outcomes. The basic intuition is the same in both cases.
->>>>>>> 714b1813cac3a1a8826031bbe23691e5d3794bb6
-=======
 * The most important difference is that, with discrete distributions, it makes sense to estimate the probability of a specific outcome. What is the probability of rolling a 9? With continuous distributions, this makes no sense because there are an infinite number of possible outcomes. *With continuous variables, we only estimate intervals.* 
 
 <!-- DK: This is important. Give an example. Answer the question. -->
 
 Don't worry about the distinctions between discrete and continuous outcomes, or between the discrete and continuous probability distributions which we will use to summarize our beliefs about those outcomes. The basic intuition is the same in both cases.
->>>>>>> 28c2ed2de15f0a1278ef1ffbc158e9533c4d47db
-
 
 
 ### Unnormalized distributions
@@ -918,13 +776,6 @@ To answer this question, we need to use the tools of joint and conditional proba
 
 For example, assume you have Probophobia. There is then a 50% chance that you test positive and a 50% chance you test negative. Similarly, if we assume that the second model is true --- that you don't have Probophobia --- then there is 1% chance you test positive and a 99% you chance negative. Of course, for you (or any individual) we do not know for sure what is happening. We do not know if you have the disease. We do not know what your test will show. But we can use these relationships to construct the joint distribution.
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-<!-- DK: Above is a a bit awkward. Not sure that the below works. It certainly needs to be explained! Could also do this with n = 10000 and then unnest(). Would that be clearer? -->
-=======
->>>>>>> 714b1813cac3a1a8826031bbe23691e5d3794bb6
-=======
->>>>>>> 28c2ed2de15f0a1278ef1ffbc158e9533c4d47db
 
 ```{r, echo = FALSE}
 set.seed(9)
@@ -932,25 +783,7 @@ set.seed(9)
 
 
 ```{r}
-<<<<<<< HEAD
-<<<<<<< HEAD
 
-=======
->>>>>>> 714b1813cac3a1a8826031bbe23691e5d3794bb6
-=======
->>>>>>> 28c2ed2de15f0a1278ef1ffbc158e9533c4d47db
-# Pipes generally start with tibbles, so we start with a tibble which just
-# includes an ID variable. We don't really use ID. It is just handy for getting
-# organized. We call this object `jd_disease`, where the `jd` standds for
-# *j*oint *d*istribution.
-
-<<<<<<< HEAD
-<<<<<<< HEAD
-
-=======
->>>>>>> 714b1813cac3a1a8826031bbe23691e5d3794bb6
-=======
->>>>>>> 28c2ed2de15f0a1278ef1ffbc158e9533c4d47db
 jd_disease <- tibble(p = rep(seq(0.01, 0.5, 0.49), 10000)) %>%
   mutate(disease = map_int(p, ~ rbinom(n = 1, size = 1, p = .)))
 
@@ -1104,21 +937,9 @@ Question: *What is the chance of the bag contains exactly two white marbles, giv
 
 $$ \text{Prob}(\text{2 Marbles in bag | White Marble Select=3} ) $$
 Just as during the *Probophobia* models, in order to answer this question, we need to start up with the simulated data and then graphing out the joint distribution of this sinerio because we need to considered all possible outcomes of this model, and then based on the joint distribution we can slice out the the part we want (Conditional distribution) in the end making an posterior graph as well as normalizing it to see the probability.
-<<<<<<< HEAD
-<<<<<<< HEAD
 
 Step 1: Simulate the data into an tibble
 
-=======
-
-Step 1: Simulate the data into an tibble
-
->>>>>>> 714b1813cac3a1a8826031bbe23691e5d3794bb6
-=======
-
-Step 1: Simulate the data into an tibble
-
->>>>>>> 28c2ed2de15f0a1278ef1ffbc158e9533c4d47db
 Let's say you take a marble out of the bag, record whether it's black or white, then return it to the bag. You repeat this three times, observing the number of white marbles you see out of three trials. You could get three whites, two whites, one white, or zero whites as a result of this trial. We have three models (three different proportions of white marbles in the bag) and four possible experimental results. Let's create 3,000 draws from this joint distribution:
 
 ```{r}
@@ -1565,17 +1386,11 @@ p_draws <- tibble(p = rep(seq(0, 1, 0.1), 1000)) %>%
 odds_2nd <- tibble(p = sample(p_draws$p, size = sims, replace = TRUE)) %>%
   mutate(heads = map_int(p, ~ rbinom(n = 1, size = 20, p = .))) %>% 
   mutate(above_ten = ifelse(heads >= 10, TRUE, FALSE)) 
-<<<<<<< HEAD
-<<<<<<< HEAD
 
 odds_2nd
-=======
 
-odds_2nd
 
 ```
-
->>>>>>> 714b1813cac3a1a8826031bbe23691e5d3794bb6
 
 ```{r}
 odds_2nd %>%
@@ -1597,38 +1412,6 @@ odds_2nd %>%
 summarize(success = sum(above_ten)/sims)
 ```
 about 32.8%
-
-
-
-=======
-
-odds_2nd
-
-```
-
-
->>>>>>> 28c2ed2de15f0a1278ef1ffbc158e9533c4d47db
-```{r}
-odds_2nd %>%
-  ggplot(aes(x = heads,fill = above_ten))+
-           geom_histogram(aes(y = after_stat(count/sum(count))),bins = 50)+
-  scale_fill_manual(values = c('grey50', 'red'))+
-  labs(title = "Posterior Probability Distribution (Right Way 1st)",
-         subtitle = "Number of heads in 20 tosses",
-         x = "Number of heads",
-         y = "Probability",
-         fill = "Above ten heads") + 
-    scale_x_continuous(labels = scales::number_format(accuracy = 1)) +
-    scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
-    theme_classic()
-```
-Using this Posterior distribution derived from the (right way 1st) simulated data, the probability results in 10 or more head is
-```{r}
-odds_2nd %>%
-summarize(success = sum(above_ten)/sims)
-```
-about 32.8%
-
 
 Third way is to sample from the actual distribution, which is a small dataset with just a few rows, but it includes both $\rho_h$ and the probability of each $\rho_h$. This also gives the correct answer.
 
