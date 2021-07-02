@@ -4,7 +4,7 @@
 
 <!-- We need a fourth example, after Presidential elections, which is continuous. Presumably normal distribution. Perhaps using heigh of adults from nhanes for empirical. Then posterior is height at basketball court. -->
 
-<!-- Add truth is out there image. -->
+<!-- Add truth is out there image. Done.-->
 
 <!-- When building the chapter, we don't want rayshader images to pop up! -->
 
@@ -49,6 +49,7 @@ library(rayshader)
 library(rgl)
 library(tidyverse)
 library(magick)
+library(primer.data)
 ```
 
 ## List-columns and map functions
@@ -494,11 +495,45 @@ All the characteristics for discrete probability distributions which we reviewed
 
 A good mathematical distribution for the height of adult men is the normal distribution.
 
+Mathematical
+
+```{r}
+height_data <-nhanes%>%
+  filter(age >= 18) %>%
+  select(height,age)%>%
+  drop_na() %>%
+  arrange(age) %>%
+  group_by(age) %>%
+  summarize(height_average = mean(height))
+
+  # mutate(height_average= mean(height)) %>%
+  # summarise(age,height_average) %>%
+  # summarise_all(funs(unique(.[.!='']))) 
+
+ height_data
+```
+
+
+```{r}
+height_data %>%
+  ggplot(aes(age,height_average))+
+  geom_col()
+  
+```
+
+
+
 <!-- DK: Insert here mathematical, empirical and posterior examples. -->
 
 Comments:
 
 <!-- Need X Files poster -->
+
+
+```{r, echo = FALSE, fig.cap = "The truth is out there"}
+knitr::include_graphics("05-probability/images/truth_out_there.jpg")
+```
+ 
 
 * *The truth is out there.* If we asked all 300+ million Americans whether or not they approve of President Biden, we could know $p$ exactly. Alas, we can't do that. We use a posterior probability distribution to summarize are beliefs about the true value of $p$, a truth we can never confirm.
 
