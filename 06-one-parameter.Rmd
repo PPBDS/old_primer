@@ -1,10 +1,10 @@
 # One Parameter {#one-parameter}
 
-<!-- Read chapters 4, 5, 6 and 7. -->
+<!-- Read chapters 4, 5, 6 and 7. Mostly done -->
 
 <!-- Add a lot of comments to this .Rmd with your initials. -->
 
-<!-- Do the one tutorial.  -->
+<!-- Do the one tutorial.  Done.-->
 
 <!-- Read all my old comments. Indicate if they are not clear. -->
 
@@ -21,13 +21,13 @@
 <!-- In the Functions are your friend! section -->
 
 <!-- The variation in p-hat (when we do 1,000 reps) decreases as shovel size increases. For each shovel size, you plot 1,000 points. Small shovels have lots of overlap, so, use alpha. Even big shovels only have scores of possible p-hats. Then, say, can we measure the decrease in varition more precisely then just looking at this cloud of points? Yes! Plot the standard deviation of the cloud for each shovel size. -->
-
+<!-- RS: Graph 1,000 points of phat? Woudn't this be misleading, because of like what is said above, that small shovels only have a few possible models?-->
 <!-- Maybe make it a gganimation? -->
 
 <!-- Explain in a comment the reason for  fun = function(.x) 1/(2 * sqrt(.x)) in the plot. I don't know why we need the 2. We would probably use geom_function(). Maybe using geom_function with the function for a standard error will just magically work! -->
 
 <!-- A paragraph about the distinction between distributions and probability distributions. We often can work with the former till the very end. When answering most questions, I can just work with the "raw" distribution. I don't need the posterior probability distribution. -->
-
+<!-- RS: Still confused about this myself. Wouldn't we always want to end with a standardized posterior probability distribution? Standardized just seems better. -->
 <!-- Could not get figure references to work. They have been removed. But we ought to figure that out and add them back!  Should create a simple example (three line Rmd file) and then ask on RStudio Community.  -->
 
 <!-- Make a 15 second video, put it on YouTube. "We don't estimate parameters because we care about parameters. Parameters are imaginary! Like unicorns! [Put finger on forehead and imitate unicorn.] We estimate parameters to build Data Generating Mechanisms. And with a DGM, you can move the world!" -->
@@ -53,7 +53,7 @@ One way to answer this question would be to perform an exhaustive count: remove 
 *What is the probability, using that same urn, that we will draw more than 8 red beads if we use a shovel of size 20?*
 
 To begin this chapter, we will look at a real sampling activity: the urn.  Then, we will simulate the urn example using R code. This will help us to understand the *standard error* and the ways in which uncertainty factors into our predictions. We then create a joint distribution of models and data for the urn example. We derive a posterior distribution from that joint distribution, and then use that posterior to answer our questions. 
-
+<!-- RS: Add foreshadowing to Ch. 7, saying something like: "To try and estimate the probability distribution of a single parameter, p." Ch.7 does a good job of explaining 1 para v. 2 params, but readers should know what they are getting into. -->
 Use the **tidyverse** package. 
 
 ```{r, message=FALSE}
@@ -196,7 +196,7 @@ In Section \@ref(virtual-sampling), we'll mimic the hands-on sampling activity w
 Afterwards, we'll present you with definitions, terminology, and notation related to sampling in Section \@ref(standard-errors). As in many disciplines, such necessary background knowledge may seem confusing at first. However, if you truly understand the underlying concepts and practice, you'll be able to master them.
 
 To tie the contents of this chapter to the real world, we'll present an example of one of the most common uses of sampling: polls. In Section \@ref(sampling-case-study) we'll look at a particular case study: a 2013 poll on then U.S. President Barack Obama's popularity among young Americans, conducted by the Kennedy School's Institute of Politics at Harvard University. 
-
+<!-- RS: I would condense the IRL sampling part, because while I do think it is a good change of pace from the virtual sampling in Chapter 5, I don't want to be repetitive and do the same thing again with virtual sampling. Also, we could add a paragraph describing how the IRL sample creates an empirical distribution, while the virtual sampling creates a joint distribution model to later base our posterior distribution off of. Chapter 5 has limited real world applications, so I think it is definetly worth it to sprinkle some throughout this chapter where we can.  -->
 
 ## Virtual sampling {#virtual-sampling}
 
@@ -228,6 +228,8 @@ urn <- tibble(color = c(rep("red", 400),
 urn  
 ```
 
+<!-- RS: Past 2 code chunks use mutate to add IDs, rest of the chapter uses map functions. Maybe add a quick map review and refer readers back to chapter 5 to learn more, but I'm more a fan of using map than ID.   -->
+<!-- RS: Add link to Ch.5 discussion of mapping, I think it does an alright to decent job. Consult with whoever is doing chapter 5 and see if they would want Ch.6 to take on mapping education responsibilities, or if Ch.5 should go into a tiny bit more depth.  -->
 Observe that `urn` has `r scales::comma(nrow(urn))` rows, meaning that the urn contains 
 `r scales::comma(nrow(urn))` beads. The first variable `ID` is used as an *identification variable*. None of the beads in the actual urn are marked with numbers. The second variable `color` indicates whether a particular virtual bead is red or white. 
 
@@ -340,7 +342,7 @@ ggplot(aes(x = prop_red)) +
   
   scale_y_continuous(breaks = seq(2, 10, 2))
 ```
-
+<!-- RS: Add that we add boundary because we know that the mathematical probability of drawing a red bead is .4, and that in reality we would rarely know this. Also possibly add additional review/info about sample vs. population either here or at the beginning where we introduce sampling.  -->
 We set the `boundary` and `binwidth` arguments. Setting `boundary = 0.4` ensures a binning scheme with one bin's boundary at 0.4. Since `binwidth = 0.05`, this will create bins with boundaries at 0.30, 0.35, 0.45, and so on. Recall that $\hat{p}$ is equal to the proportion of beads which are red in our samples. 
 
 Observe that we occasionally obtained proportions red that are less than 30%. On the other hand, we occasionally obtained proportions that are greater than 45%. However, the most frequently occurring proportions were between 35% and 45%. Why do we have these differences in proportions red? Because of *sampling variation*. 
@@ -487,6 +489,7 @@ virtual_samples_100 %>%
        title = "100") 
 ```
 
+<!-- RS: This chapter is much more cohesive and easier to read than the last chapter, but at the same time this code chunk keeps appearing over and over again! Might be a good idea to rework the format or consolidate all of these code chunks. Maybe bring function section up to the top.  -->
 For easy comparison, we present the three resulting histograms in a single row with matching x and y axes:
 
 ```{r, fig.cap = "Comparing the distributions of proportion red for different sample sizes (25, 50, 100). The important takeaway is that our center becomes more concentrated as our sample size increases, indicating a smaller standard deviation between our guesses."}
@@ -518,9 +521,10 @@ comparing_sampling_distributions <- ggplot(virtual_prop, aes(x = prop_red)) +
 
 comparing_sampling_distributions
 ```
+<!-- RS: The x axis seems to not be uniform, as there a proportion out of 25 is different than a proportion out of 50 than a proportion out of 100. Maybe use geom_density the graphs? Or change bin widths? -->
 
 Observe that as the sample size increases, the variation of the 1,000 replicates of the proportion of red decreases. In other words, as the sample size increases, there are fewer differences due to sampling variation and the distribution centers more tightly around the same value. All three histograms center around roughly 40%.
-
+<!-- RS: Maybe add a gganim to see how density changes as sample size increases? Pretty sure it will break when n = 1000 but that could also be an opportunity to educate about samples and population (because n = 1000 is no longer a sample and prob_red should just be a number.) -->
 We can be numerically explicit about the amount of variation in our three sets of 1,000 values of `prop_red` by using the *standard deviation*. A standard deviation is a summary statistic that measures the amount of variation within a numerical variable. For all three sample sizes, let's compute the standard deviation of the 1,000 proportions red by running the following data wrangling code that uses the `sd()` summary function.
 
 ```{r}
@@ -576,7 +580,7 @@ comparing_n_table  %>%
 As the sample size increases, the variation decreases. In other words, there is less variation in the 1,000 values of the proportion red. As the sample size increases, our guesses at the true proportion of the urn's beads that are red get more precise. The larger the shovel, the more precise the result. 
 
 ### Functions are your friend!
-
+<!-- RS: Maybe move this section up? And also add a brief explanation of functions (1 paragraphish), as this is the first time functions come up (to my knowledge.) I like the idea of reinforcing the setup a couple of times, but I think it gets kind of old.  -->
 Note that in the last section, we ran more or less the same code three times, but with different sizes for our shovel: 25, 50, and 100.  Whenever you find yourself writing the same code three or more times, you should write a *function* that does the same thing.  Let's look at the code that used a shovel of size 25 and calculated the proportion of beads that were red one more time:
 
 ```{r}
@@ -677,14 +681,15 @@ shovels_100 %>%
 ```
 
 The red line here represents an important statistical concept: standard error (SE). The mathematical definition of SE for our purposes is the standard deviation divided by the square root of the sample size. As the shovel size increases, and thus our sample size increases, we find that the standard error decreases.  If this is confusing right now, fear not! We will delve into this explanation in our next section. 
+<!-- RS: Definitely add better description of standard error. As someone who knows nothing about standard error, this description is not very helpful. -->
 
 <!-- The variation in p-hat (when we do 1,000 reps) decreases as shovel size increases. For each shovel size, you plot 1,000 points. Small shovels have lots of overlap, so, use alpha. Even big shovels only have scores of possible p-hats. Then, say, can we measure the decrease in varition more precisely then just looking at this cloud of points? Yes! Plot the standard deviation of the cloud for each shovel size. -->
 
-
+<!-- RS: I agree with whoever wrote the above comment in theory, but not completely sure about what the execution loos like. I think it is important to tie the distribution into what the standard deviation tells us about our data and the shape of our graph.  -->
 ```{r, echo = FALSE, fig.cap = "To any poets and philosophers confused about this: don't worry! It won't be on a problem set."}
 knitr::include_graphics("06-one-parameter/images/meme_math.png")
 ```
-
+<!-- RS: Remove cringey memes.  -->
 This is the power of running many analyses at once using map functions and list columns: before, we could tell that the standard deviation was decreasing as the shovel size increased, but when only looking at shovel sizes of 25, 50, and 100, it wasn't clear *how quickly* it was decreasing.
 
 ## Standard error {#standard-errors}
@@ -834,11 +839,11 @@ To really drive home our point: standard error is just a fancy term for your unc
 ```{r, echo = FALSE, fig.cap= "If you are wondering how much you need to know, follow this helpful guide of the information we have learned this chapter!", fig.align= 'center'}
 knitr::include_graphics("06-one-parameter/images/final_preceptor.png")
 ```
-
+<!-- RS: Pyramid is not super helpful and I support removing it and all references to it.  -->
 This hierarchy represents the knowledge we need to understand standard error (SE). At the bottom, we have math. It's the foundation for our understanding, but it doesn't need to be what we take away from this lesson. As we go up, we simplify the topic. The top of the pyramid are the basic levels of understanding that will help you to remember in the future. 
 
 If I know your estimate plus or minus *two* standard errors, I know your 95% confidence interval. This is valuable information. Standard error is really just a measure for how uncertain we are about something we do not know, the thing we are estimating. When we recall SE, we should remember that, all in all, it's a complicated concept that can be distilled into: the way old people talk about confidence intervals. 
-
+<!-- RS: Explain what confidence interval is.  -->
 Recall that $\hat{p}$ is the estimated value of p which comes from taking a sample. There can be billions and billions of $\hat{p}$'s. We look at a large group of $\hat{p}$'s, create a distribution of results to represent the possible values of p based on our findings, and then we compute a standard error to account for our own uncertainty about our predictions. Our 95% confidence interval for our prediction == our estimate plus or minus **two** standard errors. 
 
 In regards to the fifth layer of the hierarchy, we may wonder: 
@@ -863,7 +868,7 @@ We have looked at a number of different models and their accuracy and precision.
 Let's start with our first question: **If we get 17 red beads in a random sample of size 50 taken from an urn with 1000 (white or red) beads, how many red beads are in the urn?**
 
 In Chapter \@ref(probability) we outlined the key intuition behind all inference: there is a joint distribution of data-which-we-might-see-from-our-experiment and models-which-we-are-considering. We take this joint distribution, combine it with the actual results of the experiment, and calculate a posterior distribution over the set of possible models. In other words, we start with 
-
+<!-- RS: Not a huge fan of this definition of joint distribution. Chapter 5 has a much better one.  -->
 $$\text{Prob}(\text{models}, \text{data})$$ 
 
 We then add the specific results of the experiment, and calculate the conditional distribution of the models, given the data that we have seen:
@@ -878,7 +883,12 @@ It is useful to define a parameter, $p$, which is the proportion of red beads in
 
 <!-- Note to future authors: I am somewhat concerned that this is not exactly correct since we really ought to sample what happens when you pick 50 beads out of an urn. This can be approximated with the binomial, which is what we have done here. And, with such big numbers, it is a good approximation. But it is not exactly correct. -->
 
-
+<!-- RS: Really trying to get my ideas together before I edit anything, but hopefully this code resolves the above issue? -->
+<!-- tibble(ID = 0:urn_size) %>% -->
+<!--   mutate(beads = map(ID, ~c(rep("red", .), rep("white", urn_size - .)))) %>% -->
+<!--   mutate(pop_num_red = map_dbl(beads, ~sum(. == "red", 1, 0)))  %>% -->
+<!--   mutate(sample_num_red = map(beads, ~replicate(n = reps, sum(sample(., shovel_size) == "red", 1, 0)))) %>% -->
+<!--   unnest(sample_num_red) -->
 ```{r, cache = TRUE}
 set.seed(10)
 
@@ -982,7 +992,7 @@ joint_dist %>%
 
 Now, we have explored the most likely possibilities according to all possible models of this scenario. Let's create a posterior distribution by taking a *slice* of our joint distribution based on the number of red beads in the shovel. 
 
-
+<!-- RS: Make a better connection between the joint distribution and posterior distribution section, and make it super clear how one leads to the other.  -->
 ### Posterior distribution
 
 When we look at our question -- we are asking for the posterior probability of a certain case. This case is where we find that, using the 50 slot shovel, we get a result of 17 red beads. What does that make our posterior probability? We want:
@@ -1013,7 +1023,7 @@ joint_dist %>%
     scale_y_continuous(labels = scales::percent_format()) +
     theme_classic()
 ```
-
+<!-- RS: This section seems messed up, maybe something was removed? No 3d models in sight. -->
 To visualize this in a 3D plot, see the slice in the figure below. There are a few things to note. First, the x-axis only extends to 600 (rather than the total 1000) due to the fact that, when the shovel only draws 17/50 = .34 = 34% red beads, it is almost impossible for the total number red beads in the total urn to exceed 600. The most likely number of red beads in the total urn, when the shovel draws 17/50 red beads, is somewhere in the 290-350 range. This is signified by the peak between these points. The probability is lower below 280 and above 350 because it is less likely that this is the number of red beads in the urn, conditional on the fact that the shovel drew 17/50 red beads. This is our posterior distribution. 
 
 For any value of red beads found in the shovel (from 0 to 50), there is a posterior distribution of possible values of red beads in the total urn. This distribution is meant to illustrate that, though our sample gives an estimate of the total proportion of red beads in the entire urn, there is much variation in what the actual proportion might be. To summarize: the distribution of the hat things (the things we are predicting) is, more or less, your posterior.
@@ -1031,7 +1041,7 @@ The key issue with the urn paradigm is that, unlike real world data science, we 
 <!-- DK: Could use rayshader to make the posterior, or even to do a movie, as we hope to do in Chapter 5 someday. Also, should note that we are approaching the continuous case as the number of models and number of possible data results become ever larger.  -->
 
 ### Hypothesis tests
-
+<!-- RS: I would reword this section a little bit, and make it explicitly clear where the BAD hypothesis testing begins and the GOOD sumarization begins. Maybe create 6.4.3.1 and 6.4.3.2-->
 Recall our view on hypothesis tests: **Amateurs test. Professionals summarize.** Traditionally, most scientific papers are not so much interested in estimating p. They are interested in testing specific hypotheses. What do we mean by that?
 
 Let's look at a possible hypothesis in our urn paradigm: there are equal number of red and white beads in the urn. The null hypothesis is denoted by $H_0$, while the alternative hypothesis is denoted by $H_a$. Therefore, our hypothesis is designed as such:
@@ -1080,7 +1090,8 @@ post_dist <- joint_dist %>%
   
 post_dist 
 ```
-
+<!-- RS: Need to make it more clear that the 17 goes from the data in our joint distribution from the previous question.  -->
+<!-- RS: Also, shouldn't the number of trials (n in rbinom) be greater than 1? Don't we want to do multiple trials for each potential p? I think using this rbinom is falsely saying that for a given p, the number of red beads drawn WILL be ____ . It could be that, but there would also be many other possiblities of red beads drawn. I feel we should make another joint distribution and take the posterior distribution from that, but this is all kind of confusing and I could be totaly wrong. -->
 Note that we have two columns to focus on after removing the columns `red_in_urn` and `red_in_shovel`. The column `p` represents our probability for the number of red beads we draw with our shovel size of 20 (conditional upon a previous draw of 17 red beads). The column `new_reds` represents the number of red beads found in our draw of twenty beads with the corresponding value for `p`. Scroll through our object to look at the probabilities for various results of `new_reds`. 
 
 With this unnormalized distribution, it is easy to create the normalized posterior probability distribution.
@@ -1140,7 +1151,7 @@ post_dist %>%
 To examine the validity of our final conclusion, let's look to our Cardinal Virtues. 
 
 ### Cardinal virtues
-
+<!-- RS: I like the cardinal virtues motif, and I think we could implement something cool wherever they appear throughout the primer. I don't have any ideas right now, but maybe someone can think of something cool.  -->
 Recall the virtue of Wisdom. We want to know if there is a decent connection between the problem we face and the data we have. Our problem is answering the following question: *Conditional on our answer to Question 1, what is the probability, using the same urn, that we will draw more than 8 red beads if we use a shovel of size 20?* The way in which we have approached answering this question is to, from our posterior distribution from our urn, create a joint distribution to estimate the probability of drawing more than 8 red beads with a shovel of size 20. Is this question about *this* particular urn, or all urns? Clearly, as it is conditional upon a result from our specific urn, our conclusions can only be applied to *this particular urn*; our conclusions are not generalizable to all urns.
 
 Justice encompasses two main topics that apply to our urn: predictive versus causal model and mathematical formulas. Are we are modeling (just) for prediction or are we (also) modeling for causation? Predictive models care nothing about causation. With prediction, all we care about is forecasting Y given X on some as-yet-unseen data. There is no notion of “manipulation” in such models. As we can see, then, our model is **predictive**; we are not manipulating anything. The math of our model can be: 
@@ -1148,7 +1159,7 @@ $$ T_i  \sim B(p_H, n = 20) $$
 The total number $T$ of red beads in experiment $i$ with 20 sampled beads, $T_i$, is distributed as a binomial with $n = 20$ and an unknown probability $\rho_h$ of the proportion red exceeding 8 out of 20 beads.
 
 Courage focuses on code -- the structure of our model. Code allows us to “fit” a model by estimating the values of the unknown parameters. Though we can never know the true values of these parameters, we can express our uncertain knowledge in the form of posterior probability distributions. With those distributions, we can compare the actual values of the outcome variable with the “fitted” or “predicted” results of the model. We can examine the “residuals,” the difference between the fitted and actual values. To answer our question, we have taken a slice of our posterior distribution to create a joint distribution. To find our final solution, we looked at the area under the curve that includes all values of 8 red beads or above. 
-
+<!-- RS: Kind of confused about the vocab. Didn't we go from joint to posterior probability to another posterior probability? Also I mentioned this earlier but shouldn't we create another joint distribution with p and phat? -->
 When we think of Temperance, we should think of uncertainty. Asserting a posterior distribution is, conceptually, the same as opening a casino and allowing people to place wagers on outcomes, with the odds consistent with your posterior. If your posterior is wrong, they will take all your money. That would be bad! So, what do we do? Rule of thumb: the future is always more variable than our models would suggest. The entire point of the virtue of Temperance to be aware of that fact and take account of it. Courage --- that bold bastard --- comes along and says, "Here is the model! Let's calculate the posterior and open the casino!" Temperance says, "Hold on! Yes, I can calculate the posterior, but we need to be cautious." Temperance is concerned with the tails of our predictions, not the center. What is the best strategy for opening our casino, then? Limit the bets on the first few nights to make sure our posterior is OK. *Temperance is concerned with the sensible management of the casino.*
 
 ## Discussion
@@ -1231,7 +1242,7 @@ On December 4, 2013, National Public Radio in the US reported on a poll of Presi
 > According to a new Harvard University Institute of Politics poll, just 41 percent of millennials — adults ages 18-29 — approve of Obama's job performance, his lowest-ever standing among the group and an 11-point drop from April.
 
 Let's tie elements of the real life poll in this new article with our "tactile" and "virtual" urn activity from Sections \@ref(sampling-activity) and \@ref(virtual-sampling) using the terminology, notations, and definitions we learned in Section \@ref(standard-errors). You'll see that our sampling activity with the urn is an idealized version of what pollsters are trying to do in real life. 
-
+<!-- RS: I love the way this section uses the vocabulary, and I think this should be replicated everywhere else in the chapter. Very helpful to see the meaning of each word in practice. Maybe add mention to the first cardinal value when setting up the problem to really teach the concept? -->
 First, who is the **(Study) Population** of $N$ individuals or observations of interest? 
 
 * Urn: $N$ = 1000 identically sized red and white beads
@@ -1321,7 +1332,9 @@ The assignment mechanism sorts units into control and experiment groups, while t
 To think about the sampling mechanism further: why are certain beads sampled, while others are not? Is this completely random? 
 
 In order to investigate this concept, let's revisit our Preceptor Tables.
+<!-- RS: I definetly support further exploring the Kennedy study further in this chapter, or in the tutorial because I feel like it would be much more informative than redoing the urn problem.  -->
 
+<!-- RS: Consider a brief section about observational study design? I know this isn't a stats class, but might be useful to at least discuss bad sampling methods (volunteer surveys, convienence, and other types of biases. ) -->
 #### Preceptor Tables
 
 Recall that a Preceptor Table is a table with rows and columns for all the data we would (reasonably) like to have. There are two different types of Preceptor Tables that are applicable to our urn example: actual and ideal.
@@ -1423,7 +1436,7 @@ The first scenario provides a more accurate estimate, since the students outside
 Key lesson:
 
 There is a truth! There is a true value for $p$ which we do not know! We want to create a posterior probability distribution which summarizes our knowledge. We care about the posterior probability distribution of p. The center of that distribution is around the mean or median of the proportion in your sample. The sd (or mad) of that posterior is the standard deviation divided by the square root of our sample size! Note that this is the same thing as the standard deviation of the repeated samples.
-
+<!-- RS: I think there is a typo? I think standard error is intended, not standard deviation.  -->
 Key lesson: 
 
 We have a journey from reality, to our predictions, to the standard error of our predictions, to the posterior probability distribution for p. This is our sequence:
@@ -1476,4 +1489,5 @@ As we continue our journey, recall the case of Primrose Everdeen and what she re
 ```{r, echo = FALSE}
 knitr::include_graphics("06-one-parameter/images/posterior_effie.png")
 ```
-
+<!-- RS: The conclusion of this chapter (6.4 and 6.5) is really exceptional. Honestly the start of the chapter can be kind of confusing, and it would be less so if it was structured like the conclusion.  -->
+<!-- RS: Overall, the start and the end of the chapter is good, but the middle has some confusing vocab mixups and it is not very helpful to teach someone how to actually approch the problem. I also support utilizing real world studies more either in the primer or the tutotial (like the Kennedy study. ) -->
