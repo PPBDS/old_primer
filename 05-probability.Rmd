@@ -505,9 +505,18 @@ Mathematical:
 
 
 ```{r}
-tibble(height = rnorm(10000, mean = 170, sd = 9)) %>% 
+tibble(height = rnorm(10000, mean = 175, sd = 9)) %>% 
   ggplot(aes(x = height)) +
-    geom_density()
+    geom_histogram(aes(y = after_stat(count/sum(count))), 
+                 binwidth = 1, 
+                 color = "white")+
+  labs(title = "Mathematical Probability Distribution",
+       subtitle = "Expectations for an random male's height",
+       x = "Height",
+       y = "Probability") +
+  scale_y_continuous(labels =
+                      scales::percent_format(accuracy = 1)) +
+  theme_classic()
   
 ```
 
@@ -520,16 +529,37 @@ nhanes %>%
   select(height)%>%
   drop_na() %>%
   ggplot(aes(x = height)) +
-    geom_histogram(bins = 50)
+    geom_histogram(aes(y = after_stat(count/sum(count))), 
+                 binwidth = 1, 
+                 color = "white")+
+  labs(title = "Empiracal Probability Distribution",
+       subtitle = "Height for male by NHANES",
+       x = "Height",
+       y = "Probability",caption = "Source:NHANES") +
+  scale_y_continuous(labels =
+                      scales::percent_format(accuracy = 1)) +
+  theme_classic()
 
 ```
 
 The *posterior distribution* for heights depends on the context. Are we considering all the adult men in America? In that case, our posterior would probably look a lot like the empirical distribution using NHANES data. If we are being asked about the distribution of heights among players in the NBA, then our posterior might look like:
 
 ```{r}
-tibble(height = rnorm(100000, mean = 195, sd = 3)) %>% 
-  ggplot(aes(x = height)) +
-    geom_density()
+tibble(height = c(rep(165, 2), rep(167, 3), rep(170, 8), 
+                  rep(172, 9), rep(176, 9), rep(177, 8),
+                  rep(179, 10), rep(182, 18), rep(183, 23), 
+                  rep(189, 20),rep(193, 21), rep(200, 15),rep(205, 15),rep(212, 8),rep(220, 4)))%>% 
+    ggplot(aes(x = height)) +
+    geom_histogram(aes(y = after_stat(count/sum(count))), 
+                   binwidth = 5, 
+                   color = "white")+
+    labs(title = "Posterior Probability Distribution",
+         subtitle = "One's belief about NBA baskectball players",
+         x = "Height",
+         y = "Probability") +
+    scale_y_continuous(labels =
+                           scales::percent_format(accuracy = 1)) +
+    theme_classic()
   
 ```
 
