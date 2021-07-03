@@ -881,14 +881,8 @@ We can do the same thing with our sampling problem. Assume that we know that the
 
 It is useful to define a parameter, $p$, which is the proportion of red beads in the urn. This also takes on exactly 1,001 possible values: $0, 1/1000, 2/1000, ..., 999/1000, 1$. With these assumptions, we can create an unnormalized joint distribution:
 
-<!-- Note to future authors: I am somewhat concerned that this is not exactly correct since we really ought to sample what happens when you pick 50 beads out of an urn. This can be approximated with the binomial, which is what we have done here. And, with such big numbers, it is a good approximation. But it is not exactly correct. -->
+<!-- Note to future authors: I am somewhat concerned that this is not exactly correct since we really ought to sample what happens when you pick 50 beads out of an urn. This can be approximated with the binomial, which is what we have done here. And, with such big numbers, it is a good approximation. But it is not exactly correct. Fixed-->
 
-<!-- RS: Really trying to get my ideas together before I edit anything, but hopefully this code resolves the above issue? -->
-<!-- tibble(ID = 0:urn_size) %>% -->
-<!--   mutate(beads = map(ID, ~c(rep("red", .), rep("white", urn_size - .)))) %>% -->
-<!--   mutate(pop_num_red = map_dbl(beads, ~sum(. == "red", 1, 0)))  %>% -->
-<!--   mutate(sample_num_red = map(beads, ~replicate(n = reps, sum(sample(., shovel_size) == "red", 1, 0)))) %>% -->
-<!--   unnest(sample_num_red) -->
 ```{r, cache = TRUE}
 set.seed(10)
 
@@ -899,18 +893,21 @@ urn_size <- 1000
 shovel_size <- 50
 reps <- 100
 
-# Create a tibble where red_in_urn creates a sequence from 0 to urn_size(1000)
-# by a value of 1. Create p as red_in_urn divided by the total urn_size. Column
-# red_in_shovel will map p using rbinom(). Call n = reps (where reps is defined
-# as 100) and size as shovel_size (defined as 50). Finally, unnest!
+#Create a tibble with a sequence from 0 to urn_size. In an urn of size 1000, 0 signifies there are no red beads in the urn, while urn_size signifies all the beads are red. 
 
-joint_dist <- 
-  tibble(red_in_urn = seq(from = 0, to = urn_size, by = 1)) %>% 
-    mutate(p = red_in_urn / urn_size) %>% 
-    mutate(red_in_shovel = map(p, ~ rbinom(n = reps, 
-                                               size = shovel_size, 
-                                               prob = .))) %>%
-    unnest(red_in_shovel) 
+# n represents the population, and will be a list of length 1000 consisting of the words "red" and "white." The number of red beads is equal to the ID, and the number of white beads is equal to urn_size - ID.
+
+# p represents the population proportion of red beads, and is found by dividing the total number of red beads in the population by the population size. 
+
+# Take a sample of each population with a sample size indicated by shovel_size, and find the number of red beads in the sample. Repeat this for the given number of reps in order to reduce sample variation. 
+
+# red_in_shovel will store the results from each experiment in a list, so unnest to remove the list and make the tibble longer. 
+
+joint_dist <- tibble(ID = 0:urn_size) %>%
+  mutate(n = map(ID, ~c(rep("red", .), rep("white", urn_size - .)))) %>%
+  mutate(p = map_dbl(n, ~sum(. == "red")/urn_size))  %>%
+  mutate(red_in_shovel = map(n, ~replicate(n = reps, sum(c(sample(., shovel_size)) == "red")))) %>%
+  unnest(red_in_shovel) 
 
 # After making our joint distribution, take a sample of size 10.
 
@@ -918,18 +915,7 @@ joint_dist %>%
   slice_sample(n = 10)
 ```
 
-After looking at our joint distribution, let's plot it. Call the `red_in_urn` for our y-axis, to indicate the number of red beads in the urn. Call `red_in_shovel` for our x-axis, to indicate the number of red beads in each shovel. This allows us to see which possible values of red beads in our samples are most associated with certain values for the number of red beads in the urn.
-
-```{r, cache = TRUE}
-joint_dist %>%
-  ggplot(aes(y = red_in_urn, x = red_in_shovel)) +
-    geom_point(alpha = 0.005) +
-    labs(title = "Joint Distribution of Red Beads in Shovel and in Urn",
-         x = "Number of Red Beads in Shovel",
-         y = "Number of Red Beads in Urn")
-```
-
-It is easier to define our "model" in this joint distribution in terms of the unknown parameter $p$ rather than, as above, in terms of the unknown number of red beads in the urn. Showing our plot in terms of $p$ and using the term "proportion" rather than "number of red beads" is closer to what we are trying to model.
+It is easiest to define our "model" in this joint distribution in terms of the unknown parameter $p$ rather than in terms of the unknown number of red beads in the urn. If we plotted the number of read beads in the urn, our model would only be applicable to the 1,000 bead urn. By using $p$, we can model the likelihood of drawing our sample from any size urn, because $p$ is normalized. We can always go back and multiply $p$ by the population size to get the number of red beads in the population if we want. Lets plot `red_in_shovel` on the x axis to indicate the number of red beads drawn in the sample, and `p`on the y axis to indicate the population proportion of red beads. 
 
 ```{r, cache = TRUE}
 joint_dist %>%
@@ -1077,7 +1063,7 @@ post_dist <- joint_dist %>%
   
   # Remove the columns of red_in_urn and red_in_shovel so we are left with p.
   
-  select(-red_in_urn, -red_in_shovel) %>% 
+  select(-n, -red_in_shovel) %>% 
   
   # Create object new_reds which maps p using rbinom with size defined as our
   # previously created shovel_size of 20.
