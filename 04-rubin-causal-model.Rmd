@@ -297,9 +297,9 @@ Let's look at an ideal Preceptor Table with more subjects using our new notation
 # First, we create a tibble with the values we want for the table
 
 tibble(subject = c("Yao", "Emma", "Cassidy", "Tahmid", "Diego"),
-       ytreat = c("13", "11", "11", "9", "6"),
-       ycontrol = c("9", "11", "10", "12", "4"),
-       ydiff = c("+4", "0", "+1", "-3", "+2")) %>%
+       ytreat = c("13", "14", "11", "9", "3"),
+       ycontrol = c("9", "11", "6", "12", "4"),
+       ydiff = c("+4", "+3", "+5", "-3", "-1")) %>%
   
   # Then, we use the gt function to make it pretty
   
@@ -327,17 +327,17 @@ From this ideal Preceptor Table, there are many possible estimands we might be i
 ::: {.fullwidth} 
 
 - A potential outcome for one person, e.g., Yao's potential outcome under treatment: $13$.  
-- A causal effect for one person, such as for Emma.  This is the difference between the potential outcomes: $11 - 11 = 0$.
-- The most positive causal effect: $+4$, for Yao.
+- A causal effect for one person, such as for Emma.  This is the difference between the potential outcomes: $14 - 11 = +3$.
+- The most positive causal effect: $+5$, for Cassidy.
 - The most negative causal effect: $-3$, for Tahmid.
-- The median causal effect: $+1$.
-- The median percentage change: $+10.0\%$. To see this, calculate the percentage change for each person.  You'll get 5 percentages: $+44.4\%$, $0.0\%$, $+10.0\%$, $-25.0\%$, and $+25.0\%$. 
+- The median causal effect: $+3$.
+- The median percentage change: $+27.2\%$. To see this, calculate the percentage change for each person.  You'll get 5 percentages: $+44.4\%$, $+27.2\%$, $+83.3\%$, $-25.0\%$, and $-25.0\%$. 
 
 :::
 
 And so on. There are a lot of things one might care about!
 
-All of the variables we calculated above are examples of estimands we might be interested in. One estimand is important enough that it has its own name: the **average treatment effect**, often abbreviated as **ATE**. The average treatment effect is the mean of all the individual causal effects. Here, the mean is $+0.8$.
+All of the variables we calculated above are examples of estimands we might be interested in. One estimand is important enough that it has its own name: the **average treatment effect**, often abbreviated as **ATE**. The average treatment effect is the mean of all the individual causal effects. Here, the mean is $+1.6$.
 
 Remember what an actual Preceptor Table riddled, as it always is, with question marks, looks like:
 
@@ -347,8 +347,8 @@ Remember what an actual Preceptor Table riddled, as it always is, with question 
 # First, we create a tibble with the values we want for the table
 
 tibble(subject = c("Yao", "Emma", "Cassidy", "Tahmid", "Diego"),
-       ytreat = c("13", "11", "?", "?", "6"),
-       ycontrol = c("?", "?", "10", "12", "?"),
+       ytreat = c("13", "14", "?", "?", "3"),
+       ycontrol = c("?", "?", "6", "12", "?"),
        ydiff = c("?", "?", "?", "?", "?")) %>%
   
   # Then, we use the gt function to make it pretty
@@ -392,8 +392,8 @@ Remember what our Preceptor Table looks like with all of the missing data:
 # First, we create a tibble with the values we want for the table
 
 tibble(subject = c("Yao", "Emma", "Cassidy", "Tahmid", "Diego"),
-       ytreat = c("13", "11", "?", "?", "6"),
-       ycontrol = c("?", "?", "10", "12", "?"),
+       ytreat = c("13", "14", "?", "?", "3"),
+       ycontrol = c("?", "?", "6", "12", "?"),
        ydiff = c("?", "?", "?", "?", "?")) %>%
   
   # Then, we use the gt function to make it pretty
@@ -425,8 +425,8 @@ Assuming there is a constant treatment effect, $\tau$, for everyone, filling in 
 # First, we create a tibble with the values we want for the table
 
 tibble(subject = c("Yao", "Emma", "Cassidy", "Tahmid", "Diego"),
-       ytreat = c("13", "11", "$$10 + \\tau$$", "$$12 + \\tau$$", "6"),
-       ycontrol = c("$$13 - \\tau$$", "$$11 - \\tau$$", "10", "12", "$$6 - \\tau$$"),
+       ytreat = c("13", "14", "$$6 + \\tau$$", "$$12 + \\tau$$", "3"),
+       ycontrol = c("$$13 - \\tau$$", "$$14 - \\tau$$", "6", "12", "$$3 - \\tau$$"),
        ydiff = c("$$\\tau$$", "$$\\tau$$", "$$\\tau$$", "$$\\tau$$", "$$\\tau$$")) %>%
   
   # Then, we use the gt function to make it pretty
@@ -452,17 +452,17 @@ tibble(subject = c("Yao", "Emma", "Cassidy", "Tahmid", "Diego"),
 
 <!-- DK: Make this math easier! -->
 
-Now we need to find an estimate for $\tau$ in order to fill in the missing values. One approach is to subtract the average of the observed control values from the average of the observed treated values. $$((13 + 11 + 6) / 3) - ((10 + 12) /  2)$$ $$10 - 11 = -1$$
+Now we need to find an estimate for $\tau$ in order to fill in the missing values. One approach is to subtract the average of the observed control values from the average of the observed treated values. $$((13 + 14 + 3) / 3) - ((6 + 12) /  2)$$ $$10 - 9 = +1$$
 
-This gives us an estimate of $-1$ for $\tau$. Let's fill in our missing values by adding $\tau$ to the observed values under control and by subtracting $\tau$ from the observed value under treatment like so:
+This gives us an estimate of $+1$ for $\tau$. Let's fill in our missing values by adding $\tau$ to the observed values under control and by subtracting $\tau$ from the observed value under treatment like so:
 
 ```{r, echo = FALSE}
 # First, we create a tibble with the values we want for the table
 
 tibble(subject = c("Yao", "Emma", "Cassidy", "Tahmid", "Diego"),
-       ytreat = c("13", "11", "$$10 + (-1)$$", "$$12 + (-1)$$", "5"),
-       ycontrol = c("$$13 - (-1)$$", "$$11 - (-1)$$", "10", "12", "$$5 - (-1)$$"),
-       ydiff = c("-1", "-1", "-1", "-1", "-1")) %>%
+       ytreat = c("13", "14", "$$6 + (+1)$$", "$$12 + (+1)$$", "3"),
+       ycontrol = c("$$13 - (+1)$$", "$$14 - (+1)$$", "6", "12", "$$3 - (+1)$$"),
+       ydiff = c("+1", "+1", "+1", "+1", "+1")) %>%
   
   # Then, we use the gt function to make it pretty
   
@@ -491,9 +491,9 @@ Which gives us:
 # First, we create a tibble with the values we want for the table
 
 tibble(subject = c("Yao", "Emma", "Cassidy", "Tahmid", "Diego"),
-       ytreat = c("13", "11", "9", "11", "6"),
-       ycontrol = c("14", "12", "10", "12", "7"),
-       ydiff = c("-1", "-1", "-1", "-1", "-1")) %>%
+       ytreat = c("13", "14", "7", "13", "3"),
+       ycontrol = c("12", "13", "6", "12", "2"),
+       ydiff = c("+1", "+1", "+1", "+1", "+1")) %>%
   
   # Then, we use the gt function to make it pretty
   
@@ -529,8 +529,8 @@ Consider a model in which causal effects differ based on sex:
 # First, we create a tibble with the values we want for the table
 
 tibble(subject = c("Yao", "Emma", "Cassidy", "Tahmid", "Diego"),
-       ytreat = c("13", "11", "$$10 + \\tau_F$$", "$$12 + \\tau_M$$", "6"),
-       ycontrol = c("$$13 - \\tau_M$$", "$$11 - \\tau_F$$", "10", "12", "$$6 - \\tau_M$$"),
+       ytreat = c("13", "14", "$$6 + \\tau_F$$", "$$12 + \\tau_M$$", "3"),
+       ycontrol = c("$$13 - \\tau_M$$", "$$14 - \\tau_F$$", "6", "12", "$$3 - \\tau_M$$"),
        ydiff = c("$$\\tau_M$$", "$$\\tau_F$$", "$$\\tau_F$$", "$$\\tau_M$$", "$$\\tau_M$$")) %>%
   
   # Then, we use the gt function to make it pretty
@@ -556,8 +556,8 @@ tibble(subject = c("Yao", "Emma", "Cassidy", "Tahmid", "Diego"),
 
 We would have two different estimates for $\tau$.
 
-$\tau_M$ would be $$(13+6)/2 - 12 = -2.5$$
-$\tau_F$ would be $$(11-10 = +1)$$ 
+$\tau_M$ would be $$(13+3)/2 - 12 = -4$$
+$\tau_F$ would be $$(14-6 = +8)$$ 
 
 Using those values, we would fill out our new table like this: 
 
@@ -565,9 +565,9 @@ Using those values, we would fill out our new table like this:
 # First, we create a tibble with the values we want for the table
 
 tibble(subject = c("Yao", "Emma", "Cassidy", "Tahmid", "Diego"),
-       ytreat = c("13", "11", "$$10 + (+1)$$", "$$12 + (-2.5)$$", "6"),
-       ycontrol = c("$$13 - (-2.5)$$", "$$11 - (+1)$$", "10", "12", "$$6 - (-2.5)$$"),
-       ydiff = c("-2.5", "+1", "+1", "-2.5", "-2.5")) %>%
+       ytreat = c("13", "14", "$$6 + (+8)$$", "$$12 + (-4)$$", "3"),
+       ycontrol = c("$$13 - (-4)$$", "$$14 - (+8)$$", "6", "12", "$$3 - (-4)$$"),
+       ydiff = c("-4", "+8", "+8", "-4", "-4")) %>%
   
   # Then, we use the gt function to make it pretty
   
@@ -596,9 +596,9 @@ Which gives us:
 # First, we create a tibble with the values we want for the table
 
 tibble(subject = c("Yao", "Emma", "Cassidy", "Tahmid", "Diego"),
-       ytreat = c("13", "11", "11", "8.5", "6"),
-       ycontrol = c("16.5", "10", "10", "12", "8.5"),
-       ydiff = c("-2.5", "+1", "+1", "-2.5", "-2.5")) %>%
+       ytreat = c("13", "14", "14", "8", "3"),
+       ycontrol = c("17", "6", "6", "12", "7"),
+       ydiff = c("-4", "+8", "+8", "-4", "-4")) %>%
   
   # Then, we use the gt function to make it pretty
   
@@ -621,7 +621,7 @@ tibble(subject = c("Yao", "Emma", "Cassidy", "Tahmid", "Diego"),
 
 &nbsp;
 
-We now have two different estimates for Emma (and for everyone else in the table). When we estimate $Y_c(Emma)$ using an assumption of constant treatment effect (a single value for $\tau$), we get 12. When we estimate assuming treatment effect is constant for each sex, we calculate that $Y_c(Emma) = 10$. This difference between our estimates for Emma highlights the difficulties of inference. Models drive inference. Different models will produce different inferences.  
+We now have two different estimates for Emma (and for everyone else in the table). When we estimate $Y_c(Emma)$ using an assumption of constant treatment effect (a single value for $\tau$), we get $Y_c(Emma) = 13$. When we estimate assuming treatment effect is constant for each sex, we calculate that $Y_c(Emma) = 8$. This difference between our estimates for Emma highlights the difficulties of inference. Models drive inference. Different models will produce different inferences.  
  
 
 
@@ -635,8 +635,8 @@ Reality looks like this:
 # First, we create a tibble with the values we want for the table
 
 tibble(subject = c("Yao", "Emma", "Cassidy", "Tahmid", "Diego"),
-       ytreat = c("13", "11", "$$10 + \\tau_{cassidy}$$", "$$12 + \\tau_{tahmid}$$", "6"),
-       ycontrol = c("$$13 - \\tau_{yao}$$", "$$11 - \\tau_{emma}$$", "10", "12", "$$6 - \\tau_{diego}$$"),
+       ytreat = c("13", "14", "$$6 + \\tau_{cassidy}$$", "$$12 + \\tau_{tahmid}$$", "3"),
+       ycontrol = c("$$13 - \\tau_{yao}$$", "$$14 - \\tau_{emma}$$", "6", "12", "$$3 - \\tau_{diego}$$"),
        ydiff = c("$$\\tau_{yao}$$", "$$\\tau_{emma}$$", "$$\\tau_{cassidy}$$", "$$\\tau_{tahmid}$$", "$$\\tau_{diego}$$")) %>%
   
   # Then, we use the gt function to make it pretty
@@ -667,7 +667,7 @@ Can we solve for $\tau_{yao}$? No! That is the Fundamental Problem of Causal Inf
 
 The average treatment effect is the **average** difference in *potential* outcomes between the treated group and the control groups. Because averaging is a linear operator, the average difference is the same as the difference between the averages. The distinction between this estimand and estimands like $\tau$, $\tau_M$ and $\tau_F$, is that, in this case, we do not care about using the average treatment effect to fill in missing values in each row. The average treatment effect is useful because we don't have to assume anything about each individuals' $\tau$, like $\tau_{yao}$, but can still understand something about the average causal effect across the whole population. 
 
-As we did before, the simplest way to estimate the ATE is to take the mean of the treated group ($10$) and the mean of the control group ($11$) and then take the difference in those means ($-1$). We'll call this estimate of the average treatment effect, $\widehat{ATE}$, pronounced "ATE-hat."
+As we did before, the simplest way to estimate the ATE is to take the mean of the treated group ($10$) and the mean of the control group ($9$) and then take the difference in those means ($1$). We'll call this estimate of the average treatment effect, $\widehat{ATE}$, pronounced "ATE-hat."
 
 If we already did this exact same calculation above, why are we talking about it again? Remember that we are unwilling to assume treatment effect is constant in our study population, and we cannot solve for $\tau$ if $\tau$ is different for different individuals. This is where $\widehat{ATE}$ is helpful. 
 
@@ -686,6 +686,7 @@ Just because the ATE is often a useful estimand doesn't mean that it *always* is
 <!-- DK: Would be nice if the numbers here were calculated from the actual data, and not hard coded. -->
 
 Consider point #3. For example, let's say the treatment effect does vary dependent on sex. For males there is a strong negative effect (-3.5), but for females there is a smaller positive effect (+1). However, the average treatment effect for the whole sample, even if you estimate it correctly, will be a single negative number (-1) -- since the negative effect for males is larger than the positive effect for females.  
+<!-- SZ: Where are the numbers for this coming from? -->
 
 <!-- DK: Stick in the formula for estimating ATE. -->
 
@@ -695,9 +696,9 @@ Estimating the average treatment effect, by calculating $\widehat{ATE}$, is easy
 # First, we create a tibble with the values we want for the table
 
 tibble(subject = c("Yao", "Emma", "Cassidy", "Tahmid", "Diego"),
-       ytreat = c("13", "11", "12", "14", "6"),
-       ycontrol = c("11", "9", "10", "12", "4"),
-       ydiff = c("+2", "+2", "+2", "+2", "+2")) %>%
+       ytreat = c("13", "14", "9", "15", "3"),
+       ycontrol = c("10", "11", "6", "12", "0"),
+       ydiff = c("+3", "+3", "+3", "+3", "+3")) %>%
   
   # Then, we use the gt function to make it pretty
   
@@ -720,7 +721,7 @@ tibble(subject = c("Yao", "Emma", "Cassidy", "Tahmid", "Diego"),
 
 &nbsp;
 
-In this example, there is indeed a constant treatment effect for everyone: $+2$. Note that the *observed* values are all the same, but the unobserved values were such that our estimated ATE, $-1$, is pretty far from the actual ATE, $+2$. If we think we have a reasonable estimate of ATE, using that value as a constant for $\tau$ might be our *best guess*. For more discussion, see more from Matt Blackwell:
+In this example, there is indeed a constant treatment effect for everyone: $+3$. Note that the *observed* values are all the same, but the unobserved values were such that our estimated ATE, $-1$, is pretty far from the actual ATE, $+3$. If we think we have a reasonable estimate of ATE, using that value as a constant for $\tau$ might be our *best guess*. For more discussion, see more from Matt Blackwell:
 
 ```{r echo = FALSE}
 knitr::include_app("https://www.youtube.com/embed/cBYUuD2aVkA")

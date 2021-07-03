@@ -1,10 +1,14 @@
 # Five Parameters {#five-parameters}
 
-<!-- All our cool new way of doing Cardinal Virtues needs to be added. -->
 
-<!-- Testing section makes no sense. -->
+<!-- More sophisticated things to worry about and then pointers or ideas for how to deal with them. Maybe use female years to live versus male today. -->
 
-<!-- Do we need the centering nonsense anymore, given that we explain it in chapter 9? No. So, don't center age. But, at some point (when showing simople model with just age) mention that the intercept for the line is at age = 0. -->
+<!-- Put Population Table at start of Justice in the chapters with a Population Table. -->
+
+<!-- Cardinal virtues of Wisdom and Justice are mostly fixed. Courage and Temperance fixes are priority for next week. No! Priority next week is networking! -->
+
+<!-- Posterior for Expected and Individual Male Advantage plot looks weird. Why three colors? -->
+     
 
 <!-- At end of Justice section, review with math and plots what we have learned so far. No fitted models. No stan_glm(). No code for ho you made the plots. Do sex first and then age then parallel lines (like chapter 9) and then non-parallel lines.  Maybe we don't fit the first three of these. We just show the plots (and we don't even show the code which generates the plots). -->
 
@@ -22,13 +26,28 @@
 
 <!-- Improve summary section. -->
 
+<!-- Maybe consider posterior_predictive checks. Belongs at the end of the courage section. -->
+
 Last chapter, we studied four parameters: models in which we studied multiple right-hand side variables at once. The next step in our model building education is to learn about *interactions*. The effect of a treatment relative to a control is almost never uniform. The effect might be bigger in women than in men, smaller in the rich relative to the poor. The technical term for such effects is "heterogeneous," which is just Ph.D.'ese for "different." With enough data, all effects are heterogeneous. Causal effects, at least in the social science, always vary across units. To model this reality, we rely on interactions, on allowing the effect size to differ. The same applies for predictive models. The relationship between our outcome variable $y$ and a predictor variable $x$ is rarely constant. The relationship varies based on the values of other variables. To take account of interactions, we need models with at least 5 parameters. 
 
 <!-- DK: Add some more. What are the key lessons? What do we carry over from previous chapters? What is new? Hit the data science research cycle. -->
 
+Packages:
+
+```{r, message=FALSE}
+library(primer.data)
+library(gt)
+library(gtsummary)
+library(skimr)
+library(tidyverse)
+library(rstanarm)
+library(broom.mixed)
+```
+
+
 Consider the following questions:
 
-*How many years would we expect two political candidates --- one male and one female, both 10 years older than the average candidate --- to live after the election? How different will their lifespans be? More broadly, how long do candidates, in general, live after the election? Does winning the election affect their longevity?*
+*How many years would we expect two gubernatorial candidates --- one male and one female, both 10 years older than the average candidate --- to live after the election? How different will their lifespans be? More broadly, how long do candidates, in general, live after the election? Does winning the election affect their longevity?*
 
 
 Note how far we have come in the *Primer*. These are difficult questions, involving issues of both prediction and causation. Yet, if we follow the Cardinal Virtues, we can provide sophisticated answers.
@@ -36,27 +55,53 @@ Note how far we have come in the *Primer*. These are difficult questions, involv
 
 ## Wisdom
 
-Always start by looking at the data.
-
 ```{r echo = FALSE, fig.cap = "Wisdom"}
 knitr::include_graphics("other/images/Wisdom.jpg")
 ```
 
-### EDA of `governors`
+Recall the most important aspects of wisdom: the Preceptor Table, the EDA (exploratory data analysis), the population, and the Population Table. As always, we start with the Preceptor Table --- the table of data that would make all of our questions answerable with mere arithmetic (no inferences). 
 
-Packages:
+### The Preceptor Table
 
-```{r, message=FALSE}
-library(primer.data)
-library(skimr)
-library(tidyverse)
-library(rstanarm)
-library(broom.mixed)
+To create our Preceptor Table, we must first revisit our questions:
+
+*How many years would we expect two gubernatorial candidates --- one male and one female, both 10 years older than the average candidate --- to live after the election? How different will their lifespans be? More broadly, how long do candidates, in general, live after the election? Does winning the election affect their longevity?*
+
+What (imagined) dataset would make all of these questions easy to solve with a little bit of math? Well, we obviously need data on all gubernatorial candidate elections in the United States. We also need to know their dates of birth, age at time of election, age at time of death, and data for age at time of death minus age at time of election. With these pieces of information, we could answer all of our questions with simple math. 
+
+Also, because this is an idealized table, we would know age at time of death assuming victory and age at time of death assuming loss. This would not be possible in the real world due to the Fundamental Problem of Causal Inference --- we cannot observe a unit under two different conditions (both victory and loss).
+
+Here is a sample:
+
+```{r, echo = FALSE, fig.align = 'left'}
+# First, we create a tibble with the values we want for the table
+
+tibble(ID = c("Candidate 1", "Candidate 2"),
+       sex = c("F", "M"),
+       before = c("56", "72"),
+       ytreat = c("12", "7"),
+       ycontrol = c("9", "5"),
+       yeffect = c("+3", "+2")) %>%
+  
+  # Then, we use the gt function to make it pretty
+  
+  gt() %>%
+  cols_label(ID = md("ID"),
+             sex = md("Sex"),
+             before = md("Age at Election"),
+             ytreat = md("Years Lived (Win)"),
+             ycontrol = md("Years Lived (Loss)"),
+             yeffect = md("Treatment Effect of Winning")) 
 ```
+
+
+We would have rows for *every* gubernatorial election candidate in U.S. history. We may want further details, such as election year. This is merely a sketch of our ideal dataset. Now that we know our "perfect" reality, what data do we actually have to work with? 
+
+### EDA of `governors`
 
 <!-- We discuss below that we only have data for people who are already dead. That is an interesting restriction, and effects the Preceptor Table in interesting ways. Or is such a discussion too advanced? -->
 
-The **primer.data** package includes the  `governors` data set which features the demographic information about the candidates for governor in the United States. @barfort2020 gathered this data and concluded that winning a gubernatorial election increases a candidate's lifespan.
+The **primer.data** package includes the  `governors` data set which features demographic information about candidates for governor in the United States. @barfort2020 gathered this data and concluded that winning a gubernatorial election increases a candidate's lifespan.
 
 
 ```{r}
@@ -149,49 +194,83 @@ ch10 %>%
 ```
 
 
-This plot shows that men live much longer, on average, than women after the election. Does that make sense to you? Is there an intuitive explanation for why this might be? 
+This plot shows that men live much longer, on average, than women after the election. Is there an intuitive explanation for why this might be? 
 
 
 ### Population
-
 
 The concept of the "population" is subtle and important. *The population is not the set of candidates for which we have data.* That is the dataset. The population is the larger --- potentially much larger --- set of individuals about whom we want to make inferences. *The parameters in our models refer to the population, not to the dataset.*
 
 Consider a simple example. Define $\mu$ as the average number of years lived by candidates for governor after Election Day. Can we calculate $\mu$ from our data? No! There are many candidates for governor who are still alive, who are not included in our data even though they are part of the "population" we want to study. $\mu$ can not be *calculated.* It can only be *estimated.*
 
-Note, also, that there are many different populations, each with its own $\mu$, in which we might be interested. 
+Another problem is that we would like to estimate the effect of winning on lifespan in *present day*. Because our data excludes the most recent candidates (since they are still alive), our predictions will not mirror the future as well as we may hope. 
 
-* The population of all candidates for governor in the US from 1945 to 2012. This is the period covered in the paper. 
+Even though the original question is about "gubernatorial candidates" in general, and does not specifically refer to the United States, we will assume that the data we have for US governors is *representative enough* of the population we are interested in (global politicians) that the exercise is useful. If we did not believe that, then we should stop right now. *The major part of Wisdom is deciding what questions you can't answer because of the data you just don't have.*
 
-* The population of all candidates for governor in the US from 1900 to 2012. A priori, we would not expect a major difference between candidates who run in 1946 and those who run in 1942. How different could they be? It is therefore not unreasonable to extend the population of interest back in time, even if we have no data for earlier periods.
+The truth is: in the social sciences, there is never a perfect relationship between the data you have and the question you are trying to answer. Data for gubernatorial candidates in the past is not an analog for gubernatorial candidates today. Nor is it the same as the data for candidates in other countries. Yet, this data is relevant. Right? It is certainly better than nothing.
 
-* The population of all candidates for governor in the US from 1945 to 2030. We are often interested in the future. We want to make predictions about what *will* happen to candidates, including candidates who have not yet run for office.
+*Generally speaking, using not-perfect data is better than using no data at all.*
 
-* The population of candidates for governor around the world. Other countries have governors! We want to understand their longevity as well.
-
-* The population of candidates for all political offices in the US. We might expect candidates for Senator to have similar lifespans to candidates for Governor.
-
-* And so on. There are as many possible populations as there are questions we might ask.
-
-All of these populations are different, so each has a different $\mu$. Which $\mu$ we are interested in depends on the problem we are trying to solve. It is a judgment call, a matter of Wisdom, as to whether or not that data we have is "close enough" to the population we are interested in to justify making a model.
-
-Even though the original question is about "political candidates" in general, and does not specifically refer to either the United States or to elections for governor, we will assume that the data we have for US governors is, uh, *representative enough* of the population we are interested in (global politicians) that the exercise is useful. If we did not believe that, then we should stop right now. *The major part of Wisdom is deciding what questions you can't answer because of the data you just don't have.*
+Of course, this is not always true. If we wanted to predict lifespans of gubernatorial candidates in the U.S., and our data was from lifespans of presidential candidates in France... we would be better off not making any predictions at all. If the data won't help, don't use the data. 
 
 
 <!-- DK: Add more? Connect to Preceptor Table. -->
 
 
-## Justice and Courage
+## Justice 
 
 ```{r echo = FALSE, out.width="60%", fig.align='center', fig.cap = "Justice"}
 knitr::include_graphics("other/images/Justice.jpg")
 ```
 
+After inspecting our data and deciding that it is “close enough” to our questions to be useful, we move on to Justice.
+
+Justice emphasizes a few key concepts:
+
+* The Population Table, a structure which includes a row for every unit in the population. We generally break the rows in the Population Table into three categories: the data for units we want to have (the actual data set), the data for units which we actually have (the Preceptor Table), and the data for units we do not care about (the rest of the population, not included in the data or the Preceptor Table).
+* Is our data representative of the population?
+* Is the meaning of the columns consistent, i.e., can we assume validity? We then make an assumption about the data generating mechanism.
+
+We inspect both representativeness and validity through our Population Table. Representativeness focuses on the rows of the table, while validity focuses on the columns.
+
+### Representativeness
+
+Recall that representativeness involves our rows; specifically, do the rows from our dataset match the rows from our desired population. 
+
+When we want to know if our data is representative of our population, the primary question we ask is: did everyone in our desired population have an equal chance of being sampled? For a more simple example, think back to our urn example in Chapter 6. We were able to determine that, barring any issue with our sampling mechanism (the shovel), every bead had an equal chance of being sampled. Is that the case here?
+
+After looking at @barfort2020, the source for our dataset, we see that:
+
+"We collect data... for all candidates running in a gubernatorial election from 1945 to 2012. We limit attention to the two candidates who received the highest number of votes."
+
+This data is, then, *highly* representative of gubernatorial candidates, as it includes every candidate from 1945 to 2012. However, there is one large caveat: only the two candidates with the most votes are included in the dataset. This is unfortunate, as we would ideally look at all gubernatorial candidates (regardless of votes). Regardless, we still deem the dataset to be somewhat representative of our larger population. 
+
+### Validity
+
+Validity, on the other hand, involves our columns. To put it simply, does the column for lifespan in our Preceptor Table equate to the column for lifespan from our dataset. Again, we look to the source of our data: @barfort2020. 
+
+The collection of birth and death dates for *winning* candidates is well documented. The birth and death dates for losing candidates, however, is not as easily gathered. In fact, @barfort2020 had to perform independent research for this information:
+
+> "For losing candidates, we use information gathered from several online sources, including Wikipedia, The Political Graveyard..., Find a Grave... and Our Campaigns." 
+
+This is not nearly as reliable as the data collection for candidates who won their election. And, there was a further complication:
+
+> "In a few cases, we are only able to identify the year of birth or death, not the exact date of the event. For these candidates, we impute the date as July 1 of the given year."
+
+For these candidates, then, our estimate for longevity will be inaccurate. We also have to *hope* that the birth and death dates listed on unreliable internet sources are accurate. It is possible that they are not, especially for older candidates.
+
+The mission of this exploration is to ensure validity as much as possible --- that is, to equate our columns when they are not equated themseleves. In this case, because we cannot fix the issues with data collection, we accept that our estimates may be slightly skewed. 
+
+### Functional form 
+
+
+
+## Courage
+
+
 ```{r echo = FALSE, out.width="60%", fig.align='center', fig.cap = "Courage"}
 knitr::include_graphics("other/images/Courage.jpg")
 ```
-
-Because we will be going through a series of models in this chapter, it is useful to combine the virtues of Justice and Courage. 
 
 
 ### election_age
@@ -342,41 +421,9 @@ fit_1 %>%
 
 <!-- DK: Priority is to add a graphic which shows the "cloud" of possible regression lines, consistent with the posterior for beta_1.  -->
 
-<!-- DK: Need a smoother transition back to centering. Or get rid of centering all together? -->
-
 <!-- DK: Would using 50-year-old be better? -->
 
 <!-- DK: Fix. -->
-
-As discussed in Chapter \@ref(four-parameters), we center variables when the model's intercept does not make substantive sense. To center a model, we pick a constant value, usually the mean of the independent variable, and subtract that constant from every value of the independent variable. Another option would be to pick a reasonable reference value, like 50 years-old. Either way, the meaning of `election_age` changes from the raw number of years a candidate has been alive to the number of years relative to that reference value. 
-
-
-In this example, we want to center the value for `election_age`, the independent variable. First, we must pick the value that we will center by. Here, we will use the mean of `election_age`, which is about `r round(mean(ch10$election_age), 0)` years old.  Once we find this number, we will subtract it from every `election_age` value, creating a new variable: `c_election_age`, where the "c" stand for **c**entered.  `c_election_age` is the number of years a candidate has been alive, as of Election Day, relative to the average years alive of all candidates on their respective election days.
-
-```{r}
-ch10 <- ch10 %>% 
-  mutate(c_election_age = election_age - mean(election_age))
-```
-
-
-
-```{r, cache = TRUE}
-fit_1_centered <- stan_glm(data = ch10,
-                      formula = lived_after ~ c_election_age,
-                      refresh = 0,
-                      seed = 11)
-
-print(fit_1_centered, detail = FALSE)
-```
-
-<!-- DK: If we are doing centering, then we ought to do it correctly, by showing side-by-side scatterplots with fitted lines, the better to show that we have just slid things over. -->
-
-
-We can see that the intercept has decreased while the slope has stayed the same. When we interpret this model, we only have to change the definition of the intercept. Rather than the intercept representing the remaining years of a candidate who was alive for zero years before running for governor, it now represents the post-election lifespan of a gubernatorial candidate who was alive for the mean number of years before running. If a candidate was alive for about `r round(mean(ch10$election_age), 0)` years before running for governor, they are expected to live for about `r round(coef(fit_1_centered)["(Intercept)"], 0)` years after the election, on average. 
-
-<!-- DK: Really need the ideal and actual Preceptor Table for this example. And should probably present it earlier. -->
-
-Think hard about your parameters. What do they mean? Which population do they represent? What ideal Preceptor Table would make their calculation easy? In this case, $\beta_0$ is the average number of years which gubernatorial candidates live after election day, but just for the subset of candidates who are the average age on Election Day. If we had the ideal Preceptor Table, this would be trivial to calculate. Just take the average for that subset! No estimation required. But, our actual Preceptor Table has lots of missing values. In particular, many gubernatorial candidates have not . . . uh . . . died. (How inconsiderate!) So, we can't know how many years they will live. All we can do is, first, define  $\beta_0$ and, second, estimate a posterior probability distribution for it. 
 
 ### sex
 
@@ -484,9 +531,9 @@ posterior_epred(fit_2a,
 The interpretation of this parameter is the same as we have seen before. There is a true average, across the entire population, of the number of years that male candidates live after the election. We can never know what that true average is. But, it seems very likely that the true average is somewhere between 27.5 and 29.5 years.
 
 
-### c_election_age and sex
+### election_age and sex
 
-In this model, our outcome variable continues to be `lived_after`, but now we will have two different explanatory variables: `c_election_age` and `sex`. Note that `sex` is a categorical explanatory variable and `c_election_age` is a continuous explanatory variable. This is the same type of model --- parallel slopes --- as we saw in Chapter \@ref(four-parameters).
+In this model, our outcome variable continues to be `lived_after`, but now we will have two different explanatory variables: `election_age` and `sex`. Note that `sex` is a categorical explanatory variable and `election_age` is a continuous explanatory variable. This is the same type of model --- parallel slopes --- as we saw in Chapter \@ref(four-parameters).
 
 Math: 
 
@@ -512,7 +559,7 @@ Let's translate the model into code.
 
 ```{r, cache = TRUE}
 fit_3 <- stan_glm(data = ch10,
-                      formula = lived_after ~ sex + c_election_age,
+                      formula = lived_after ~ sex + election_age,
                       refresh = 0,
                       seed = 12)
 ```
@@ -527,7 +574,7 @@ Looking at our results, you can see that our intercept value is around `r round(
 
 Note that `sexMale` is around `r round(coef(fit_3)["sexMale"], 0)`. This is our coefficient, $\beta_1$. We need to connect this value to our intercept value to get something meaningful. Using the formula $\beta_0 + \beta_1$, we find out that the number of years the average male candidate ---  who, on the day of election, is the average age of all candidates --- would live is around `r round(coef(fit_3)["(Intercept)"] + coef(fit_3)["sexMale"], 0)` years.  
 
-Now take a look at the coefficient for $c\_election\_age_i$, $\beta_2$. The median of the posterior, `r round(coef(fit_3)["c_election_age"], 1)`, represents the slope of the model. When comparing two candates who differ by one year in `c_election_age`, we expect that they will differ by `r round(coef(fit_3)["c_election_age"], 1)` years in `lived_after`. It makes sense that this value is negative. The more years a candidate has lived, the fewer years the candidate has left to live. So, for every extra year a candidate is alive before an election, their lifespan after the election will be `r abs(round(coef(fit_3)["c_election_age"], 1))` years lower, on average.
+Now take a look at the coefficient for $c\_election\_age_i$, $\beta_2$. The median of the posterior, `r round(coef(fit_3)["election_age"], 1)`, represents the slope of the model. When comparing two candates who differ by one year in `election_age`, we expect that they will differ by `r round(coef(fit_3)["election_age"], 1)` years in `lived_after`. It makes sense that this value is negative. The more years a candidate has lived, the fewer years the candidate has left to live. So, for every extra year a candidate is alive before an election, their lifespan after the election will be `r abs(round(coef(fit_3)["election_age"], 1))` years lower, on average.
 
 
 Let’s now look at some posteriors.
@@ -566,12 +613,12 @@ Let's now take a look at a posterior distribution for $\beta_2$, the coefficient
 ```{r fit_gov3-p1, exercise = TRUE}
 fit_3 %>% 
   as_tibble() %>% 
-  ggplot(aes(c_election_age)) + 
+  ggplot(aes(election_age)) + 
     geom_histogram(aes(y = after_stat(count/sum(count))),
                    bins = 100) +
-    labs(title = "Posterior Distribution of the Coefficient of `c_election_age`",
+    labs(title = "Posterior Distribution of the Coefficient of `election_age`",
          y = "Probability",
-         x = "Coefficient of `c_election_age`") + 
+         x = "Coefficient of `election_age`") + 
     scale_y_continuous(labels = scales::percent_format()) +
     theme_classic()
 
@@ -594,9 +641,9 @@ fit_3 %>%
 
 <!-- With this as warm-up, we are now in a position to explore interactions. -->
 
-### c_election_age, sex and c_election_age*sex
+### election_age, sex and election_age*sex
 
-Let's create another model. This time, however, the numeric outcome variable of `lived_after` is a function of the two explanatory variables we used above, `c_election_age` and `sex`, and of their interaction. To look at interactions, we need 5 parameters, which is why we needed to wait until this chapter to introduce the concept.
+Let's create another model. This time, however, the numeric outcome variable of `lived_after` is a function of the two explanatory variables we used above, `election_age` and `sex`, and of their interaction. To look at interactions, we need 5 parameters, which is why we needed to wait until this chapter to introduce the concept.
 
 Math:
 
@@ -618,7 +665,7 @@ Code:
 
 ```{r, cache = TRUE}
 fit_4 <- stan_glm(data = ch10,
-                      formula = lived_after ~ sex*c_election_age,
+                      formula = lived_after ~ sex*election_age,
                       refresh = 0,
                       seed = 13)
 ```
@@ -633,7 +680,7 @@ print(fit_4, detail = FALSE)
 
 The intercept has increased. $\beta_0$ is around `r round(coef(fit_4)["(Intercept)"], 0)`. This is the intercept for females. It still means the average number of years lived after the election for women is `r round(coef(fit_4)["(Intercept)"], 0)` or so. Our `sexMale` coefficient, $\beta_1$, refers to the value that must be added to the intercept in order to get the average for males. When calculated, the result is `r round(coef(fit_4)["(Intercept)"] + coef(fit_4)["sexMale"], 0)`. Keep in mind, however, that these values only apply if $c\_election\_age_i = 0$, if, that is, candidate $i$ is around `r round(mean(ch10$election_age), 0)` years old. 
 
-The coefficient for $c\_election\_age_i$, $\beta_2$, is `r round(coef(fit_4)["c_election_age"], 1)`. What does this mean? It is the slope for females. So, when comparing two female candidates who differ by one year in age, we expect that the older candidate will live `r abs(round(coef(fit_4)["c_election_age"], 1))` years less. Now direct your attention below at the coefficient of `sexMale:c_election_age`, $\beta_3$, which is `r round(coef(fit_4)["sexMale:c_election_age"], 1)`. This is the value that must be added to the coefficient of $c\_election\_age_i$ (recall $\beta_2 + \beta_3$) in order to find the slope for males. When the two are added together, this value, or slope, is about `r round(coef(fit_4)["c_election_age"] + coef(fit_4)["sexMale:c_election_age"], 1)`. When comparing two male candidates who differ in age by one year, we expect the older candidate to live about `r abs(round(coef(fit_4)["c_election_age"] + coef(fit_4)["sexMale:c_election_age"], 1))` years less. 
+The coefficient for $c\_election\_age_i$, $\beta_2$, is `r round(coef(fit_4)["election_age"], 1)`. What does this mean? It is the slope for females. So, when comparing two female candidates who differ by one year in age, we expect that the older candidate will live `r abs(round(coef(fit_4)["election_age"], 1))` years less. Now direct your attention below at the coefficient of `sexMale:election_age`, $\beta_3$, which is `r round(coef(fit_4)["sexMale:election_age"], 1)`. This is the value that must be added to the coefficient of $c\_election\_age_i$ (recall $\beta_2 + \beta_3$) in order to find the slope for males. When the two are added together, this value, or slope, is about `r round(coef(fit_4)["election_age"] + coef(fit_4)["sexMale:election_age"], 1)`. When comparing two male candidates who differ in age by one year, we expect the older candidate to live about `r abs(round(coef(fit_4)["election_age"] + coef(fit_4)["sexMale:election_age"], 1))` years less. 
 
 *Key point*: The interpretation of the intercepts only apply to candidates for whom $c\_election\_age_i = 0$. Candidates who are not `r round(mean(ch10$election_age), 0)` years-old will have a different expected number of years to live. The interpretation of the slope applies to everyone. In other words, the relationship between $lived\_after_i$ and $c\_election\_age_i$ is the same, regardless of your gender or how old you are.
 
@@ -678,8 +725,8 @@ Male candidates live longer on average than female candidates. Note, also, that 
 ```{r}
 fit_4 %>% 
   as_tibble() %>% 
-  mutate(slope_men = c_election_age + `sexMale:c_election_age`) %>% 
-  rename(slope_women = c_election_age) %>% 
+  mutate(slope_men = election_age + `sexMale:election_age`) %>% 
+  rename(slope_women = election_age) %>% 
   select(slope_women, slope_men) %>% 
   pivot_longer(cols = slope_women:slope_men, 
                names_to = "parameters",
@@ -728,7 +775,7 @@ After tidying our data, we will extract values and assign sensible names for lat
 
 intercept <- tidy$estimate[1]
 sex_male <- tidy$estimate[2]
-c_election_age <- tidy$estimate[3]
+election_age <- tidy$estimate[3]
 interaction_term <- tidy$estimate[4]
 
 ```
@@ -738,32 +785,32 @@ Now that we have extracted our values, we will create the intercept and slope va
 * The intercept is the intercept for females. It represents the average number of years lived after the election for females.
 * Our `sexMale` coefficient refers to the value that must be added to the intercept in order to get the average years lived post-election for males. 
 * The coefficient for $c\_election\_age_i$ is the slope for females. 
-* The coefficient of `sexMale:c_election_age` is the value that must be added to the coefficient of $c\_election\_age_i$ in order to find the slope for males. 
+* The coefficient of `sexMale:election_age` is the value that must be added to the coefficient of $c\_election\_age_i$ in order to find the slope for males. 
 
 ```{r}
-# Recall that the intercept and the estimate for c_election_age act as the
+# Recall that the intercept and the estimate for election_age act as the
 # estimates for female candidates only. Accordingly, we have assigned those
 # values (from the previous code chunk) to more sensible names: female_intercept
 # and female_slope.
 
 female_intercept <- intercept
-female_slope <- c_election_age
+female_slope <- election_age
 
 # To find the male intercept, we must add the intercept for the estimate for
-# sex_male. To find the male slope, we must add c_election_age to our
+# sex_male. To find the male slope, we must add election_age to our
 # interaction term estimate.
 
 male_intercept <- intercept + sex_male
-male_slope <- c_election_age + interaction_term
+male_slope <- election_age + interaction_term
 ```
 
 After creating objects for our different intercepts and slopes, we will now create the interaction model using `geom_abline()` for a male and female line. 
 
 ```{r}
-# From the ch10 data, create a ggplot object with c_election_age as the x-axis
+# From the ch10 data, create a ggplot object with election_age as the x-axis
 # and lived_after as the y-axis. We will use color = sex.
 
-ggplot(ch10, aes(x = c_election_age, y = lived_after, color = sex)) +
+ggplot(ch10, aes(x = election_age, y = lived_after, color = sex)) +
   
   # Use geom_point to show the datapoints. 
   
@@ -830,7 +877,7 @@ Consider the "on average" interpretation first. The answer begins with the poste
 
 ```{r}
 newobs = tibble(sex = c("Male", "Female"), 
-                 c_election_age = 10)
+                 election_age = 10)
 
 pe <- posterior_epred(object = fit_4, 
                       newdata = newobs) %>% 
@@ -989,7 +1036,7 @@ Let's compare the results from `posterior_epred()` and `posterior_predict()` for
 
 ```{r}
 newobs <- tibble(sex = c("Male", "Female"),
-                  c_election_age = 10)
+                  election_age = 10)
 
 pe <- posterior_epred(fit_4, 
                       newdata = newobs) %>%
