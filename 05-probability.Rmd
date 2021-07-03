@@ -2,7 +2,9 @@
 
 <!-- We need a fourth example, after Presidential elections, which is continuous. Presumably normal distribution. Perhaps using heigh of adults from nhanes for empirical. Then posterior is height at basketball court. -->
 
-<!-- Add truth is out there image. Done.-->
+<!-- Add copy button to tutorial in correct places. -->
+
+<!-- Read https://ppbds.github.io/primer.tutorials/articles/instructions.html -->
 
 <!-- When building the chapter, we don't want rayshader images to pop up! -->
 
@@ -25,6 +27,7 @@
 
 <!-- Wait on this. Maybe add, after N models, a section on Infinity models, meaning a continuous parameter p. Note that we have a continuous distribution section now. Want to set the stage for Chapter 6, in which we are generating a posterior for p which we may think of as taking an infinite number of values. This is a key dimension on which chapter 5 and 6 need to connect. Maybe not necessary? -->
 
+*This chapter is being edited.*
 
 > The usual touchstone of whether what someone asserts is mere persuasion or at least a subjective conviction, i.e., firm belief, is betting. Often someone pronounces his propositions with such confident and inflexible defiance that he seems to have entirely laid aside all concern for error. A bet disconcerts him. Sometimes he reveals that he is persuaded enough for one ducat but not for ten. For he would happily bet one, but at ten he suddenly becomes aware of what he had not previously noticed, namely that it is quite possible that he has erred. -— Immanuel Kant, *Critique of Pure Reason*
 
@@ -183,6 +186,8 @@ Pay attention to notation. Whenever we are talking about a specific probability 
 
 
 ### Flipping a coin
+
+All data science problems start with a question. Example: *What will be the result of the next flip of a coin?* All questions are answered with the help of probability distributions.
 
 A *mathematical distribution* is based on a mathematical formula. Assuming that the coin is perfectly fair, we should, on average, get heads as often as we get tails.
 
@@ -369,6 +374,7 @@ Now let's say we are building probability distributions for political events, li
 We can start with a *mathematical distribution* for X which assumes that the chances of the Democratic candidate winning any given state's electoral votes is 0.5 and the results from each state are independent.
 
 ```{r, echo = FALSE}
+# Add comments explaining what this does.
 
 ev <- c(rep(3, 8), rep(4, 5), rep(5, 3), rep(6, 6), rep(7, 3), rep(8,2),
         rep(9, 3), rep(10, 4), rep(11, 4), 12, 13, 14, 15, rep(16, 2), 18, 20 , 20, 19, 29, 38, 55)
@@ -487,38 +493,45 @@ There are many political science questions you could explore with posterior dist
 
 ### Height
 
+Question: *What is the height of the next adult male we will meet?*
+
 The three examples above are all *discrete* probability distributions, meaning that the outcome variable can only take on a limited set of values. A coin flip has two outcomes. The sum of a pair of dice has 11 outcomes. The total electoral votes for the Democratic candidate has 539 possible outcomes. In the limit, we can also create *continuous* probability distributions which have an *infinite* number of possible outcomes. For example, the average height for an American male could be any real number between 0 inches and 100 inches. (Of course, an average value anywhere near 0 or 100 is absurd. The point is that the average could be 68.564, 68.5643, 68.56432 68.564327, or any real number.)
 
 All the characteristics for discrete probability distributions which we reviewed above apply just as much to continuous probability distributions. For example, we can create mathematical, empirical and posterior probability distributions for continuous outcomes just as we did for discrete outcomes.
 
 A good mathematical distribution for the height of adult men is the normal distribution.
 
-Mathematical
-
-```{r}
-height_data <-nhanes%>%
-  filter(age >= 18) %>%
-  select(height,age)%>%
-  drop_na() %>%
-  arrange(age) %>%
-  group_by(age) %>%
-  summarize(height_average = mean(height))
-
-  # mutate(height_average= mean(height)) %>%
-  # summarise(age,height_average) %>%
-  # summarise_all(funs(unique(.[.!='']))) 
-
- height_data
-```
+Mathematical:
 
 
 ```{r}
-height_data %>%
-  ggplot(aes(age,height_average))+
-  geom_col()
+tibble(height = rnorm(10000, mean = 170, sd = 9)) %>% 
+  ggplot(aes(x = height)) +
+    geom_density()
   
 ```
 
+
+The *empirical distribution* involves using data from the National Health and Nutrition Examination Survey (NHANES). 
+
+```{r}
+nhanes %>%
+  filter(gender == "Male", age >= 18) %>%
+  select(height)%>%
+  drop_na() %>%
+  ggplot(aes(x = height)) +
+    geom_histogram(bins = 50)
+
+```
+
+The *posterior distribution* for heights depends on the context. Are we considering all the adult men in America? In that case, our posterior would probably look a lot like the empirical distribution using NHANES data. If we are being asked about the distribution of heights among players in the NBA, then our posterior might look like:
+
+```{r}
+tibble(height = rnorm(100000, mean = 195, sd = 3)) %>% 
+  ggplot(aes(x = height)) +
+    geom_density()
+  
+```
 
 
 <!-- DK: Insert here mathematical, empirical and posterior examples. -->
