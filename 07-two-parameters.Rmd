@@ -1,11 +1,10 @@
 # Two Parameters {#two-parameters}
 
-<!-- Read Gelman on problems with testing. -->
+<!-- Read Gelman on problems with testing. GP: Not yet. -->
 
-<!-- There are two big things. First, I think the introduction of 7.1 (everything before 7.1.1) belongs outside of the "Wisdom" section entirely. Chapter 5 establishes that the cardinal virtues are parts of a process to answer your questions. Creating the questions themselves is not part of "Wisdom" (as per chapter 5) and therefore doesn't belong in that section, but rather right before it. Secondly, it seems to me that most of what is discussed in the "Courage" section actually belongs in the "Temperance" section. Agreed! Do this.  -->
+<!-- I think the introduction of 7.1 (everything before 7.1.1) belongs outside of the "Wisdom" section entirely. Chapter 5 establishes that the cardinal virtues are parts of a process to answer your questions. Creating the questions themselves is not part of "Wisdom" (as per chapter 5) and therefore doesn't belong in that section, but rather right before it. GP: Done -->
 
-<!-- Delete females from EDA plot and make a better plot.  Maybe it has both a histogram and a density overlayed. Or maybe not! I don't know. -->
-
+<!-- Delete females from EDA plot and make a better plot.  Maybe it has both a histogram and a density overlayed. Or maybe not! I don't know. GP: Done -->
 
 <!-- old stuff: -->
 
@@ -35,25 +34,11 @@ Even then, however, the relative likelihood of different models is not that impo
 
 In addition to a change in tools, there are two key differences in this chapter. First, Chapter \@ref(one-parameter) used models with just one parameter: the number of red beads, which we can also transform into a parameter, $p$, the number of red beads divided by 1,000. The  model in Chapter \@ref(one-parameter) was binomial, and there is only one unknown parameter $p$ in such models. In this chapter, we have two unknown parameters: the mean $\mu$ height in the US and the standard deviation, $\sigma$, of the normally distributed error term.
 
-Second, Chapter \@ref(one-parameter) dealt with a limited set of specific models: 1,001 of them, to be precise. The procedure used was just what we saw in Chapter \@ref(probability).  In this chapter, on the other hand, we have continuous parameters.   
+Second, Chapter \@ref(one-parameter) dealt with a limited set of specific models: 1,001 of them, to be precise. The procedure used was just what we saw in Chapter \@ref(probability).  In this chapter, on the other hand, we have continuous parameters.
 
-The purpose of this chapter is to demonstrate, slowly and thoroughly, how professionals do data science.
+By this point, we should understand that the reason for making models is not, primarily, that making models is fun (although it is)! The reason is that, when confronted with a question, we face decisions. We must decide between variables X or Y. We must choose from datasets A, B and C. Confronted by a decision, we need to make a model of the world to help us. 
 
-```{r, echo = FALSE}
-knitr::include_graphics("07-two-parameters/images/learn_the ways.gif")
-```
-
-Data science is ultimately a moral act, so we will use the four [Cardinal Virtues](https://en.wikipedia.org/wiki/Cardinal_virtues) --- Wisdom, Justice, Courage and Temperance --- to organize our approach.  
-
-## Wisdom
-
-```{r echo = FALSE}
-knitr::include_graphics("other/images/Wisdom.jpg")
-```
-
-The reason for making models is not, primarily, that making models is fun (although it is)! The reason is that, when confronted with a question, we face decisions. We must decide between variables X or Y. We must choose from datasets A, B and C. Confronted by a decision, we need to make a model of the world to help us. 
-
-<!-- Add back reference to ch 12 when it shows up again. -->
+<!-- Add back reference to ch 12 when it shows up again. GP: Can't do this yet (have not read that far) -->
 
 The real world is complex. Any substantive decision problem includes a great deal of complexity and requires even more context. We do not have the time to get into that level of detail now. So, we simplify. We are going to create a model of height for adult men. We will then use that model to answer four questions:
 
@@ -65,9 +50,21 @@ The real world is complex. Any substantive decision problem includes a great dea
 
 * What is our posterior probability distribution for the height of the 3rd tallest man out of the next 100 we meet?
 
-The first and fourth questions require a full scale posterior probability distribution as an answer. The middle two questions have a single number as their answer, but we first create a posterior probability distribution in order to derive that number.
+The hope for this chapter is that, by answering these four questions, we'll gain a better and more thorough understanding of how professionals do data science.
+
+```{r, echo = FALSE}
+knitr::include_graphics("07-two-parameters/images/learn_the ways.gif")
+```
+
+Data science is ultimately a moral act, so we will use the four [Cardinal Virtues](https://en.wikipedia.org/wiki/Cardinal_virtues) --- Wisdom, Justice, Courage and Temperance --- to organize our approach.  
+
+## Wisdom
 
 ### Preceptor Table
+
+```{r echo = FALSE}
+knitr::include_graphics("other/images/Wisdom.jpg")
+```
 
 What rows and columns of data do you need such that, if you had them all, the calculation of the number of interest would be trivial? If you want to know the average height of an adult in India, then the Preceptor Table would include a row for each adult in India and a column for their height. In this scenario, we want to know the average height for men, where "men" includes all males on Earth that are over the age of 18. 
 
@@ -106,7 +103,7 @@ This table would extend all the way until person 4 billion-and-something. If we 
 
 ### EDA for `nhanes`
 
-<!-- This EDA is not very good and does not build naturally to where we want to be. -->
+<!-- This EDA is not very good and does not build naturally to where we want to be. GP: Fixed (hopefully) -->
 
 In our quest to find suitable data, we find the `nhanes` dataset from the National Health and Nutrition Examination Survey conducted from 2009 to 2011 by the Centers for Disease Control and Prevention, which examines health and other pieces of data for children and adults in the United States. 
 
@@ -154,32 +151,38 @@ nhanes %>%
   skim()
 ```
 
-Interesting! There are 353 missing values of height in our subset of data. Just using `glimpse()` does not show us that.  Let's filter out the NA's using `drop_na()`. This will delete the rows in which the value of any variable is missing. For simplicity, and because we want to examine height in men (not boys), let's limit our data to only include adults. 
+Interesting! There are 353 missing values of height in our subset of data. Just using `glimpse()` does not show us that.  Let's filter out the NA's using `drop_na()`. This will delete the rows in which the value of any variable is missing. Because we want to examine height in men (not boys, nor females), let's limit our data to only include adult males. 
 
 ```{r}
 ch7 <- nhanes %>% 
-  select(age, gender, height) %>%
-  filter(age >= 18) %>% 
+  filter(gender == "Male", age >= 18) %>% 
+  select(height) %>% 
   drop_na()
 ```
 
-Plot your data. `geom_density()` is a smooth version of `geom_histogram()`. With `geom_density()`, the y-axis is scaled so that the area under the curve equals 1. 
+Let's plot this data using `geom_density()` and `geom_histogram()`. 
 
 <!-- DK: Add discussion about 95% interval. Connect to posterior_predict later. More or less: posterior_predict makes the same histogram as the raw data. Teach that! -->
 
 ```{r}
 ch7 %>%
-  ggplot(aes(x = height, color = gender)) + 
-  geom_density() + 
+  ggplot(aes(x = height)) + 
+  geom_density(color = "black",
+               fill = "red",
+               alpha = .2) +
+  geom_histogram(mapping = aes(y = ..density..),
+                 bins = 15,
+                 color = "black",
+                 fill = "blue",
+                 alpha = .2) +
   labs(x = expression(mu),
+       y = "Density",
        title = "Height (cm) in NHANES Dataset",
        color = "Sex") +
   theme_classic()
 ```
 
-We see the most probable heights for both genders and that men are generally taller than women. 
-
-Let's focus on a subset of the `nhanes` data, designed to answer our questions. And, instead of using all the data, let's just use 50 randomly selected observations. (The `set.seed()` function ensures that the same 50 observations are selected every time this code is run.) 
+We'll be focusing on a subset of the `nhanes` data, designed to answer our questions. And, instead of using all the data, we'll just use 50 randomly selected observations. (The `set.seed()` function ensures that the same 50 observations are selected every time this code is run.) 
 
 <!-- Add more comments to below code chunk. Put set.seed discussion there. There should be as many lines of comments as lines of code. -->
 
@@ -191,6 +194,7 @@ ch7_all <- nhanes %>%
   drop_na() 
 
 set.seed(9)
+
 ch7 <- ch7_all %>% 
   slice_sample(n = 50)
 ```
@@ -217,7 +221,7 @@ Is not-perfect data *always* better? No! If your problem is estimating the media
 
 For now, we will accept that our data works.
 
-<!--I feel as though the entire 7.1.3 section can be summarized in one paragraph and placed as an introduction to the subsequent section — I don't think the message merits its own entire section. -->
+<!-- I feel as though the entire 7.1.3 section can be summarized in one paragraph and placed as an introduction to the subsequent section — I don't think the message merits its own entire section. GP: Ask preceptor about the difference between the discussion of "population" in Wisdom, and the discussion of "representativeness" in Justice. (These feel largely like a repeat of the same information; in Wisdom you are *assuming* the data is represantitive, and in Justice you are *asking* whether the data is representative?) Until then, I'm not sure how to organize these last few sections... -->
 
 ### The Population Table
 
@@ -281,11 +285,11 @@ We inspect both representativeness and validity through our Population Table. Re
 
 ### Representativeness
 
-As we've stated above, representativeness involves our rows. More specifically, whether the rows that we *do* have data for are the same as the rows for which we *do not* have data. This is a somewhat convoluted way of saying: do all pieces of desired data have an equal chance of being included in our dataset?
+As we've stated above, representativeness involves our rows. More specifically, are the rows that we *do* have data for representative of the rows for which we *do not* have data? Ideally, the data we have is a random, unbiased selection from our population, and so the answer to our question is yes.
 
-<!-- The equivalence of the two above statements is not immediately apparent. So fix it. -->
+For our `nhanes` data, is this the case? It is time to investigate.
 
-Ideally, data is a random selection from our population. For our `nhanes` data, is this the case? It is time to investigate. 
+<!-- The equivalence of the two above statements is not immediately apparent. So fix it. GP: Fixed -->
 
 According to the CDC, individuals are invited to participate in NHANES based on a randomized process. First, the United States is divided into a number of geographical groups (to ensure counties from all areas). From each of these groups, counties are randomly selected to participate. After a county has been randomly selected, members of the households in that county are notified of the upcoming survey, and must volunteer their time to participate. 
 It is clear that this process goes through several layers of randomization (promising!). That being said, many counties are excluded by the end of the process. It is also possible for certain groups or communities to be less representative of the greater population, though we cannot know that for certain. 
@@ -313,9 +317,11 @@ As best we can, we need to investigate any possible reasons that we may not be a
 However, a little mathematical notation will make our modeling assumptions clear, will bring some precision to our approach. In this case:
 
 $$ y_i =  \mu + \epsilon_i $$
-with $\epsilon_i \sim N(0, \sigma^2)$. $y_i$ is the height of male $i$. $\mu$ is the average height of all males in the population. $\epsilon_i$ is the "error term," the difference between the height of male $i$ and the average height of all males.  $\epsilon_i$ is, by assumption, normally distributed with a mean of 0 and a standard deviation of $\sigma$.
+with $\epsilon_i \sim N(0, \sigma^2)$. $y_i$ is the height of male $i$. $\mu$ is the average height of all males in the population. $\epsilon_i$ is the "error term," the difference between the height of male $i$ and the average height of all males.
 
-<!-- \epsilon_i \sim N(0, \sigma^2) warrants elaboration, as drawing an error term from a normal distribution like this is not something that has been discussed previously. -->
+$\epsilon_i$ is normally distributed with a mean of 0 and a standard deviation of $\sigma$. The mean being 0 relates to our concept of **accuracy**; we are assuming that our data is representative enough to be accurate, and so we can expect our average error to be 0. The standard deviation, on the other hand, relates to our concept of **precision**; the smaller $\sigma$ is, the more precise our data is, and the larger $\sigma$ is, the less precise our data is. 
+
+<!-- \epsilon_i \sim N(0, \sigma^2) warrants elaboration, as drawing an error term from a normal distribution like this is not something that has been discussed previously. GP: Done! -->
 
 This is the simplest model we can construct. Note: 
 
