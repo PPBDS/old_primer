@@ -1,17 +1,13 @@
 # Two Parameters {#two-parameters}
 
-<!-- Read Gelman on problems with testing. GP: Not yet. -->
+<!-- Read Gelman on problems with testing. -->
 
-<!-- Read chapter 8 and 11.  -->
+<!-- Read chapter 8 and 11. -->
 
-<!-- Add comments to important code chunks, like the EDA graphic. -->
 
-<!-- Place Population Table at the start of Justice. -->
-
-<!-- Add discussion of why Wisdom has nothing to do with representativeness. Use basketball player example. The  best way to be sure that your data is representative of the population is for the process which selected that data to be random. Almost never true! Even if NHANES is a perfect survey --- things are still hard. And no survey is perfect. People in jail? People in hospitals?  -->
+<!-- Add discussion of why Wisdom has nothing to do with representativeness. Use basketball player example. The  best way to be sure that your data is representative of the population is for the process which selected that data to be random. Almost never true! Even if NHANES is a perfect survey --- things are still hard. And no survey is perfect. People in jail? People in hospitals? GP: Done (maybe could elaborate some more later)  -->
 
 <!-- old stuff: -->
-
 
 <!-- Concerns about representativeness and validity may cause us to make adjustments in our final posteriors in an ad hoc --- but still useful! --- manner, or they may cause us to make changes in our actual models.  -->
 
@@ -39,7 +35,7 @@ Second, Chapter \@ref(one-parameter) dealt with a limited set of specific models
 
 By this point, we should understand that the reason for making models is not, primarily, that making models is fun (although it is)! The reason is that, when confronted with a question, we face decisions. We must decide between variables X or Y. We must choose from datasets A, B and C. Confronted by a decision, we need to make a model of the world to help us. 
 
-<!-- Add back reference to ch 12 when it shows up again. GP: Can't do this yet (have not read that far) -->
+<!-- Add back reference to ch 12 when it shows up again. -->
 
 The real world is complex. Any substantive decision problem includes a great deal of complexity and requires even more context. We do not have the time to get into that level of detail now. So, we simplify. We are going to create a model of height for adult men. We will then use that model to answer four questions:
 
@@ -103,8 +99,6 @@ tibble(ID = c("Person 1", "Person 2", "...", "Person 45000", "Person 45001", "..
 This table would extend all the way until person 4 billion-and-something. If we had this table, all of our questions could be answered with basic math. No inference necessary. Now that we've seen our ideal dataset, what does our actual data look like? 
 
 ### EDA for `nhanes`
-
-<!-- This EDA is not very good and does not build naturally to where we want to be. GP: Fixed (hopefully) -->
 
 In our quest to find suitable data, we find the `nhanes` dataset from the National Health and Nutrition Examination Survey conducted from 2009 to 2011 by the Centers for Disease Control and Prevention, which examines health and other pieces of data for children and adults in the United States. 
 
@@ -175,15 +169,18 @@ ch7 %>%
   # You can have multiple geom layers in a plot by simply adding them one after
   # the other.
   
+  # Be careful though! Often times you'll need to give each additional layer its
+  # own mapping argument in order for it to show up properly.
+  
   geom_histogram(mapping = aes(y = ..density..),
                  bins = 15,
                  color = "black",
                  fill = "blue",
                  alpha = .2) +
   
-  # In order to gave Greek letters and other mathematical expressions appear in
-  # plot labels, you need to use the expression() function, with appropriate
-  # arguments, which will often be the name of the Greek letter you want.
+  # In order to use Greek letters and other mathematical expressions in plot
+  # labels and titles, you'll need to use the expression() function, with
+  # appropriate arguments.
   
   labs(x = expression(mu),
        y = "Density",
@@ -221,7 +218,7 @@ In this case, we want to predict average height for males *today*, not for peopl
 
 It is a judgment call, a matter of Wisdom, as to whether or not we may assume that the data we have and the data we want to have (i.e., the Preceptor Table) are drawn from the same population.
 
-Even though the original question is about “males” in general, and does not specifically refer to those males in the United States, we will assume that the data we have for United States citizens is, uh, representative enough of the population we are interested in. If we did not believe that, then we should stop right now. The major part of Wisdom is deciding what questions you can’t answer because of the data you just don’t have.
+Note that this judgement call differs from the discussion of representativeness in Justice. In Wisdom, we ask questions about how the data was collected, and what this says about our data. In Justice, we ask questions (already knowing how the data was collected) about whether or not inferences made using this data can apply to a broader scope of the population. Suppose, for instance, that the men sampled in NHANES were all NBA players. Wisdom would tell us that these heights are likely to be much greater than those of the average person. Justice asks whether or not this data is representative of the average person, and what modifications could imposed to fix a potential bias.
 
 In the social sciences, *there is never a perfect relationship between the data you have and the question you are trying to answer.* Data for American males in the past is not the same thing as data for American males today. Nor is it the same as the data for men in France or Mexico.Yet, this data is relevant. Right? It is certainly better than nothing. 
 
@@ -231,27 +228,44 @@ Is not-perfect data *always* better? No! If your problem is estimating the media
 
 For now, we will accept that our data works.
 
-<!-- I feel as though the entire 7.1.3 section can be summarized in one paragraph and placed as an introduction to the subsequent section — I don't think the message merits its own entire section. GP: Ask preceptor about the difference between the discussion of "population" in Wisdom, and the discussion of "representativeness" in Justice. (These feel largely like a repeat of the same information; in Wisdom you are *assuming* the data is represantitive, and in Justice you are *asking* whether the data is representative?) Until then, I'm not sure how to organize these last few sections... -->
+## Justice
+
+```{r, echo = FALSE}
+knitr::include_graphics("other/images/Justice.jpg")
+```
+
+Having looked at our data and decided that it is "close enough" to our questions that creating a model will help us come up with better answers, we move on to Justice. 
+
+Justice emphasizes a few key concepts:
+
+* The Population Table, a structure which includes a row for every unit in the population. We generally break the rows in the Population Table into three categories: the data for units we want to have (the Preceptor Table), the data for units which we actually have (our actual data), and the data for units we do not care about (the rest of the population, not included in the data or the Preceptor Table).
+* Is our data representative of the population?
+* Is the meaning of the columns consistent, i.e., can we assume validity?
+We then make an assumption about the data generating mechanism.
+
+We inspect both representativeness and validity through our Population Table. Representativeness focuses on the rows of the table, while validity focuses on the columns. Let's explore what that means in more depth. 
 
 ### The Population Table
 
-The Population Table shows the data that we actually have in our desired population. It shows rows from three sources: the Preceptor Table, the data, and the population outside of the data (rows which exist but for which we have no data).
+The Population Table shows rows from three sources: the **Preceptor Table**, the **actual data**, and the **population** (outside of the data).
 
-In our Preceptor rows, we have information for our covariates of sex and year. However, because those rows are not included in our data, we do not have any outcome results (height). Since our scenario pertains to a prediction for average height in 2021, the year column will read "2021" and the sex column will read "male."
+Our **Preceptor Table** rows contain the information that we would *want* to know in order to answer our questions. These rows contain entries for our covariates (sex and year) but they do not contain any outcome results (height). We are trying to answer questions about the male population in 2021, so our sex entries for these rows will read "Male" and our year entries of these rows will read "2021". 
 
-The rows from our data have everything: the covariates and the outcomes. The covariates here will be 2009-2011 for year and male for sex, since these are the pieces of information that are included in our data. We *will* have outcome results in these rows. 
+Our **actual data** rows contain the information that we *do* know. These rows contain entries for both our covariates *and* the outcomes. In this case, the actual data comes from a study conducted on males in 2009-2011, so our sex entries for these rows will read "Male" and our year entries of these rows will either read "2009", "2010", or "2011".
 
-The rows from the population have no data. These are subjects which fall under our desired population, but for which we have no data. As such, all rows are missing.
+Our **population** rows contain no data. These are subjects which fall under our desired population, but for which we have no data. As such, all rows are missing.
+
+<!-- GP: I changed everything but the explanation for the **population** rows. I am confused; shouldn't the population rows still contain "Male" in the sex column? Because this entire chapter, we've exclusively been discussing the male population, so at least that much should be known, no? -->
 
 ```{r, echo = FALSE}
 tibble(source = c("Preceptor Table", "Preceptor Table", "...",
-                  "Data", "Data", "Data", "...", 
+                  "Actual Data", "Actual Data", "Actual Data", "...", 
                   "Population", "Population", "Population"),
        gender = c("Male", "Male", "...",
                   "Male", "Male", "Male", "...",
                   "?", "?", "?"),
        year = c("2021", "2021", "...",
-                "2009", "2010", "2009", "...",
+                "2009", "2011", "2010", "...",
                 "?", "?", "?"),
        height = c("?", "?", "...",
                  "180", "160", "168", "...",
@@ -273,33 +287,11 @@ tibble(source = c("Preceptor Table", "Preceptor Table", "...",
   fmt_markdown(columns = everything())  
 ```
 
-
-
-## Justice
-
-```{r, echo = FALSE}
-knitr::include_graphics("other/images/Justice.jpg")
-```
-
-Having looked at our data and decided that it is "close enough" to our questions that creating a model will help us come up with better answers, we move on to Justice. 
-
-Justice emphasizes a few key concepts:
-
-* The Population Table, a structure which includes a row for every unit in the population. We generally break the rows in the Population Table into three categories: the data for units we want to have (the actual data set), the data for units which we actually have (the Preceptor Table), and the data for units we do not care about (the rest of the population, not included in the data or the Preceptor Table).
-* Is our data representative of the population?
-* Is the meaning of the columns consistent, i.e., can we assume validity?
-We then make an assumption about the data generating mechanism.
-
-We inspect both representativeness and validity through our Population Table. Representativeness focuses on the rows of the table, while validity focuses on the columns. Let's explore what that means in more depth. 
-
-
 ### Representativeness
 
 As we've stated above, representativeness involves our rows. More specifically, are the rows that we *do* have data for representative of the rows for which we *do not* have data? Ideally, the data we have is a random, unbiased selection from our population, and so the answer to our question is yes.
 
 For our `nhanes` data, is this the case? It is time to investigate.
-
-<!-- The equivalence of the two above statements is not immediately apparent. So fix it. GP: Fixed -->
 
 According to the CDC, individuals are invited to participate in NHANES based on a randomized process. First, the United States is divided into a number of geographical groups (to ensure counties from all areas). From each of these groups, counties are randomly selected to participate. After a county has been randomly selected, members of the households in that county are notified of the upcoming survey, and must volunteer their time to participate. 
 It is clear that this process goes through several layers of randomization (promising!). That being said, many counties are excluded by the end of the process. It is also possible for certain groups or communities to be less representative of the greater population, though we cannot know that for certain. 
@@ -330,8 +322,6 @@ $$ y_i =  \mu + \epsilon_i $$
 with $\epsilon_i \sim N(0, \sigma^2)$. $y_i$ is the height of male $i$. $\mu$ is the average height of all males in the population. $\epsilon_i$ is the "error term," the difference between the height of male $i$ and the average height of all males.
 
 $\epsilon_i$ is normally distributed with a mean of 0 and a standard deviation of $\sigma$. The mean being 0 relates to our concept of **accuracy**; we are assuming that our data is representative enough to be accurate, and so we can expect our average error to be 0. The standard deviation, on the other hand, relates to our concept of **precision**; the smaller $\sigma$ is, the more precise our data is, and the larger $\sigma$ is, the less precise our data is. 
-
-<!-- \epsilon_i \sim N(0, \sigma^2) warrants elaboration, as drawing an error term from a normal distribution like this is not something that has been discussed previously. GP: Done! -->
 
 This is the simplest model we can construct. Note: 
 
@@ -486,8 +476,11 @@ These 4,000 rows are draws from the estimated posteriors, each in its own column
 ```{r}
 fit_obj %>% 
   as_tibble() %>% 
-  rename(mu = `(Intercept)`) %>% 
-  ggplot(aes(x = mu)) +
+  ggplot(aes(x = `(Intercept)`)) +
+  
+# Recall that after_stat() allows us to work with "stat variables" that have
+# been calculated by ggplot, such as "count" and "density".
+  
     geom_histogram(aes(y = after_stat(count/sum(count))), 
                    bins = 100) +
     labs(title = "Posterior for Average Male Height",
@@ -503,11 +496,13 @@ Although it is possible to have variable names like "(Intercept)", it is not rec
 
 Note that the title includes the word "Posterior" and not the complete term "Posterior Probability Distribution." This will be our practice going forward. "Posterior" means "Posterior Distribution" and, any posterior distribution in which the sum of the range is 1 is a "posterior probability distribution." In most or our plots, "posterior" implies "posterior probability distribution."
 
-Always go back to first principles. There is some "*truth*, an unknown number, a fact about the world. If we knew everything, if we had the Preceptor Table, inference would not be necessary. Algebra would suffice. Alas, in this imperfect world, we have no choice but to be data scientist. We are always uncertain. We summarize our knowledge of unknown numbers with posterior probability distributions, or "posteriors" for short.
+Always go back to first principles. There is some *truth*, an unknown number, a fact about the world. If we knew everything, if we had the Preceptor Table, inference would not be necessary. Algebra would suffice. Alas, in this imperfect world, we have no choice but to be data scientist. We are always uncertain. We summarize our knowledge of unknown numbers with posterior probability distributions, or "posteriors" for short.
 
 <!-- Add more discussion about what this plot means. -->
 
 ```{r}
+# The same plot as above, but for sigma instead of mu.
+
 fit_obj %>% 
   as_tibble() %>% 
   ggplot(aes(x = sigma)) +
