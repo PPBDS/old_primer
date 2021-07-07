@@ -53,7 +53,6 @@
 <li><a class="" href="maps.html">Maps</a></li>
 <li><a class="" href="ipums.html">IPUMS</a></li>
 <li><a class="" href="animation.html">Animation</a></li>
-<li><a class="" href="python.html">Python</a></li>
 <li><a class="" href="set-up-for-working-on-the-primer.html">Set Up for Working on The Primer</a></li>
 <li><a class="" href="references.html">References</a></li>
 </ul>
@@ -73,31 +72,40 @@
 <span class="header-section-number">3.1</span> Introduction<a class="anchor" aria-label="anchor" href="#introduction"><i class="fas fa-link"></i></a>
 </h2>
 <!-- TODO: -->
-<!-- Add one paragraph Distill section, including links, like from Bootcamp page. Point toward tutorial. -->
+<!-- Add one paragraph Distill section, including links, like from Bootcamp page. Point toward tutorial. DONE -->
+<!-- Any inspiration to be drawn from this: https://ubc-dsci.github.io/introduction-to-datascience/reading.html -->
+<!-- Add Google sheets examples? -->
+<p>Getting data into and out of R is a major part of any real world data science project. There are multiple data formats that you use to transport this data, each with their own positives and negatives.</p>
 <p>Start by loading the packages which we will need in this chapter.</p>
 <div class="sourceCode" id="cb387"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyverse.tidyverse.org">tidyverse</a></span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">primer.data</span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://dbplyr.tidyverse.org/">dbplyr</a></span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/sfirke/janitor">janitor</a></span><span class="op">)</span></code></pre></div>
-</div>
-<div id="writing-and-reading-files" class="section level2" number="3.2">
-<h2>
-<span class="header-section-number">3.2</span> Writing and reading files<a class="anchor" aria-label="anchor" href="#writing-and-reading-files"><i class="fas fa-link"></i></a>
-</h2>
-<div class="inline-figure"><img src="03-data/images/file_extensions.png" width="100%"></div>
-<p>Getting data into and out of R is a major part of any real world data science project. There are multiple data formats that you use to transport this data, each with their own positives and negatives.</p>
 <p>You can find most of the files that we use for this chapter <a href="https://github.com/PPBDS/primer.tutorials/tree/master/inst/www">here</a>. We can also access these files by saving the URL to R and then using it so that we can download and access the files located on the internet.</p>
 <div class="sourceCode" id="cb388"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">github_url</span> <span class="op">&lt;-</span> <span class="st">"https://raw.githubusercontent.com/PPBDS/primer.tutorials/master/inst/www/"</span></code></pre></div>
+</div>
+<div id="reading-and-writing-files" class="section level2" number="3.2">
+<h2>
+<span class="header-section-number">3.2</span> Reading and writing files<a class="anchor" aria-label="anchor" href="#reading-and-writing-files"><i class="fas fa-link"></i></a>
+</h2>
+<div class="figure" style="text-align: center">
+<span id="fig:unnamed-chunk-247"></span>
+<img src="03-data/images/file_extensions.png" alt="Choose your file formats wisely." width="50%"><p class="caption">
+FIGURE 3.1: Choose your file formats wisely.
+</p>
+</div>
+<!-- Added this since I wanted the introduction section to actually have some sort of introduction rather than just package downloads. -->
+<p>The first method that we can use to import data is by using a file. You’ve likely downloaded files before, whether it’s a game’s EXE file, an image’s JPG file, or an essay’s PDF file. At their core, those files are just data. The JPG file has a bunch of data about the colors in the image and the PDF file has a bunch of data about the text. So we can use these files to store data from experiments or surveys so that we can then analyze that data later or share that data with other people.</p>
+<p>In this section, we’ll be going over the common file formats and how we can pull data from these files into R or create new files so that we can share them with other people.</p>
 <div id="text-files" class="section level3" number="3.2.1">
 <h3>
 <span class="header-section-number">3.2.1</span> Text files<a class="anchor" aria-label="anchor" href="#text-files"><i class="fas fa-link"></i></a>
 </h3>
-<p>The most common type of data text file is “CSV,” which stands for <strong>c</strong>omma <strong>s</strong>eparated <strong>v</strong>alue. In other words, csv files are files whose values are separated by commas. Each comma from the csv file corresponds to a column, and the column names are, by default, taken from the first line of the file.</p>
+<p>The most common type of data text file is “CSV,” which stands for <em>c</em>omma <em>s</em>eparated <em>v</em>alue. In other words, CSV files are files whose values are separated by commas. Each comma from the csv file corresponds to a column, and the column names are, by default, taken from the first line of the file.</p>
 <p>CSV files (and their counterparts) are easily transferable between computers and programming languages and are extremely simple because they’re effectively just text files that have a special format. Additionally, they’re very easy to parse through small amounts of data because they’re easily readable by humans and computers.
 However, due to their simple nature, CSV files are only able to move basic data and only as text values. They also have poor support for special characters like commas, which can make the dataset harder to organize and understand by adding a new column for a few specific entries. This make CSV files good for sharing data between computers and languages, but not efficient for transporting or saving large amounts of data.</p>
-<p>In this section, we’ll be going over the common file formats and how we can pull data from these files into R.</p>
 <div id="reading-and-writing-from-a-csv-file" class="section level4" number="3.2.1.1">
 <h4>
 <span class="header-section-number">3.2.1.1</span> Reading and writing from a CSV file<a class="anchor" aria-label="anchor" href="#reading-and-writing-from-a-csv-file"><i class="fas fa-link"></i></a>
@@ -477,6 +485,7 @@ In this case, the comment is the <code>#</code> sign, so we just need to include
 ##   &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
 ## 1     1     2     3
 ## 2     4     5     6</code></pre>
+<!-- AG: Going to figure out a way to meld these two things together so I can have one "arguments and important functions" section for both CSV and Excel files. That's probably a lot smoother and improves understanding more than the current structure. Don't have time right now to fix it. -->
 <p>If the .xlsx file has multiple sheets, you have to use the <code>sheet</code> argument to specify the sheet number or name.
 The <code><a href="https://readxl.tidyverse.org/reference/read_excel.html">read_excel()</a></code> function also has arguments similar to the <code>read_csv()</code> function such as <code>col_names</code>, <code>col_types</code>, and <code>na</code>.</p>
 </div>
@@ -521,7 +530,7 @@ However, RDS files are limited to R projects only, and they’re incomprehensibl
 <h3>
 <span class="header-section-number">3.2.4</span> JSON<a class="anchor" aria-label="anchor" href="#json"><i class="fas fa-link"></i></a>
 </h3>
-<p>An increasingly common format for sharing data is <strong>J</strong>avaScript <strong>O</strong>bject <strong>N</strong>otation or JSON. Because this format is very general, it is nothing like a spreadsheet. Note that JSON files are often made available via the internet. Several organizations provide a JSON API or a web service that you can connect directly to and from which you can obtain data.</p>
+<p>An increasingly common format for sharing data is <em>J</em>avaScript <em>O</em>bject <em>N</em>otation or JSON. Because this format is very general, it is nothing like a spreadsheet. Note that JSON files are often made available via the internet. Several organizations provide a JSON API or a web service that you can connect directly to and from which you can obtain data.</p>
 <p>JSON files are a minimal readable format that structures data, and they’re commonly used to transmit data between a server and a web application like a website. For people familiar with the Javascript coding language, you’ll likely see the similarities between the JSON file format and the Javascript syntax. This makes JSON files ideal for internet transport, but they don’t see much use within a project like RDS files do.</p>
 <p>The functions <code><a href="https://rdrr.io/pkg/jsonlite/man/fromJSON.html">fromJSON()</a></code> and <code><a href="https://rdrr.io/pkg/jsonlite/man/fromJSON.html">toJSON()</a></code> allow you to convert between R objects and JSON. Both functions come from the <strong>jsonlite</strong> package.</p>
 <div class="sourceCode" id="cb451"><pre class="downlit sourceCode r">
@@ -595,8 +604,8 @@ However, RDS files are limited to R projects only, and they’re incomprehensibl
 </h2>
 <div class="figure">
 <span id="fig:unnamed-chunk-281"></span>
-<img src="03-data/images/exploits_of_a_mom.png" alt="DROP TABLE is a particularly infamous SQL command." width="100%"><p class="caption">
-FIGURE 3.1: DROP TABLE is a particularly infamous SQL command.
+<img src="03-data/images/exploits_of_a_mom.png" alt="DROP TABLE is a particularly infamous SQL command" width="100%"><p class="caption">
+FIGURE 3.2: DROP TABLE is a particularly infamous SQL command
 </p>
 </div>
 <p>Databases are one of the most common methods of storing data, as they are capable of storing large amounts of data while also allowing for multiple people to access and change them at the same time. Think of these like a giant book with a bunch of tables that hold data. These are useful by themselves, but with the advent of computers we are now able to use relational databases.</p>
@@ -737,7 +746,7 @@ FIGURE 3.1: DROP TABLE is a particularly infamous SQL command.
 ##  [5] "genres"          "invoice_items"   "invoices"        "media_types"    
 ##  [9] "playlist_track"  "playlists"       "sqlite_sequence" "sqlite_stat1"   
 ## [13] "tracks"</code></pre>
-<p>There are 13 tables in this database. Let’s access the first couple of tables, just so that we can get a good look at them and see how they’re structured..</p>
+<p>There are 13 tables in this database. Let’s access the first couple of tables, just so that we can get a good look at them and see how they’re structured.</p>
 <div class="sourceCode" id="cb479"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">albums</span> <span class="op">&lt;-</span> <span class="fu">tbl</span><span class="op">(</span><span class="va">con</span>, <span class="st">"albums"</span><span class="op">)</span>
 <span class="va">albums</span></code></pre></div>
@@ -774,7 +783,7 @@ FIGURE 3.1: DROP TABLE is a particularly infamous SQL command.
 ##  9        9 BackBeat            
 ## 10       10 Billy Cobham        
 ## # … with more rows</code></pre>
-<p>As you can see, each table has a common column: the <code>ArtistId</code> column. However, they all have different information linked to that ID, such as “albums” having the albums that artist produced and “artists” having the name of that artist.</p>
+<p>As you can see, these tables both have a common column: the <code>ArtistId</code> column. However, they all have different information linked to that ID, such as “albums” having the albums that artist produced and “artists” having the name of that artist.</p>
 <p>Here is the <a href="http://schemaspy.org/sample/diagrams/summary/relationships.real.large.png">full relationship diagram</a> of the database that we’re using.</p>
 <p>Let’s go over some of the operations that you can do on a SQLite database.</p>
 <div id="using-dbplyr" class="section level4" number="3.3.2.1">
@@ -825,9 +834,9 @@ FIGURE 3.1: DROP TABLE is a particularly infamous SQL command.
 <span class="header-section-number">3.3.2.2</span> Using SQL code<a class="anchor" aria-label="anchor" href="#using-sql-code"><i class="fas fa-link"></i></a>
 </h4>
 <p>First off, let’s try to understand what SQLite and SQL really is.</p>
-<p>SQL, or <strong>S</strong>tructured <strong>Q</strong>uery <strong>L</strong>anguage, is a coding language that works to build the relational databases that we’ve been using so far. SQLite is a special type of database that you can download onto your computer that uses SQL as its basic structure and basic language. Essentially, SQLite uses SQL code to do the things that it does.</p>
+<p>SQL, or <em>S</em>tructured <em>Q</em>uery <em>L</em>anguage, is a coding language that works to build the relational databases that we’ve been using so far. SQLite is a special type of database that you can download onto your computer that uses SQL as its basic structure and basic language. Essentially, SQLite uses SQL code to do the things that it does.</p>
 <p>While you shouldn’t need to write SQL code in this primer, it’s very common to read from an SQL database in order to access data so that you can graph it.</p>
-<p>SQL runs through something known as a <strong>query</strong>, a line of code that pulls in information from the database. This is effectively asking the database for a specific set of data. This is what’s known as a <code>SELECT</code> command, which “selects” data from the database and brings it into your computer for your use.</p>
+<p>SQL runs through something known as a <em>query</em>, a line of code that pulls in information from the database. This is effectively asking the database for a specific set of data. This is what’s known as a <code>SELECT</code> command, which “selects” data from the database and brings it into your computer for your use.</p>
 <div class="sourceCode" id="cb485"><pre class="sourceCode sql"><code class="sourceCode sql"><span id="cb485-1"><a href="data.html#cb485-1" aria-hidden="true" tabindex="-1"></a><span class="co">-- This code is written in SQL syntax, so it won't work if you just put it into R. </span></span>
 <span id="cb485-2"><a href="data.html#cb485-2" aria-hidden="true" tabindex="-1"></a><span class="co">-- We'll be going over how to write SQL in R later in this section.</span></span>
 <span id="cb485-3"><a href="data.html#cb485-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -1130,11 +1139,11 @@ WHERE (`num_albums` &gt; 3.0)
 ## 10        84    Foo Fighters          4</code></pre>
 <p>SQL is more versatile than <code>dbplyr</code>, but it’s also a lot more confusing because it’s not as straightforward. This creates one golden rule:</p>
 <blockquote>
-<p><strong>Use dbplyr functions for data analysis and SQL code for accessing data</strong></p>
+<p><em>Use dbplyr functions for data analysis and SQL code for accessing data</em></p>
 </blockquote>
 <p>This is because SQL code is weird and hard to understand, but it allows you to easily pull in data. SQL is a coding language <em>designed</em> for you to query or ask databases for data. Meanwhile, <code>dbplyr</code> is meant for analyzing that data and modifying it.</p>
 <p>Now, we worked with an SQLite database within this tutorial due to its simplicity. However, there are other databases that can be accessed in different ways. For example, a PostgresSQL server is located on the internet and allows you to pull data from the internet instead of downloading it into your computer. You can learn about some of the types of SQL databases and their differences <a href="https://www.digitalocean.com/community/tutorials/sqlite-vs-mysql-vs-postgresql-a-comparison-of-relational-database-management-systems">here</a>.</p>
-<p><strong>Why should we bother with databases at all?</strong></p>
+<p><em>But why should we bother with databases at all?</em></p>
 <p>Opening a database stored in a <code>.db</code> file involved a lot more effort than just opening a <code>.csv</code>, <code>.tsv</code>, or any of the other plain text or Excel formats. It was a bit of a pain to use a database in that setting since we had to use <code>dbplyr</code> to translate <code>tidyverse</code>-like commands (<code>filter</code>, <code>select</code>, <code>head</code>, etc.) into SQL commands that the database understands. Not all <code>tidyverse</code> commands can currently be translated with SQLite databases, like we showed with <code><a href="https://dplyr.tidyverse.org/reference/slice.html">slice()</a></code>. So you might be wondering, why should we use databases at all?</p>
 <p>Databases are beneficial in a large-scale setting:</p>
 <ul>
@@ -1153,7 +1162,7 @@ For example, <a href="https://www.internetlivestats.com/google-search-statistics
 <span class="header-section-number">3.4</span> Webscraping<a class="anchor" aria-label="anchor" href="#webscraping"><i class="fas fa-link"></i></a>
 </h2>
 <div class="inline-figure"><img src="03-data/images/tags.png" width="100%"></div>
-<p>In the first part of this chapter, we learned how to read in data from plain text files that are usually “rectangular” in shape using the <strong>tidyverse</strong> <code>read_*</code> functions. Sadly, not all data comes in this simple format, but we can happily use many other tools to read in more messy/wild data formats. The formal name for gathering non-rectangular data from the web and transforming it into a more useful format for data analysis is <strong>web scraping</strong>.</p>
+<p>In the first part of this chapter, we learned how to read in data from plain text files that are usually “rectangular” in shape using the <strong>tidyverse</strong> <code>read_*</code> functions. Sadly, not all data comes in this simple format, but we can happily use many other tools to read in more messy/wild data formats. The formal name for gathering non-rectangular data from the web and transforming it into a more useful format for data analysis is <em>web scraping</em>.</p>
 <p>We can do web scraping through r by using the <strong>rvest</strong> library, which is a library that allows us to look at HTML and CSS selectors, then pick them apart to get the data we want. Let’s look at what this means.</p>
 <div id="html-and-css-selectors" class="section level3" number="3.4.1">
 <h3>
@@ -1167,16 +1176,16 @@ For example, <a href="https://www.internetlivestats.com/google-search-statistics
 <div class="figure">
 <span id="fig:unnamed-chunk-304"></span>
 <img src="03-data/images/nobel.PNG" alt="A little bit of HTML editing can bring you a long way." width="100%"><p class="caption">
-FIGURE 3.2: A little bit of HTML editing can bring you a long way.
+FIGURE 3.3: A little bit of HTML editing can bring you a long way.
 </p>
 </div>
-<p>Websites are coded in a language called <strong>HTML</strong>, or <strong>H</strong>yper<strong>T</strong>ext <strong>M</strong>arkup <strong>L</strong>anguage. This is the code that puts all of the information on the website, such as the numbers and text. These are the files created when we “knit” our .Rmd files and it’s what makes them put information on the screen. When we’re webscraping, we can look at the information on the website by looking at the HTML code. You can try this out by yourself! Just go to any website and right-click, then press “Inspect.” You’ll be able to see the HTML code behind the website and even edit it to your liking!</p>
+<p>Websites are coded in a language called <em>HTML</em>, or <em>H</em>yper<em>T</em>ext <em>M</em>arkup <em>L</em>anguage. This is the code that puts all of the information on the website, such as the numbers and text. These are the files created when we “knit” our .Rmd files and it’s what makes them put information on the screen. When we’re webscraping, we can look at the information on the website by looking at the HTML code. You can try this out by yourself! Just go to any website and right-click, then press “Inspect.” You’ll be able to see the HTML code behind the website and even edit it to your liking!</p>
 <div class="sourceCode" id="cb501"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/include_graphics.html">include_graphics</a></span><span class="op">(</span><span class="st">"03-data/images/html_inspect.gif"</span><span class="op">)</span></code></pre></div>
 <div class="figure">
 <span id="fig:unnamed-chunk-305"></span>
 <img src="03-data/images/html_inspect.gif" alt="You can see the HTML code of a website and even edit it temporarily by inspecting the HTML code of the in" width="100%"><p class="caption">
-FIGURE 3.3: You can see the HTML code of a website and even edit it temporarily by inspecting the HTML code of the in
+FIGURE 3.4: You can see the HTML code of a website and even edit it temporarily by inspecting the HTML code of the in
 </p>
 </div>
 <p>HTML uses many nested “tags” to organize the structure. For example, an HTML file like this:</p>
@@ -1212,7 +1221,7 @@ Hello World
 </p>
 </div>
 
-<p>Each tag defines an <strong>element</strong>, or a part of a website. For example, we used the <code>&lt;p&gt;</code> tag to define a paragraph element in HTML. We then close the paragraph by using the <code>&lt;/p&gt;</code> tag, ending the paragraph. You can find a full list of HTML tags and elements <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element">here</a>.</p>
+<p>Each tag defines an <em>element</em>, or a part of a website. For example, we used the <code>&lt;p&gt;</code> tag to define a paragraph element in HTML. We then close the paragraph by using the <code>&lt;/p&gt;</code> tag, ending the paragraph. You can find a full list of HTML tags and elements <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element">here</a>.</p>
 <p>Now, we’re doing data science. And let’s say you find some really cool website off of the internet that has a lot of really useful data, but there’s no download file (and <a href="data.html#legal-to-scrape">it’s legal to scrape from that website</a>). That means that you have to pull the information from the HTML code.</p>
 <p>We can do this by using the <strong>rvest</strong> package like I talked about earlier. This is essentially a package that allows you to scrape information from HTML code, allowing you to scrape the information off of the complete website.</p>
 <div class="sourceCode" id="cb503"><pre class="downlit sourceCode r">
@@ -1354,8 +1363,8 @@ This is so useless, you shouldn’t even be reading it.
 <h4>
 <span class="header-section-number">3.4.1.2</span> CSS selectors<a class="anchor" aria-label="anchor" href="#css-selectors"><i class="fas fa-link"></i></a>
 </h4>
-<p><strong>CSS</strong>, or <strong>C</strong>ascading <strong>S</strong>tyle <strong>S</strong>heets, is a coding language that defines the style of webpages. You may have noticed earlier that the HTML code we output earlier was just black and white. But websites aren’t black and white, they have colors and other cool things. They do this by using CSS to add special rules to specific elements.</p>
-<p>Now, there are a number of ways to do this. The first one is by using a <strong>class</strong> to tell the webpage that you want all of these elements to have the same style. CSS classes are a way for multiple elements to have the same style, rather than being limited to a unique ID. We can see an example of this below, where we set the elements with the class <code>good-info</code> to be green and the class <code>amazing-info</code> to have a pale red background.</p>
+<p><em>CSS</em>, or <em>C</em>ascading <em>S</em>tyle <em>S</em>heets, is a coding language that defines the style of webpages. You may have noticed earlier that the HTML code we output earlier was just black and white. But websites aren’t black and white, they have colors and other cool things. They do this by using CSS to add special rules to specific elements.</p>
+<p>Now, there are a number of ways to do this. The first one is by using a <em>class</em> to tell the webpage that you want all of these elements to have the same style. CSS classes are a way for multiple elements to have the same style, rather than being limited to a unique ID. We can see an example of this below, where we set the elements with the class <code>good-info</code> to be green and the class <code>amazing-info</code> to have a pale red background.</p>
 <div class="sourceCode" id="cb517"><pre class="sourceCode css"><code class="sourceCode css"><span id="cb517-1"><a href="data.html#cb517-1" aria-hidden="true" tabindex="-1"></a><span class="co">/*This uses the `css` language instead of the R language. You can use this</span></span>
 <span id="cb517-2"><a href="data.html#cb517-2" aria-hidden="true" tabindex="-1"></a><span class="co">  code in an Rmarkdown file by substituting the "r" for "css" in the top </span></span>
 <span id="cb517-3"><a href="data.html#cb517-3" aria-hidden="true" tabindex="-1"></a><span class="co">  brackets*/</span></span>
@@ -1430,7 +1439,7 @@ This is so useless, you shouldn’t even be reading it.
 
 </div>
 <p><br></p>
-<p>Now, there’s a really clever trick that we can use here. Let’s say that we only want the table cells that are important, but we don’t know exactly where they are (we only know their class). Well in most cases, the data you want will be a different color, like what we see in the data above. Think about it like making <strong>important information</strong> have a bold font to make it stand out. CSS makes all of the <strong>information</strong> bold by assigning it a specific class, so we can just look for everything that has that class and pull it out so that we only get the <strong>important</strong> information. We can do this by using <code><a href="https://rvest.tidyverse.org/reference/html_element.html">html_elements()</a></code>. Just plug in the class of the element that you want with a <code>.</code> in front to tell R that it’s an class.</p>
+<p>Now, there’s a really clever trick that we can use here. Let’s say that we only want the table cells that are important, but we don’t know exactly where they are (we only know their class). Well in most cases, the data you want will be a different color, like what we see in the data above. Think about it like making <em>important information</em> have an italic font to make it stand out. CSS makes all of the <em>information</em> italic by assigning it a specific class, so we can just look for everything that has that class and pull it out so that we only get the <em>important</em> information. We can do this by using <code><a href="https://rvest.tidyverse.org/reference/html_element.html">html_elements()</a></code>. Just plug in the class of the element that you want with a <code>.</code> in front to tell R that it’s an class.</p>
 <div class="sourceCode" id="cb519"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">raw_html_3</span> <span class="op">&lt;-</span> <span class="st">"&lt;html&gt;
                  &lt;table&gt;
@@ -1468,7 +1477,7 @@ This is so useless, you shouldn’t even be reading it.
   <span class="fu"><a href="https://rvest.tidyverse.org/reference/html_element.html">html_elements</a></span><span class="op">(</span><span class="st">".good-info.amazing-info"</span><span class="op">)</span> <span class="op">%&gt;%</span>
   <span class="fu"><a href="https://rvest.tidyverse.org/reference/html_text.html">html_text2</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <pre><code>## [1] "This is really important info."</code></pre>
-<p>Webpages will also use something called an <strong>ID</strong> to change the color of a specific element. Do the same thing but this time with a “#” at the beginning to signify that it’s a symbol.</p>
+<p>Webpages will also use something called an <em>ID</em> to change the color of a specific element. Do the same thing but this time with a “#” at the beginning to signify that it’s a symbol.</p>
 <div class="sourceCode" id="cb523"><pre class="sourceCode css"><code class="sourceCode css"><span id="cb523-1"><a href="data.html#cb523-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.red-id</span> {</span>
 <span id="cb523-2"><a href="data.html#cb523-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">color</span>: <span class="cn">red</span></span>
 <span id="cb523-3"><a href="data.html#cb523-3" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
@@ -1569,7 +1578,7 @@ link to primer
   <span class="fu"><a href="https://rvest.tidyverse.org/reference/html_attr.html">html_attr</a></span><span class="op">(</span><span class="st">"href"</span><span class="op">)</span></code></pre></div>
 <pre><code>## [1] "https://ppbds.github.io/primer/index.htm"</code></pre>
 <p>This accesses the <code>href</code> attribute of the element without accessing the link, allowing you to find the links to outside websites.</p>
-<p>These chains are known as <strong>CSS Selectors</strong> and they’re an important part of data science because they allow us to find data and information on a website without having to download every file or copying everything down. Instead, we can just use the website’s inbuilt code to get the information.</p>
+<p>These chains are known as <em>CSS Selectors</em> and they’re an important part of data science because they allow us to find data and information on a website without having to download every file or copying everything down. Instead, we can just use the website’s inbuilt code to get the information.</p>
 </div>
 </div>
 <div id="application" class="section level3" number="3.4.2">
@@ -1632,7 +1641,7 @@ link to primer
 <h4>
 <span class="header-section-number">3.4.2.1</span> Are you allowed to scrape that website?<a class="anchor" aria-label="anchor" href="#legal-to-scrape"><i class="fas fa-link"></i></a>
 </h4>
-<p><strong>BEFORE</strong> scraping data from the web, you should always check whether or not you are <strong>ALLOWED</strong> to scrape it! There are two documents that are important for this: the robots.txt file (found by adding <code>/robots.txt</code> to the end of a URL like <a href="https://www.craigslist.org/robots.txt">so</a>) and reading the website’s Terms of Service document. The website’s Terms of Service document is far and away the more important of the two because it’s actually legally binding, so you should look there first. What happens when we look at Craigslist’s Terms of Service document? Well we read this:</p>
+<p><em>BEFORE</em> scraping data from the web, you should always check whether or not you are <em>ALLOWED</em> to scrape it! There are two documents that are important for this: the robots.txt file (found by adding <code>/robots.txt</code> to the end of a URL like <a href="https://www.craigslist.org/robots.txt">so</a>) and reading the website’s Terms of Service document. The website’s Terms of Service document is far and away the more important of the two because it’s actually legally binding, so you should look there first. What happens when we look at Craigslist’s Terms of Service document? Well we read this:</p>
 <p><em>“You agree not to copy/collect CL content via robots, spiders, scripts, scrapers, crawlers, or any automated or manual equivalent (e.g., by hand).”</em></p>
 <p>source: <a href="https://www.craigslist.org/about/terms.of.use" class="uri">https://www.craigslist.org/about/terms.of.use</a></p>
 <blockquote>
@@ -1743,7 +1752,7 @@ link to primer
 <h2>
 <span class="header-section-number">3.5</span> Working with APIs<a class="anchor" aria-label="anchor" href="#working-with-apis"><i class="fas fa-link"></i></a>
 </h2>
-<div class="inline-figure"><img src="03-data/images/api.png" width="100%"></div>
+<div class="inline-figure"><img src="03-data/images/api.png" width="50%" style="display: block; margin: auto;"></div>
 <!-- source used here: https://bookdown.org/rdpeng/RProgDA/reading-web-based-data.html -->
 <p>“API” stands for Application Program Interface. They allow us to access open data from government agencies, companies, and other organizations. API provides the rules for software applications to interact with one another. Open data APIs provide the rules you need to know to write R code to request and pull data from the organization’s web server into R. Usually, some of the computational burden of querying and subsetting the data is taken on by the source’s server, to create the subset of requested data to pass to your computer. In practice, this means you can often pull the subset of data you want from a very large available dataset without having to download the full dataset and load it locally into your R session.</p>
 <p>As an overview, the basic steps for accessing and using data from a web API when working in R are:</p>
@@ -1755,12 +1764,12 @@ link to primer
 </ul>
 <p>To get the data from an API, you should first read the organization’s API documentation. An organization will post details on what data is available through their API(s), as well as how to set up HTTP requests to get that data. To request the data through the API, you will typically need to send the organization’s web server an HTTP request using a GET or POST method. The API documentation details will typically show an example GET or POST request for the API, including the base URL to use and the possible query parameters that can be used to customize the dataset request.</p>
 <p>Here is an example:</p>
-<p>The National Aeronautics and Space Administration (NASA) has an API for pulling the <a href="https://apod.nasa.gov/apod/astropix.html">Astronomy Picture of the Day</a>. In their API documentation, they specify that the base URL for the API request should be <strong><a href="https://api.nasa.gov/planetary/apod" class="uri">https://api.nasa.gov/planetary/apod</a></strong> and that you can include parameters to specify the date of the daily picture you want, whether to pull a high-resolution version of the picture, and a NOAA API key you have requested from NOAA.</p>
+<p>The National Aeronautics and Space Administration (NASA) has an API for pulling the <a href="https://apod.nasa.gov/apod/astropix.html">Astronomy Picture of the Day</a>. In their API documentation, they specify that the base URL for the API request should be <em><a href="https://api.nasa.gov/planetary/apod" class="uri">https://api.nasa.gov/planetary/apod</a></em> and that you can include parameters to specify the date of the daily picture you want, whether to pull a high-resolution version of the picture, and a NOAA API key you have requested from NOAA.</p>
 <p>Many organizations will require you to get an <em>API key</em> and use this key in each of your API requests. This key allows the organization to control API access, including enforcing rate limits per user. API rate limits restrict how often you can request data (such as an hourly limit of 1,000 requests per user for NASA APIs).</p>
 <p>API keys should be kept private, so if you are writing code that includes an API key, be very careful not to include the actual key in any code that is public (even any code in public GitHub repositories). To ensure privacy, save the value of your key in a file named .Renviron in your home directory. This file should be a plain text file and must end in a blank line. Once you’ve saved your API key to a global variable in that file (e.g., with a line added to the .Renviron file like NOAA_API_KEY = “abdafjsiopnab038”), you can assign the key value to an R object in an R session using the Sys.getenv function (e.g., noaa_api_key &lt;- Sys.getenv(“NOAA_API_KEY”)), and then use the object <code>noaa_api_key</code> anywhere you would otherwise have used the character string with your API key.</p>
 <p>To find more R packages for accessing and exploring open data, check out the <a href="https://github.com/ropensci/opendata">Open Data CRAN task view</a>. You can also browse through the <a href="https://ropensci.org/packages/">ROpenSci packages</a>, all of which have GitHub repositories where you can further explore how each package works! ROpenSci is an organization with the mission to create open software tools for science. If you create your own package to access data relevant to scientific research through an API, consider submitting it for peer-review through ROpenSci.</p>
 <p>The <strong>riem</strong> package, developed by Maelle Salmon and an ROpenSci package, is an excellent and straightforward example of how you can use R to pull open data through a web API. This package allows you to pull weather data from airports around the world directly from the Iowa Environmental Mesonet. To show you how to pull data into R through an API, in this section we will walk you through code in the <strong>riem</strong> package or code based closely on code in the package.</p>
-<p>To get a certain set of weather data from the Iowa Environmental Mesonet, you can send an HTTP request specifying a base URL, <strong><a href="https://mesonet.agron.iastate.edu/cgi-bin/request/asos.py/" class="uri">https://mesonet.agron.iastate.edu/cgi-bin/request/asos.py/</a></strong>, as well as some parameters describing the subset of dataset you want (e.g., date ranges, weather variables, output format). Once you know the rules for the names and possible values of these parameters (more on that below), you can submit an HTTP GET request using the function<code><a href="https://httr.r-lib.org/reference/GET.html">GET()</a></code> from the <strong>httr</strong> package.</p>
+<p>To get a certain set of weather data from the Iowa Environmental Mesonet, you can send an HTTP request specifying a base URL, <em><a href="https://mesonet.agron.iastate.edu/cgi-bin/request/asos.py/" class="uri">https://mesonet.agron.iastate.edu/cgi-bin/request/asos.py/</a></em>, as well as some parameters describing the subset of dataset you want (e.g., date ranges, weather variables, output format). Once you know the rules for the names and possible values of these parameters (more on that below), you can submit an HTTP GET request using the function<code><a href="https://httr.r-lib.org/reference/GET.html">GET()</a></code> from the <strong>httr</strong> package.</p>
 <p>When you are making an HTTP request using the <code><a href="https://httr.r-lib.org/reference/GET.html">GET()</a></code> or <code><a href="https://httr.r-lib.org/reference/POST.html">POST()</a></code> functions from the <strong>httr</strong> package, you can include the key-value pairs for any query parameters as a list object in the <code>query</code> argument of the function. For example, suppose you want to get wind speed in miles per hour (data = “sped”) for Denver, CO, (station = “DEN”) for the month of June 2016 (year1 = “2016,” month1 = “6,” etc.) in Denver’s local time zone (tz = “America/Denver”) and in a comma-separated file (format = “comma”). To get this weather dataset, you can run:</p>
 <div class="sourceCode" id="cb554"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://httr.r-lib.org/">httr</a></span><span class="op">)</span></code></pre></div>
@@ -1819,21 +1828,113 @@ If an R package doesn’t exist for an open API and you’d like to write your o
 </ol>
 <p>Information for this section on API’s was taken from <em>Mastering Software Development in R</em> textbook, authored by Roger D. Peng, Sean Kross, and Brooke Anderson.</p>
 </div>
-<div id="summary-3" class="section level2" number="3.6">
+<div id="distill" class="section level2" number="3.6">
 <h2>
-<span class="header-section-number">3.6</span> Summary<a class="anchor" aria-label="anchor" href="#summary-3"><i class="fas fa-link"></i></a>
+<span class="header-section-number">3.6</span> Distill<a class="anchor" aria-label="anchor" href="#distill"><i class="fas fa-link"></i></a>
+</h2>
+<!-- DK: Copied the below from bootcamp. Useful? -->
+<!-- [Distill for R Markdown](https://rstudio.github.io/distill/) is the main documentation page. Key sections are [Creating a Website](https://rstudio.github.io/distill/website.html) and [Publishing Websites](https://rstudio.github.io/distill/publish_website.html). Step-by-step guides include: -->
+<!--   + [Building a blog with distill](https://themockup.blog/posts/2020-08-01-building-a-blog-with-distill/) by Thomas Mock.   -->
+<!--   + [Building a {distill} website](https://lisalendway.netlify.app/posts/2020-12-09-buildingdistill/) by Lisa Lendway.   -->
+<!--   + [Create a distill website](https://aosmith16.github.io/spring-r-topics/materials.html#week-2-create-a-distill-website) and [More on distill articles and deploy website](https://aosmith16.github.io/spring-r-topics/materials.html#week-3-more-on-distill-articles-and-deploy-website) by Ariel Muldoon. -->
+<!-- AG: I'm not creative enough to make a smooth segue so just putting in the information with a temporary transition until I think of one. -->
+<!-- Add one paragraph Distill section, including links, like from Bootcamp page. Point toward tutorial. -->
+<p>Now, you may have noticed that whenever we knit our .Rmd files, we produce an HTML file. And just a little bit earlier in the <a href="data.html#website-structure">webscraping section</a>, we talked about how websites using HTML to make up the basic structure. So by that logic, can’t we make our own websites by using the HTML files that are created when we knit the .Rmd?</p>
+<p>That’s exactly what the <strong>distill</strong> package does. Essentially, <strong>distill</strong> allows you to make websites using the HTML files that are output when you knit them. It also organizes the pages nicely to make the website navigable and look professional.</p>
+<p>Here’s an <a href="https://bootcamp.davidkane.info/">example of a distill website</a>. As you can see, this is a clear, easy website with a few pages and easily distinguishable information.</p>
+<p>We cover how to use the <strong>distill</strong> package in the associated <a href="https://ppbds.github.io/primer.tutorials/">primer tutorials</a>, where we’ll walk you through creating a distill page and developing your own citations.</p>
+<!-- AG: As said during a past session, people don't read the primer but they do look back at the primer for a reference. It might be a good idea to include common errors since these people are almost definitely looking back because their website is ugly or they're getting stupid errors. As such, I'm including a short-ish description of useful distill functions and things like that for these references (having each of them as their own section makes things very simple as you can just click it). It may be better to just include all of the things that the tutorial has, but that's very long and includes a few things that I think are somewhat unnecessary in the primer (like all of the plot and text sections). It's pretty simple to rework or delete this if it's wrong though, so don't spare any criticism. -->
+<div id="common-errors-and-functions" class="section level3" number="3.6.1">
+<h3>
+<span class="header-section-number">3.6.1</span> Common Errors and Functions<a class="anchor" aria-label="anchor" href="#common-errors-and-functions"><i class="fas fa-link"></i></a>
+</h3>
+<p>As you forge onwards into the world of distill, you will likely encounter a variety of errors that’ll make you want to throw your computer away. As such, we’ll go through a few of the common functions and errors encountered while making a distill page.</p>
+<div id="create_website" class="section level4" number="3.6.1.1">
+<h4>
+<span class="header-section-number">3.6.1.1</span> <code>create_website()</code><a class="anchor" aria-label="anchor" href="#create_website"><i class="fas fa-link"></i></a>
+</h4>
+<p>The first step to creating a website is by using the <code>create_website()</code> function. This creates the entire distill website and should be the first function that you run whenever you want to make one. Just use the following syntax:</p>
+<div class="sourceCode" id="cb557"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">distill</span><span class="op">)</span>
+<span class="fu">create_website</span><span class="op">(</span>dir <span class="op">=</span> <span class="st">"."</span>, title <span class="op">=</span> <span class="st">"title-of-your-website"</span>, gh_pages <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
+<p>This essentially creates a distill website in your current R project, titles it “title-of-your-website” and formats it so that we can publish it on <a href="https://pages.github.com/">Github Pages</a> (Github’s website publishing service). After you run this, you should see an <code>index.Rmd</code> and an <code>about.Rmd</code> file in your project, as well as some other miscellaneous files. These are the “Home” and “About” pages that you can use on your website.</p>
+</div>
+<div id="create_article" class="section level4" number="3.6.1.2">
+<h4>
+<span class="header-section-number">3.6.1.2</span> <code>create_article()</code><a class="anchor" aria-label="anchor" href="#create_article"><i class="fas fa-link"></i></a>
+</h4>
+<p>But what if I want more pages than that? Only being restricted to a Home and About page is pretty bad, especially when you want to have a bibliography. This is when we use <code>create_article()</code> to create a new page within our website. Just run the function with the title of the file and it’ll automatically create the .Rmd file for you to code in.</p>
+<div class="sourceCode" id="cb558"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu">create_article</span><span class="op">(</span><span class="st">"sources.Rmd"</span><span class="op">)</span></code></pre></div>
+<p>Then, you need to put it into your website. Just go to the <code>_site.yml</code> file and add the page in using <code>text: "Sources"</code> and <code>"href: sources.html"</code>. This is what the <code>_site.yml</code> file should look like after you add the page.</p>
+<pre><code>name: "."
+title: "title-of-your-website"
+description: |
+  Welcome to the website. I hope you enjoy it!
+output_dir: "docs"
+navbar:
+  right:
+    # These two pages were automatically put in.
+    - text: "Home"
+      href: index.html
+    - text: "About"
+      href: about.html
+    # This page was added by us.
+    - text: "Sources"
+      href: sources.html
+output: distill::distill_article</code></pre>
+<p>The <code>_site.yml</code> is the file that keeps everything in line and organizes your distill website. <em>However, it’s very specific as to the syntax, so you should take care to only add in specific things.</em> Additionally, keep in mind that you should always use the <code>create_article()</code> function whenever you need to create a new page or a .Rmd file. <em>Do not add in a .Rmd file manually.</em> These both lead to errors that can break your project.</p>
+</div>
+<div id="formatting-the-article" class="section level4" number="3.6.1.3">
+<h4>
+<span class="header-section-number">3.6.1.3</span> Formatting the article<a class="anchor" aria-label="anchor" href="#formatting-the-article"><i class="fas fa-link"></i></a>
+</h4>
+<p>You can format the article just like you did before because it’s still an RMarkdown file. However, you can also put more advanced features like block quotes <a href="https://www.rstudio.com/wp-content/uploads/2015/02/rmarkdown-cheatsheet.pdf">here</a>. Just make sure not to edit the headers at the top of the file without knowing exactly what you’re doing in order to prevent any errors.</p>
+</div>
+<div id="error-operator-is-invalid-for-atomic-vectors" class="section level4" number="3.6.1.4">
+<h4>
+<span class="header-section-number">3.6.1.4</span> <code>Error: $ operator is invalid for atomic vectors</code><a class="anchor" aria-label="anchor" href="#error-operator-is-invalid-for-atomic-vectors"><i class="fas fa-link"></i></a>
+</h4>
+<p>This is the error caused by creating a .Rmd file without using it in your <code>_site.yml</code> or using <code>create_article()</code> to make it. Essentially, distill doesn’t know how to deal with the extra .Rmd file and crashes because of it. This can normally be solved just by deleting the extra .Rmd, but it may be necessary to just nuke the project from orbit and restart.</p>
+<p>As such, make sure that you never create an extra .Rmd, as it’s just going to be more work on your end when you start encountering this error. If you want to write R code for a graph so that you can put it into your website, just use a normal R script file by going to File -&gt; New File -&gt; R Script in RStudio.</p>
+</div>
+<div id="yaml-errors" class="section level4" number="3.6.1.5">
+<h4>
+<span class="header-section-number">3.6.1.5</span> YAML Errors<a class="anchor" aria-label="anchor" href="#yaml-errors"><i class="fas fa-link"></i></a>
+</h4>
+<p>These are errors that are created by problems in your <code>_site.yml</code> file or in the headers (the — part) at the top of your file. These parts essentially tell distill what the title and the description of your page is, as well as some other information. However, missing parts can cause pretty significant problems because distill just doesn’t have the information that it needs. For example, deleting the <code>site:</code> part of the header will not allow the website to work or not including <code>description: |</code> will stop the description from showing up.</p>
+<p>Here’s what the YAML header at the top of your .Rmd file should look like. You can make some edits to it or add more information, but make sure to keep this basic structure in order to prevent any errors.</p>
+<pre><code>---
+title: "Home"
+description: |
+  Description of the page
+site: distill::distill_website
+---</code></pre>
+<p>Keep in mind that you can modify this when you need to make a new page. However, whenever you have an error beginning with <code>Error in yaml::yaml.load(..., eval.expr = TRUE) :</code>, that normally means that you have a YAML error and you need to fix this part of the code.</p>
+</div>
+</div>
+</div>
+<div id="summary-3" class="section level2" number="3.7">
+<h2>
+<span class="header-section-number">3.7</span> Summary<a class="anchor" aria-label="anchor" href="#summary-3"><i class="fas fa-link"></i></a>
 </h2>
 <!-- One paragraph for each subsection. Each paragraph tries to provide a brief summary, including package names and key commands. -->
 <p><em>Pulling data into and out of R is a key factor in the data science process.</em></p>
 <p><em>Use files like CSV, Excel, RDS, JSON, and SQL files/databases to organize and share your data.</em></p>
 <p><em>Use SelectorGadget to pull data off of websites, but make sure it’s legal to.</em></p>
-<p><em>Use an API when to get data from government agencies</em></p>
+<p><em>Use an API when to get data from government agencies or companies.</em></p>
+<p><em>Publish your results on a website by using Distill.</em></p>
 <p>This chapter is all about pulling data into R. It’s not about graphing that data, cleaning it, wrangling it, or anything like that, it’s just about pulling that data in without losing your mind.</p>
-<p>In this chapter, we looked at a few common file formats and used the <strong>readr</strong> package to read them and pull data from them so that we can use that data in our plots. This allowed us to download data from websites like <a href="https://kaggle.com">kaggle.com</a> and use it in our dataset.</p>
+<p>In this chapter, we looked at a few common file formats and used the <strong>readr</strong> package to read them and pull data from them so that we can use that data in our plots. This allowed us to download data from websites like <a href="https://kaggle.com">kaggle.com</a> and use it in our R session.</p>
 <p>We also looked at databases and how we can pull in a few select pieces of data from them so that we aren’t overloading our computers with thousands or millions of data rows. We went over how we can write SQL queries so that we can acheive some special effects without causing errors or detonating our computers.</p>
 <p>And finally, we looked at how we can pull data from websites both through webscraping and through APIs, letting us pull data from the internet quickly and easily. This lets us find data for our projects and load it into our R session without having to create it ourselves or download a file from the internet.</p>
-<p>In the end, this chapter is about getting data from other people and using it inside your own projects. And make sure to use up to date data.</p>
-<div class="inline-figure"><img src="03-data/images/suckville.png" width="100%"></div>
+<p>In the end, this chapter is about getting data from other people and using it inside your own projects.</p>
+<div class="figure">
+<span id="fig:unnamed-chunk-331"></span>
+<img src="03-data/images/suckville.png" alt="Make sure to use up to date data." width="100%"><p class="caption">
+FIGURE 3.5: Make sure to use up to date data.
+</p>
+</div>
 
 </div>
 </div>
@@ -1846,7 +1947,7 @@ If an R package doesn’t exist for an open API and you’d like to write your o
 <li><a class="nav-link" href="#data"><span class="header-section-number">3</span> Data</a></li>
 <li><a class="nav-link" href="#introduction"><span class="header-section-number">3.1</span> Introduction</a></li>
 <li>
-<a class="nav-link" href="#writing-and-reading-files"><span class="header-section-number">3.2</span> Writing and reading files</a><ul class="nav navbar-nav">
+<a class="nav-link" href="#reading-and-writing-files"><span class="header-section-number">3.2</span> Reading and writing files</a><ul class="nav navbar-nav">
 <li><a class="nav-link" href="#text-files"><span class="header-section-number">3.2.1</span> Text files</a></li>
 <li><a class="nav-link" href="#excel-files"><span class="header-section-number">3.2.2</span> Excel files</a></li>
 <li><a class="nav-link" href="#rds-files"><span class="header-section-number">3.2.3</span> RDS files</a></li>
@@ -1866,7 +1967,10 @@ If an R package doesn’t exist for an open API and you’d like to write your o
 </ul>
 </li>
 <li><a class="nav-link" href="#working-with-apis"><span class="header-section-number">3.5</span> Working with APIs</a></li>
-<li><a class="nav-link" href="#summary-3"><span class="header-section-number">3.6</span> Summary</a></li>
+<li>
+<a class="nav-link" href="#distill"><span class="header-section-number">3.6</span> Distill</a><ul class="nav navbar-nav"><li><a class="nav-link" href="#common-errors-and-functions"><span class="header-section-number">3.6.1</span> Common Errors and Functions</a></li></ul>
+</li>
+<li><a class="nav-link" href="#summary-3"><span class="header-section-number">3.7</span> Summary</a></li>
 </ul>
 
       <div class="book-extra">
