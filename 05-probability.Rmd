@@ -1,11 +1,14 @@
 # Probability {#probability}
 
-<!-- Put the empirical distribution first for our 4 probability distributions. Then, mathematical. Give the simple notation a single observation. Start the mathematical with the distribution of a single observation is described by this formula. y_i ~ Bernoulli(p). Expected value of y_i is this mathematical probability distribution. If your assumptions are correct, then as your sample size increases, the empirical probability distribution will look more and more like the mathematical distribution.  -->
+<!-- Put the empirical distribution first for our 4 probability distributions. Then, mathematical. Give the simple notation a single observation. Start the mathematical with the distribution of a single observation is described by this formula. y_i ~ Bernoulli(p). Expected value of y_i is this mathematical probability distribution. If your assumptions are correct, then as your sample size increases, the empirical probability distribution will look more and more like the mathematical distribution.  Done.-->
 
 
-<!-- Note Bernoulli is for a single coin toss, Bernoulli(p). Binomial is for an arbitrary number of coin tosses, Binomial(p, n). Read about expected values.  -->
+<!-- Note Bernoulli is for a single coin toss, Bernoulli(p). Binomial is for an arbitrary number of coin tosses, Binomial(p, n). Read about expected values. Done. -->
 
-<!-- Put in the same shorthand versions of probability notation as in chapter 2, to the extent we have them. -->
+<!-- Put in the same shorthand versions of probability notation as in chapter 2, to the extent we have them. Done.-->
+
+
+
 
 <!-- Start thinking about discussing "population". Maybe add a paragraph to each of the first three examples? (mostly in the first two because the third one posterior come from internet) Done.-->
 
@@ -196,6 +199,38 @@ Pay attention to notation. Whenever we are talking about a specific probability 
 
 All data science problems start with a question. Example: *What will be the result of the next flip of a coin?* All questions are answered with the help of probability distributions.
 
+
+An *empirical distribution* is based on data. You can think of this as the probability distribution created by running a simulation. In theory, if we increase the number of coins we flip in our simulation, the empirical distribution will look more and more similar to the mathematical distribution. The mathematical distribution is the Platonic form. The empirical distribution will often look like the mathematical probability distribution, but it will rarely be exactly the same.
+
+In this simulation, there are 56 heads and 44 tails. The outcome will vary every time we run the simulation, but the proportion of heads to tails should not be too different if this coin is fair.
+
+```{r}
+# We are flipping one fair coin a hundreds times. We need to get the same result
+# each time we create this graphic because we want the results to match the
+# description in the text. Using set.seed() guarantees that the random results
+# are the same each time. We define 0 as tails and 1 as heads.
+
+set.seed(3)
+
+tibble(results = sample(c(0, 1), 100, replace = TRUE)) %>% 
+  ggplot(aes(x = results)) +
+    geom_histogram(aes(y = after_stat(count/sum(count))), 
+                   binwidth = 0.5, 
+                   color = "white") +
+    labs(title = "Empirical Probability Distribution",
+         subtitle = "Flipping one coin a hundred times",
+         x = "Outcome\nResult of Coin Flip",
+         y = "Probability") +
+    scale_x_continuous(breaks = c(0, 1), 
+                       labels = c("Heads", "Tails")) +
+    scale_y_continuous(labels = 
+                         scales::percent_format(accuracy = 1)) +
+    theme_classic()
+```
+
+
+
+
 A *mathematical distribution* is based on a mathematical formula. Assuming that the coin is perfectly fair, we should, on average, get heads as often as we get tails.
 
 
@@ -221,42 +256,10 @@ ggplot(mydata, aes(x = results)) +
   theme_classic()
 
 ```
-$Heads= 50\% $ $Tails= 50\% $
+
+The distribution of a single observation is described by this formula. $y_i ~ Bernoulli(p)$. Expected value of $y_i$ is this mathematical probability distribution. If the mathematical assumptions are correct, then as your sample size increases, the empirical probability distribution will look more and more like the mathematical distribution. 
 
 
-
-
-An *empirical distribution* is based on data. You can think of this as the probability distribution created by running a simulation. In theory, if we increase the number of coins we flip in our simulation, the empirical distribution will look more and more similar to the mathematical distribution. The mathematical distribution is the Platonic form. The empirical distribution will often look like the mathematical probability distribution, but it will rarely be exactly the same.
-
-In this simulation, there are 56 heads and 44 tails. The outcome will vary every time we run the simulation, but the proportion of heads to tails should not be too different if this coin is fair.
-
-<!-- YW: "The proportion of heads to tails should not be too difference if this coin is fair" I get the point, I think it would be better if connects to the large chunk of explanation of $\rho$ and specific probability in this discussion. Agreed! -->
-
-
-
-```{r}
-# We are flipping one fair coin a hundreds times. We need to get the same result
-# each time we create this graphic because we want the results to match the
-# description in the text. Using set.seed() guarantees that the random results
-# are the same each time. We define 0 as tails and 1 as heads.
-
-set.seed(3)
-
-tibble(results = sample(c(0, 1), 100, replace = TRUE)) %>% 
-  ggplot(aes(x = results)) +
-    geom_histogram(aes(y = after_stat(count/sum(count))), 
-                   binwidth = 0.5, 
-                   color = "white") +
-    labs(title = "Empirical Probability Distribution",
-         subtitle = "Flipping one coin a hundred times",
-         x = "Outcome\nResult of Coin Flip",
-         y = "Probability") +
-    scale_x_continuous(breaks = c(0, 1), 
-                       labels = c("Heads", "Tails")) +
-    scale_y_continuous(labels = 
-                         scales::percent_format(accuracy = 1)) +
-    theme_classic()
-```
 
 
 A *posterior distribution* is based on beliefs and expectations. It displays your belief about things you can't see right now. You may have posterior distributions for outcomes in the past, present, or future.
@@ -300,43 +303,6 @@ The full terminology is mathematical (or empirical or posterior) *probability* d
 
 ### Rolling two dice
 
-Our *mathematical distribution* tells us that, with a fair dice, the probability of getting 1, 2, 3, 4, 5, and 6 are equal: there is a 1/6 chance of each. When we roll two dice at the same time and sum the numbers, the values closest to the middle are more common than values at the edge because there are more combinations of numbers that add up to the middle values.
-
-
-```{r, echo = FALSE}
-tibble(sum = c(rep(c(2, 12), 1), 
-               rep(c(3, 11), 2),
-               rep(c(4, 10), 3), 
-               rep(c(5,  9), 4),
-               rep(c(6,  8), 5),
-               rep(c(7), 6))) %>% 
-  ggplot(aes(x = sum)) +
-    geom_histogram(aes(y = after_stat(count/sum(count))), 
-                   binwidth = 1, 
-                   color = "white") +
-    labs(title = "Mathematical Probability Distribution",
-         subtitle = "Expectation for the sum from rolling two dice",
-         x = "Outcome\nSum of Two Die",
-         y = "Probability") +
-    scale_x_continuous(breaks = seq(2, 12, 1), labels = 2:12) +
-    scale_y_continuous(labels = 
-                         scales::percent_format(accuracy = 1)) +
-    theme_classic()
-```
-$p(2)= 1/6*1/6=\frac{1}{36} = 2.8 \%$
-$p(3)= 1/6*1/6*2=\frac{1}{18} = 5.6 \%$
-$p(4)= 1/6*1/6*3=\frac{1}{12} = 8.3 \%$
-$p(5)= 1/6*1/6*4=\frac{1}{9} = 11.1 \%$
-$p(6)= 1/6*1/6*5=\frac{5}{36} = 13.9 \%$
-$p(7)= 1/6*1/6*6=\frac{1}{6} =  16.7 \%$
-$p(8)= 1/6*1/6*5=\frac{5}{36} =  13.9 \%$
-$p(9)= 1/6*1/6*4=\frac{1}{9} =  11.1 \%$
-$p(10)= 1/6*1/6*3=\frac{1}{12} = 8.3 \%$
-$p(11)= 1/6*1/6*2=\frac{1}{18} = 5.6 \%$
-$p(12)= 1/6*1/6=\frac{1}{36} = 2.8 \%$
-
-
-
 
 We get an *empirical distribution* by rolling two dice a hundred times, either by hand or with a computer simulation. The result is not identical to the mathematical distribution because of the inherent randomness of the real world and/or of simulation. 
 
@@ -370,6 +336,33 @@ emp_dist_dice
 We might consider labeling the y-axis in plots of empirical distributions as "Proportion" rather than "Probability" since it is an actual proportion, calculated from real (or simulated) data. We will keep it as "Probability" since we want to emphasize the parallels between mathematical, empirical and posterior probability distributions.
 
 
+Our *mathematical distribution* tells us that, with a fair dice, the probability of getting 1, 2, 3, 4, 5, and 6 are equal: there is a 1/6 chance of each. When we roll two dice at the same time and sum the numbers, the values closest to the middle are more common than values at the edge because there are more combinations of numbers that add up to the middle values.
+
+
+```{r, echo = FALSE}
+tibble(sum = c(rep(c(2, 12), 1), 
+               rep(c(3, 11), 2),
+               rep(c(4, 10), 3), 
+               rep(c(5,  9), 4),
+               rep(c(6,  8), 5),
+               rep(c(7), 6))) %>% 
+  ggplot(aes(x = sum)) +
+    geom_histogram(aes(y = after_stat(count/sum(count))), 
+                   binwidth = 1, 
+                   color = "white") +
+    labs(title = "Mathematical Probability Distribution",
+         subtitle = "Expectation for the sum from rolling two dice",
+         x = "Outcome\nSum of Two Die",
+         y = "Probability") +
+    scale_x_continuous(breaks = seq(2, 12, 1), labels = 2:12) +
+    scale_y_continuous(labels = 
+                         scales::percent_format(accuracy = 1)) +
+    theme_classic()
+```
+
+$$ p_X(x) = \begin{cases} \dfrac{x-1}{36} &\text{for }x=1,2,3,4,5,6 \\ \dfrac{13-x}{36} &\text{for }x=7,8,9,10,11,12 \\ 0 &\text{otherwise} \end{cases} $$
+
+
 The *posterior distribution* for rolling two dice a hundred times depends on your beliefs. If you take the dice from your Monopoly set, you have reason to believe that the assumptions underlying the mathematical distribution are true. However, if you walk into a crooked casino and a host asks you to play craps, you might be suspicious, just as in the "flipping a coin example" the word "suspicious" means you no longer trust the "population" where the mathematical and empircal distribution drawn their data from. For example, in craps, a come-out roll of 7 and 11 is a "natural," resulting in a win for the "shooter" and a loss for the casino. You might expect those numbers to occur less often than they would with fair dice. Meanwhile, a come-out roll of 2, 3 or 12 is a loss for the shooter. You might also expect values like 2, 3 and 12 to occur more frequently. Your posterior distribution might look like this:
 
 ```{r, echo = FALSE}
@@ -400,7 +393,34 @@ Someone less suspicious of the casino would have a posterior distribution which 
 
 Now let's say we are building probability distributions for political events, like a presidential election. We want to know the probability that Democratic candidate wins X electoral votes, where X comes from the range of possible outcomes: 0 to 538. (The total number of electoral votes in US elections since 1964 is 538.)
 
-We can start with a *mathematical distribution* for X which assumes that the chances of the Democratic candidate winning any given state's electoral votes is 0.5 and the results from each state are independent.
+The *empirical distribution* in this case could involve looking into past elections in the United States and counting the number of electoral votes that the Democrats won in each. For the empirical distribution, we create a tibble with electoral vote results from past elections. Looking at elections since 1964, we can observe that the number of electoral votes that the Democrats received in each one is different. Given that we only have 15 entries, it is difficult to draw conclusions or make predictions based off of this empirical distribution.
+
+However, this model is enough to suggest that the assumptions of the mathematical probability distribution above do not work for electoral votes. The model assumes that the Democrats have a 50% chance of receiving each of the 538 votes. Just looking at the mathematical probability distribution, we can observe that receiving 13 or 17 or 486 votes out of 538 would be extreme and almost impossible under this mathematical model. However, our empirical distribution tells us that those were real election results.
+
+```{r, echo = FALSE}
+# Votes are since 1964, for Democratic candidate
+
+mydata <- tibble(electoral_votes = c(486,191,17,297,49,13,111,370,379,
+                      266,251,365,332,227,306))
+
+#306 is electoral votes for Joe Biden in 2020 presidential election.
+
+ggplot(mydata, aes(x = electoral_votes)) +
+  geom_histogram(aes(y = after_stat(count/sum(count))), 
+                 bins = 100, 
+                 color = "white") +
+  labs(title = "Empirical Probability Distribution",
+       subtitle = "Electoral votes from 16 previous elections",
+       x = "Outcome\nElectoral Vote Total for Democratic Candidate",
+       y = "Probability") +
+  scale_y_continuous(labels = 
+                       scales::percent_format(accuracy = 1)) +
+  theme_classic()
+
+```
+
+
+We can build a *mathematical distribution* for X which assumes that the chances of the Democratic candidate winning any given state's electoral votes is 0.5 and the results from each state are independent.
 
 ```{r, echo = FALSE}
 # Add comments explaining what this does.
@@ -427,38 +447,13 @@ ggplot(data = result, aes(total)) +
 
 ```
 
+Recall from chapter 2, the Normal distribution which is an probability distribution that is symmetric about the mean is described by this formula. 
+$$y_i \sim N(\mu, \sigma^2)$$. 
+Each value $y_i$ is drawn from a normal distribution with parameters $\mu$ for the mean and $\sigma$ for the standard deviation. If our assumption for this mathematical distribution is correct (we don't), then the as the sample size increase the empirical distribution should look more and more similar to the our mathematical distribution. 
 
 
 We know that campaign platforms, donations, charisma, and many other factors will contribute to a candidate's success. Elections are more complicated than coin tosses. We also know that many presidential elections in history have resulted in much bigger victories or defeats than this distribution seems to allow for.
 
-The *empirical distribution* in this case could involve looking into past elections in the United States and counting the number of electoral votes that the Democrats won in each. For the empirical distribution, we create a tibble with electoral vote results from past elections. Looking at elections since 1964, we can observe that the number of electoral votes that the Democrats received in each one is different. Given that we only have 15 entries, it is difficult to draw conclusions or make predictions based off of this empirical distribution.
-
-However, this model is enough to suggest that the assumptions of the mathematical probability distribution above do not work for electoral votes. The model assumes that the Democrats have a 50% chance of receiving each of the 538 votes. Just looking at the mathematical probability distribution, we can observe that receiving 13 or 17 or 486 votes out of 538 would be extreme and almost impossible under this mathematical model. However, our empirical distribution tells us that those were real election results.
-
-We are using the past elections data in the *mathematical* and *empirical* distribution is because we think that the performance of past elections could influence the election in 2020.
-
-
-```{r, echo = FALSE}
-# Votes are since 1964, for Democratic candidate
-
-mydata <- tibble(electoral_votes = c(486,191,17,297,49,13,111,370,379,
-                      266,251,365,332,227,306))
-
-#306 is electoral votes for Joe Biden in 2020 presidential election.
-
-ggplot(mydata, aes(x = electoral_votes)) +
-  geom_histogram(aes(y = after_stat(count/sum(count))), 
-                 bins = 100, 
-                 color = "white") +
-  labs(title = "Empirical Probability Distribution",
-       subtitle = "Electoral votes from 16 previous elections",
-       x = "Outcome\nElectoral Vote Total for Democratic Candidate",
-       y = "Probability") +
-  scale_y_continuous(labels = 
-                       scales::percent_format(accuracy = 1)) +
-  theme_classic()
-
-```
 
 The *posterior distribution* of electoral votes is a popular topic, and an area of strong disagreement, among data scientists. Consider this posterior from *FiveThirtyEight*.
 
@@ -529,30 +524,6 @@ The three examples above are all *discrete* probability distributions, meaning t
 
 All the characteristics for discrete probability distributions which we reviewed above apply just as much to continuous probability distributions. For example, we can create mathematical, empirical and posterior probability distributions for continuous outcomes just as we did for discrete outcomes.
 
-*Mathematical distribution* is complete based on mathematical formula and assumptions like in the Flipping a coin session we assume that the coin is an perfectly fair coin where where the probability landing on heads or tails is equal. In this case, we assume that the average hight of men is 175 cm, as well as the standard deviation for height is around 9 cm. When we have these two values, the average which we also called the mean, and standard deviation (sd), we can create an normal distribution using the `rnorm()` function. And an normal distribution is an good approximation and generalization for height in our scenario.
-
-
-Mathematical Distribution:
-
-```{r}
-tibble(height = rnorm(10000, mean = 175, sd = 9)) %>% 
-  ggplot(aes(x = height)) +
-    geom_histogram(aes(y = after_stat(count/sum(count))), 
-                 binwidth = 1, 
-                 color = "white")+
-  labs(title = "Mathematical Probability Distribution",
-       subtitle = "Expectations for an random male's height",
-       x = "Height",
-       y = "Probability") +
-  scale_y_continuous(labels =
-                      scales::percent_format(accuracy = 1)) +
-  theme_classic()
-  
-```
-$mean=175$
-$sd=9$
-
-Now we create an normal distribution, the histogram graph has it's most high bar near 178, which is what we set when creating the tibble for our simulated data. Again anybody can question the legitimacy of this model, and completely throw it in the trash,and one of the way to telling someone who make this graph is bad is through the *empirical distribution*.
 
 The *empirical distribution* involves using data from the National Health and Nutrition Examination Survey (NHANES). What we are doing here is instead making an model by ourself using some mathematical formula, we use the actual data, we can get the data from either simulated by our own like in the "flipping a coin" and "Rolling two dice" scenario, or we used the data from someone else, like the presidential election and this scenario. 
 
@@ -574,7 +545,32 @@ nhanes %>%
   theme_classic()
 
 ```
-When we graph this we can sort of seeing something similar to the mathematical graph, which tells us that the mathematical graph we create is an good approximation, but at the same time it also looks different. 
+
+
+*Mathematical distribution* is complete based on mathematical formula and assumptions like in the Flipping a coin session we assume that the coin is an perfectly fair coin where where the probability landing on heads or tails is equal. In this case, we assume that the average hight of men is 175 cm, as well as the standard deviation for height is around 9 cm. When we have these two values, the average which we also called the mean, and standard deviation (sd), we can create an normal distribution using the `rnorm()` function. And an normal distribution is an good approximation and generalization for height in our scenario.
+
+
+Mathematical Distribution:
+
+```{r}
+tibble(height = rnorm(10000, mean = 175, sd = 9)) %>% 
+  ggplot(aes(x = height)) +
+    geom_histogram(aes(y = after_stat(count/sum(count))), 
+                 binwidth = 1, 
+                 color = "white")+
+  labs(title = "Mathematical Probability Distribution",
+       subtitle = "Expectations for an random male's height",
+       x = "Height",
+       y = "Probability") +
+  scale_y_continuous(labels =
+                      scales::percent_format(accuracy = 1)) +
+  theme_classic()
+  
+```
+
+Again, the Normal distribution which is an probability distribution that is symmetric about the mean is described by this formula. 
+$$y_i \sim N(\mu, \sigma^2)$$. 
+Each value $y_i$ is drawn from a normal distribution with parameters $\mu$ for the mean and $\sigma$ for the standard deviation. If the mathematical assumptions are correct in this case the two parameters $\mu$ and $\sigma$, then as our sample size increases, the empirical probability distribution will look more and more like the mathematical distribution. 
 
 
 The *posterior distribution* for heights depends on the context. Are we considering all the adult men in America? In that case, our posterior would probably look a lot like the empirical distribution using NHANES data. If we are being asked about the distribution of heights among players in the NBA, then our posterior might look like:
