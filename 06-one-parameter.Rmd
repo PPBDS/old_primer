@@ -10,6 +10,60 @@
 
 <!-- Change first example to not use 1,000 beads for creating the fake distribution. We are no longer discrete. p is continuous! So, sample 10,000 possible values for p.  No need to correspond to the urn limitations. Or maybe just assume we don't know how many beads are in the urn. Yes! That! -->
 
+<!-- RS: For the comment above, should we use rbinom()? Later in the chapter the concern is brought up that using rbinom is not perfect and that sampling directly from the population is better. However, if we wanted to make p continuous and sample from a population of unknown size I think we would be forced to use rbinom(). -->
+
+<!-- RS: New Chapter 6 Layout Proposal:  -->
+<!-- 6.1: Real sampling activity -->
+<!-- - Keep the same as now, but possibly introduce some of the vocab.  -->
+
+<!-- 6.2: Increasing trials -->
+<!-- -Goals: Goal is to try and replicate the in real life sampling activity using virtual simulation. Use tools like mapping and functions to make our life easier. Bring up the point that while sampling in real life it can be time consuming to perform many trials. So, how would doing 33 trials in real life compare to doing 1,000 trials virtually? The answer is that our distribution becomes more like the normal distribution as we experience more extreme results as we increase the number of trials.  -->
+
+<!-- - 6.2.1: Mapping: Mapping refresher. How does it work? Why is it useful? map v. map_int()? Refer readers back to Ch. 5 if they need additional help.  -->
+<!-- - 6.2.2: Virtual sampling:  First create the urn (Maybe pick a random number for the number of red and white beads in the urn?). Then create our sampling tibble step by step, explaining all relevant functions. Compare results to real life sampling activity. At the end allude to the fact that functions would be helpful to allow us to sample as many times as we want instead of having to manually input the number of times we want to sample.  -->
+<!-- - 6.2.3: Functions: What is a function? What is the notation? How can we use functions in the situation above? -->
+<!-- - 6.2.4: Effect of more trials: Show histograms from different numbers of trials. Point out the development of tails as trials increase, because you are more likely to find outlier trials when you have more trials. Finally create gganim of mean and standard deviation to show effect of more trials and lead to the normal approximaiton.  -->
+<!-- - 6.2.5: The normal approximation: Present mathematical equation for the normal approximation, and explain the properties of the normal distribution. Plot a graph of the normal distribution and virtual sampling side by side.  -->
+
+<!-- 6.3 Sample size (What happens when we change sample size?) -->
+<!-- -Topics:  -->
+
+<!-- - 6.3.1: Comparing sample sizes: Create graph of 1000 p values for several sample sizes. -->
+<!-- - 6.3.2: Standard error: Definition of standard error, using both the equation as well as explaining its meaning without all the math.  -->
+<!-- - 6.3.3: Graphical explanation: Compare histograms of different sample sizes. (Try and make a gganim.) Display summary lines of mean and standard deviation.  -->
+<!-- - 6.3.4: SE of n sized sample: Create graph of standard deviation v. sample size, and connection to SE. Try and overlay or put side by side the cloud of points for each sample size and the standard error for each sample size.  -->
+<!-- 6.4 Putting everything together -->
+<!-- -Goals: Apply everything from the previous sections to answer 2 questions:  -->
+
+<!-- - 6.4.1: The Questions: In a well mixed urn with an unknown number of red and white beads, we get 17 red beads in a random sample of size 50. (Should we use data on more than 1 sample?) -->
+<!-- 1. What proportion of beads in the urn are red?  -->
+<!-- 2. What is the probability that we will draw more than 8 red beads if we use a shovel of size 20?  -->
+
+<!-- - 6.4.2: Wisdom: -->
+<!-- -- 6.4.2.1: One parameter: Explain that, like the section alludes to, we are finding one parameter for the population. Walk through the thought process on how we need to find the one parameter in the first question to answer the second question.  -->
+<!-- -- 6.4.2.2: Preceptor Table: Explain/Create the preceptor table.  -->
+<!-- - 6.4.3: Justice: -->
+<!-- -- 6.4.3.1: Binomial model: Present binomial equation as the basis for our future models.  -->
+<!-- -- 6.4.3.2: Examining validiity: Does phat represent p? Is our data good? -->
+<!-- - 6.4.4: Courage: -->
+<!-- -- 6.4.4.1: From discrete to continuous: Explain that we no longer know how many beads in the urn, so we will create alot of p values and do 1,000 samples for each one to find the most common probibility for each number of beads.  -->
+<!-- -- 6.4.4.2: Joint distribution: Create the joint distribution. Also include rayshader plots.  -->
+<!-- -- 6.4.4.3: Hypothesis testing: Explain that hypothesis testing is bad, and that instead we should create a distribution that displays the range of possible outcomes instead of simply disproving one possible outcome.  -->
+<!-- -- 6.4.4.4: Posterior Distribution: Explain taking a  -->
+<!-- -- 6.4.4.5: Binomial Distribution: Compare bead distribution to another binomial distribution such as flipping a coin. Then convert to a probibility distribution, and calculate the answer to the second question. -->
+<!-- - 6.4.5: Temperence:  -->
+<!-- -- 6.4.5.1: Changing the starting data: What happens if our starting data was different? (Explore different packages that might allow readers to explore this for themselves in a cool way.) -->
+<!-- - 6.4.6: stan_glm(): Introduce stan_glm() for Ch. 7. Makes everything we did above way easier.  -->
+
+<!-- 6.5 The Real World -->
+<!-- -Notes: Will be mostly the same as current section. -->
+
+<!-- - 6.5.1: Kennedy Study: Exact same as current 6.5.2. Compare population, sampling, population params, etc. between Kennedy Study and Bead example.  -->
+<!-- - 6.5.2: Experimental Design: This would be new. Discuss basic experimental design and bias. What are some warning signs for bad design? Is the Kennedy Obama Study biased? How about the bead examples? How do we acheive good experimental design. This section would be a brief introduction to topics discussed in an intro stats class.  -->
+<!-- -- Add  El Jefe's or Felipe's to this section.  -->
+<!-- - 6.5.3: Variance: Talk about standard error in real world, compared to the bead example. Maybe also discuss confidence intervals, and accuracy/precision.  -->
+
+<!-- 6.7 Summary -->
 <!-- Old stuff: -->
 
 <!-- Another paragraph or two of discussion about the final posterior. How do we use it? Within what range would you offer 50/50 odds that the true percentage lies? (use quantile(0.25, 0.75). Area under the curve? Explain clearly how that 26% is calculated. What is post_dist? What does it mean? How can I use it? Maybe show it sorted? Add some code comments. -->
@@ -53,7 +107,7 @@ One way to answer this question would be to perform an exhaustive count: remove 
 *What is the probability, using that same urn, that we will draw more than 8 red beads if we use a shovel of size 20?*
 
 To begin this chapter, we will look at a real sampling activity: the urn.  Then, we will simulate the urn example using R code. This will help us to understand the *standard error* and the ways in which uncertainty factors into our predictions. We then create a joint distribution of models and data for the urn example. We derive a posterior distribution from that joint distribution, and then use that posterior to answer our questions. 
-<!-- RS: Add foreshadowing to Ch. 7, saying something like: "To try and estimate the probability distribution of a single parameter, p." Ch.7 does a good job of explaining 1 para v. 2 params, but readers should know what they are getting into. -->
+<!-- RS: Add foreshadowing to Ch. 7, saying something like: "To try and estimate the probability distribution of a single parameter, p." Ch.7 does a good job of explaining 1 param v. 2 params, but readers should know what they are getting into. -->
 Use the **tidyverse** package. 
 
 ```{r, message=FALSE}
@@ -196,7 +250,7 @@ In Section \@ref(virtual-sampling), we'll mimic the hands-on sampling activity w
 Afterwards, we'll present you with definitions, terminology, and notation related to sampling in Section \@ref(standard-errors). As in many disciplines, such necessary background knowledge may seem confusing at first. However, if you truly understand the underlying concepts and practice, you'll be able to master them.
 
 To tie the contents of this chapter to the real world, we'll present an example of one of the most common uses of sampling: polls. In Section \@ref(sampling-case-study) we'll look at a particular case study: a 2013 poll on then U.S. President Barack Obama's popularity among young Americans, conducted by the Kennedy School's Institute of Politics at Harvard University. 
-<!-- RS: I would condense the IRL sampling part, because while I do think it is a good change of pace from the virtual sampling in Chapter 5, I don't want to be repetitive and do the same thing again with virtual sampling. Also, we could add a paragraph describing how the IRL sample creates an empirical distribution, while the virtual sampling creates a joint distribution model to later base our posterior distribution off of. Chapter 5 has limited real world applications, so I think it is definetly worth it to sprinkle some throughout this chapter where we can.  -->
+<!-- RS: We could add a paragraph describing how the IRL sample creates an empirical distribution, while the virtual sampling creates a joint distribution model to later base our posterior distribution off of. Chapter 5 has limited real world applications, so I think it is definetly worth it to sprinkle some throughout this chapter where we can.  -->
 
 ## Virtual sampling {#virtual-sampling}
 
@@ -521,7 +575,7 @@ comparing_sampling_distributions <- ggplot(virtual_prop, aes(x = prop_red)) +
 
 comparing_sampling_distributions
 ```
-<!-- RS: The x axis seems to not be uniform, as there a proportion out of 25 is different than a proportion out of 50 than a proportion out of 100. Maybe use geom_density the graphs? Or change bin widths? -->
+<!-- RS: The x axis seems to not be uniform, as  a proportion out of 25 is different than a proportion out of 50 than a proportion out of 100. Maybe use geom_density the graphs? Or change bin widths? -->
 
 Observe that as the sample size increases, the variation of the 1,000 replicates of the proportion of red decreases. In other words, as the sample size increases, there are fewer differences due to sampling variation and the distribution centers more tightly around the same value. All three histograms center around roughly 40%.
 <!-- RS: Maybe add a gganim to see how density changes as sample size increases? Pretty sure it will break when n = 1000 but that could also be an opportunity to educate about samples and population (because n = 1000 is no longer a sample and prob_red should just be a number.) -->
@@ -685,7 +739,7 @@ The red line here represents an important statistical concept: standard error (S
 
 <!-- The variation in p-hat (when we do 1,000 reps) decreases as shovel size increases. For each shovel size, you plot 1,000 points. Small shovels have lots of overlap, so, use alpha. Even big shovels only have scores of possible p-hats. Then, say, can we measure the decrease in varition more precisely then just looking at this cloud of points? Yes! Plot the standard deviation of the cloud for each shovel size. -->
 
-<!-- RS: I agree with whoever wrote the above comment in theory, but not completely sure about what the execution loos like. I think it is important to tie the distribution into what the standard deviation tells us about our data and the shape of our graph.  -->
+<!-- RS: I agree with whoever wrote the above comment in theory, but not completely sure about what the execution looks like. I think it is important to tie the distribution into what the standard deviation tells us about our data and the shape of our graph.  -->
 ```{r, echo = FALSE, fig.cap = "To any poets and philosophers confused about this: don't worry! It won't be on a problem set."}
 knitr::include_graphics("06-one-parameter/images/meme_math.png")
 ```
