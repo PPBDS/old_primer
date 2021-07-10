@@ -1,8 +1,6 @@
 # Three Parameters {#three-parameters}
 
-<!-- Note: For the Preceptor Table and the Population Table, we are assuming no differences across questions. Not sure what group we want answer these questions for: Adults US citizens. Adult Massachusetts residents. Train commuters. Definitely for today.  -->
-
-<!-- Do Wisdom at the top, end with Population Table.  -->
+<!-- Go through old MM comments and ensure which ones stay for next meeting. -->
 
 <!-- Each new model starts with Justice, nodding toward the one true population table. Then discussion of representativeness and validity. -->
 
@@ -17,6 +15,8 @@ Models have parameters. In Chapter \@ref(one-parameter) we created models with a
 ## Wisdom
 
 Wisdom begins with considering the questions we desire to answer and the data set we are given.
+
+<!-- Add in that questions pertain to population of train commuters -->
 
 ### The Questions
 
@@ -36,9 +36,47 @@ Wisdom begins with considering the questions we desire to answer and the data se
 
 *Assume we have a group of eight people, two of whom make $100,000, two $200,000, two $300,000 and two $400,000. How many will be liberal?*
 
-After determining the questions we would like to answer, we must then consider ideally what data we would have to do so and make our preceptor table. In other words, for each individual in the population, what information do we need to answer each question. Look at the first question. Upon first glance, it appears that to answer this, we would like to have the age and party affiliation of those in population, and the same holds true for the second question. Therefore, we would need to have the columns of age and party affiliation in our preceptor table. The third and fourth question, however, would require individuals being exposed to Spanish-speakers and the their attitudes on immigration before and after the fact, so in our preceptor table, we would need the columns of attitude on immigration before and after being exposed to Spanish-speakers. Lastly, the fourth question would require income and age for every individual in the population, and the fifth and sixth would require knowing whether an individual is liberal or not as well as their income, so we would also need columns with information on income and if someone is liberal or not. Therefore, our preceptor table would appear as the following:
+After determining the questions we would like to answer, we must then consider ideally what data we would have to do so and make our preceptor table. Recall: a Preceptor Table is the smallest possible table such that, if there is no missing data, all questions are easy to answer. In other words, for each individual in the population, what information do we need to answer each question. Look at the first question. Upon first glance, it appears that to answer this, we would like to have the age and party affiliation of those in population, and the same holds true for the second question. Therefore, we would need to have the columns of age and party affiliation in our preceptor table. 
+
+The third and fourth question, however, would require individuals being exposed to Spanish-speakers and the their attitudes on immigration before and after the fact, so in our preceptor table, we would need the columns of attitude on immigration before and after being exposed to Spanish-speakers. 
+
+Lastly, the fourth question would require income and age for every individual in the population, and the fifth and sixth would require knowing whether an individual is liberal or not as well as their income, so we would also need columns with information on income and if someone is liberal or not. Therefore, our preceptor table would appear as the following:
 
 <!-- Make sample Preceptor Table. Need a column for all 6 (?) of the variables that are used in the four models. But need two columns for att_end, because it is the dependent variable in the only causal model, which means that there are two potential outcomes.  -->
+
+<!-- MM: Slow down above explanation and discuss why ending attitude is needed for treatment and control groups -->
+
+```{r}
+library(gt)
+library(tidyverse)
+tibble(ID = c("Commuter 1", "Commuter 2", "...", "Commuter 1000", "Commuter 1001", "..."),
+       age = c("23", "18", "...", "49", "38", "..."),
+       party = c("Democrat", "Republican", "...", "Republican", "Democrat", "..."),
+       income = c("50000", "150000", "...", "100000", "200000", "..."),
+       liberal = c("Liberal", "Not Liberal", "...", "Liberal", "Liberal", "..."),
+       attitude_after_control = c("3", "7", "...", "4", "9", "..."),
+       attitude_after_treated = c("8", "7", "...", "8", "7", "...")
+       ) %>%
+  
+  # Then, we use the gt function to make it pretty
+  
+  gt() %>%
+  cols_label(ID = md("ID"),
+             age = md("Age"),
+             party = md("Party"),
+             income = md("Income"),
+             liberal = md("Liberal"),
+             attitude_after_control = md("Control Ending Attitude"),
+             attitude_after_treated = md("Treated Ending Attitude")) %>%
+  tab_style(cell_borders(sides = "right"),
+            location = cells_body(columns = c(ID))) %>%
+  tab_style(style = cell_text(align = "left", v_align = "middle", size = "large"), 
+            locations = cells_column_labels(columns = c(ID))) %>%
+  cols_align(align = "center", columns = everything()) %>%
+  cols_align(align = "left", columns = c(ID)) %>%
+  fmt_markdown(columns = everything())
+```
+
 
 <!-- Recall: a Preceptor Table is the smallest possible table such that, if there is no missing data, all questions are easy to answer. -->
 
@@ -63,9 +101,107 @@ The data include information about each respondent's gender, political affiliati
 
 Let's restrict attention to a subset of the variables by recalling the Preceptor table we made. By that, we can determine that the variables `age`, `party`, `liberal` and `income` are relevant to the questions we seek to answer. This is because `age` is the age of the respondent, `party` is their political party affiliation, `liberal` is whether they are liberal or not, and `income` is the income of the respondent. Additionally, since `treatment` tells us whether the respondent was given the treatment of being exposed to Spanish-speakers in the train station and `att_end` tell us about the respondent's attitude on immigration after the treatment, these are also variables of interest to us since they will be useful in answering some questions. 
 
-<!-- MM: Incorporate lines 103-130 here -->
+```{r}
+ch8 <- trains %>% 
+  select(age, att_end, party, income, treatment, liberal)
+```
+
+It is always smart to look at a some random samples of the data:
+
+```{r}
+ch8 %>% 
+  slice_sample(n = 5)
+```
+
+`att_end` is a measure of person's attitude toward immigration. A higher number means more conservative, i.e., a more exclusionary stance toward immigration into the United States. 
+
+```{r}
+ch8 %>% 
+  glimpse()
+```
+
+Pay attention to the variable types. Do they make sense? Perhaps. But there are certainly grounds for suspicion. Why is  `att_end` a double rather than an integer? All the values in the data appear to be integers, so there is no benefit to having these variables be doubles. Why is `party` a character variable and `treatment` a factor variable? It could be that these are intentional choices made by the creator of the tibble, i.e., us. Or, these could be mistakes. Most likely, these choices are a mixture of sensible and arbitrary. Regardless, it is your responsibility to notice them. You can't make a good model without looking closely at the data which you are using.
+
+```{r}
+ch8 %>% 
+  skim()
+```
+
+`skim()` shows us what the different values of `treatment` are because it is a factor. Unfortunately, it does not do the same for character variables like `party`. The ranges for `age` and `att_end` seem reasonable. Recall that participants were asked three questions about immigration issues, each of which allowed for an answer indicated strength of agreement on a scale form 1 to 5, with higher values indicating more agreement with conservative viewpoints. `att_end` is the sum of the responses to the three questions, so the most liberal possible value is 3 and the most conservative is 15.
+
+By taking our first glance at the data in the above manners, we gain greater understanding of the data we have to work with and whether it will be capable of answering our questions. However, we can't make models and use the data for our analysis without also understanding the population that the data is from and whether it can be applied to the population we would like to work with.
 
 <!-- Conclude this section with discussion of the population issue. -->
+
+### Population
+
+The data that we have are very limited. There are only 115 observations, all from 2012 and involving train commuters to Boston. What me must ask ourselves is if this data can be applied to the population that we are answering our questions for. How useful will this data be today, or for other populations around Boston, or for other cities in the US? Only your judgment, along with advice from your colleagues, can guide you.
+
+The key concept is the idea of a "population." From which larger population is the data we have being (conceptually) drawn? If we were only interested in the age of individuals in our data set, we would have no need for inference. *We know everyone's ages already.* We only need tools like `stan_glm()` if we seek to understand individuals not in our data. Only if our data is "representative," at least to some extent, of that larger population can we use our data to answer our questions.
+
+For our current questions, the population we are answering questions for is the general population of train commuters today. However, the data we have involves train commuters around Boston in 2012. So, what we must ask ourselves is if this data from 2012 can be used to draw conclusions to our questions for a population for today. Additionally, we must also questions whether this data which is specific to the Boston Area can be applied to all train commuters. If we believe that the data is representative enough of today's population of train commuters, then we can continue with the process of answering our questions. We will assume that the data is drawn from the larger population of train commuters and that there isn't very much change overtime within this population so we can apply our data to the population of train commuters today.
+
+### Population Table
+
+By determining that the data is drawn from the same population which we are analyzing, we can go on to produce a Population Table. 
+
+The Population Table shows rows from three sources: the **Preceptor Table**, the **actual data**, and the **population** (outside of the data).
+
+Our **Preceptor Table** rows contain the information that we would *want* to know in order to answer our questions. These rows contain entries for our covariates (city and year) but they do not contain any outcome results. We are trying to answer questions about the train commuter population in 2021, so our city entries for these rows will vary and our year entries of these rows will read "2021". 
+
+Our **actual data** rows contain the information that we *do* know. These rows contain entries for both our covariates *and* the outcomes. In this case, the actual data comes from a study conducted on train commuters around Boston, MA in 2012, so our city entries for these rows will read "Boston, MA" and our year entries of these rows will read "2012".
+
+Our **population** rows contain no data. These are subjects which fall under our desired population, but for which we have no data. As such, all rows are missing.
+
+The population table includes commuters from our Preceptor table with the information that we would ideally have to answer the questions and those from the data we have that is specific to Boston, MA. Additionally, the population table also includes the groups of people within our population that we don't have 
+
+```{r}
+tibble(source = c("Preceptor Table", "Preceptor Table", "Preceptor Table",  "...", "Data", "Data", "Data", "...", "Population", "Population", "Population"),
+       city = c("Chicago, IL", "Seattle, WA", "Atlanta, GA", "...",
+                  "Boston, MA", "Boston, MA", "Boston, MA", "...",
+                  "?", "?", "?"),
+       year = c("2021", "2021", "2021", "...",
+                "2012", "2012", "2012", "...",
+                "?", "?", "?"),
+       age = c("?", "?", "?", "...",
+                 "43", "52", "28", "...",
+                 "?", "?", "?"),
+       party = c("?", "?", "?", "...", 
+                  "Democrat", "Republican", "Republican", "...",
+                  "?", "?", "?"),
+       income = c("?", "?", "?", "...", 
+                    "150000", "50000", "200000", "...",
+                    "?", "?", "?"),
+       liberal = c("?", "?", "?", "...", 
+                 "Liberal", "Liberal", "Not Liberal", "...",
+                 "?", "?", "?"),
+       att_treat = c("?", "?", "?", "...", 
+                 "6", "8", "4", "...",
+                 "?", "?", "?"),
+       att_control = c("?", "?", "?", "...", 
+                 "4", "2", "5", "...",
+                 "?", "?", "?")) %>%
+  
+  # Then, we use the gt function to make it pretty
+  
+  gt() %>%
+  cols_label(source = md("Source"),
+             city = md("City"),
+             year = md("Year"),
+             age = md("Age"),
+             party = md("Party"),
+             income = md("Income"),
+             liberal = md("Liberal"),
+             att_treat = md("Treatment"),
+             att_control = md("Control")) %>%
+  tab_style(cell_borders(sides = "right"),
+            location = cells_body(columns = c(source))) %>%
+  tab_style(style = cell_text(align = "left", v_align = "middle", size = "large"), 
+            locations = cells_column_labels(columns = c(source))) %>%
+  cols_align(align = "center", columns = everything()) %>%
+  cols_align(align = "left", columns = c(source)) %>%
+  fmt_markdown(columns = everything())  
+```
 
 
 
