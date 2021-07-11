@@ -282,20 +282,21 @@ Note that, in this chapter, we have used the variable `ID` in two different ways
 `r scales::comma(nrow(urn))` beads in our virtual urn. And that is OK! `ID` means the same concept in both cases.   
 
 
-Our virtual urn needs a virtual shovel. We use `slice_sample()` and a list-column to take a sample of 50 beads from our virtual urn.
+Our virtual urn needs a virtual shovel. We use `slice_sample()` and list-column mapping wizardry learned in Section \@ref(list-columns-and-map-functions) to take a sample of 50 beads from our virtual urn.
 
 
 ```{r}
 # Define ID as 1 to look at one example of drawing fifty beads. When ID is
 # called within map(), we are performing slice_sample() upon our urn once (ID =
-# 1) and taking a sample of 50 beads. Note that the ID in the main tibble has
-# nothing to do wkth the ID variable in urn. The former refers to samples from
-# the urn. The latter refers to beads in the urn.
+# 1) and taking a sample of 50 beads. Note that the ID in this tibble has
+# nothing to do with the ID variable in the urn we made previously. The former refers to each sample we take from the urn. The latter refers to each individual bead in the urn.
 
 tibble(ID = 1) %>% 
   mutate(shovel = map(ID, ~ slice_sample(urn, n = 50)))
 ```
 
+<!-- RS: Less ambiguous variable naming to try and not confuse readers? Maybe instead of initializing each tibble with `ID`, we could use bead_ID, trial_ID, shovel_ID etc. -->
+<!-- RS: Also, why do we use slice_sample()? I feel like normal sample() is better, and we could get rid of having to assign IDs to each bead which serves no real purpose. -->
 As usual, map functions and list-columns are powerful but confusing. The `str()` function is a good way to explore a tibble with a list-column.
 
 
@@ -314,14 +315,12 @@ Let's compute the proportion of beads in our virtual sample that are red. First,
 tibble(ID = 1) %>% 
   mutate(shovel = map(ID, ~ slice_sample(urn, n = 50))) %>% 
   
-  # Using map_int, perform the sum where (within the shovel -- denoted by the
-  # period) the color is equal to red. This counts the number of red beads in
-  # the shovel.
+# To count the number of red beads in each shovel, we can use a lesser known property of the sum() function: By passing in a comparison expression, sum() will count the number of occurrences within a vector. In this case, we count the total number occurrences of the word red in the color column of shovel. 
   
   mutate(numb_red = map_int(shovel, ~ sum(.$color == "red")))
 ```
 
-How does this work? R treats `TRUE` like the number `1` and `FALSE` like the number `0`. So summing the number of `TRUE`s and `FALSE`s is equivalent to summing `1`'s and `0`'s. In the end, this operation counts the number of beads where `color` equals "red".
+How does this work? R evaluates if `color == red`, and treats `TRUE` values like the number `1` and `FALSE` values like the number `0`. So summing the number of `TRUE`s and `FALSE`s is equivalent to summing `1`'s and `0`'s. In the end, this operation counts the number of beads where `color` equals "red".
 
 Second, add a column for the total number of beads. (We already "know" that this is 50, but it never hurts to make our code more general.)
 
@@ -332,7 +331,7 @@ tibble(ID = 1) %>%
   mutate(numb_beads = map_int(shovel, ~ length(.$color)))
 ```
 
-Third, calculate the proportion red:
+Third, calculate the proportion red, and view the final output for our single sample:
 
 ```{r}
 tibble(ID = 1) %>% 
@@ -342,7 +341,7 @@ tibble(ID = 1) %>%
   mutate(prop_red = numb_red / numb_beads)
 ```
 
-Careful readers will note that the `numb_red` is changing in each example above. The reason, of course, is that each block re-runs the shovel exercise, getting a (potentially) different number of red beads. If we wanted the same number in each block, we would need to use `set.seed()` each time, always providing the same `seed` each time.
+Careful readers will note that the `numb_red` is changing in each example above. The reason, of course, is that each block re-runs the shovel exercise, and slice_sample will return a random number of red beads. If we wanted the same number in each block, we would need to use `set.seed()` each time, always providing the same `seed` each time.
 
 Let's now perform the virtual analog of having 33 groups of students use the sampling shovel!
 
