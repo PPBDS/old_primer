@@ -106,11 +106,12 @@ One way to answer this question would be to perform an exhaustive count: remove 
 *What is the probability, using that same urn, that we will draw more than 8 red beads if we use a shovel of size 20?*
 
 To begin this chapter, we will look at a real sampling activity: the urn.  Then, we will simulate the urn example using R code. This will help us to understand the *standard error* and the ways in which uncertainty factors into our predictions. We then create a joint distribution of models and data for the urn example. We derive a posterior distribution from that joint distribution, and then use that posterior to answer our questions. 
-<!-- RS: Add foreshadowing to Ch. 7, saying something like: "To try and estimate the probability distribution of a single parameter, p." Ch.7 does a good job of explaining 1 param v. 2 params, but readers should know what they are getting into. -->
-Use the **tidyverse** package. 
+<!-- RS: Add foreshadowing to Ch. 7, saying something like: "To try and estimate the probability distribution of a single parameter, p." Ch.7 does a good job of explaining 1 param v. 2 params, but readers should know what they are getting into. (Include this when we get into "answering the questions")-->
+Use the **tidyverse** package. We will also use the **dplyr** package to display summary lines.
 
 ```{r, message=FALSE}
 library(tidyverse)
+library(dplyr)
 ```
 
 ```{r, message = FALSE}
@@ -274,15 +275,14 @@ urn <- tibble(color = c(rep("red", 400),
 urn  
 ```
 
-<!-- RS: Add link to Ch.5 discussion of mapping, I think it does an alright to decent job. Consult with whoever is doing chapter 5 and see if they would want Ch.6 to take on mapping education responsibilities, or if Ch.5 should go into a tiny bit more depth.  -->
 Observe that `urn` has `r scales::comma(nrow(urn))` rows, meaning that the urn contains 
-`r scales::comma(nrow(urn))` beads. The first variable `ID` is used as an *identification variable*. None of the beads in the actual urn are marked with numbers. The second variable `color` indicates whether a particular virtual bead is red or white. 
+`r scales::comma(nrow(urn))` beads. The first variable `ID` is used as an *identification variable*. None of the beads in the actual urn are marked with numbers, but the `ID` column will be relevant later on. The second variable `color` indicates whether a particular virtual bead is red or white. 
 
 Note that, in this chapter, we have used the variable `ID` in two different ways: first, to keep track of the samples drawn by the 33 individual teams and, second, to keep track of the 
 `r scales::comma(nrow(urn))` beads in our virtual urn. And that is OK! `ID` means the same concept in both cases.   
 
 
-Our virtual urn needs a virtual shovel. We use `slice_sample()` and list-column mapping wizardry learned in Section \@ref(list-columns-and-map-functions) to take a sample of 50 beads from our virtual urn.
+Our virtual urn needs a virtual shovel. We use `slice_sample()` and list-column mapping wizardry learned in Section \@ref(list-columns-and-map-functions) to take a sample of 50 beads from our virtual urn. This is where the `ID` column in our `urn` becomes relevant, because `slice_sample()` will sample rows with a unique ID. Without the `ID` column, the urn would be a mess of the words "red" and "white," and `slice_sample()` would have no way of telling whether or not a bead has been drawn before.  
 
 
 ```{r}
@@ -307,6 +307,8 @@ tibble(ID = 1) %>%
 ```
 
 There are two levels. There is one row in the tibble for each sample. So far, we have only drawn one sample. Within each row, there is a second level, the tibble which is the sample. That tibble has two variables: `ID` and `color`.
+
+Before plowing ahead, it's important to stop 
 
 Let's compute the proportion of beads in our virtual sample that are red. First, add a column which indicates the number of red beads in the sample taken in the shovel.
 
@@ -345,8 +347,50 @@ Careful readers will note that the `numb_red` is changing in each example above.
 
 Let's now perform the virtual analog of having 33 groups of students use the sampling shovel!
 
-### Using the virtual shovel 33 times
+### Using the virtual shovel multiple times
 
+Lets look back on the concept of **sampling variation** that we discussed previously. Because the number of beads drawn will vary from sample to sample, it is not good enough to estimate the proportion of beads in the whole urn from one measly sample. We need to use the virtual shovel multiple times! 
+
+The agenda for this section is as follows: 
+
+1. **Refactor** our code to allow us to sample as many times as we want. 
+2. Use our new code to replicate the tactile sampling exercise in Section \@ref(sampling-activity), but virtually! We can then compare the results from real life and our virtual simulation. 
+3. Use the virtual shovel 1,000 and 10,000 times to examine the effect of more samples on the distribution.   
+
+In order to use our virtual shovel different numbers of times and compare the results, lets give ourselves a question to answer: 
+
+*How do the distributions of 33, 1,000, and 10,000 samples compare?*
+
+Some readers may consider copying the code from above, and creating 3 new variables: One for the distribution of 33 samples, one for 1,000 samples, and one for 10,000 samples.
+
+```{r}
+samples_33 <- tibble(ID = 1:33) %>% 
+  mutate(shovel = map(ID, ~ slice_sample(urn, n = 50))) %>% 
+  mutate(numb_red = map_int(shovel, ~ sum(.$color == "red"))) %>% 
+  mutate(numb_beads = map_int(shovel, ~ length(.$color))) %>% 
+  mutate(prop_red = numb_red / numb_beads)
+
+samples_1000 <- tibble(ID = 1:1000) %>% 
+  mutate(shovel = map(ID, ~ slice_sample(urn, n = 50))) %>% 
+  mutate(numb_red = map_int(shovel, ~ sum(.$color == "red"))) %>% 
+  mutate(numb_beads = map_int(shovel, ~ length(.$color))) %>% 
+  mutate(prop_red = numb_red / numb_beads)
+
+samples_10000 <- tibble(ID = 1:10000) %>% 
+  mutate(shovel = map(ID, ~ slice_sample(urn, n = 50))) %>% 
+  mutate(numb_red = map_int(shovel, ~ sum(.$color == "red"))) %>% 
+  mutate(numb_beads = map_int(shovel, ~ length(.$color))) %>% 
+  mutate(prop_red = numb_red / numb_beads)
+```
+
+While some people may be satisfied with this solution, it is not good enough for us! What if, for example, we wanted to compare the distributions from using the shovel for every integer value between 1 and 100. If we used our previous code, we would have to make 100 variables, which would be very time consuming to do. There must be a better way! 
+
+```{r, echo = FALSE, fig.cap = "Although it seems like more work intially, refactoring our code will help in the longrun."}
+knitr::include_graphics("06-one-parameter/images/code_refactor_meme.jpeg")
+```
+
+### Using the virtual shovel 33 times
+<!-- RS: Reason why some titles do not have specific URL thingys? -->
 In our tactile sampling exercise in Section \@ref(sampling-activity), we had 33 groups of students use the shovel, yielding 33 samples of size 50 beads. We then used these 33 samples to compute 33 proportions. We can perform this repeated/replicated sampling virtually by just doing the same thing 33 times. 
 
 We'll save these results in a data frame called `virtual_samples`. 
