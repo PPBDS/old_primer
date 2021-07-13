@@ -1,17 +1,9 @@
 # One Parameter {#one-parameter}
 
-<!-- Remove our defined functions like make_prop_red(). Reason is that we no longer teach how to write functions in chapter 3. (Same applies in tutorials.) Use shovel_size <- c(25, 50, 100)
-reps <- 1:5
-expand_grid(shovel_size, reps) and then just the code we have. -->
 
 <!-- Map functions and list-columns are taught in chapter 5, both the Primer and the tutorial. Take look. Make a PR about things you want to make sure students know, or examples problems we should do. -->
 
 <!-- Need to teach students how to use the standard error. Maybe in tutorial. Emphasize the equivalence of 17% best guess wit 1% SE is the same thing as 17% best guess with a 95% confidence interval of 11% to 23%.   -->
-
-<!-- shovel_size <- c(25, 50, 100) -->
-<!-- reps <- 1:5 -->
-<!-- expand_grid(shovel_size, reps) -->
-
 
 <!-- Read all my old comments. Indicate if they are not clear. -->
 
@@ -89,9 +81,9 @@ expand_grid(shovel_size, reps) and then just the code we have. -->
 knitr::include_app("https://www.youtube.com/embed/e3PJ3Du_zDc")
 ```
 
-This scene is from  *The Hunger Games*, a dystopian novel in which children are selected via lottery to fight to the death. Primrose Everdeen is selected from the urn. Why does she have the misfortune of being selected? Or, as we data scientists say, *sampled*?
+*The Hunger Games* is a dystopian novel in which children are chosen via lottery to fight to the death. Primrose Everdeen is selected from the urn. Why does she have the misfortune of being selected? Or, as we data scientists say, *sampled*?
 
-In Chapter \@ref(probability), we learned about probability, the framework for quantifying uncertainty. In this chapter, we will learn about *sampling*, the beginning of our journey toward inference. When we sample, we take some *units* from a population, calculate statistics based on those units, and make inferences about unknown parameters associated with the population. 
+In Chapter \@ref(probability), we learned about probability, the framework for quantifying uncertainty. In this chapter, we will learn about *sampling*, the beginning of our journey toward inference. When we sample, we take some *units* from a *population*, calculate statistics based on those units, and make inferences about unknown *parameters* associated with the population. 
 
 The urn below has a certain number of red and a certain number of white beads all of equal size, mixed well together. What proportion, $p$, of this urn's beads are red? 
 
@@ -106,15 +98,22 @@ One way to answer this question would be to perform an exhaustive count: remove 
 *What is the probability, using that same urn, that we will draw more than 8 red beads if we use a shovel of size 20?*
 
 To begin this chapter, we will look at a real sampling activity: the urn.  Then, we will simulate the urn example using R code. This will help us to understand the *standard error* and the ways in which uncertainty factors into our predictions. We then create a joint distribution of models and data for the urn example. We derive a posterior distribution from that joint distribution, and then use that posterior to answer our questions. 
+<<<<<<< HEAD
 <!-- RS: Add foreshadowing to Ch. 7, saying something like: "To try and estimate the probability distribution of a single parameter, p." Ch.7 does a good job of explaining 1 param v. 2 params, but readers should know what they are getting into. (Include this when we get into "answering the questions")-->
 Use the **tidyverse** package. We will also use the **dplyr** package to display summary lines.
+=======
 
-```{r, message=FALSE}
+<!-- RS: Add foreshadowing to Ch. 7, saying something like: "To try and estimate the probability distribution of a single parameter, p." Ch.7 does a good job of explaining 1 param v. 2 params, but readers should know what they are getting into. -->
+
+Use the **tidyverse** package. 
+>>>>>>> ed41a3b26776b175b572983de268435d0e4bc0e4
+
+```{r, message = FALSE}
 library(tidyverse)
 library(dplyr)
 ```
 
-```{r, message = FALSE}
+```{r, echo = FALSE, message = FALSE}
 # Needed for the one 3-D plot below.
 
 library(rayshader)
@@ -142,13 +141,17 @@ knitr::include_graphics("06-one-parameter/images/sampling_bowl_3_cropped.jpg")
 
 Observe that 17 of the 50 sampled beads are red and thus 17/50 = 0.34 = 34% of the shovel's beads are red. We can view the proportion of beads that are red in this shovel as a guess of the proportion of beads that are red in the entire urn. While not as exact as doing an exhaustive count of all the beads in the urn, our guess of 34% took much less time and energy to make. 
 
+<<<<<<< HEAD
 Recall that $p$ is the true value of the proportion of red beads. There is only one $p$. Our guesses at the proportion of red beads are known as $\hat{p}$ (pronounced p hat), where $\hat{p}$ is the estimated value of $p$ which comes from taking a sample. There can be an infinite number of $\hat{p}$. 
+=======
+Recall that $p$ is the true value of the proportion of red beads. There is only one $p$. Our guesses at the proportion of red beads are known as $\hat{p}$, where $\hat{p}$ is the estimated value of $p$ which comes from taking a sample. There are many possible $\hat{p}$'s. You and I will often differ in our estimates. We each have a different $\hat{p}$ even though we agree that there is only one $p$. 
+>>>>>>> ed41a3b26776b175b572983de268435d0e4bc0e4
 
-Imagine that we started this activity over from the beginning, replacing the 50 beads back into the urn and starting over. Would we remove exactly 17 red beads? Maybe? 
+Start this activity over from the beginning, placing the 50 beads back into the urn. Would a second sample include exactly 17 red beads? Maybe, but probably not.
 
 What if we repeated this activity *many* times? Would our guess at the proportion of the urn's beads that are red, $\hat{p}$, be exactly 34% every time? Surely not. 
 
-Let's repeat this exercise with the help of 33 groups of friends to understand how the value varies across 33 independent trials. 
+Let's repeat this exercise with the help of 33 groups of friends to understand how the value of $\hat{p}$ varies across 33 independent trials. 
 
 ### Using the shovel 33 times {#student-shovels}
 
@@ -208,7 +211,7 @@ tactile_sample_urn
 
 For each `group`, we are given their names, the number of `red_beads` they obtained, and the corresponding proportion out of 50 beads that were red, called `prop_red`. We also have an `ID` variable which gives each of the 33 groups a unique identifier. Each row can be viewed as one instance of a replicated activity: using the shovel to remove 50 beads and computing the proportion of those beads that are red. 
 
-Let's visualize the distribution of these 33 proportions using `geom_histogram()` with `binwidth = 0.05`. This is a computerized and complete version of the partially completed hand-drawn histogram you saw earlier. Setting boundary = 0.4 indicates that we want a binning scheme such that one of the bins' boundary is at 0.4. `color = "white"` modifies the color of the boundary for visual clarity. 
+Let's visualize the distribution of these 33 proportions using `geom_histogram()` with `binwidth = 0.05`. This is a computerized and complete version of the partially completed hand-drawn histogram you saw earlier. Setting `boundary = 0.4` indicates that we want a binning scheme such that one of the bins' boundary is at 0.4. `color = "white"` modifies the color of the boundary for visual clarity. 
 
 ```{r}
 tactile_sample_urn %>%
@@ -239,11 +242,15 @@ What we just demonstrated in this activity is the statistical concept of **sampl
 
 Moreover, because we mixed the beads before each use of the shovel, the samples were random and independent. Because each sample was drawn at random, the samples were different from each other. This is an example of  *sampling variation*, and it is important to consider! For example, what if instead of selecting 17 beads in our first sample we had selected just 11? Does that mean that the population proportion of the beads is 11/50 or 22%? No! Because we performed 33 trials we can look to our histogram, and see that the peak of the distribution occurs when .35 < $\hat{p}$ < .4 , so it is *very likely* that the proportion of red beads in the entire population will also fall in or near this range. 
 
-In Section \@ref(virtual-sampling), we'll mimic the hands-on sampling activity we just performed on a computer. This will allow us not only to repeat the sampling exercise much more than 33 times, but it will also allow us to use shovels with different numbers of slots than just 50. 
+In Section \@ref(virtual-sampling), we'll mimic the hands-on sampling activity we just performed on a computer. This will allow us not only to repeat the sampling exercise much more than 33 times, but it will also allow us to use shovels with different numbers of slots than just 50.
 
+<<<<<<< HEAD
 Afterwards, we'll present you with definitions, terminology, and notation related to sampling in Section \@ref(standard-errors). As in many disciplines, such necessary background knowledge may seem confusing at first. However, if you truly understand the underlying concepts and practice, you'll be able to master them.
 
 To tie the contents of this chapter to the real world, we'll present an example of one of the most common uses of sampling: polls. In Section \@ref(sampling-case-study) we'll look at a particular case study: a 2013 poll on then U.S. President Barack Obama's popularity among young Americans, conducted by the Kennedy School's Institute of Politics at Harvard University. 
+=======
+<!-- RS: We could add a paragraph describing how the IRL sample creates an empirical distribution, while the virtual sampling creates a joint distribution model to later base our posterior distribution off of. Chapter 5 has limited real world applications, so I think it is definetly worth it to sprinkle some throughout this chapter where we can.  -->
+>>>>>>> ed41a3b26776b175b572983de268435d0e4bc0e4
 
 ## Virtual sampling {#virtual-sampling}
 
@@ -312,6 +319,7 @@ Before plowing ahead, it's important to stop
 
 Let's compute the proportion of beads in our virtual sample that are red. First, add a column which indicates the number of red beads in the sample taken in the shovel.
 
+<!-- DK: Is code like .$color understandable? -->
 
 ```{r}
 tibble(ID = 1) %>% 
@@ -432,8 +440,10 @@ ggplot(aes(x = prop_red)) +
   
   scale_y_continuous(breaks = seq(2, 10, 2))
 ```
+
 <!-- RS: Add that we add boundary because we know that the mathematical probability of drawing a red bead is .4, and that in reality we would rarely know this. Also possibly add additional review/info about sample vs. population either here or at the beginning where we introduce sampling.  -->
-We set the `boundary` and `binwidth` arguments. Setting `boundary = 0.4` ensures a binning scheme with one bin's boundary at 0.4. Since `binwidth = 0.05`, this will create bins with boundaries at 0.30, 0.35, 0.45, and so on. Recall that $\hat{p}$ is equal to the proportion of beads which are red in our samples. 
+
+Since `binwidth = 0.05`, this will create bins with boundaries at 0.30, 0.35, 0.45, and so on. Recall that $\hat{p}$ is equal to the proportion of beads which are red in each sample. 
 
 Observe that we occasionally obtained proportions red that are less than 30%. On the other hand, we occasionally obtained proportions that are greater than 45%. However, the most frequently occurring proportions were between 35% and 45%. Why do we have these differences in proportions red? Because of *sampling variation*. 
 
@@ -618,18 +628,7 @@ Observe that as the sample size increases, the variation of the 1,000 replicates
 
 <!-- RS: Maybe add a gganim to see how density changes as sample size increases? Pretty sure it will break when n = 1000 but that could also be an opportunity to educate about samples and population (because n = 1000 is no longer a sample and prob_red should just be a number.) -->
 
-We can be numerically explicit about the amount of variation in our three sets of 1,000 values of `prop_red` by using the *standard deviation*. A standard deviation is a summary statistic that measures the amount of variation within a numerical variable. For all three sample sizes, let's compute the standard deviation of the 1,000 proportions red by running the following data wrangling code that uses the `sd()` summary function.
-
-```{r}
-virtual_samples_25 %>% 
-  summarize(sd = sd(prop_red), .groups = 'drop_last')
-
-virtual_samples_50 %>% 
-  summarize(sd = sd(prop_red), .groups = 'drop_last')
-
-virtual_samples_100 %>% 
-  summarize(sd = sd(prop_red), .groups = 'drop_last')
-```
+We can be numerically explicit about the amount of variation in our three sets of 1,000 values of `prop_red` by using the *standard deviation*. A standard deviation is a summary statistic that measures the amount of variation within a numerical variable. For all three sample sizes, let's compute the standard deviation of the 1,000 proportions red.
 
 
 ```{r, echo = FALSE, fig.cap = "Comparing the number of slots in the shovel with the standard deviation of proportions red. Here, we see that standard deviation decreases with higher sample sizes. Larger sample sizes yield more precise estimates."}
@@ -672,91 +671,49 @@ comparing_n_table  %>%
 
 As the sample size increases, the variation decreases. In other words, there is less variation in the 1,000 values of the proportion red. As the sample size increases, our guesses at the true proportion of the urn's beads that are red get more precise. The larger the shovel, the more precise the result. 
 
-### Functions are your friend!
 
-<!-- RS: Maybe move this section up? And also add a brief explanation of functions (1 paragraphish), as this is the first time functions come up (to my knowledge.) I like the idea of reinforcing the setup a couple of times, but I think it gets kind of old.  -->
+In the last section, we ran more or less the same code three times, but with different sizes for our shovel: 25, 50, and 100. We can use `expand_grid()` and a new variable, `shovel_size`, to create a tibble which will organize our results.  
 
-Note that in the last section, we ran more or less the same code three times, but with different sizes for our shovel: 25, 50, and 100.  Whenever you find yourself writing the same code three or more times, you should write a *function* that does the same thing.  Let's look at the code that used a shovel of size 25 and calculated the proportion of beads that were red one more time:
 
 ```{r}
-tibble(ID = 1:1000) %>% 
-  mutate(shovel = map(ID, ~ slice_sample(urn, n = 25))) %>% 
+expand_grid(ID = c(1:3), shovel_size = c(25, 50, 100))
+```
+
+The above sets the stage for simulating three samples for each of three different shovel sizes. Similar code as above can be used.
+
+```{r}
+expand_grid(ID = c(1:3), shovel_size = c(25, 50, 100)) %>% 
+  mutate(shovel = map(shovel_size, ~ slice_sample(urn, n = .))) %>% 
   mutate(numb_red = map_int(shovel, ~ sum(.$color == "red"))) %>% 
   mutate(numb_beads = map_int(shovel, ~ length(.$color))) %>% 
   mutate(prop_red = numb_red / numb_beads)
 ```
 
-Once you have a pipe which does what you want, creating a function is relatively easy. Just place the code within a function definition and "pull out" specific variables as arguments.
+We changed the second line to use `shovel_size` rather than `ID` as the mapping variable since we can no longer hard code the shovel size into the call to `slice_sample()`. Expand to 1,000 simulations for each value of `shovel_size` and finish with a calculation of standard deviation.
 
 ```{r}
-make_prop_red <- function(x, shovel_size, reps){
-  tibble(ID = 1:reps) %>% 
-    mutate(shovel = map(ID, ~ slice_sample(x, n = shovel_size))) %>% 
-    mutate(numb_red = map_int(shovel, ~ sum(.$color == "red"))) %>% 
-    mutate(numb_beads = map_int(shovel, ~ length(.$color))) %>% 
-    mutate(prop_red = numb_red / numb_beads)
-}
-```
-
-
-See how this just uses the code we had before to create `virtual_prop_red_25`, but generalizes it.  Now we can create the same tibbles we did before, ready to plot the histograms, with only three lines of code:
-
-```{r}
-virtual_prop_red_25  <- make_prop_red(x = urn, shovel_size = 25,  reps = 1000)
-virtual_prop_red_50  <- make_prop_red(x = urn, shovel_size = 50,  reps = 1000)
-virtual_prop_red_100 <- make_prop_red(x = urn, shovel_size = 100, reps = 1000)
-```
-
-But this still isn't the best way.  Note that we have three objects we need to deal with, `virtual_prop_red_25`, `virtual_prop_red_50`, and `virtual_prop_red_100`. Instead, let's store our results in a single tibble.  How can we do this?  By using `map()` to create a list-column!
-
-First, we'll create a tibble that has a variable named `shovel_size` with our values (25, 50, 100):
-
-
-```{r}
-tibble(shovel_size = c(25, 50, 100))
-```
-
-Next, we'll create list column called `prop_red_results` that is the output of `make_prop_red()`.
-
-```{r}
-tibble(shovel_size = c(25, 50, 100)) %>%
-  mutate(prop_red_results = map(shovel_size,
-                                ~ make_prop_red(x = urn, 
-                                           shovel_size = .x, 
-                                           reps = 1000)))
-
-```
-
-Adding another map function will let us get the standard deviations of our estimated proportions:
-
-```{r}
-shovels <- tibble(shovel_size = c(25, 50, 100)) %>%
-  mutate(prop_red_results = map(shovel_size,
-                                ~ make_prop_red(x = urn, 
-                                           shovel_size = .x, 
-                                           reps = 1000))) %>% 
+expand_grid(ID = c(1:1000), shovel_size = c(25, 50, 100)) %>% 
+  mutate(shovel = map(shovel_size, ~ slice_sample(urn, n = .))) %>% 
+  mutate(numb_red = map_int(shovel, ~ sum(.$color == "red"))) %>% 
+  mutate(numb_beads = map_int(shovel, ~ length(.$color))) %>% 
+  mutate(prop_red = numb_red / numb_beads) %>% 
+  group_by(shovel_size) %>% 
+  summarize(st_dev_p_hat = sd(prop_red))
   
-  # Use map_dbl() to create a column that draws the standard deviations of our
-  # prop_red values. We can use pull after our ~ to isolate the prop_red values
-  # and use a pipe (as we normally do) here to draw the sd() of this column.
-  
-  
-  mutate(prop_red_sd = map_dbl(prop_red_results, 
-                               ~ pull(., prop_red) %>% sd()))
-
-glimpse(shovels)
 ```
 
-Now that we have this framework, there's no need to limit ourselves to the sizes 25, 50, and 100.  Why not try all integers from 1 to 100? We can use the same code, except we'll now set `shovel_size = 1:100` when initializing the tibble.
+This is, approximately, the same result as we saw above, but calculated without so much code duplication.
+
+Now that we have this framework, there's no need to limit ourselves to the sizes 25, 50, and 100.  Why not try all integers from 1 to 100? We can use the same code, except we'll now set `shovel_size = 1:100`.
 
 ```{r, cache = TRUE}
-shovels_100 <- tibble(shovel_size = 1:100) %>%
-  mutate(prop_red_results = map(shovel_size,
-                                ~ make_prop_red(x = urn, 
-                                           shovel_size = .x, 
-                                           reps = 1000))) %>% 
-  mutate(prop_red_sd = map_dbl(prop_red_results, 
-                               ~ pull(., prop_red) %>% sd()))
+shovels_100 <- expand_grid(ID = c(1:1000), shovel_size = c(1:100)) %>% 
+  mutate(shovel = map(shovel_size, ~ slice_sample(urn, n = .))) %>% 
+  mutate(numb_red = map_int(shovel, ~ sum(.$color == "red"))) %>% 
+  mutate(numb_beads = map_int(shovel, ~ length(.$color))) %>% 
+  mutate(prop_red = numb_red / numb_beads) %>% 
+  group_by(shovel_size) %>% 
+  summarize(st_dev_p_hat = sd(prop_red))
 
 glimpse(shovels_100)
 ```
@@ -766,7 +723,7 @@ Now, we have the standard deviation of `prop_red` for all shovel sizes from 1 to
 
 ```{r, echo = FALSE, fig.cap = "Comparing standard deviations of proportions red for 100 different shovels. The standard deviation decreases at the same rate as the square root of shovel size. The red line shows the standard error."}
 shovels_100 %>%
- ggplot(aes(x = shovel_size, y = prop_red_sd)) +
+ ggplot(aes(x = shovel_size, y = st_dev_p_hat)) +
  geom_point() +
  stat_function(aes(x = 1:100, colour = "red"), 
                fun = function(.x) 1/(2 * sqrt(.x)), 
@@ -776,15 +733,19 @@ shovels_100 %>%
 ```
 
 The red line here represents an important statistical concept: standard error (SE). The mathematical definition of SE for our purposes is the standard deviation divided by the square root of the sample size. As the shovel size increases, and thus our sample size increases, we find that the standard error decreases.  If this is confusing right now, fear not! We will delve into this explanation in our next section. 
+
 <!-- RS: Definitely add better description of standard error. As someone who knows nothing about standard error, this description is not very helpful. -->
 
 <!-- The variation in p-hat (when we do 1,000 reps) decreases as shovel size increases. For each shovel size, you plot 1,000 points. Small shovels have lots of overlap, so, use alpha. Even big shovels only have scores of possible p-hats. Then, say, can we measure the decrease in varition more precisely then just looking at this cloud of points? Yes! Plot the standard deviation of the cloud for each shovel size. -->
 
 <!-- RS: I agree with whoever wrote the above comment in theory, but not completely sure about what the execution looks like. I think it is important to tie the distribution into what the standard deviation tells us about our data and the shape of our graph.  -->
+
 ```{r, echo = FALSE, fig.cap = "To any poets and philosophers confused about this: don't worry! It won't be on a problem set."}
 knitr::include_graphics("06-one-parameter/images/meme_math.png")
 ```
+
 <!-- RS: Remove cringey memes.  -->
+
 This is the power of running many analyses at once using map functions and list columns: before, we could tell that the standard deviation was decreasing as the shovel size increased, but when only looking at shovel sizes of 25, 50, and 100, it wasn't clear *how quickly* it was decreasing.
 
 ## Standard error {#standard-errors}
@@ -801,8 +762,6 @@ The relationship between the standard error and the standard deviation is that, 
 
 If this sounds confusing, don't worry! It is. Before we can explain this in more depth, it is important to understand some terminology. 
 
-
-
 ### Terminology and notation {#terminology-and-notation}
 
 ```{r, echo = FALSE, fig.cap = "Let Yoda's wisdom dull the pain of this terminology section."}
@@ -815,7 +774,7 @@ First, a **population** is the set of relevant units. The population's size is u
 
 Second, a **population parameter** is a numerical summary quantity about the population that is unknown, but you wish you knew. For example, when this quantity is the mean, the population parameter of interest is the *population mean*. This is mathematically denoted with the Greek letter $\mu$ pronounced "mu." In our earlier sampling from the urn activity, however, since we were interested in the *proportion* of the urn's beads that were red, the population parameter is the *population proportion*, denoted with $p$. 
 
-Third, a **census** is an exhaustive enumeration or counting of all $N$ units in the population in order to compute the population parameter's value *exactly*. In our sampling activity, this would correspond to counting the number of beads out of $N$ = 1000 that are red and computing the *population proportion* $p$ that are red *exactly*. When the number $N$ of individuals or observations in our population is large as was the case with our urn, a census can be quite expensive in terms of time, energy, and money. A census is impossible for any populations which includes the future, like our blood pressure next year or candidates for governor in 2040. There is a *truth* but we could not, even in theory, calculate it.
+Third, a **census** is an exhaustive enumeration or counting of all $N$ units in the population in order to compute the population parameter's value *exactly*. In our sampling activity, this would correspond to counting the number of beads out of $N = 1000$ that are red and computing the *population proportion* $p$ that are red *exactly*. When the number $N$ of individuals or observations in our population is large as was the case with our urn, a census can be quite expensive in terms of time, energy, and money. A census is impossible for any populations which includes the future, like our blood pressure next year or candidates for governor in 2040. There is a *truth* but we could not, even in theory, calculate it.
 
 Fourth, **sampling** is the act of collecting a sample from the population when we can not, or do not want to, perform a census. The sample size is lower case $n$, as opposed to upper case $N$ for the population's size. Typically the sample size $n$ is much smaller than the population size $N$. In our sampling activities, we used shovels with varying slots to extract samples of size $n$ = 1 through $n$ = 100. 
 
@@ -865,7 +824,7 @@ For example, observe the centers of all three sampling distributions: they are a
 
 ```{r, echo = FALSE, fig.cap = "Previously seen comparing standard deviations of proportions red for 100 different shovels"}
 shovels_100 %>%
-  ggplot(aes(x = shovel_size, y = prop_red_sd)) +
+  ggplot(aes(x = shovel_size, y = st_dev_p_hat)) +
   geom_point() +
   labs(x = "Shovel size",
        y = "Standard deviation of the proportion red")
@@ -913,7 +872,7 @@ Furthermore, let's display the graph of standard errors for $n = 1$ to $n = 100$
 
 ```{r, echo = FALSE, fig.cap = "Standard errors of the sample proportion based on sample sizes of 1 to 100"}
 shovels_100 %>%
-  ggplot(aes(x = shovel_size, y = prop_red_sd)) +
+  ggplot(aes(x = shovel_size, y = st_dev_p_hat)) +
   geom_point() +
   labs(x = "Sample size (n)",
        y = expression(Standard~error~of~hat(italic(p))))
@@ -934,11 +893,15 @@ To really drive home our point: standard error is just a fancy term for your unc
 ```{r, echo = FALSE, fig.cap= "If you are wondering how much you need to know, follow this helpful guide of the information we have learned this chapter!", fig.align= 'center'}
 knitr::include_graphics("06-one-parameter/images/final_preceptor.png")
 ```
+
 <!-- RS: Pyramid is not super helpful and I support removing it and all references to it.  -->
+
 This hierarchy represents the knowledge we need to understand standard error (SE). At the bottom, we have math. It's the foundation for our understanding, but it doesn't need to be what we take away from this lesson. As we go up, we simplify the topic. The top of the pyramid are the basic levels of understanding that will help you to remember in the future. 
 
 If I know your estimate plus or minus *two* standard errors, I know your 95% confidence interval. This is valuable information. Standard error is really just a measure for how uncertain we are about something we do not know, the thing we are estimating. When we recall SE, we should remember that, all in all, it's a complicated concept that can be distilled into: the way old people talk about confidence intervals. 
+
 <!-- RS: Explain what confidence interval is.  -->
+
 Recall that $\hat{p}$ is the estimated value of p which comes from taking a sample. There can be billions and billions of $\hat{p}$'s. We look at a large group of $\hat{p}$'s, create a distribution of results to represent the possible values of p based on our findings, and then we compute a standard error to account for our own uncertainty about our predictions. Our 95% confidence interval for our prediction == our estimate plus or minus **two** standard errors. 
 
 In regards to the fifth layer of the hierarchy, we may wonder: 
@@ -963,7 +926,9 @@ We have looked at a number of different models and their accuracy and precision.
 Let's start with our first question: **If we get 17 red beads in a random sample of size 50 taken from an urn with 1000 (white or red) beads, how many red beads are in the urn?**
 
 In Chapter \@ref(probability) we outlined the key intuition behind all inference: there is a joint distribution of data-which-we-might-see-from-our-experiment and models-which-we-are-considering. We take this joint distribution, combine it with the actual results of the experiment, and calculate a posterior distribution over the set of possible models. In other words, we start with 
+
 <!-- RS: Not a huge fan of this definition of joint distribution. Chapter 5 has a much better one.  -->
+
 $$\text{Prob}(\text{models}, \text{data})$$ 
 
 We then add the specific results of the experiment, and calculate the conditional distribution of the models, given the data that we have seen:
@@ -1108,6 +1073,7 @@ joint_dist %>%
     theme_classic()
 ```
 <!-- RS: This section seems messed up, maybe something was removed? No 3d models in sight. -->
+
 To visualize this in a 3D plot, see the slice in the figure below. There are a few things to note. First, the x-axis only extends to 600 (rather than the total 1000) due to the fact that, when the shovel only draws 17/50 = .34 = 34% red beads, it is almost impossible for the total number red beads in the total urn to exceed 600. The most likely number of red beads in the total urn, when the shovel draws 17/50 red beads, is somewhere in the 290-350 range. This is signified by the peak between these points. The probability is lower below 280 and above 350 because it is less likely that this is the number of red beads in the urn, conditional on the fact that the shovel drew 17/50 red beads. This is our posterior distribution. 
 
 For any value of red beads found in the shovel (from 0 to 50), there is a posterior distribution of possible values of red beads in the total urn. This distribution is meant to illustrate that, though our sample gives an estimate of the total proportion of red beads in the entire urn, there is much variation in what the actual proportion might be. To summarize: the distribution of the hat things (the things we are predicting) is, more or less, your posterior.
