@@ -343,11 +343,11 @@ Let's look back on the concept of **sampling variation** that we discussed previ
 
 The agenda for this section is as follows: 
 
-1. **Refactor** our code to allow us to sample as many times as we want. 
+1. **Re-factor** our code to allow us to sample as many times as we want. 
 2. Use our new code to replicate the tactile sampling exercise in Section \@ref(sampling-activity), but virtually! We can then compare the results from real life and our virtual simulation. 
 3. Use the virtual shovel 1,000 times to examine the effect of more samples on the distribution.   
 
-#### Refactoring our code
+#### Re-factoring our code
 
 In order to use our virtual shovel different numbers of times and compare the results, lets give ourselves a question to answer: 
 
@@ -378,13 +378,13 @@ samples_1000 <- tibble(ID = 1:1000) %>%
 
 While some people may be satisfied with this solution, it is not good enough for us! What if, for example, we wanted to compare the distributions from using the shovel for every integer value between 1 and 100. If we used our previous code, we would have to make 100 variables, which would be very time consuming to do. There must be a better way! 
 
-```{r, echo = FALSE, fig.cap = "Although it seems like more work intially, refactoring our code will help in the longrun."}
+```{r, echo = FALSE, fig.cap = "Although it seems like more work intially, re-factoring our code will help in the longrun."}
 knitr::include_graphics("06-one-parameter/images/code_refactor_meme.jpeg")
 ```
 
-As data scientists it is important to stop and look back on our code from time to time. First we need to look at our end goal: To compare using the virtual shovel different numbers of times. Then we look at our code. Does having a tibble for each sampling distribution make sense? Will it be easy to work with later? The answer is no. Instead, our goal should be to create one single tibble which we can group by number of samples. The process of restructuring our code to make it cleaner, simpler, and more versatile is called **refactoring**, and any *good* developer will do it from time to time. 
+As data scientists it is important to stop and look back on our code from time to time. First we need to look at our end goal: To compare using the virtual shovel different numbers of times. Then we look at our code. Does having a tibble for each sampling distribution make sense? Will it be easy to work with later? The answer is no. Instead, our goal should be to create one single tibble which we can group by number of samples. The process of restructuring our code to make it cleaner, simpler, and more versatile is called **re-factoring**, and any *good* developer will do it from time to time. 
 
-Now Let's attempt to refactor our code to create one tibble that includes the sampling distributions for any number of trials we choose. First, create the foundation for our tibble. 
+Now Let's attempt to re-factor our code to create one tibble that includes the sampling distributions for any number of trials we choose. First, create the foundation for our tibble. 
 
 ```{r}
 num_trials <- c(10, 33, 1000)
@@ -419,14 +419,14 @@ multiple_sampling_distributions <- tibble(reps = num_trials) %>%
 multiple_sampling_distributions
 ```
 
-Another way to refactor our code would be to use functions. To reduce complexity we will not use functions, but additional information about what they are and how to use them can be found in Section \@ref(functions). 
+Another way to re-factor our code would be to use functions. To reduce complexity we will not use functions, but additional information about what they are and how to use them can be found in Section \@ref(functions). 
 
 <!-- RS: Include one code chunk creating a function to show what they are or should we not show them whatsoever? -->
-Before we go onto using our new tibble to compare the effect of increasing the number of trials, there are still two refactoring topics left to discuss: the first being *reducing ambiguity*. If we want to present our findings to other data scientists, or ask for help online, it is important that others can understand our code. To increase understanding and reduce ambiguity, we should put some effort into creating variable names that others can easily understand. We should also avoid complicated nested functions, as they are both difficult to debug and hard to understand. Finally, we should include lots of comments in our code that can be used to document our thought process, which will also help outsiders audit our code. The more comments the better!
+Before we go onto using our new tibble to compare the effect of increasing the number of trials, there are still two re-factoring topics left to discuss: the first being *reducing ambiguity*. If we want to present our findings to other data scientists, or ask for help online, it is important that others can understand our code. To increase understanding and reduce ambiguity, we should put some effort into creating variable names that others can easily understand. We should also avoid complicated nested functions, as they are both difficult to debug and hard to understand. Finally, we should include lots of comments in our code that can be used to document our thought process, which will also help outsiders audit our code. The more comments the better!
 
-The final topic of refactoring left to discuss is *efficiency*. Because most of us run R Studio on our local machines, each R variable is stored using memory on our computers. As we add more columns or more complex objects to our tibbles, they will take up more memory. While our urn simulation takes up a relatively small amount of storage and we are not overly concerned with optimizing tibble size, it never hurts to practice making our tibbles more efficient. This will become especially handy when working with large data sets with thousands of rows and dozens of columns. 
+The final topic of re-factoring left to discuss is *efficiency*. Because most of us run R Studio on our local machines, each R variable is stored using memory on our computers. As we add more columns or more complex objects to our tibbles, they will take up more memory. While our urn simulation takes up a relatively small amount of storage and we are not overly concerned with optimizing tibble size, it never hurts to practice making our tibbles more efficient. This will become especially handy when working with large data sets with thousands of rows and dozens of columns. 
 
-In our urn exercise, the largest hindrance to efficiency are our chosen datatypes. Although we haven't really cared thus far, using `slice_sample()` will store tibbles inside our tibble, while `sample()` will store a list. We chose `slice_sample()` primarily because it can be useful with real data sets to select multiple columns, while `sample()` does not have that functionality. However, that extra data comes at a cost! A tibble with nothing in it takes up `r object.size(tibble())` of memory, so generating an individual sample tibble for each of the `r scales::comma(nrow(multiple_sampling_distributions))` rows in our tibble will make our object substantially larger. It is certainly worthwhile to read (or at least skim) this ["article about memory in R"](http://adv-r.had.co.nz/memory.html) to make sure that we understand the implications of storing complex objects within tibbles, so we can make the most out of our future list-column mapping endeavors. 
+In our urn exercise, the largest hindrance to efficiency are our chosen datatypes. Although we haven't really cared thus far, using `slice_sample()` will store tibbles inside our tibble, while `sample()` will store a list. We chose `slice_sample()` primarily because it can be useful with real data sets to select multiple columns, while `sample()` does not have that functionality. However, that extra data comes at a cost! A tibble with nothing in it takes up `r object.size(tibble())` of memory, so generating an individual sample tibble for each of the `r scales::comma(nrow(multiple_sampling_distributions))` rows in our tibble will make our object substantially larger. It is certainly worthwhile to read (or at least skim) this [article about memory in R](http://adv-r.had.co.nz/memory.html) to make sure that we understand the implications of storing complex objects within tibbles, so we can make the most out of our future list-column mapping endeavors. 
 
 R makes it easy to analyze the size of our objects using the `object.size()` function. Let's compare the effect of using `slice_sample()` versus using `sample()`.
 
@@ -458,7 +458,7 @@ The results are that using `slice_sample()` causes our tibble to be over 2 times
 <!-- RS: Reason why some titles do not have specific URL thingys? -->
 In our tactile sampling exercise in Section \@ref(sampling-activity), we had 33 groups of students use the shovel, yielding 33 samples of size 50 beads. We then used these 33 samples to compute 33 proportions. 
 
-Let's use our newly refactored code to replicate the tactile sampling activity in a virtual format. We'll save these results in a data frame called `virtual_samples`. 
+Let's use our newly re-factored code to replicate the tactile sampling activity in a virtual format. We'll save these results in a data frame called `virtual_samples`. 
 <!-- RS: Old code for 33 samples: -->
 <!-- virtual_samples <- tibble(ID = 1:33) %>% -->
 <!--   mutate(shovel = map(ID, ~ slice_sample(urn, n = 50))) %>% -->
@@ -560,7 +560,7 @@ This visualization allows us to see how our results differed between our tactile
 knitr::include_graphics("06-one-parameter/images/sample_bernie.png")
 ```
 
-The advantage of modern technology is that we can use virtual simulation as many times as we choose! No longer do we have to have to recruit groups of friends to sample, which would be especially troublesome as we increase the number of samples. Let's review our refactored tibble to compare the differences between 10, 33, and 1000 trials.    
+The advantage of modern technology is that we can use virtual simulation as many times as we choose! No longer do we have to have to recruit groups of friends to sample, which would be especially troublesome as we increase the number of samples. Let's review our re-factored tibble to compare the differences between `r num_trials[1]`, `r num_trials[2]`, and `r num_trials[3]` trials.    
 
 ```{r}
 set.seed(9)
@@ -575,22 +575,18 @@ multiple_sampling_distributions <- tibble(reps = num_trials) %>%
   mutate(numb_red = map_int(shovel, ~sum(.$color == "red"))) %>%
   mutate(prop_red = numb_red/shovel_size)
 
+summary_lines <- multiple_sampling_distributions %>%
+  group_by(reps) %>%
+  summarise(mean = mean(prop_red))
+
 multiple_sampling_distributions
 ```
 
 Remember: There are `r length(num_trials)` values for `reps`, one for each number of trials we want to compare. We then expand our tibble to have a `trial_ID` from 1 to our desired number of reps. Each row now represents one instance of a sample from our urn. Finally we compute the number of red beads in each sample and $\hat{p}$.
 
-Along with creating the `multiple_sample_distributions` tibble with our distributions for each number of trials, we will also create a tibble called `summary_lines` that will contain the mean $\hat{p}$ across each value of `reps`. We can use the `summary_lines` tibble to help us visualize our sampling distributions: 
+Along with creating the `multiple_sample_distributions` tibble with our distributions for each number of trials, we also create a tibble called `summary_lines` that contains the mean $\hat{p}$ across each value of `reps`.
 
-```{r}
-summary_lines <- multiple_sampling_distributions %>%
-  group_by(reps) %>%
-  summarise(mean = mean(prop_red))
-
-summary_lines
-```
-
-Now we can combine the `multiple_sampling_distributions` and `summary_lines` tibbles to compare the sampling distributions for 10, 33, and 1,000 trials. 
+Now we can combine the `multiple_sampling_distributions` and `summary_lines` tibbles to compare the sampling distributions for `r num_trials[1]`, `r num_trials[2]`, and `r num_trials[3]` trials. 
 
 ```{r}
 
@@ -613,11 +609,19 @@ multiple_sampling_distributions %>%
    scale_y_continuous(labels = scales::percent_format()) 
 ```
 
-The most frequently occurring proportions of red beads occur, again, between 35% and 45%. Every now and then, we obtain proportions much lower or higher. These are rare, however. Observe that we now have a much more symmetric and smoother bell-shaped distribution. This shape is, in fact, well approximated by a normal distribution. 
+First, why the empty spaces among the bars? Recall that, with only 50 beads, there are only 51 possible values for $\hat{p}$: 0, 0.02, 0.04, ..., 0.98, 1. A value of 0.31 or 0.47 is impossible, hence the gaps.
 
-Why the empty spaces among the bars? Recall that, with only 50 beads, there are only 51 possible values for $\hat{p}$: 0, 0.02, 0.04, ..., 0.98, 1. A value of 0.03 or 0.39 is impossible, hence the gaps.
+Some other interesting trends appear. First, notice how the sampling distribution for `r num_trials[1]` trials is very tall, while `r num_trials[3]` trials is shorter. This occurs because as we increase the number of trials, tails develop on our distribution as extreme $\hat{p}$ values are more likely to occur. The symmetric, bell-shaped distribution shown in the histogram of `r num_trials[3]` trials is well approximated by the *normal distribution*. 
 
-<!-- Should we discuss the normal distribution here? -->
+The most frequently occurring proportions of red beads occur, again, between 35% and 45%. But 35% to 40% is a wide range! We can use the `summary_lines` tibble to help better quantify this trend. Each red line displays the mean sample proportion, and as we increase the number of trials, the red line becomes closer and closer to the actual value of the sample proportion. We can also see this analytically:
+
+```{r, echo = FALSE}
+summary_lines
+```
+
+This is an important property of sampling. For problems involving proportion (p) or the mean ($\mu$), we can take repeated samples, and know that the mean of our sampling distribution will be approximately equal to the unknown population parameter we want to evaluate. However, it is *very* important to know that for the above to be true, we must take *random* samples *directly from the population*. 
+
+Now that we've examined the effect if increasing the number of trials, we will now change our virtual shovel size. 
 
 ### The effect of different shovel sizes {#different-shovels}
 
