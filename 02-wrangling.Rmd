@@ -52,6 +52,7 @@ library(fivethirtyeight)
 Tibbles are a kind of data frame, useful for storing data in which we have the same number of observations for each variable. We can use the `tibble()` function to create tibbles. Tibbles are composed of columns, each of which is a variable, and rows, each of which is a "unit" or an "observation." Furthermore, each column (i.e., each variable) can be of a different type: character, integer, factor, double, date and so on.
 
 <!-- Atilla: Tibble description was too long and ambiguous. I've broke it into multiple sentences with a little different wording. -->
+<!-- AM: Probably mention how we've already used tibbles, such as the trains dataset from Chapter 1. -->
 
 ### `tibble()`
 
@@ -61,7 +62,7 @@ tibble(a = 2.1, b = "Hello", c = TRUE, d = 9L)
 
 <!-- AM: Also unnecessarily wordy. -->
 
-In our code, we specify the variable names (or the names of columns) as , `a`, `b`, and `c`. Under each variable, we give a different value. Under each variable name, the data type is specified for the data within that column. A tibble can consist of one or more atomic vectors, the most important types of which are double, character, logical, and integer. The tibble above includes a variable of each type. The "L" in "9L" tells R that we want `d` to be an integer rather than the default, which would be a double. When you print out a tibble, the variable type is shown below the variable name.
+In our code, we specify the column names as , `a`, `b`, and `c`. Under each variable, we give a different value. Under each variable name, the data type is specified for the data within that column. A tibble can consist of one or more atomic vectors, the most important types of which are double, character, logical, and integer. The tibble above includes a variable of each type. The "L" in "9L" tells R that we want `d` to be an integer rather than the default, which would be a double. When you print out a tibble, the variable type is shown below the variable name, as indicated by `<dbl>`, `<chr>`, and so on.
 
 <!--Atilla: "The "L" in "9L" tells R that we want `d" part is not necessarily an extra information. I think parentheses is unnecessary in this case. I've edited that.-->
 
@@ -83,6 +84,8 @@ If we did not include the backticks, R would give us an error.
 tibble(54abc = 1, my var = 2, c = 3)
 ```
 
+In the real world, you may come across datasets with dirty column names such as `54abc` or `my var`.
+
 It is sometimes easier to use the function `tribble()` to create tibbles.
 
 ```{r}
@@ -93,9 +96,13 @@ tribble(
 )
 ```
 
+<!-- AM: The last part of this sentence is confusing. -->
+
 The tildes --- as in `~ var1` --- specify which row has the column names. The formatting makes it easier, relative to specifying raw vectors, to see which values are from the same observation.
 
 ## Lists
+
+<!-- AM: Shouldn't the figure come AFTER the first demonstration of `list()` on lines 113-116? -->
 
 ```{r, echo = FALSE, fig.cap = "Subsetting a list, visually."}
 knitr::include_graphics("02-wrangling/images/lists-subsetting.png")
@@ -116,7 +123,7 @@ x_named <- list(a = 1, b = 2, c = 3)
 str(x_named)
 ```
 
-Unlike atomic vectors, `list()` can contain a mix of objects.
+Unlike atomic vectors, `list()` can contain objects of several types.
 
 ```{r}
 y <- list("a", 1L, 1.5, TRUE)
@@ -140,7 +147,7 @@ x2 <- list(list(1, 2), list(3, 4))
 x3 <- list(1, list(2, list(3)))
 ```
 
-I'll draw them as follows:
+They are structured as follows:
 
 ```{r, echo = FALSE}
 knitr::include_graphics("02-wrangling/images/lists-structure.png")
@@ -198,8 +205,11 @@ knitr::include_graphics("02-wrangling/images/nasty.gif")
 
 So far, our tibbles have been clean and wholesome, like `gapminder` and `trains`. **Real data is nasty.** You will bring data into R from the outside world and discover there are problems. We will now discuss common remedial tasks for cleaning and transforming character data, also known as strings. A *string* is one or more characters that are enclosed inside a pair of matching 'single' or "double quotes".
 
+<!-- AM: This could be worded better. -->
 
 We will use the `fruit` data, a vector with the names of different fruits, from the **stringr** package, which is automatically loaded when we issue `library(tidyverse)`. Although we can manipulate character vectors directly, it is much more common, in real world situations, to work with vectors which are in a tibble.
+
+<!-- AM: Should this codeblock be put beneath the "Character vectors" section? -->
 
 ```{r}
 tbl_fruit <- tibble(fruit = fruit)
@@ -213,7 +223,9 @@ tbl_fruit %>%
   slice_sample(n = 8)
 ```
 
-Note that `slice_sample()` selects a random set of rows from the tibble. If you use the argument `n`, as here, you get back that many rows. Use the argue `prop` to return a specific percentage of all the rows in the tibble.
+<!-- AM: Demonstrate a use of the `prop` argument? Or just delete it entirely? -->
+
+Note that `slice_sample()` selects a random set of rows from the tibble. The argument `n`, as shown above, will display that many rows. Use the argument `prop` to return a specific percentage of all the rows in the tibble.
 
 `str_detect()` determines if a character vector matches a pattern.  It returns a logical vector that is the same length as the input. Recall logicals are either `TRUE` or `FALSE`.
 
@@ -222,9 +234,9 @@ Which fruit names actually include the letter "c?"
 ```{r}
 tbl_fruit %>% 
   mutate(fruit_in_name = str_detect(fruit, pattern = "c")) 
-
 ```
 
+<!-- AM: How is it different? Demonstrate a usage of `length()`? -->
 
 `str_length()` counts characters in your strings. Note this is different from the `length()` of the character vector itself.
 
@@ -233,7 +245,7 @@ tbl_fruit %>%
   mutate(name_length = str_length(fruit)) 
 ```
 
-`str_sub()` extracts parts of a string. The function takes start and end arguments which are vectorised.
+`str_sub()` returns a portion of a string. This demonstration will return the first three letters of each `fruit` with the arguments `fruit`, `1`, and `3`.
 
 ```{r}
 tbl_fruit %>% 
@@ -971,13 +983,13 @@ You can also view examples of both `pivot_longer()` and `pivot_wider()` on the [
 
 *A distribution is a function that shows the possible values of a variable and how often they occur.*
 
-Think of the distribution of a variable as an urn from which we can pull out, at random, values for that variable. Drawing a thousand or so values from that urn, and then looking at a histogram, can show where the values are centered and how the values vary. Because people are sloppy, they will use the word distribution to refer to both the (imaginary!) urn from which we are drawing values and to the list of values we have drawn. It is better, however, to keep three distinct ideas separate:
+Think of the distribution of a variable as an urn from which we can pull out, at random, values for that variable. Drawing a thousand or so values from that urn, and then looking at a histogram, can show where the values are centered and how they vary. Because people are sloppy, they will use the word distribution to refer to both the (imaginary!) urn from which we are drawing values and to the list of values we have drawn. It is better, however, to keep three distinct ideas separate:
 
-* The *unknown true distribution* which, in reality, generates the data which we see. Outside of stylized examples in which we *assume* that a distribution follows a simple mathematical formula, we will never have access to the unknown true distribution. We can only estimate it, however imperfectly. This unknown true distribution is often referred to as the *data generating mechanism*, or DGM. It is a function or black box or urn which produces data. We can see the data. We can't see the urn. Later in the *Primer*, once we have learned about posterior distributions, we will often refer to this as *Preceptor's Posterior*.
+* The *unknown true distribution* which, in reality, generates the data which we see. Outside of stylized examples in which we *assume* that a distribution follows a simple mathematical formula, we will never have access to the unknown true distribution. We can only estimate it. This unknown true distribution is often referred to as the *data generating mechanism*, or DGM. It is a function or black box or urn which produces data. We can see the data. We can't see the urn. Later in the *Primer*, once we have learned about posterior distributions, we will often refer to this as *Preceptor's Posterior*.
 
 * The *estimated distribution* which, we think, generates the data which we see. Again, we can never know the unknown true distribution. But, by making some assumptions and using the data we have, we can *estimate* a distribution. Our estimate may be very close to the true distribution. Or it may be far away. The main task of data science to to create and use these estimated distributions. Almost always, these distributions are instantiated in computer code.
 
-* A *vector of numbers drawn* from the estimated distribution. Both true and estimated distributions can be complex beasties, difficult to describe accurately and in detail. But a vector of numbers drawn from a distribution is easy to understand and use. So, in general, we work with vectors of numbers. When someone --- either a colleague or a piece of R code --- has created a distribution which we want to use to answer a question, we don't really want the distribution itself. We just want a vectors of "draws" from that distribution. Vectors are easy to work with! Complex computer code is not.
+* A *vector of numbers drawn* from the estimated distribution. Both true and estimated distributions can be complex beasties, difficult to describe accurately and in detail. But a vector of numbers drawn from a distribution is easy to understand and use. So, in general, we work with vectors of numbers. When someone --- either a colleague or a piece of R code --- creates a distribution which we want to use to answer a question, we don't really want the distribution itself. Rather, we want a vectors of "draws" from that distribution. Vectors are easy to work with! Complex computer code is not.
 
 Again, people (including us!) will often be sloppy and use the same word, "distribution," without making it clear whether they are talking about the *true distribution*, the *estimated distribution*, or a vector of *draws* from the estimated distribution. Try not to be sloppy.
 
@@ -996,7 +1008,7 @@ table(rolls)
 ```
 
 
-In this case, with only 10 values, it is actually less efficient to store the data like this. But what happens when we have 10,000 rolls.
+In this case, with only 10 values, it is actually less efficient to store the data like this. But what happens when we have 10,000 rolls?
 
 ```{r}
 more_rolls <- rep(rolls, 1000)
@@ -1025,9 +1037,11 @@ more_rolls_p <- tibble(value = more_rolls) %>%
 rolls_p + more_rolls_p
 ```
 
-The two vectors --- `rolls` and `more_rolls` --- have the exact same shape because, even though their lengths differ, they are the same thing. *The total count for each value does not matter. What matters is the relative proportions.*
+The two vectors --- `rolls` and `more_rolls` --- have the exact same shape because even though of different lengths, these values were drawn from the same distribution. *The total count for each value does not matter. What matters is the relative proportions.*
 
-Since shape is what matters, we will often "normalize" distributions so that the sum of the counts equals one, meaning that the y-axis is a percentage of the total. Example:
+<!-- Atilla:Phrase "they are the same thing" seems ambiguous. I thought following phrase would be more proper: " since even though of different lengths, these values were drawn from the same distribution. "  Could the preceptor check this revision? -->
+
+Since shape is what matters, we often "normalize" distributions so that the sum of the counts equals one, where y-axis shows the percentages of total. Example:
 
 ```{r, echo = FALSE}
 rolls_p <- tibble(value = rolls) %>% 
@@ -1114,7 +1128,7 @@ Consider a "uniform" distribution. This is the case in which every outcome in th
 runif(n = 10, min = 4, max = 6)
 ```
 
-Mathematically, we would write:
+Mathematically, we would notate:
 
 $$y_i \sim U(4, 6)$$, 
 
@@ -1463,6 +1477,16 @@ In data science, the most important kind of distribution is a *probability distr
 
 Here are some topics which will prove important later in the *Primer*.
 
+### Combinations
+
+We often need to create a tibble with all the possible combinations of two or more variables. `expand_grid()` is the easiest approach.
+
+```{r}
+expand_grid(x = c("A", "B"), y = c(1, 2, 3, 4))
+```
+
+`crossing()` does something similar if the input variables are already in a tibble.
+
 ### Matrices
 
 Recall that a "matrix" in R is a rectangular array of data, shaped like a data frame or tibble, but containing only one type of data, e.g., numeric. Large matrices also print out ugly. (There are other differences, none of which we care about here.) Example:
@@ -1531,7 +1555,7 @@ tbl %>%
   drop_na(a)
 ```
 
-Be careful, however, if you use `drop_na()` without a specific variable provided. In that case, you will remove all rows with a missing value for any variable in the tibble.
+However, be careful! If you use `drop_na()` without a specific variable provided, you will remove all rows with a missing value for any variable in the tibble.
 
 ```{r}
 tbl %>% 
@@ -1566,7 +1590,7 @@ tbl %>%
 
 ### Using `skim()`
 
-The **`skimr`** package offers a very useful function know as the `skim()` function, and it allows you to get valuable information from the data set in one glance. This is similar to the `glimpse()` function but it's a little more detailed and offers some preliminary analysis of the topic.
+The **`skimr`** package offers a very useful function known as the `skim()` function, allowing you to get valuable information from the data set in one glance. This is similar to the `glimpse()` function, but it's a little more detailed and offers some preliminary analysis of the topic.
 
 Let's try skimming the `nhanes` dataset.
 
@@ -1592,7 +1616,7 @@ No! That is ridiculous. We don't have them all memorized. Why should you? The po
 
 <!-- DK: I am eliding over distributions of numbers (easy) and of values, like race. Should go back and have binom return "Head". Or maybe this is subtle enough that I can ignore it. Also, should make clear that sample() is, conceptually, taking draws from trains$age. Or, rather, trains$age is some draw from an imaginary distribution or population. -->
 
-The key data science concept from this chapter is, again, the idea of a "distribution." The word distribution is used in two very different ways. First, a distribution is an invisible object that you can never use of touch. <!-- Alex- not sure what "use of touch" means -->It is the imaginary urn from which you can take draws. Only in very special cases will you ever be able to "know" what the distribution is, mainly the case where there is a physical process, like a roulette wheel, which you can inspect or in the case of an assumed mathematical formula. But, in almost all real world data science problems, the "distribution" is a mental creation whose reality you can never confirm.
+The key data science concept from this chapter is, again, the idea of a "distribution." The word distribution is used in two very different ways. First, a distribution is an invisible object that you can never see or touch. It is the imaginary urn from which you can take draws. Only in very special cases will you ever be able to "know" what the distribution is, mainly in cases where there is a physical process, like a roulette wheel, which you can inspect or in the case of an assumed mathematical formula. In almost all real world data science problems, the "distribution" is a mental creation whose reality you can never confirm.
 
 The second way that the word distribution is used is to refer to a vector of values, a variable in an R tibble. The 115 ages in `trains` are a distribution as are 1,000 draws from `rnorm()`. 
 

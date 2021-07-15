@@ -1,0 +1,104 @@
+# For help debugging build failures open an issue on the RStudio community with the 'github-actions' tag.
+# https://community.rstudio.com/new-topic?category=Package%20development&tags=github-actions
+on:
+
+# the git diff command that we use now makes it so that pushes to the master do
+# not get tested, since they are the master branch and so diff returns no difference
+# for them. If this is revisited, some form of git log may be better. Or a
+# different command on the condition that the merge is TRUE.
+# For now, removing the push setting will remove the false positives.
+# @Preceptor, a test will not run on your changes if you make them
+# from the master branch.
+
+  # push:
+  #   branches:
+  #     - master
+  pull_request:
+    branches:
+      - master
+
+name: R-CMD-check
+
+jobs:
+  R-CMD-check:
+    runs-on: macOS-latest
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v2
+
+      # fetch-depth necessary for key git diff command. Otherwise Github Actions
+      # would make a "shallow" clone with not enough information for the diff
+      # command. See: https://github.community/t/how-do-i-get-the-git-diff-compared-to-main/179296/7
+      # and https://github.blog/2020-12-21-get-up-to-speed-with-partial-clone-and-shallow-clone/
+
+        with:
+          fetch-depth: 0
+      - uses: r-lib/actions/setup-r@v1
+
+      # renv cache makes install dependencies almost instaneous...if it works.
+      # https://rstudio.github.io/renv/articles/ci.html
+      # renv::consent(), line 63, seems to make it work. See https://github.com/r-lib/actions/issues/79
+
+      - uses: actions/cache@v1
+        with:
+          path: ~/Library/Application Support/renv
+          key: ${{ runner.os }}-renv-${{ hashFiles('**/renv.lock') }}
+          restore-keys: |
+             ${{ runner.os }}-renv-
+
+      - name: Install dependencies
+
+      # line 64 is key command. Uses terminal to generate a list of files changed
+      # in the commit (in comparison to the master) and then uses grep to find
+      # only the Rmds among the changed files.
+
+      # the two following lines are terminal commands that read through the list
+      # of changed Rmds and use sed and regular expressions to isolate them. The
+      # first lists packages included in library(...), the second lists packages
+      # like knitr::. In the renv_restore command, these two lists are concatenated
+      # and their unique items (sort -u) are fed into the packages argument of
+      # renv::restore as a vector (intern = TRUE).
+
+      # If you want to switch to simply using all the packages. Delete the
+      # two last system lines. Remove the last two system(...) commands. Remove the
+      # packages argument in renv::restore(). Though it will work without it, it
+      # is better to replace the string "cat changes" in the for() loop, with
+      # "git diff --name-only origin/master HEAD | grep Rmd". Then delete the
+      # system command underneath renv::consent(...).
+
+        run: |
+          install.packages("renv")
+          renv::consent(provided = TRUE)
+          system("git diff --name-only origin/master HEAD | grep Rmd > changes")
+          system('while read line; do grep "library(" "$line"; done < changes | sed -E  "s/.*library\\(|\\).*//g" > 1')
+          system('while read line; do grep -E ".*\\:\\:" "$line"; done < changes | sed -E "s/\\:\\:.*//g" | sed -E "s/.*[^A-Za-z1-9]//g" > 2')
+          renv::restore(packages = system('cat 1 2 | awk "NF" | sort -u', intern = TRUE))
+        shell: Rscript {0}
+      - name: Check
+
+      # This is based off of the testing in primer.tutorials, however
+      # rmarkdown::render(), which we use in the book does not seem to work here.
+      # knitr::knit2html both knit, but rmarkdown::render is allegedly more robust.
+      # https://stackoverflow.com/questions/27246746/how-to-replicate-knit-html-in-a-command-line.
+      # It may be worth finding out why rmarkdown::render() does not work.
+      # As of 07/09/21, I get the following warnings when I run
+      # rmarkdown::render("01-visualization.Rmd") in the console.
+        # [WARNING] This document format requires a nonempty <title> element.
+        #   Defaulting to '01-visualization.knit' as the title.
+        #   To specify a title, use 'title' in metadata or --metadata title="...".
+        # Tweaking _book/index.html
+        # Error in file(con, "r") : cannot open the connection
+        # In addition: Warning messages:
+        # 1: The label(s) wrangling not found
+        # 2: The label(s) probability not found
+        # 3: The label(s) probability not found
+        # 4: The label(s) wrangling not found
+        # 5: In file(con, "r") :
+        #   cannot open file '_book/index.html': No such file or directory
+
+        run: |
+          for(i in system("cat changes", intern = TRUE)) {
+          knitr::knit2html(i)
+          }
+        shell: Rscript {0}
