@@ -241,7 +241,7 @@ To tie the contents of this chapter to the real world, we'll present an example 
 
 We just performed a *tactile* sampling activity. We used a physical urn of beads and a physical shovel. We did this by hand so that we could develop our intuition about the ideas behind sampling. In this section, we mimic this physical sampling with *virtual* sampling, using a computer.  
 
-### Using the virtual shovel once
+### Using the virtual shovel once {#shovel-one-time}
 
 Virtual sampling requires a virtual urn and a virtual shovel. Create a tibble named `urn`. The rows of `urn` correspond exactly to the contents of the actual urn. 
 
@@ -337,7 +337,7 @@ Careful readers will note that the `numb_red` is changing in each example above.
 
 Let's now perform the virtual analog of having 33 groups of students use the sampling shovel!
 
-### Using the virtual shovel multiple times
+### Using the virtual shovel multiple times {#shovel-multiple-times}
 
 Let's look back on the concept of **sampling variation** that we discussed previously. Because the number of beads drawn will vary from sample to sample, it is not good enough to estimate the proportion of beads in the whole urn from one measly sample. We need to use the virtual shovel multiple times! 
 
@@ -347,7 +347,7 @@ The agenda for this section is as follows:
 2. Use our new code to replicate the tactile sampling exercise in Section \@ref(sampling-activity), but virtually! We can then compare the results from real life and our virtual simulation. 
 3. Use the virtual shovel 1,000 times to examine the effect of more samples on the distribution.   
 
-#### Re-factoring our code
+#### Re-factoring our code {#refactoring-one-parameter}
 
 In order to use our virtual shovel different numbers of times and compare the results, lets give ourselves a question to answer: 
 
@@ -454,7 +454,7 @@ paste("Smaller tibble size: ",format(object.size(smaller_tibble), units = "auto"
 
 The results are that using `slice_sample()` causes our tibble to be over 2 times larger than using `sample()`. Considering that both tibbles are relatively small, the increased size caused by `slice_sample()` is insignificant, so it is perfectly fine to continue to use it over `sample()`! Again, we only really care about the effects of inefficiency and memory intensive datatypes when our data sets become much larger, so let's not worry too much about being the most efficient in this exercise. 
 
-#### Using the virtual shovel 33 times
+#### Using the virtual shovel 33 times {#shovel-33-times}
 <!-- RS: Reason why some titles do not have specific URL thingys? -->
 In our tactile sampling exercise in Section \@ref(sampling-activity), we had 33 groups of students use the shovel, yielding 33 samples of size 50 beads. We then used these 33 samples to compute 33 proportions. 
 
@@ -625,9 +625,15 @@ Now that we've examined the effect if increasing the number of trials, we will n
 
 ### The effect of different shovel sizes {#different-shovels}
 
-Instead of just one shovel, imagine we have three choices of shovels to extract a sample of beads with: shovels of size 25, 50, and 100. Using our newly developed tools for virtual sampling, let's unpack the effect of having different sample sizes. Start by virtually using the shovel 1,000 times. Then, compute the resulting 1,000 replicates of proportion red. Finally, plot the distribution using a histogram. 
+```{r, echo = FALSE, fig.cap = "What happens if we use different sized shovels to sample?"}
+knitr::include_graphics("06-one-parameter/images/three_shovels.png")
+```
+
+Instead of just one shovel, imagine we have three choices of shovels to extract a sample of beads with: shovels of size 25, 50, and 100. Using our newly developed tools for virtual sampling, let's unpack the effect of having different sample sizes. Start by creating a tibble with 1,000 rows, each row representing an instance of us sampling from the urn with our chosen shovel size. Then, compute the resulting 1,000 replicates of proportion red. Finally, plot the distribution using a histogram. 
 
 ```{r}
+# Within slice_sample(), n = 25 represents our shovel of size 25.  
+
 virtual_samples_25 <- tibble(ID = 1:1000) %>% 
   mutate(shovel = map(ID, ~ slice_sample(urn, n = 25))) %>% 
   mutate(numb_red = map_int(shovel, ~ sum(.$color == "red"))) %>% 
@@ -636,7 +642,7 @@ virtual_samples_25 <- tibble(ID = 1:1000) %>%
 
 virtual_samples_25 %>%
   ggplot(aes(x = prop_red)) +
-  geom_histogram(binwidth = 0.01, 
+  geom_histogram(binwidth = 0.04, 
                  boundary = 0.4, 
                  color = "white") +
   labs(x = "Proportion of 25 beads that were red", 
@@ -655,14 +661,14 @@ virtual_samples_50 <- tibble(ID = 1:1000) %>%
 
 virtual_samples_50  %>%
   ggplot(aes(x = prop_red)) +
-  geom_histogram(binwidth = 0.01, 
+  geom_histogram(binwidth = 0.04, 
                  boundary = 0.4, 
                  color = "white") +
   labs(x = "Proportion of 50 beads that were red", 
        title = "50")  
 ```
 
-There are about twice as many bars with the size-50 shovel than the size-25 shovel because the former allows for many more possible values for $\hat{p}$.
+We choose a bin width of .04 for all histograms to more easily compare different shovel sizes. Using a smaller bin size would result in gaps between the bars, as a shovel of size 50 has more possible $\hat{p}$ values than a shovel of size 25. 
 
 Finally, we will perform the same process with 1000 replicates to map the histogram using a shovel size of **100**.
 
@@ -676,7 +682,7 @@ virtual_samples_100 <- tibble(ID = 1:1000) %>%
 
 virtual_samples_100 %>%
   ggplot(aes(x = prop_red)) +
-  geom_histogram(binwidth = 0.01, 
+  geom_histogram(binwidth = 0.04, 
                  boundary = 0.4, 
                  color = "white") +
   labs(x = "Proportion of 100 beads that were red", 
@@ -705,7 +711,7 @@ virtual_prop <- bind_rows(virtual_samples_25 %>%
 # (~n).
 
 comparing_sampling_distributions <- ggplot(virtual_prop, aes(x = prop_red)) +
-  geom_histogram(binwidth = 0.01, boundary = 0.4, color = "white") +
+  geom_histogram(binwidth = 0.04, boundary = 0.4, color = "white") +
   labs(x = "Proportion of shovel's beads that are red", 
        title = "Comparing distributions of proportions red for three different shovel sizes.") +
   facet_wrap(~ n) 
@@ -714,11 +720,16 @@ comparing_sampling_distributions <- ggplot(virtual_prop, aes(x = prop_red)) +
 
 comparing_sampling_distributions
 ```
-<!-- RS: The x axis seems to not be uniform, as  a proportion out of 25 is different than a proportion out of 50 than a proportion out of 100. Maybe use geom_density the graphs? Or change bin widths? -->
 
-Observe that as the sample size increases, the variation of the 1,000 replicates of the proportion of red decreases. In other words, as the sample size increases, there are fewer differences due to sampling variation and the distribution centers more tightly around the same value. All three histograms center around roughly 40%.
+Observe that as the sample size increases, the histogram becomes taller and narrower. This is because the *variation* of the proportion red for each sample decreases. Remember: A large variation means there are a wide range of values that can be achieved, while smaller variations are concentrated around a specific value. 
 
-<!-- RS: Maybe add a gganim to see how density changes as sample size increases? Pretty sure it will break when n = 1000 but that could also be an opportunity to educate about samples and population (because n = 1000 is no longer a sample and prob_red should just be a number.) -->
+Why does variation decrease as sample size increases? If we use a large sample size like 100 or 500, our sample is much more representative of the population simply because more of the population is included. As a result, the proportion red in our sample ($\hat{p}$) will be closer to the population proportion (p).  On the other hand, smaller samples have much more variation because of our old friend chance. We are much more likely to have extreme samples that are not representative of our population. 
+
+> The concept of variation will be important for the following section, so it's important to have a solid understanding. If you are still confused about this concept, let's turn to a simpler exercise: The coin flip.
+>
+> If you flip a coin 10 times, you would expect to flip around 5 heads, but if you were lucky you could flip 8 or 9. If one trial represents flipping the coin 10 times, there will be considerable variation between trials. 
+>
+> On the other hand, if one trial consisted of flipping a coin 10,000 times, you would expect to flip close to 5,000 heads every single trial. With a larger sample size there is less variation. 
 
 We can be numerically explicit about the amount of variation in our three sets of 1,000 values of `prop_red` by using the *standard deviation*. A standard deviation is a summary statistic that measures the amount of variation within a numerical variable. For all three sample sizes, let's compute the standard deviation of the 1,000 proportions red.
 
@@ -761,27 +772,38 @@ comparing_n_table  %>%
 
 &nbsp;
 
-As the sample size increases, the variation decreases. In other words, there is less variation in the 1,000 values of the proportion red. As the sample size increases, our guesses at the true proportion of the urn's beads that are red get more precise. The larger the shovel, the more precise the result. 
+As the sample size increases, the sample to sample variation decreases, and our guesses at the true proportion of the urn's beads that are red get more precise. The larger the shovel, the more precise the result. 
 
+Let's take a step back for a minute. The reality is that our code needs to be *re-factored*, because we are yet again making a separate tibble for each sample size. To make comparisons easier, let's attempt to put all 3 shovel sizes in the same tibble using mapping. 
 
-In the last section, we ran more or less the same code three times, but with different sizes for our shovel: 25, 50, and 100. We can use `expand_grid()` and a new variable, `shovel_size`, to create a tibble which will organize our results.  
+```{r}
+tibble(trial_ID = 1:1000) %>%
+  mutate(shovel_ID = map(trial_ID, ~c(25, 50, 100))) %>%
+  unnest(shovel_ID) %>%
+  mutate(samples = map(shovel_ID, ~slice_sample(urn, n = .))) %>%
+  mutate(num_red = map_int(samples, ~sum(.$color == "red"))) %>%
+  mutate(prop_red = num_red/shovel_ID)
+```
+This process of creating this tibble is very similar to the creation of our re-factored tibble in Section \@ref(refactoring-one-parameter) except for a few differences. We initialized both tibbles with our desired number of trials, but this time we map the shovel size to the trial number. Using this mapping, we will use 3 different sized shovels for each of our 1,000 trials. Thus, our tibble will have 3 $\cdot$ 1,000, or 3,000 rows. Finally, we use mapping within `slice_sample()` to pass in the shovel size. 
+
+To those of us who do not completely understand mapping, do not fret! The **tidyr** package provides the `expand_grid()` function as a neat alternative. We can use `expand_grid()` and a new variable, `shovel_size`, to create a tibble which will organize our results. Instead of using 1,000 trials, let's use 3 to get a feel for the function.
 
 
 ```{r}
-expand_grid(ID = c(1:3), shovel_size = c(25, 50, 100))
+expand_grid(trial_ID = c(1:3), shovel_size = c(25, 50, 100))
 ```
 
 The above sets the stage for simulating three samples for each of three different shovel sizes. Similar code as above can be used.
 
 ```{r}
-expand_grid(ID = c(1:3), shovel_size = c(25, 50, 100)) %>% 
+expand_grid(trial_ID = c(1:3), shovel_size = c(25, 50, 100)) %>% 
   mutate(shovel = map(shovel_size, ~ slice_sample(urn, n = .))) %>% 
   mutate(numb_red = map_int(shovel, ~ sum(.$color == "red"))) %>% 
   mutate(numb_beads = map_int(shovel, ~ length(.$color))) %>% 
   mutate(prop_red = numb_red / numb_beads)
 ```
 
-We changed the second line to use `shovel_size` rather than `ID` as the mapping variable since we can no longer hard code the shovel size into the call to `slice_sample()`. Expand to 1,000 simulations for each value of `shovel_size` and finish with a calculation of standard deviation.
+Again, we changed the second line to use `shovel_size` rather than `trial_ID` as the mapping variable since we can no longer hard code the shovel size into the call to `slice_sample()`. Expand to 1,000 simulations for each value of `shovel_size` and finish with a calculation of standard deviation.
 
 ```{r}
 expand_grid(ID = c(1:1000), shovel_size = c(25, 50, 100)) %>% 
@@ -794,7 +816,7 @@ expand_grid(ID = c(1:1000), shovel_size = c(25, 50, 100)) %>%
   
 ```
 
-This is, approximately, the same result as we saw above, but calculated without so much code duplication.
+This is, approximately, the same result as we saw above, but with 1 re-factored tibble instead of 3 separate ones. We can also functions like `expand_grid()` in the future to make our code more concise.
 
 Now that we have this framework, there's no need to limit ourselves to the sizes 25, 50, and 100.  Why not try all integers from 1 to 100? We can use the same code, except we'll now set `shovel_size = 1:100`.
 
@@ -826,11 +848,11 @@ shovels_100 %>%
 
 The red line here represents an important statistical concept: standard error (SE). The mathematical definition of SE for our purposes is the standard deviation divided by the square root of the sample size. As the shovel size increases, and thus our sample size increases, we find that the standard error decreases.  If this is confusing right now, fear not! We will delve into this explanation in our next section. 
 
+<!-- RS: Not correct, standard error applies to population proportions.  -->
+
 <!-- RS: Definitely add better description of standard error. As someone who knows nothing about standard error, this description is not very helpful. -->
 
 <!-- The variation in p-hat (when we do 1,000 reps) decreases as shovel size increases. For each shovel size, you plot 1,000 points. Small shovels have lots of overlap, so, use alpha. Even big shovels only have scores of possible p-hats. Then, say, can we measure the decrease in varition more precisely then just looking at this cloud of points? Yes! Plot the standard deviation of the cloud for each shovel size. -->
-
-<!-- RS: I agree with whoever wrote the above comment in theory, but not completely sure about what the execution looks like. I think it is important to tie the distribution into what the standard deviation tells us about our data and the shape of our graph.  -->
 
 ```{r, echo = FALSE, fig.cap = "To any poets and philosophers confused about this: don't worry! It won't be on a problem set."}
 knitr::include_graphics("06-one-parameter/images/meme_math.png")
