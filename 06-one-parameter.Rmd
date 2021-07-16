@@ -268,7 +268,7 @@ urn
 ```
 
 Observe that `urn` has `r scales::comma(nrow(urn))` rows, meaning that the urn contains 
-`r scales::comma(nrow(urn))` beads. The first variable `ID` is used as an *identification variable*. None of the beads in the actual urn are marked with numbers, but the `ID` column will be relevant later on. The second variable `color` indicates whether a particular virtual bead is red or white. 
+`r scales::comma(nrow(urn))` beads. The first variable `ID` is used as an *identification variable*. None of the beads in the actual urn are marked with numbers. The second variable `color` indicates whether a particular virtual bead is red or white. 
 
 Note that, in this chapter, we have used the variable `ID` in two different ways: first, to keep track of the samples drawn by the 33 individual teams and, second, to keep track of the 
 `r scales::comma(nrow(urn))` beads in our virtual urn. And that is OK! `ID` means the same concept in both cases.   
@@ -307,7 +307,11 @@ Let's compute the proportion of beads in our virtual sample that are red. First,
 tibble(ID = 1) %>% 
   mutate(shovel = map(ID, ~ slice_sample(urn, n = 50))) %>% 
   
-# To count the number of red beads in each shovel, we can use a lesser known property of the sum() function: By passing in a comparison expression, sum() will count the number of occurrences within a vector. In this case, we count the total number occurrences of the word red in the color column of shovel. 
+# To count the number of red beads in each shovel, we can use a lesser 
+# known property of the sum() function: By passing in a comparison 
+# expression, sum() will count the number of occurrences within a vector. 
+# In this case, we count the total number occurrences of the word red
+# in the color column of shovel.
 
   mutate(numb_red = map_int(shovel, ~ sum(.$color == "red")))
 ```
@@ -339,13 +343,13 @@ Let's now perform the virtual analog of having 33 groups of students use the sam
 
 ### Using the virtual shovel multiple times {#shovel-multiple-times}
 
-Let's look back on the concept of **sampling variation** that we discussed previously. Because the number of beads drawn will vary from sample to sample, it is not good enough to estimate the proportion of beads in the whole urn from one measly sample. We need to use the virtual shovel multiple times! 
+Let's look back on the concept of **sampling variation** that we discussed previously. Because the number of beads drawn will vary from sample to sample, it is not good enough to estimate the proportion of beads in the whole urn from one measly sample. We need to use the virtual shovel multiple times to obtain a more precise estimate of the proportion of red beads in the whole population.
 
 The agenda for this section is as follows: 
 
 1. **Re-factor** our code to allow us to sample as many times as we want. 
 2. Use our new code to replicate the tactile sampling exercise in Section \@ref(sampling-activity), but virtually! We can then compare the results from real life and our virtual simulation. 
-3. Use the virtual shovel 1,000 times to examine the effect of more samples on the distribution.   
+3. Use the virtual shovel 1,000 times to examine the effect of more samples on the sampling distribution.   
 
 #### Re-factoring our code {#refactoring-one-parameter}
 
@@ -382,7 +386,7 @@ While some people may be satisfied with this solution, it is not good enough for
 knitr::include_graphics("06-one-parameter/images/code_refactor_meme.jpeg")
 ```
 
-As data scientists it is important to stop and look back on our code from time to time. First we need to look at our end goal: To compare using the virtual shovel different numbers of times. Then we look at our code. Does having a tibble for each sampling distribution make sense? Will it be easy to work with later? The answer is no. Instead, our goal should be to create one single tibble which we can group by number of samples. The process of restructuring our code to make it cleaner, simpler, and more versatile is called **re-factoring**, and any *good* developer will do it from time to time. 
+As data scientists it is important to stop and look back on our code from time to time. First we need to look at our end goal: To compare using the virtual shovel different numbers of times. Then we look at our code. Does having a tibble for each sampling distribution make sense? Will it be easy to work with later? The answer is no. Instead, our goal should be to create one single tibble which we can group by number of samples. The process of restructuring our code to make it cleaner and more general is called **re-factoring**, and any *good* developer will do it from time to time. 
 
 Now Let's attempt to re-factor our code to create one tibble that includes the sampling distributions for any number of trials we choose. First, create the foundation for our tibble. 
 
@@ -391,18 +395,26 @@ num_trials <- c(10, 33, 1000)
 
 multiple_sampling_distributions <- tibble(reps = num_trials) %>%
   
-#After we create a tibble with 3 rows, one for each number of trials, we create a range from 1 to . , where . passes in the number or trials using mapping. 
+# After we create a tibble with 3 rows, one for each number of trials, we create 
+# a range from 1 to . , where . passes in the number or trials using mapping.
+  
+# For example, when reps = 10 we create a range from 1 to 10, and when reps = 33
+# we create a range from 1 to 33. 
+  
   
   mutate(trial_ID = map(reps, ~1:.)) %>%
 
-#unnest() is a nifty function from the tidyr package, which expands a tibble by giving each element of a list its own row. Before unnest(), our tibble had only 3 rows, and the trial_ID was stored in a neat list. After unnest() our tibble has 1,043 rows. 
+# unnest() is a nifty function from the tidyr package, which expands a tibble by giving
+# each element of a list its own row. Before unnest(), our tibble had only 3 rows,
+# and the trial_ID was stored in a neat list. After unnest() our tibble has 1,043
+# (10 + 33 + 1000) rows.
   
   unnest(trial_ID)
 
 multiple_sampling_distributions
 ```
 
-Let's examine what changes we made to our sampling distribution and why. Because our goal is to compare distributions that use the shovel different numbers of times, our new code starts with `num_trials`. If we want to compare different numbers of trials in the future, we can simply change `num_trials` instead of having to make a new tibble and variable. After we initialize the tibble, we create a range of integers from 1 to our desired number of trials. Each number will represent an instance of us sampling from the virtual urn. Note how the `reps` column only has `r length(num_trials)` values: `r num_trials[1]`, `r num_trials[2]`, and `r num_trials[3]`. This will help group our tibble by number of trials later on. 
+Let's examine what changes we made and why. Because our goal is to compare distributions that use the shovel different numbers of times, our new code starts with `num_trials`. If we want to compare different numbers of trials in the future, we can simply change `num_trials` instead of having to make a new tibble and variable. After we initialize the tibble, we create a range of integers from 1 to our desired number of trials. Each number will represent an instance of us sampling from the virtual urn. Note how the `reps` column only has `r length(num_trials)` values: `r num_trials[1]`, `r num_trials[2]`, and `r num_trials[3]`. This will help group our tibble by number of trials later on. 
 
 For each trial we will take a sample using `slice_sample()`, and then calculate the number of red beads in the sample and $\hat{p}$. This is the same code from when we sampled from the virtual urn a single time earlier on. 
 
@@ -426,7 +438,7 @@ Before we go onto using our new tibble to compare the effect of increasing the n
 
 The final topic of re-factoring left to discuss is *efficiency*. Because most of us run R Studio on our local machines, each R variable is stored using memory on our computers. As we add more columns or more complex objects to our tibbles, they will take up more memory. While our urn simulation takes up a relatively small amount of storage and we are not overly concerned with optimizing tibble size, it never hurts to practice making our tibbles more efficient. This will become especially handy when working with large data sets with thousands of rows and dozens of columns. 
 
-In our urn exercise, the largest hindrance to efficiency are our chosen datatypes. Although we haven't really cared thus far, using `slice_sample()` will store tibbles inside our tibble, while `sample()` will store a list. We chose `slice_sample()` primarily because it can be useful with real data sets to select multiple columns, while `sample()` does not have that functionality. However, that extra data comes at a cost! A tibble with nothing in it takes up `r object.size(tibble())` of memory, so generating an individual sample tibble for each of the `r scales::comma(nrow(multiple_sampling_distributions))` rows in our tibble will make our object substantially larger. It is certainly worthwhile to read (or at least skim) this [article about memory in R](http://adv-r.had.co.nz/memory.html) to make sure that we understand the implications of storing complex objects within tibbles, so we can make the most out of our future list-column mapping endeavors. 
+In our urn exercise, the largest hindrance to efficiency are our chosen datatypes. Although we haven't really cared thus far, using `slice_sample()` will store tibbles inside our tibble, while `sample()` will store a list. We chose `slice_sample()` primarily because it can be useful with real data sets to select multiple columns, while `sample()` does not have that functionality. However, that extra data comes at a cost! A tibble with nothing in it takes up `r object.size(tibble())` bytes of memory, so generating an individual sample tibble for each of the `r scales::comma(nrow(multiple_sampling_distributions))` rows in our tibble will make our object substantially larger. It is certainly worthwhile to read (or at least skim) this [article about memory in R](http://adv-r.had.co.nz/memory.html) to make sure that we understand the implications of storing complex objects within tibbles, so we can make the most out of our future list-column mapping endeavors. 
 
 R makes it easy to analyze the size of our objects using the `object.size()` function. Let's compare the effect of using `slice_sample()` versus using `sample()`.
 
@@ -500,7 +512,6 @@ ggplot(aes(x = prop_red)) +
 
 Since `binwidth = 0.05`, this will create bins with boundaries at 0.30, 0.35, 0.45, and so on. Recall that $\hat{p}$ is equal to the proportion of beads which are red in each sample.
 
-<!-- RS: Can we decide on a boundary size? I feel like it's different for every graph. -->
 Observe that we occasionally obtained proportions red that are less than 30%. On the other hand, we occasionally obtained proportions that are greater than 45%. However, the most frequently occurring proportions were between 35% and 45%. Why do we have these differences in proportions red? Because of *sampling variation*. 
 
 Compare our virtual results with our tactile results from the previous section. Observe that both histograms are somewhat similar in their center and variation, although not identical. These slight differences are again due to random sampling variation. Furthermore, observe that both distributions are somewhat bell-shaped.
@@ -532,7 +543,10 @@ facet_compare <- bind_rows(virtual_samples %>%
                        levels = c("Virtual sampling", 
                                   "Tactile sampling"))) %>% 
   
-  # the boundary argument makes sure that at least one bin borders .4, because we have the unusual insight in knowing that the population proportion in the urn is .4 (600 white beads and 400 red beads). Setting the color to white changes the border color, making the distribution easier to visualize. 
+# the boundary argument makes sure that at least one bin borders .4, because 
+# we have the unusual insight in knowing that the population proportion in the urn 
+# is .4 (600 white beads and 400 red beads). Setting the color to white changes 
+# the border color, making the distribution easier to visualize. 
   
   ggplot(aes(x = prop_red)) +
     geom_histogram(binwidth = 0.05, 
@@ -608,6 +622,8 @@ multiple_sampling_distributions %>%
        color = "mean") + 
    scale_y_continuous(labels = scales::percent_format()) 
 ```
+
+By graphing the results for multiple samples, we have created 3 **sampling distributions**, each with a different number of observations. Looking at our sampling distributions we have some questions to answer.  
 
 First, why the empty spaces among the bars? Recall that, with only 50 beads, there are only 51 possible values for $\hat{p}$: 0, 0.02, 0.04, ..., 0.98, 1. A value of 0.31 or 0.47 is impossible, hence the gaps.
 
@@ -725,13 +741,25 @@ Observe that as the sample size increases, the histogram becomes taller and narr
 
 Why does variation decrease as sample size increases? If we use a large sample size like 100 or 500, our sample is much more representative of the population simply because more of the population is included. As a result, the proportion red in our sample ($\hat{p}$) will be closer to the population proportion (p).  On the other hand, smaller samples have much more variation because of our old friend chance. We are much more likely to have extreme samples that are not representative of our population. 
 
-> The concept of variation will be important for the following section, so it's important to have a solid understanding. If you are still confused about this concept, let's turn to a simpler exercise: The coin flip.
->
-> If you flip a coin 10 times, you would expect to flip around 5 heads, but if you were lucky you could flip 8 or 9. If one trial represents flipping the coin 10 times, there will be considerable variation between trials. 
->
-> On the other hand, if one trial consisted of flipping a coin 10,000 times, you would expect to flip close to 5,000 heads every single trial. With a larger sample size there is less variation. 
+Let's attempt to visualize the concept of *variation* a different way. For each sample size, let's plot the proportion red for *all* 1,000 samples. With 3 different shovel sizes, we will have 3,000 total points, with each point representing an instance of sampling from the urn with a specific shovel size. 
 
-We can be numerically explicit about the amount of variation in our three sets of 1,000 values of `prop_red` by using the *standard deviation*. A standard deviation is a summary statistic that measures the amount of variation within a numerical variable. For all three sample sizes, let's compute the standard deviation of the 1,000 proportions red.
+```{r}
+virtual_prop %>%
+  ggplot(aes(x = n, y = prop_red, color = as.factor(n))) +
+  geom_jitter(alpha = .15) + 
+  labs(title = "Results of 1,000 samples for 3 different shovel sizes.",
+       subtitle = "As shovel size increases, variation decreases.",
+       y = "Proportion red in sample",
+       color = "Shovel size") +
+  # We do not need an x axis, because the color of the points denotes the shovel size. 
+   theme(axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank())
+```
+
+This graph illustrates the exact same concept as the histogram. With the smallest shovel size there is significant variance from sample to sample, as samples take on a wide variety of sample proportions! However, as we increase the sample size, the points become more concentrated, or less variance. 
+
+There is also a third way to understand variation! We can be numerically explicit about the amount of variation in our three sets of 1,000 values of `prop_red` by using the *standard deviation*. A standard deviation is a summary statistic that measures the amount of variation within a numerical variable. For all three sample sizes, let's compute the standard deviation of the 1,000 proportions red.
 
 
 ```{r, echo = FALSE, fig.cap = "Comparing the number of slots in the shovel with the standard deviation of proportions red. Here, we see that standard deviation decreases with higher sample sizes. Larger sample sizes yield more precise estimates."}
@@ -774,7 +802,11 @@ comparing_n_table  %>%
 
 As the sample size increases, the sample to sample variation decreases, and our guesses at the true proportion of the urn's beads that are red get more precise. The larger the shovel, the more precise the result. 
 
-Let's take a step back for a minute. The reality is that our code needs to be *re-factored*, because we are yet again making a separate tibble for each sample size. To make comparisons easier, let's attempt to put all 3 shovel sizes in the same tibble using mapping. 
+```{r, echo = FALSE, fig.cap = "Variance appears everywhere in data science."}
+knitr::include_graphics("06-one-parameter/images/variance_meme.jpg")
+```
+
+Let's take a step back from all the variance. The reality is that our code needs to be *re-factored*, because we are yet again making a separate tibble for each sample size. To make comparisons easier, let's attempt to put all 3 shovel sizes in the same tibble using mapping. 
 
 ```{r}
 tibble(trial_ID = 1:1000) %>%
@@ -846,19 +878,13 @@ shovels_100 %>%
       y = "Standard deviation of the proportion red")
 ```
 
-The red line here represents an important statistical concept: standard error (SE). The mathematical definition of SE for our purposes is the standard deviation divided by the square root of the sample size. As the shovel size increases, and thus our sample size increases, we find that the standard error decreases.  If this is confusing right now, fear not! We will delve into this explanation in our next section. 
+The red line here represents an important statistical concept: standard error (SE). As the shovel size increases, and thus our sample size increases, we find that the standard error decreases.  If this is confusing right now, fear not! We will delve into the explanation of standard error in our next section. 
 
-<!-- RS: Not correct, standard error applies to population proportions.  -->
-
-<!-- RS: Definitely add better description of standard error. As someone who knows nothing about standard error, this description is not very helpful. -->
-
-<!-- The variation in p-hat (when we do 1,000 reps) decreases as shovel size increases. For each shovel size, you plot 1,000 points. Small shovels have lots of overlap, so, use alpha. Even big shovels only have scores of possible p-hats. Then, say, can we measure the decrease in varition more precisely then just looking at this cloud of points? Yes! Plot the standard deviation of the cloud for each shovel size. -->
+<!-- The variation in p-hat (when we do 1,000 reps) decreases as shovel size increases. For each shovel size, you plot 1,000 points. Small shovels have lots of overlap, so, use alpha. Even big shovels only have scores of possible p-hats. Then, say, can we measure the decrease in varition more precisely then just looking at this cloud of points? Yes! Plot the standard deviation of the cloud for each shovel size. Done I think.-->
 
 ```{r, echo = FALSE, fig.cap = "To any poets and philosophers confused about this: don't worry! It won't be on a problem set."}
 knitr::include_graphics("06-one-parameter/images/meme_math.png")
 ```
-
-<!-- RS: Remove cringey memes.  -->
 
 This is the power of running many analyses at once using map functions and list columns: before, we could tell that the standard deviation was decreasing as the shovel size increased, but when only looking at shovel sizes of 25, 50, and 100, it wasn't clear *how quickly* it was decreasing.
 
