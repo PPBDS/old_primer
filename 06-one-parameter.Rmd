@@ -193,12 +193,12 @@ tactile_sample_urn <- tibble(group = c("Ilyas, Yohan", "Ellie, Terrance", "Mark,
   sample_frac() %>% 
   mutate(red_beads = as.numeric(red_beads)) %>% 
   mutate(prop_red = red_beads/50) %>% 
-  mutate(ID = 1:33)
+  mutate(group_ID = 1:33)
 
 tactile_sample_urn
 ```
 
-For each `group`, we are given their names, the number of `red_beads` they obtained, and the corresponding proportion out of 50 beads that were red, called `prop_red`. We also have an `ID` variable which gives each of the 33 groups a unique identifier. Each row can be viewed as one instance of a replicated activity: using the shovel to remove 50 beads and computing the proportion of those beads that are red. 
+For each `group`, we are given their names, the number of `red_beads` they obtained, and the corresponding proportion out of 50 beads that were red, called `prop_red`. We also have an `group_ID` variable which gives each of the 33 groups a unique identifier. Each row can be viewed as one instance of a replicated activity: using the shovel to remove 50 beads and computing the proportion of those beads that are red. 
 
 Let's visualize the distribution of these 33 proportions using `geom_histogram()` with `binwidth = 0.05`. This is a computerized and complete version of the partially completed hand-drawn histogram you saw earlier. Setting `boundary = 0.4` indicates that we want a binning scheme such that one of the bins' boundary is at 0.4. `color = "white"` modifies the color of the boundary for visual clarity. 
 
@@ -231,12 +231,6 @@ What we just demonstrated in this activity is the statistical concept of **sampl
 
 Moreover, because we mixed the beads before each use of the shovel, the samples were random and independent. Because each sample was drawn at random, the samples were different from each other. This is an example of  *sampling variation*, and it is important to consider! For example, what if instead of selecting 17 beads in our first sample we had selected just 11? Does that mean that the population proportion of the beads is 11/50 or 22%? No! Because we performed 33 trials we can look to our histogram, and see that the peak of the distribution occurs when .35 < $\hat{p}$ < .4 , so it is *very likely* that the proportion of red beads in the entire population will also fall in or near this range. 
 
-In Section \@ref(virtual-sampling), we'll mimic the hands-on sampling activity we just performed on a computer. This will allow us not only to repeat the sampling exercise much more than 33 times, but it will also allow us to use shovels with different numbers of slots than just 50.
-
-Afterwards, we'll present you with definitions, terminology, and notation related to sampling in Section \@ref(standard-errors). As in many disciplines, such necessary background knowledge may seem confusing at first. However, if you truly understand the underlying concepts and practice, you'll be able to master them.
-
-To tie the contents of this chapter to the real world, we'll present an example of one of the most common uses of sampling: polls. In Section \@ref(sampling-case-study) we'll look at a particular case study: a 2013 poll on then U.S. President Barack Obama's popularity among young Americans, conducted by the Kennedy School's Institute of Politics at Harvard University. 
-
 ## Virtual sampling {#virtual-sampling}
 
 We just performed a *tactile* sampling activity. We used a physical urn of beads and a physical shovel. We did this by hand so that we could develop our intuition about the ideas behind sampling. In this section, we mimic this physical sampling with *virtual* sampling, using a computer.  
@@ -244,7 +238,6 @@ We just performed a *tactile* sampling activity. We used a physical urn of beads
 ### Using the virtual shovel once {#shovel-one-time}
 
 Virtual sampling requires a virtual urn and a virtual shovel. Create a tibble named `urn`. The rows of `urn` correspond exactly to the contents of the actual urn. 
-
 
 ```{r}
 # set.seed() ensures that the beads in our virtual urn are always in the same
@@ -261,57 +254,47 @@ urn <- tibble(color = c(rep("red", 400),
   # beads. But we find it aesthetically pleasing to mix them up.
   
   sample_frac() %>% 
-  mutate(ID = 1:1000) %>% 
-  select(ID, color)
+  mutate(bead_ID = 1:1000) 
 
 urn  
 ```
 
 Observe that `urn` has `r scales::comma(nrow(urn))` rows, meaning that the urn contains 
-`r scales::comma(nrow(urn))` beads. The first variable `ID` is used as an *identification variable*. None of the beads in the actual urn are marked with numbers. The second variable `color` indicates whether a particular virtual bead is red or white. 
+`r scales::comma(nrow(urn))` beads. The first variable `bead_ID` is used as an *identification variable*. None of the beads in the actual urn are marked with numbers. The second variable `color` indicates whether a particular virtual bead is red or white. 
 
-Note that, in this chapter, we have used the variable `ID` in two different ways: first, to keep track of the samples drawn by the 33 individual teams and, second, to keep track of the 
-`r scales::comma(nrow(urn))` beads in our virtual urn. And that is OK! `ID` means the same concept in both cases.   
-
+Note that in this section, we used the variable `bead_ID` to keep track of each bead in our urn, while in the last section we used `group_ID` to keep track of the samples drawn by the 33 individual teams. This is a better strategy than naming both variables `ID`, as it would be much more likely for us to get them confused later on. 
 
 Our virtual urn needs a virtual shovel. We use `slice_sample()` and list-column mapping wizardry learned in Section \@ref(list-columns-and-map-functions) to take a sample of 50 beads from our virtual urn.  
 
 ```{r}
-# Define ID as 1 to look at one example of drawing fifty beads. When ID is
-# called within map(), we are performing slice_sample() upon our urn once (ID =
-# 1) and taking a sample of 50 beads. Note that the ID in this tibble has
-<<<<<<< HEAD
-# nothing to do with the ID variable in the urn we made previously. The former refers to each sample we take from the urn. The latter refers to each individual bead in the urn.
-=======
-# nothing to do with the ID variable in the urn we made previously. The former
-# refers to each sample we take from the urn. The latter refers to each
-# individual bead in the urn.
->>>>>>> 4deb0ad0009b4894a5c0d7c68f26562efb78da79
+# Define trial_ID as one instance of us sampling 50 beads from the urn. When
+# trial_ID is called within map(), we are performing slice_sample() upon our urn
+# once, and taking a sample of 50 beads. 
 
-tibble(ID = 1) %>% 
-  mutate(shovel = map(ID, ~ slice_sample(urn, n = 50)))
+tibble(trial_ID = 1) %>% 
+  mutate(shovel = map(trial_ID, ~ slice_sample(urn, n = 50)))
 ```
 
-<!-- RS: Less ambiguous variable naming to try and not confuse readers? Maybe instead of initializing each tibble with `ID`, we could use bead_ID, trial_ID, shovel_ID etc. -->
 As usual, map functions and list-columns are powerful but confusing. The `str()` function is a good way to explore a tibble with a list-column.
 
-
 ```{r}
-tibble(ID = 1) %>% 
-  mutate(shovel = map(ID, ~ slice_sample(urn, n = 50))) %>% 
+tibble(trial_ID = 1) %>% 
+  mutate(shovel = map(trial_ID, ~ slice_sample(urn, n = 50))) %>% 
   str()
 ```
 
-There are two levels. There is one row in the tibble for each sample. So far, we have only drawn one sample. Within each row, there is a second level, the tibble which is the sample. That tibble has two variables: `ID` and `color`. This is the advantage to using `slice_sample()`, because it selects all columns of our urn, whereas `sample()` can only sample from a single column. While the bead `ID` may be irrelevant in our urn scenario, with other problems it could be very useful to have additional data about each individual.
+There are two levels. There is one row in the tibble for each sample. So far, we have only drawn one sample. Within each row, there is a second level, the tibble which is the sample. That tibble has two variables: `trial_ID` and `color`. This is the advantage to using `slice_sample()`, because it selects all columns of our urn, whereas `sample()` can only sample from a single column. While identifying each individual bead could be irrelevant in our urn scenario, with other problems it could be very useful to have additional data about each individual.
 
-Let's compute the proportion of beads in our virtual sample that are red. First, add a column which indicates the number of red beads in the sample taken in the shovel.
+However, it is important to note that the extra data provided by `slice_sample()` comes at a cost: *efficiency*. Because most of us run R Studio on our local machines, each R variable is stored using memory on our computers. As we add more columns or more complex objects to our tibbles, they will take up more memory and become less efficient. For example, `slice_sample()` will store a tibble for each sample, while `sample()` will store a list. And the difference is not negligible!  We can use the handy utility function `object.size()` to know that a tibble with nothing in it takes up `r object.size(tibble())` bytes of memory, while an empty list takes up no memory. While our urn simulation takes up a relatively small amount of storage and we are not overly concerned with optimizing tibble size, it never hurts to practice making our tibbles more efficient. Before working with large data sets that may take several minutes to load, it may be helpful to read this [article about memory in R](http://adv-r.had.co.nz/memory.html) to make sure we understand the implications of using complex datatypes within tibbles, so we can make the most out of our future list-column mapping endeavors. 
+
+Now that we've evaluated the implications of `slice_sample()` for our tibble, let's add a column which indicates the number of red beads in the sample taken from the shovel.
 
 <!-- DK: Is code like .$color understandable? -->
 <!-- RS: I think the dollar sign operator should be understood at this point, but was thinking about asking Yuhan to include a way better explanation about the "this" operator in Chapter 5.  -->
 
 ```{r}
-tibble(ID = 1) %>% 
-  mutate(shovel = map(ID, ~ slice_sample(urn, n = 50))) %>% 
+tibble(trial_ID = 1) %>% 
+  mutate(shovel = map(trial_ID, ~ slice_sample(urn, n = 50))) %>% 
   
 # To count the number of red beads in each shovel, we can use a lesser 
 # known property of the sum() function: By passing in a comparison 
@@ -324,188 +307,35 @@ tibble(ID = 1) %>%
 
 How does this work? R evaluates if `color == red`, and treats `TRUE` values like the number `1` and `FALSE` values like the number `0`. So summing the number of `TRUE`s and `FALSE`s is equivalent to summing `1`'s and `0`'s. In the end, this operation counts the number of beads where `color` equals "red".
 
-Second, add a column for the total number of beads. (We already "know" that this is 50, but it never hurts to make our code more general.)
-<!-- RS: This above part kind of annoys me tbh. -->
-<<<<<<< HEAD
-=======
-
->>>>>>> 4deb0ad0009b4894a5c0d7c68f26562efb78da79
-```{r}
-tibble(ID = 1) %>% 
-  mutate(shovel = map(ID, ~ slice_sample(urn, n = 50))) %>% 
-  mutate(numb_red = map_int(shovel, ~ sum(.$color == "red"))) %>% 
-  mutate(numb_beads = map_int(shovel, ~ length(.$color)))
-```
-
-Third, calculate the proportion red, and view the final output for our single sample:
+Finally, calculate the proportion red by dividing `numb_red` (The number of red beads observed in the shovel), by the shovel size (We are using a shovel of size 50).
 
 ```{r}
-tibble(ID = 1) %>% 
-  mutate(shovel = map(ID, ~ slice_sample(urn, n = 50))) %>% 
+tibble(trial_ID = 1) %>% 
+  mutate(shovel = map(trial_ID, ~ slice_sample(urn, n = 50))) %>% 
   mutate(numb_red = map_int(shovel, ~ sum(.$color == "red"))) %>% 
-  mutate(numb_beads = map_int(shovel, ~ length(.$color))) %>% 
-  mutate(prop_red = numb_red / numb_beads)
+  mutate(prop_red = numb_red / 50)
 ```
 
 Careful readers will note that the `numb_red` is changing in each example above. The reason, of course, is that each block re-runs the shovel exercise, and slice_sample will return a random number of red beads. If we wanted the same number in each block, we would need to use `set.seed()` each time, always providing the same `seed` each time.
 
 Let's now perform the virtual analog of having 33 groups of students use the sampling shovel!
 
-### Using the virtual shovel multiple times {#shovel-multiple-times}
+### Using the virtual shovel 33 times {#shovel-33-times}
 
-Let's look back on the concept of **sampling variation** that we discussed previously. Because the number of beads drawn will vary from sample to sample, it is not good enough to estimate the proportion of beads in the whole urn from one measly sample. We need to use the virtual shovel multiple times to obtain a more precise estimate of the proportion of red beads in the whole population.
-
-The agenda for this section is as follows: 
-<<<<<<< HEAD
-
-1. **Re-factor** our code to allow us to sample as many times as we want. 
-2. Use our new code to replicate the tactile sampling exercise in Section \@ref(sampling-activity), but virtually! We can then compare the results from real life and our virtual simulation. 
-3. Use the virtual shovel 1,000 times to examine the effect of more samples on the sampling distribution.   
-
-#### Re-factoring our code {#refactoring-one-parameter}
-
-=======
-
-1. **Re-factor** our code to allow us to sample as many times as we want. 
-2. Use our new code to replicate the tactile sampling exercise in Section \@ref(sampling-activity), but virtually! We can then compare the results from real life and our virtual simulation. 
-3. Use the virtual shovel 1,000 times to examine the effect of more samples on the sampling distribution.   
-
-#### Re-factoring our code {#refactoring-one-parameter}
-
->>>>>>> 4deb0ad0009b4894a5c0d7c68f26562efb78da79
-In order to use our virtual shovel different numbers of times and compare the results, lets give ourselves a question to answer: 
-
-*How do the distributions of 10, 33, and 1,000 samples compare?*
-
-Some readers may consider copying the code from above, and creating 3 new variables: One for the distribution of 10 samples, 33 samples, and one for 1,000 samples.
-
-```{r}
-samples_10 <- tibble(ID = 1:10) %>% 
-  mutate(shovel = map(ID, ~ slice_sample(urn, n = 50))) %>% 
-  mutate(numb_red = map_int(shovel, ~ sum(.$color == "red"))) %>% 
-  mutate(numb_beads = map_int(shovel, ~ length(.$color))) %>% 
-  mutate(prop_red = numb_red / numb_beads)
-
-samples_33 <- tibble(ID = 1:33) %>% 
-  mutate(shovel = map(ID, ~ slice_sample(urn, n = 50))) %>% 
-  mutate(numb_red = map_int(shovel, ~ sum(.$color == "red"))) %>% 
-  mutate(numb_beads = map_int(shovel, ~ length(.$color))) %>% 
-  mutate(prop_red = numb_red / numb_beads)
-
-samples_1000 <- tibble(ID = 1:1000) %>% 
-  mutate(shovel = map(ID, ~ slice_sample(urn, n = 50))) %>% 
-  mutate(numb_red = map_int(shovel, ~ sum(.$color == "red"))) %>% 
-  mutate(numb_beads = map_int(shovel, ~ length(.$color))) %>% 
-  mutate(prop_red = numb_red / numb_beads)
-
-```
-
-While some people may be satisfied with this solution, it is not good enough for us! What if, for example, we wanted to compare the distributions from using the shovel for every integer value between 1 and 100. If we used our previous code, we would have to make 100 variables, which would be very time consuming to do. There must be a better way! 
-
-```{r, echo = FALSE, fig.cap = "Although it seems like more work intially, re-factoring our code will help in the longrun."}
-knitr::include_graphics("06-one-parameter/images/code_refactor_meme.jpeg")
-```
-
-As data scientists it is important to stop and look back on our code from time to time. First we need to look at our end goal: To compare using the virtual shovel different numbers of times. Then we look at our code. Does having a tibble for each sampling distribution make sense? Will it be easy to work with later? The answer is no. Instead, our goal should be to create one single tibble which we can group by number of samples. The process of restructuring our code to make it cleaner and more general is called **re-factoring**, and any *good* developer will do it from time to time. 
-
-Now Let's attempt to re-factor our code to create one tibble that includes the sampling distributions for any number of trials we choose. First, create the foundation for our tibble. 
-
-```{r}
-num_trials <- c(10, 33, 1000)
-
-multiple_sampling_distributions <- tibble(reps = num_trials) %>%
-  
-# After we create a tibble with 3 rows, one for each number of trials, we create 
-# a range from 1 to . , where . passes in the number or trials using mapping.
-  
-# For example, when reps = 10 we create a range from 1 to 10, and when reps = 33
-# we create a range from 1 to 33. 
-  
-  
-  mutate(trial_ID = map(reps, ~1:.)) %>%
-
-# unnest() is a nifty function from the tidyr package, which expands a tibble by giving
-# each element of a list its own row. Before unnest(), our tibble had only 3 rows,
-# and the trial_ID was stored in a neat list. After unnest() our tibble has 1,043
-# (10 + 33 + 1000) rows.
-  
-  unnest(trial_ID)
-
-multiple_sampling_distributions
-```
-
-Let's examine what changes we made and why. Because our goal is to compare distributions that use the shovel different numbers of times, our new code starts with `num_trials`. If we want to compare different numbers of trials in the future, we can simply change `num_trials` instead of having to make a new tibble and variable. After we initialize the tibble, we create a range of integers from 1 to our desired number of trials. Each number will represent an instance of us sampling from the virtual urn. Note how the `reps` column only has `r length(num_trials)` values: `r num_trials[1]`, `r num_trials[2]`, and `r num_trials[3]`. This will help group our tibble by number of trials later on. 
-
-For each trial we will take a sample using `slice_sample()`, and then calculate the number of red beads in the sample and $\hat{p}$. This is the same code from when we sampled from the virtual urn a single time earlier on. 
-
-```{r}
-shovel_size <- 50
-
-multiple_sampling_distributions <- tibble(reps = num_trials) %>%
-  mutate(trial_ID = map(reps, ~1:.)) %>%
-  unnest(trial_ID) %>%
-  mutate(shovel = map(trial_ID, ~slice_sample(urn, n = shovel_size))) %>%
-  mutate(numb_red = map_int(shovel, ~sum(.$color == "red"))) %>%
-  mutate(prop_red = numb_red/shovel_size)
-
-multiple_sampling_distributions
-```
-
-Another way to re-factor our code would be to use functions. To reduce complexity we will not use functions, but additional information about what they are and how to use them can be found in Section \@ref(functions). 
-
-<!-- RS: Include one code chunk creating a function to show what they are or should we not show them whatsoever? -->
-Before we go onto using our new tibble to compare the effect of increasing the number of trials, there are still two re-factoring topics left to discuss: the first being *reducing ambiguity*. If we want to present our findings to other data scientists, or ask for help online, it is important that others can understand our code. To increase understanding and reduce ambiguity, we should put some effort into creating variable names that others can easily understand. We should also avoid complicated nested functions, as they are both difficult to debug and hard to understand. Finally, we should include lots of comments in our code that can be used to document our thought process, which will also help outsiders audit our code. The more comments the better!
-
-The final topic of re-factoring left to discuss is *efficiency*. Because most of us run R Studio on our local machines, each R variable is stored using memory on our computers. As we add more columns or more complex objects to our tibbles, they will take up more memory. While our urn simulation takes up a relatively small amount of storage and we are not overly concerned with optimizing tibble size, it never hurts to practice making our tibbles more efficient. This will become especially handy when working with large data sets with thousands of rows and dozens of columns. 
-
-In our urn exercise, the largest hindrance to efficiency are our chosen datatypes. Although we haven't really cared thus far, using `slice_sample()` will store tibbles inside our tibble, while `sample()` will store a list. We chose `slice_sample()` primarily because it can be useful with real data sets to select multiple columns, while `sample()` does not have that functionality. However, that extra data comes at a cost! A tibble with nothing in it takes up `r object.size(tibble())` bytes of memory, so generating an individual sample tibble for each of the `r scales::comma(nrow(multiple_sampling_distributions))` rows in our tibble will make our object substantially larger. It is certainly worthwhile to read (or at least skim) this [article about memory in R](http://adv-r.had.co.nz/memory.html) to make sure that we understand the implications of storing complex objects within tibbles, so we can make the most out of our future list-column mapping endeavors. 
-
-R makes it easy to analyze the size of our objects using the `object.size()` function. Let's compare the effect of using `slice_sample()` versus using `sample()`.
-
-```{r}
-larger_tibble <- tibble(reps = num_trials) %>%
-  mutate(trial_ID = map(reps, ~1:.)) %>%
-  unnest(trial_ID) %>%
-  # Use slice_sample()
-  mutate(shovel = map(trial_ID, ~slice_sample(urn, n = shovel_size))) %>%
-  mutate(numb_red = map_int(shovel, ~sum(.$color == "red"))) %>%
-  mutate(numb_beads = shovel_size) %>%
-  mutate(prop_red = numb_red/shovel_size)
-
-smaller_tibble <- tibble(reps = num_trials) %>%
-  mutate(trial_ID = map(reps, ~1:.)) %>%
-  unnest(trial_ID) %>%
-  # Use sample()
-  mutate(shovel = map(trial_ID, ~sample(urn$color, size = shovel_size))) %>%
-  mutate(numb_red = map_int(shovel, ~sum(. == "red"))) %>%
-  mutate(prop_red = numb_red/shovel_size)
-
-paste("Larger tibble size: ",format(object.size(larger_tibble), units = "auto"))
-paste("Smaller tibble size: ",format(object.size(smaller_tibble), units = "auto"))
-```
-
-The results are that using `slice_sample()` causes our tibble to be over 2 times larger than using `sample()`. Considering that both tibbles are relatively small, the increased size caused by `slice_sample()` is insignificant, so it is perfectly fine to continue to use it over `sample()`! Again, we only really care about the effects of inefficiency and memory intensive datatypes when our data sets become much larger, so let's not worry too much about being the most efficient in this exercise. 
-
-#### Using the virtual shovel 33 times {#shovel-33-times}
-<!-- RS: Reason why some titles do not have specific URL thingys? -->
 In our tactile sampling exercise in Section \@ref(sampling-activity), we had 33 groups of students use the shovel, yielding 33 samples of size 50 beads. We then used these 33 samples to compute 33 proportions. 
 
-Let's use our newly re-factored code to replicate the tactile sampling activity in a virtual format. We'll save these results in a data frame called `virtual_samples`. 
-<!-- RS: Old code for 33 samples: -->
-<!-- virtual_samples <- tibble(ID = 1:33) %>% -->
-<!--   mutate(shovel = map(ID, ~ slice_sample(urn, n = 50))) %>% -->
-<!--   mutate(numb_red = map_int(shovel, ~ sum(.$color == "red"))) %>% -->
-<!--   mutate(numb_beads = map_int(shovel, ~ length(.$color))) %>% -->
-<!--   mutate(prop_red = numb_red / numb_beads) -->
+Let's use our virtual sampling to replicate the tactile sampling activity in a virtual format. We'll save these results in a data frame called `virtual_samples`. 
+
 ```{r}
 set.seed(9)
 
-virtual_samples <- multiple_sampling_distributions %>%
-  filter(reps == 33)
+ virtual_samples <- tibble(trial_ID = 1:33) %>%
+    mutate(shovel = map(trial_ID, ~ slice_sample(urn, n = 50))) %>% 
+    mutate(numb_red = map_int(shovel, ~ sum(.$color == "red"))) %>%
+    mutate(prop_red = numb_red / 50) 
 
 virtual_samples
 ```
-
 
 Let's visualize this variation in a histogram:
 
@@ -534,7 +364,7 @@ Since `binwidth = 0.05`, this will create bins with boundaries at 0.30, 0.35, 0.
 
 Observe that we occasionally obtained proportions red that are less than 30%. On the other hand, we occasionally obtained proportions that are greater than 45%. However, the most frequently occurring proportions were between 35% and 45%. Why do we have these differences in proportions red? Because of *sampling variation*. 
 
-Compare our virtual results with our tactile results from the previous section. Observe that both histograms are somewhat similar in their center and variation, although not identical. These slight differences are again due to random sampling variation. Furthermore, observe that both distributions are somewhat bell-shaped.
+Now we will compare our virtual results with our tactile results from the previous section. Observe that both histograms are somewhat similar in their center and variation, although not identical. These slight differences are again due to random sampling variation. Furthermore, observe that both distributions are somewhat bell-shaped.
 
 
 ```{r, echo = FALSE, fig.cap = "Comparing 33 virtual and 33 tactile proportions red. Note that, though the figures differ slightly, both are centered around .35 to .45. This shows that, in both sampling distributions, the most frequently occuring proportion red is between 35% and 45%."}
@@ -545,13 +375,13 @@ Compare our virtual results with our tactile results from the previous section. 
 # come from virtual sampling and which come from tactical sampling.
 
 facet_compare <- bind_rows(virtual_samples %>% 
-                              select(-shovel) %>%
+                              select(trial_ID, prop_red) %>%
                               mutate(type = "Virtual sampling"), 
                            tactile_sample_urn %>% 
                              
   # Set numb_red = red_beads to make the column names in both tibbles the same. 
     
-                              select(ID, numb_red = red_beads, prop_red) %>% 
+                              select(trial_ID = group_ID, prop_red) %>% 
                               mutate(type = "Tactile sampling")) %>% 
   
   # Use mutate() to alter the column factor into a factor column, rather than
@@ -581,83 +411,52 @@ facet_compare <- bind_rows(virtual_samples %>%
   # Add an x axis with p-hat using expression() with paste() for clarification
   # on p-hat's meaning. Add an appropriate title and inspect our creation.
   
-    labs(x = expression(paste("Proportion of 50 beads that were red ", hat(p))),
+    labs(x = expression(paste("Proportion of 50 beads that were red", hat(p))),
          title = "Comparing distributions") 
 
 facet_compare
 ```
+
 This visualization allows us to see how our results differed between our tactile and virtual urn results. As we can see, there is some variation between our results. This is not a cause for concern, as there is always expected sampling variation between results.
 
-#### Using the virtual shovel 1,000 times {#shovel-1000-times}
+### Using the virtual shovel 1,000 times {#shovel-1000-times}
 
 ```{r, echo = FALSE, fig.cap = "So much sampling, so little time."}
 knitr::include_graphics("06-one-parameter/images/sample_bernie.png")
 ```
 
-The advantage of modern technology is that we can use virtual simulation as many times as we choose! No longer do we have to have to recruit groups of friends to sample, which would be especially troublesome as we increase the number of samples. Let's review our re-factored tibble to compare the differences between `r num_trials[1]`, `r num_trials[2]`, and `r num_trials[3]` trials.    
+Although we took 33 samples from the urn in the previous section, we should never do that again! The advantage of modern technology is that we can use virtual simulation as many times as we choose, so we have no restrictions on resources. No longer are the days where we have to recruit our friends to tirelessly sample from the physical urn. We are now data scientists! 33 samples are useless to us. Instead, we use our simulations hundreds or thousands of times to create mathematical models that we can combine with our knowledge to answer our questions. In this section we'll examine the effects of sampling from the urn 1,000 times. 
+
+We can reuse our code from above, making sure to replace 33 trials with 1,000.
 
 ```{r}
 set.seed(9)
 
-shovel_size <- 50
-num_trials <- c(10, 33, 1000)
-
-multiple_sampling_distributions <- tibble(reps = num_trials) %>%
-  mutate(trial_ID = map(reps, ~1:.)) %>%
-  unnest(trial_ID) %>%
-  mutate(shovel = map(trial_ID, ~slice_sample(urn, n = shovel_size))) %>%
-  mutate(numb_red = map_int(shovel, ~sum(.$color == "red"))) %>%
-  mutate(prop_red = numb_red/shovel_size)
-
-summary_lines <- multiple_sampling_distributions %>%
-  group_by(reps) %>%
-  summarise(mean = mean(prop_red))
-
-multiple_sampling_distributions
+ virtual_samples <- tibble(trial_ID = 1:1000) %>%
+    mutate(shovel = map(trial_ID, ~ slice_sample(urn, n = 50))) %>% 
+    mutate(numb_red = map_int(shovel, ~ sum(.$color == "red"))) %>%
+    mutate(numb_beads = map_int(shovel, ~ length(.$color))) %>% 
+    mutate(prop_red = numb_red / numb_beads) 
 ```
 
-Remember: There are `r length(num_trials)` values for `reps`, one for each number of trials we want to compare. We then expand our tibble to have a `trial_ID` from 1 to our desired number of reps. Each row now represents one instance of a sample from our urn. Finally we compute the number of red beads in each sample and $\hat{p}$.
-
-Along with creating the `multiple_sample_distributions` tibble with our distributions for each number of trials, we also create a tibble called `summary_lines` that contains the mean $\hat{p}$ across each value of `reps`.
-
-Now we can combine the `multiple_sampling_distributions` and `summary_lines` tibbles to compare the sampling distributions for `r num_trials[1]`, `r num_trials[2]`, and `r num_trials[3]` trials. 
+Now we have 1,000 values for `prop_red`, each representing the proportion of 50 beads that are red in a sample. Using the same code as earlier, let’s visualize the distribution of these 1,000 replicates of `prop_red` in a histogram:
 
 ```{r}
-
-# stat(density) reformats the y axis to a density distribution.
-# We divide the density by 50 in order to make binwidth*density = 1,
-# or 100% of the population.
-
-# geom_vline() is created for each instance in our facet_wrap, and 
-# uses the mean to determine the x location for the vertical line. 
-
-multiple_sampling_distributions %>%
-  ggplot(aes(x = prop_red)) +
-  geom_histogram(binwidth = .02, aes(y = stat(density)/50), boundary = .4, color = "white") +
-  facet_wrap(~reps) + 
-  geom_vline(data = summary_lines, aes(xintercept = mean, color = "red")) +
-  labs(title = "Using the virtual shovel 10, 33, and 1000 times.",
-       y = "Percent of Occurances", 
-       x = expression(hat(p)),
-       color = "mean") + 
-   scale_y_continuous(labels = scales::percent_format()) 
+virtual_samples %>% 
+ggplot(aes(x = prop_red)) +
+  geom_histogram(binwidth = 0.01, 
+                 boundary = 0.4, 
+                 color = "white") +
+  labs(x = expression(hat(p)),
+       y = "Count",
+       title = "Distribution of 1,000 proportions red") 
 ```
 
-By graphing the results for multiple samples, we have created 3 **sampling distributions**, each with a different number of observations. Looking at our sampling distributions we have some questions to answer.  
+Why the empty spaces among the bars? Recall that, with only 50 beads, there are only 51 possible values for $\hat{p}$: 0, 0.02, 0.04, ..., 0.98, 1. A value of 0.31 or 0.47 is impossible, hence the gaps.
 
-First, why the empty spaces among the bars? Recall that, with only 50 beads, there are only 51 possible values for $\hat{p}$: 0, 0.02, 0.04, ..., 0.98, 1. A value of 0.31 or 0.47 is impossible, hence the gaps.
+The most frequently occurring proportions of red beads occur, again, between 35% and 45%. Every now and then we observe proportions much higher or lower. This occurs because as we increase the number of trials, tails develop on our distribution as we are more likely to witness extreme $\hat{p}$ values. The symmetric, bell-shaped distribution shown in the histogram is well approximated by the *normal distribution*.
 
-Some other interesting trends appear. First, notice how the sampling distribution for `r num_trials[1]` trials is very tall, while `r num_trials[3]` trials is shorter. This occurs because as we increase the number of trials, tails develop on our distribution as extreme $\hat{p}$ values are more likely to occur. The symmetric, bell-shaped distribution shown in the histogram of `r num_trials[3]` trials is well approximated by the *normal distribution*. 
-
-The most frequently occurring proportions of red beads occur, again, between 35% and 45%. But 35% to 40% is a wide range! We can use the `summary_lines` tibble to help better quantify this trend. Each red line displays the mean sample proportion, and as we increase the number of trials, the red line becomes closer and closer to the actual value of the sample proportion. We can also see this analytically:
-
-```{r, echo = FALSE}
-summary_lines
-```
-
-This is an important property of sampling. For problems involving proportion (p) or the mean ($\mu$), we can take repeated samples, and know that the mean of our sampling distribution will be approximately equal to the unknown population parameter we want to evaluate. However, it is *very* important to know that for the above to be true, we must take *random* samples *directly from the population*. 
-
-Now that we've examined the effect if increasing the number of trials, we will now change our virtual shovel size. 
+Now that we have a good understanding of virtual sampling, we can apply our knowledge to examine the effects of changing our virtual shovel size.  
 
 ### The effect of different shovel sizes {#different-shovels}
 
@@ -668,13 +467,13 @@ knitr::include_graphics("06-one-parameter/images/three_shovels.png")
 Instead of just one shovel, imagine we have three choices of shovels to extract a sample of beads with: shovels of size 25, 50, and 100. Using our newly developed tools for virtual sampling, let's unpack the effect of having different sample sizes. Start by creating a tibble with 1,000 rows, each row representing an instance of us sampling from the urn with our chosen shovel size. Then, compute the resulting 1,000 replicates of proportion red. Finally, plot the distribution using a histogram. 
 
 ```{r}
-# Within slice_sample(), n = 25 represents our shovel of size 25.  
+# Within slice_sample(), n = 25 represents our shovel of size 25. We also divide
+# by 25 to compute the proportion red.
 
-virtual_samples_25 <- tibble(ID = 1:1000) %>% 
-  mutate(shovel = map(ID, ~ slice_sample(urn, n = 25))) %>% 
+virtual_samples_25 <- tibble(trial_ID = 1:1000) %>% 
+  mutate(shovel = map(trial_ID, ~ slice_sample(urn, n = 25))) %>% 
   mutate(numb_red = map_int(shovel, ~ sum(.$color == "red"))) %>% 
-  mutate(numb_beads = map_int(shovel, ~ length(.$color))) %>% 
-  mutate(prop_red = numb_red / numb_beads)
+  mutate(prop_red = numb_red / 25)
 
 virtual_samples_25 %>%
   ggplot(aes(x = prop_red)) +
@@ -688,11 +487,10 @@ virtual_samples_25 %>%
 We will repeat this process with a shovel size of **50**. 
 
 ```{r}
-virtual_samples_50 <- tibble(ID = 1:1000) %>% 
-  mutate(shovel = map(ID, ~ slice_sample(urn, n = 50))) %>% 
+virtual_samples_50 <- tibble(trial_ID = 1:1000) %>% 
+  mutate(shovel = map(trial_ID, ~ slice_sample(urn, n = 50))) %>% 
   mutate(numb_red = map_int(shovel, ~ sum(.$color == "red"))) %>% 
-  mutate(numb_beads = map_int(shovel, ~ length(.$color))) %>% 
-  mutate(prop_red = numb_red / numb_beads)
+  mutate(prop_red = numb_red / 50)
 
 
 virtual_samples_50  %>%
@@ -709,11 +507,10 @@ We choose a bin width of .04 for all histograms to more easily compare different
 Finally, we will perform the same process with 1000 replicates to map the histogram using a shovel size of **100**.
 
 ```{r}
-virtual_samples_100 <- tibble(ID = 1:1000) %>% 
-  mutate(shovel = map(ID, ~ slice_sample(urn, n = 100))) %>% 
+virtual_samples_100 <- tibble(trial_ID = 1:1000) %>% 
+  mutate(shovel = map(trial_ID, ~ slice_sample(urn, n = 100))) %>% 
   mutate(numb_red = map_int(shovel, ~ sum(.$color == "red"))) %>% 
-  mutate(numb_beads = map_int(shovel, ~ length(.$color))) %>% 
-  mutate(prop_red = numb_red / numb_beads)
+  mutate(prop_red = numb_red / 100)
 
 
 virtual_samples_100 %>%
@@ -772,9 +569,9 @@ virtual_prop %>%
        y = "Proportion red in sample",
        color = "Shovel size") +
   # We do not need an x axis, because the color of the points denotes the shovel size. 
-   theme(axis.title.x=element_blank(),
-        axis.text.x=element_blank(),
-        axis.ticks.x=element_blank())
+   theme(axis.title.x = element_blank(),
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank())
 ```
 
 This graph illustrates the exact same concept as the histogram. With the smallest shovel size there is significant variance from sample to sample, as samples take on a wide variety of sample proportions! However, as we increase the sample size, the points become more concentrated, or less variance. 
@@ -826,7 +623,7 @@ As the sample size increases, the sample to sample variation decreases, and our 
 knitr::include_graphics("06-one-parameter/images/variance_meme.jpg")
 ```
 
-Let's take a step back from all the variance. The reality is that our code needs to be *re-factored*, because we are yet again making a separate tibble for each sample size. To make comparisons easier, let's attempt to put all 3 shovel sizes in the same tibble using mapping. 
+Let's take a step back from all the variance. The reality is that our code needs to be *re-factored*, as it is bad practice to make a separate tibble for each sample size. To make comparisons easier, let's attempt to put all 3 shovel sizes in the same tibble using mapping. 
 
 ```{r}
 tibble(trial_ID = 1:1000) %>%
@@ -836,7 +633,6 @@ tibble(trial_ID = 1:1000) %>%
   mutate(num_red = map_int(samples, ~sum(.$color == "red"))) %>%
   mutate(prop_red = num_red/shovel_ID)
 ```
-This process of creating this tibble is very similar to the creation of our re-factored tibble in Section \@ref(refactoring-one-parameter) except for a few differences. We initialized both tibbles with our desired number of trials, but this time we map the shovel size to the trial number. Using this mapping, we will use 3 different sized shovels for each of our 1,000 trials. Thus, our tibble will have 3 $\cdot$ 1,000, or 3,000 rows. Finally, we use mapping within `slice_sample()` to pass in the shovel size. 
 
 To those of us who do not completely understand mapping, do not fret! The **tidyr** package provides the `expand_grid()` function as a neat alternative. We can use `expand_grid()` and a new variable, `shovel_size`, to create a tibble which will organize our results. Instead of using 1,000 trials, let's use 3 to get a feel for the function.
 
@@ -851,18 +647,16 @@ The above sets the stage for simulating three samples for each of three differen
 expand_grid(trial_ID = c(1:3), shovel_size = c(25, 50, 100)) %>% 
   mutate(shovel = map(shovel_size, ~ slice_sample(urn, n = .))) %>% 
   mutate(numb_red = map_int(shovel, ~ sum(.$color == "red"))) %>% 
-  mutate(numb_beads = map_int(shovel, ~ length(.$color))) %>% 
-  mutate(prop_red = numb_red / numb_beads)
+  mutate(prop_red = numb_red/shovel_size) 
 ```
 
 Again, we changed the second line to use `shovel_size` rather than `trial_ID` as the mapping variable since we can no longer hard code the shovel size into the call to `slice_sample()`. Expand to 1,000 simulations for each value of `shovel_size` and finish with a calculation of standard deviation.
 
 ```{r}
-expand_grid(ID = c(1:1000), shovel_size = c(25, 50, 100)) %>% 
+expand_grid(trial_ID = c(1:1000), shovel_size = c(25, 50, 100)) %>% 
   mutate(shovel = map(shovel_size, ~ slice_sample(urn, n = .))) %>% 
   mutate(numb_red = map_int(shovel, ~ sum(.$color == "red"))) %>% 
-  mutate(numb_beads = map_int(shovel, ~ length(.$color))) %>% 
-  mutate(prop_red = numb_red / numb_beads) %>% 
+  mutate(prop_red = numb_red/shovel_size)
   group_by(shovel_size) %>% 
   summarize(st_dev_p_hat = sd(prop_red))
   
@@ -873,11 +667,10 @@ This is, approximately, the same result as we saw above, but with 1 re-factored 
 Now that we have this framework, there's no need to limit ourselves to the sizes 25, 50, and 100.  Why not try all integers from 1 to 100? We can use the same code, except we'll now set `shovel_size = 1:100`.
 
 ```{r, cache = TRUE}
-shovels_100 <- expand_grid(ID = c(1:1000), shovel_size = c(1:100)) %>% 
+shovels_100 <- expand_grid(trial_ID = c(1:1000), shovel_size = c(1:100)) %>% 
   mutate(shovel = map(shovel_size, ~ slice_sample(urn, n = .))) %>% 
   mutate(numb_red = map_int(shovel, ~ sum(.$color == "red"))) %>% 
-  mutate(numb_beads = map_int(shovel, ~ length(.$color))) %>% 
-  mutate(prop_red = numb_red / numb_beads) %>% 
+  mutate(prop_red = numb_red / shovel_size) %>% 
   group_by(shovel_size) %>% 
   summarize(st_dev_p_hat = sd(prop_red))
 
@@ -885,7 +678,6 @@ glimpse(shovels_100)
 ```
 
 Now, we have the standard deviation of `prop_red` for all shovel sizes from 1 to 100.  Let's plot that value to see how it changes as the shovel gets larger:
-
 
 ```{r, echo = FALSE, fig.cap = "Comparing standard deviations of proportions red for 100 different shovels. The standard deviation decreases at the same rate as the square root of shovel size. The red line shows the standard error."}
 shovels_100 %>%
