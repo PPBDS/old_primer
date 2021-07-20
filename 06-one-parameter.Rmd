@@ -108,11 +108,13 @@ library(tidyverse)
 
 ```{r, echo = FALSE, message = FALSE}
 # Needed for the one 3-D plot below.
-
+options(rgl.useNULL = TRUE)
 library(rayshader)
 library(rgl)
 ```
 
+<!-- RS: options command in above chunk should fix rayshader issues. This command suppresses the default behavior of rendering the rayshader in a dedicated XQuartz Window. Read here:  -->
+<!-- https://cran.r-project.org/web/packages/rgl/vignettes/rgl.html -->
 ## Real sampling activity {#sampling-activity}
 
 ```{r, echo = FALSE, fig.cap = "An urn with red and white beads."}
@@ -620,7 +622,7 @@ comparing_n_table  %>%
 As the sample size increases, the sample to sample variation decreases, and our guesses at the true proportion of the urn's beads that are red get more precise. The larger the shovel, the more precise the result. 
 
 ```{r, echo = FALSE, fig.cap = "Variance appears everywhere in data science."}
-knitr::include_graphics("06-one-parameter/images/variance_meme.jpg")
+knitr::include_graphics("06-one-parameter/images/variance_everywhere_meme.jpeg")
 ```
 
 Let's take a step back from all the variance. The reality is that our code needs to be *re-factored*, as it is bad practice to make a separate tibble for each sample size. To make comparisons easier, let's attempt to put all 3 shovel sizes in the same tibble using mapping. 
@@ -1364,17 +1366,17 @@ As is the case in the Rubin Causal Model, we *wish* we knew the values for every
 
 urn %>%
   slice(1:2, 200, 201, 2399, 1000) %>%
-  mutate(ID = as.character(ID),
+  mutate(bead_ID = as.character(bead_ID),
          color = as.character(color)) %>%
-  add_row(ID = "...", color = "...", .after  = 2) %>%
-  add_row(ID = "...", color = "...", .after  = 5) %>% 
+  add_row(bead_ID = "...", color = "...", .after  = 2) %>%
+  add_row(bead_ID = "...", color = "...", .after  = 5) %>% 
   gt() %>%
-  cols_label(ID = md("**ID**"),
+  cols_label(bead_ID = md("**ID**"),
              color = "Year") %>%
   tab_style(cell_borders(sides = "right"),
-            location = cells_body(columns = c(ID))) %>%
+            location = cells_body(columns = c(bead_ID))) %>%
   tab_style(cell_text(weight = "bold"),
-            location = cells_body(columns = c(ID))) %>%
+            location = cells_body(columns = c(bead_ID))) %>%
   cols_align(align = "center", columns = everything())
 ```
 
@@ -1391,15 +1393,15 @@ Let's imagine we use our shovel and sample 100 beads from the urn. After taking 
 
 # Actual Preceptor Table to be created by the very helpful Cass!
 
-tibble(ID = c("1", "2", "...", "...", "200", "201", "...", "...", "999", "1000"),
+tibble(bead_ID = c("1", "2", "...", "...", "200", "201", "...", "...", "999", "1000"),
        color = c("?", "?", "...", "...", "red", "?", "...", "...", "red", "?")) %>%
   gt() %>%
-  cols_label(ID = md("**ID**"),
+  cols_label(bead_ID = md("**ID**"),
              color = "Color") %>%
   tab_style(cell_borders(sides = "right"),
-            location = cells_body(columns = c(ID))) %>%
+            location = cells_body(columns = c(bead_ID))) %>%
   tab_style(cell_text(weight = "bold"),
-            location = cells_body(columns = c(ID))) %>%
+            location = cells_body(columns = c(bead_ID))) %>%
   cols_align(align = "center", columns = everything())
 ```
 
