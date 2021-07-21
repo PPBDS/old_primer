@@ -315,7 +315,7 @@ We do not have a value for female. However we do have an intercept. In this regr
 
 $$ lived\_after_i = \beta_0  + \beta_1 male_i + \epsilon_i$$
 
-$\beta_0$ is our intercept, around `r round(coef(fit_2a)["(Intercept)"], 0)` years. In this type of model, our intercept represents the the variable which is not represented in the model. Therefore, the intercept value represents those who are not male (females). 
+$\beta_0$ is our intercept, around `r round(coef(fit_2)["(Intercept)"], 0)` years. In this type of model, our intercept represents the the variable which is not represented in the model. Therefore, the intercept value represents those who are not male (females). 
 
 $\beta_1$ only affects the outcome when the candidate is male. When the candidate is a male, we add the coefficient for male to the intercept value, which gives us the average lifespan of a male gubernatorial candidate after an election. 
 
@@ -427,7 +427,7 @@ You may recall from middle school algebra that the equation of a line is $y = m 
 Rather repeat the process in Chapter 8, we will look at the resulting plot using a model that predicts years lived after as a factor of age at election. 
 
 
-```{r, echo = false}
+```{r, echo = FALSE}
 fit_1 <- stan_glm(data = ch10,
                       formula = lived_after ~ election_age,
                       refresh = 0,
@@ -877,7 +877,6 @@ pe %>%
 
 Looking at our posterior probability distributions above, we can see that male candidates are expected to live longer. But how much longer? As in previous chapters, we can manipulate distributions in, more or less, the same way that we manipulate simple numbers. If we want to know the difference between two posterior distributions, we can simply subtract. 
 
-
 ```{r}
 pe <- posterior_epred(object = fit_4, 
                       newdata = newobs) %>% 
@@ -899,7 +898,6 @@ pe %>%
     scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
     theme_classic()
 ```
-
 
 The average value of the *difference* in years-to-live is probably positive, with the most likely value being around `r round(mean(pe$diff), 0)` years. But there still a `r round(sum(pe$diff < 0) / length(pe$diff), 2) * 100`% chance the true value is less than zero, i.e., that we should expect female candidates to live longer.
 
