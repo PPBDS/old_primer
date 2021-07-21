@@ -6,12 +6,23 @@
 
 <!-- TODO: -->
 
-<!-- Add one paragraph Distill section, including links, like from Bootcamp page. Point toward tutorial. -->
+<!-- Add one paragraph Distill section, including links, like from Bootcamp page. Point toward tutorial. DONE -->
 
+<!-- Any inspiration to be drawn from this: https://ubc-dsci.github.io/introduction-to-datascience/reading.html -->
 
+<!-- Add these?  -->
+
+<!-- https://www.rstudio.com/resources/webinars/part-1-easy-ways-to-collect-different-types-of-data-from-the-web-with-r/ -->
+
+<!-- https://www.rstudio.com/resources/webinars/part-2-easy-ways-to-collect-different-types-of-data-from-the-web-with-r/ -->
+
+<!-- Anything useful here: https://ubc-dsci.github.io/introduction-to-datascience/reading.html -->
+
+<!-- Add Google sheets examples? -->
+ 
+Getting data into and out of R is a major part of any real world data science project. There are multiple data formats that you use to transport this data, each with their own positives and negatives.
 
 Start by loading the packages which we will need in this chapter.
-
 
 ```{r, message = FALSE}
 library(tidyverse)
@@ -20,28 +31,30 @@ library(dbplyr)
 library(janitor)
 ```
 
-## Writing and reading files
-
-```{r, echo = FALSE}
-knitr::include_graphics("03-data/images/file_extensions.png")
-```
-
-Getting data into and out of R is a major part of any real world data science project. There are multiple data formats that you use to transport this data, each with their own positives and negatives.
-
 You can find most of the files that we use for this chapter [here](https://github.com/PPBDS/primer.tutorials/tree/master/inst/www). We can also access these files by saving the URL to R and then using it so that we can download and access the files located on the internet.
 
 ```{r}
-github_url <- "https://raw.githubusercontent.com/PPBDS/primer.tutorials/master/inst/www/"
+github_url <- "https://raw.githubusercontent.com/PPBDS/primer.tutorials/master/inst/tutorials/031-data-files/data/"
 ```
+
+## Reading and writing files
+
+```{r, echo = FALSE, out.width="50%", fig.cap="Choose your file formats wisely.", fig.align='center'}
+knitr::include_graphics("03-data/images/file_extensions.png")
+```
+
+<!-- Added this since I wanted the introduction section to actually have some sort of introduction rather than just package downloads. -->
+
+The first method that we can use to import data is by using a file. You've likely downloaded files before, whether it's a game's EXE file, an image's JPG file, or an essay's PDF file. At their core, those files are just data. The JPG file has a bunch of data about the colors in the image and the PDF file has a bunch of data about the text. So we can use these files to store data from experiments or surveys so that we can then analyze that data later or share that data with other people.
+
+In this section, we'll be going over the common file formats and how we can pull data from these files into R or create new files so that we can share them with other people.
 
 ### Text files
 
-The most common type of data text file is "CSV," which stands for **c**omma **s**eparated **v**alue. In other words, csv files are files whose values are separated by commas. Each comma from the csv file corresponds to a column, and the column names are, by default, taken from the first line of the file.
+The most common type of data text file is "CSV," which stands for **c**omma **s**eparated **v**alue. In other words, CSV files are files whose values are separated by commas. Each comma from the csv file corresponds to a column, and the column names are, by default, taken from the first line of the file.
 
 CSV files (and their counterparts) are easily transferable between computers and programming languages and are extremely simple because they're effectively just text files that have a special format. Additionally, they're very easy to parse through small amounts of data because they're easily readable by humans and computers. 
 However, due to their simple nature, CSV files are only able to move basic data and only as text values. They also have poor support for special characters like commas, which can make the dataset harder to organize and understand by adding a new column for a few specific entries. This make CSV files good for sharing data between computers and languages, but not efficient for transporting or saving large amounts of data.
-
-In this section, we'll be going over the common file formats and how we can pull data from these files into R.
 
 #### Reading and writing from a CSV file
 
@@ -50,9 +63,7 @@ Here's an example of a CSV file and what it looks like. Use `read_csv()` from th
 ```{r}
 # We can access files either by using their URL or their file path. In this
 # case, we're using the GitHub URL to access the database. This is done by
-# pasting the file name into our URL using the paste0() command This does the
-# same thing as creating the URL below.
-# https://raw.githubusercontent.com/PPBDS/primer.tutorials/master/inst/www/test_1.csv
+# pasting the file name into our URL using the paste0() command.
 
 file_1 <- paste0(github_url, "test_1.csv")
 
@@ -200,7 +211,7 @@ As you can see, while the function does compile the names aren't easy to access.
 file_4_tibble$`one powers`
 ```
 
-But that can still cause problems down the line and it's just annoying to use the backticks every time you want a column name. This is when we can use the `clean_names()` function from the **janitor** package. It essentially formats the column names so that they follow the [underscore separated naming convention](https://en.wikipedia.org/wiki/Snake_case#:~:text=Snake%20case%20(stylized%20as%20snake_case,subroutine%20names%2C%20and%20for%20filenames.) and are all unique.
+But that can still cause problems down the line and it's just annoying to use the backticks every time you want a column name. This is when we can use the `clean_names()` function from the **janitor** package. It essentially formats the column names so that they follow the [underscore separated naming convention](https://en.wikipedia.org/wiki/Snake_case) and are all unique.
 
 ```{r}
 file_4_tibble %>% 
@@ -316,6 +327,8 @@ read_excel(path = "example_excel.xlsx")
 file.remove("example_excel.xlsx")
 ```
 
+<!-- AG: Going to figure out a way to meld these two things together so I can have one "arguments and important functions" section for both CSV and Excel files. That's probably a lot smoother and improves understanding more than the current structure. Don't have time right now to fix it. -->
+
 If the .xlsx file has multiple sheets, you have to use the `sheet` argument to specify the sheet number or name. 
 The `read_excel()` function also has arguments similar to the `read_csv()` function such as `col_names`, `col_types`, and `na`.
 
@@ -371,7 +384,7 @@ There are also .Rdata files which can store multiple objects, but RDS files can 
 
 ### JSON
 
-An increasingly common format for sharing data is **J**avaScript **O**bject **N**otation or JSON. Because this format is very general, it is nothing like a spreadsheet. Note that JSON files are often made available via the internet. Several organizations provide a JSON API or a web service that you can connect directly to and from which you can obtain data. 
+An increasingly common format for sharing data is *J*avaScript *O*bject *N*otation or JSON. Because this format is very general, it is nothing like a spreadsheet. Note that JSON files are often made available via the internet. Several organizations provide a JSON API or a web service that you can connect directly to and from which you can obtain data. 
 
 JSON files are a minimal readable format that structures data, and they're commonly used to transmit data between a server and a web application like a website. For people familiar with the Javascript coding language, you'll likely see the similarities between the JSON file format and the Javascript syntax. This makes JSON files ideal for internet transport, but they don't see much use within a project like RDS files do.
 
@@ -415,7 +428,7 @@ Make sure to follow the JSON format exactly when you're writing JSON files, as t
 
 ## Databases
 
-```{r, echo = FALSE, fig.cap="DROP TABLE is a particularly infamous SQL command."}
+```{r, echo = FALSE, fig.cap="DROP TABLE is a particularly infamous SQL command"}
 knitr::include_graphics("03-data/images/exploits_of_a_mom.png")
 ```
 
@@ -534,7 +547,7 @@ First off, look at what data this database holds.
 ```{r}
 dbListTables(con)
 ```
-There are 13 tables in this database. Let's access the first couple of tables, just so that we can get a good look at them and see how they're structured..
+There are 13 tables in this database. Let's access the first couple of tables, just so that we can get a good look at them and see how they're structured.
 
 ```{r}
 albums <- tbl(con, "albums")
@@ -544,7 +557,7 @@ artists <- tbl(con, "artists")
 artists
 ```
  
-As you can see, each table has a common column: the `ArtistId` column. However, they all have different information linked to that ID, such as "albums" having the albums that artist produced and "artists" having the name of that artist.
+As you can see, these tables both have a common column: the `ArtistId` column. However, they all have different information linked to that ID, such as "albums" having the albums that artist produced and "artists" having the name of that artist.
 
 Here is the [full relationship diagram](http://schemaspy.org/sample/diagrams/summary/relationships.real.large.png) of the database that we're using.
 
@@ -584,11 +597,11 @@ However, there are cases where you will have to use SQL code to accomplish certa
 
 First off, let's try to understand what SQLite and SQL really is.
 
-SQL, or **S**tructured **Q**uery **L**anguage, is a coding language that works to build the relational databases that we've been using so far. SQLite is a special type of database that you can download onto your computer that uses SQL as its basic structure and basic language. Essentially, SQLite uses SQL code to do the things that it does.
+SQL, or *S*tructured *Q*uery *L*anguage, is a coding language that works to build the relational databases that we've been using so far. SQLite is a special type of database that you can download onto your computer that uses SQL as its basic structure and basic language. Essentially, SQLite uses SQL code to do the things that it does.
 
 While you shouldn't need to write SQL code in this primer, it's very common to read from an SQL database in order to access data so that you can graph it.
 
-SQL runs through something known as a **query**, a line of code that pulls in information from the database. This is effectively asking the database for a specific set of data. This is what's known as a `SELECT` command, which "selects" data from the database and brings it into your computer for your use.
+SQL runs through something known as a *query*, a line of code that pulls in information from the database. This is effectively asking the database for a specific set of data. This is what's known as a `SELECT` command, which "selects" data from the database and brings it into your computer for your use.
 
 ```{sql, connection = con}
 -- This code is written in SQL syntax, so it won't work if you just put it into R. 
@@ -766,7 +779,7 @@ band_albums_sql
 
 SQL is more versatile than `dbplyr`, but it's also a lot more confusing because it's not as straightforward. This creates one golden rule:
 
-> **Use dbplyr functions for data analysis and SQL code for accessing data**
+> *Use dbplyr functions for data analysis and SQL code for accessing data*
 
 This is because SQL code is weird and hard to understand, but it allows you to easily pull in data. SQL is a coding language *designed* for you to query or ask databases for data. Meanwhile, `dbplyr` is meant for analyzing that data and modifying it.
 
@@ -777,7 +790,7 @@ file.remove("chinook.db")
 
 Now, we worked with an SQLite database within this tutorial due to its simplicity. However, there are other databases that can be accessed in different ways. For example, a PostgresSQL server is located on the internet and allows you to pull data from the internet instead of downloading it into your computer. You can learn about some of the types of SQL databases and their differences [here](https://www.digitalocean.com/community/tutorials/sqlite-vs-mysql-vs-postgresql-a-comparison-of-relational-database-management-systems).
 
-**Why should we bother with databases at all?**
+*But why should we bother with databases at all?*
 
 Opening a database stored in a `.db` file involved a lot more effort than just opening a `.csv`, `.tsv`, or any of the other plain text or Excel formats. It was a bit of a pain to use a database in that setting since we had to use `dbplyr` to translate `tidyverse`-like commands (`filter`, `select`, `head`, etc.) into SQL commands that the database understands. Not all `tidyverse` commands can currently be translated with SQLite databases, like we showed with `slice()`. So you might be wondering, why should we use databases at all? 
 
@@ -797,7 +810,7 @@ This makes databases extremely useful for a business where they'll have employee
 knitr::include_graphics("03-data/images/tags.png")
 ```
 
-In the first part of this chapter, we learned how to read in data from plain text files that are usually "rectangular" in shape using the **tidyverse** `read_*` functions. Sadly, not all data comes in this simple format, but we can happily use many other tools to read in more messy/wild data formats. The formal name for gathering non-rectangular data from the web and transforming it into a more useful format for data analysis is **web scraping**.
+In the first part of this chapter, we learned how to read in data from plain text files that are usually "rectangular" in shape using the **tidyverse** `read_*` functions. Sadly, not all data comes in this simple format, but we can happily use many other tools to read in more messy/wild data formats. The formal name for gathering non-rectangular data from the web and transforming it into a more useful format for data analysis is *web scraping*.
 
 We can do web scraping through r by using the **rvest** library, which is a library that allows us to look at HTML and CSS selectors, then pick them apart to get the data we want. Let's look at what this means.
 
@@ -805,13 +818,13 @@ We can do web scraping through r by using the **rvest** library, which is a libr
 
 Before we jump into scraping, let's learn a little bit about what the "source code" of a website looks like. 
 
-#### Website structure
+#### Website structure {#website-structure}
 
 ```{r, echo = FALSE, fig.cap = "A little bit of HTML editing can bring you a long way."}
 knitr::include_graphics("03-data/images/nobel.png")
 ```
 
-Websites are coded in a language called **HTML**, or **H**yper**T**ext **M**arkup **L**anguage. This is the code that puts all of the information on the website, such as the numbers and text. These are the files created when we "knit" our .Rmd files and it's what makes them put information on the screen. When we're webscraping, we can look at the information on the website by looking at the HTML code. You can try this out by yourself! Just go to any website and right-click, then press "Inspect". You'll be able to see the HTML code behind the website and even edit it to your liking!
+Websites are coded in a language called *HTML*, or *H*yper*T*ext *M*arkup *L*anguage. This is the code that puts all of the information on the website, such as the numbers and text. These are the files created when we "knit" our .Rmd files and it's what makes them put information on the screen. When we're webscraping, we can look at the information on the website by looking at the HTML code. You can try this out by yourself! Just go to any website and right-click, then press "Inspect". You'll be able to see the HTML code behind the website and even edit it to your liking!
 
 ```{r, fig.cap="You can see the HTML code of a website and even edit it temporarily by inspecting the HTML code of the in"}
 knitr::include_graphics("03-data/images/html_inspect.gif")
@@ -859,7 +872,7 @@ Hello World
 </div>
 </html>
 
-Each tag defines an **element**, or a part of a website. For example, we used the `<p>` tag to define a paragraph element in HTML. We then close the paragraph by using the `</p>` tag, ending the paragraph. You can find a full list of HTML tags and elements [here](https://developer.mozilla.org/en-US/docs/Web/HTML/Element).
+Each tag defines an *element*, or a part of a website. For example, we used the `<p>` tag to define a paragraph element in HTML. We then close the paragraph by using the `</p>` tag, ending the paragraph. You can find a full list of HTML tags and elements [here](https://developer.mozilla.org/en-US/docs/Web/HTML/Element).
 
 Now, we're doing data science. And let's say you find some really cool website off of the internet that has a lot of really useful data, but there's no download file (and [it's legal to scrape from that website](#legal-to-scrape)). That means that you have to pull the information from the HTML code.
 
@@ -1015,10 +1028,9 @@ However, what if we want only the important information in that table? That's wh
 
 #### CSS selectors
 
-**CSS**, or **C**ascading **S**tyle **S**heets, is a coding language that defines the style of webpages. You may have noticed earlier that the HTML code we output earlier was just black and white. But websites aren't black and white, they have colors and other cool things. They do this by using CSS to add special rules to specific elements.
+*CSS*, or *C*ascading *S*tyle *S*heets, is a coding language that defines the style of webpages. You may have noticed earlier that the HTML code we output earlier was just black and white. But websites aren't black and white, they have colors and other cool things. They do this by using CSS to add special rules to specific elements.
 
-Now, there are a number of ways to do this. The first one is by using a **class** to tell the webpage that you want all of these elements to have the same style. CSS classes are a way for multiple elements to have the same style, rather than being limited to a unique ID. We can see an example of this below, where we set the elements with the class `good-info` to be green and the class `amazing-info` to have a pale red background.
-
+Now, there are a number of ways to do this. The first one is by using a *class* to tell the webpage that you want all of these elements to have the same style. CSS classes are a way for multiple elements to have the same style, rather than being limited to a unique ID. We can see an example of this below, where we set the elements with the class `good-info` to be green and the class `amazing-info` to have a pale red background.
 
 ```{css}
 /*This uses the `css` language instead of the R language. You can use this
@@ -1089,7 +1101,7 @@ We can then use that class in the HTML code.
 </div>
 <br>
 
-Now, there's a really clever trick that we can use here. Let's say that we only want the table cells that are important, but we don't know exactly where they are (we only know their class). Well in most cases, the data you want will be a different color, like what we see in the data above. Think about it like making **important information** have a bold font to make it stand out. CSS makes all of the **information** bold by assigning it a specific class, so we can just look for everything that has that class and pull it out so that we only get the **important** information. We can do this by using `html_elements()`. Just plug in the class of the element that you want with a `.` in front to tell R that it's an class.
+Now, there's a really clever trick that we can use here. Let's say that we only want the table cells that are important, but we don't know exactly where they are (we only know their class). Well in most cases, the data you want will be a different color, like what we see in the data above. Think about it like making *important information* have an italic font to make it stand out. CSS makes all of the *information* italic by assigning it a specific class, so we can just look for everything that has that class and pull it out so that we only get the *important* information. We can do this by using `html_elements()`. Just plug in the class of the element that you want with a `.` in front to tell R that it's an class.
 
 ```{r}
 raw_html_3 <- "<html>
@@ -1131,7 +1143,7 @@ raw_html_3 %>%
   html_text2()
 ```
 
-Webpages will also use something called an **ID** to change the color of a specific element. Do the same thing but this time with a "#" at the beginning to signify that it's a symbol.
+Webpages will also use something called an *ID* to change the color of a specific element. Do the same thing but this time with a "#" at the beginning to signify that it's a symbol.
 
 ```{css}
 .red-id {
@@ -1237,7 +1249,7 @@ raw_html_5 %>%
 
 This accesses the `href` attribute of the element without accessing the link, allowing you to find the links to outside websites.
 
-These chains are known as **CSS Selectors** and they're an important part of data science because they allow us to find data and information on a website without having to download every file or copying everything down. Instead, we can just use the website's inbuilt code to get the information.
+These chains are known as *CSS Selectors* and they're an important part of data science because they allow us to find data and information on a website without having to download every file or copying everything down. Instead, we can just use the website's inbuilt code to get the information.
 
 ### Application
 
@@ -1307,7 +1319,7 @@ However, when we're scraping from actual websites we need to take more than just
 
 #### Are you allowed to scrape that website? {#legal-to-scrape}
 
-**BEFORE** scraping data from the web, you should always check whether or not you are **ALLOWED** to scrape it! There are two documents that are important for this: the robots.txt file (found by adding `/robots.txt` to the end of a URL like [so](https://www.craigslist.org/robots.txt)) and reading the website's Terms of Service document. The website's Terms of Service document is far and away the more important of the two because it's actually legally binding, so you should look there first. What happens when we look at Craigslist's Terms of Service document? Well we read this:
+*BEFORE* scraping data from the web, you should always check whether or not you are *ALLOWED* to scrape it! There are two documents that are important for this: the robots.txt file (found by adding `/robots.txt` to the end of a URL like [so](https://www.craigslist.org/robots.txt)) and reading the website's Terms of Service document. The website's Terms of Service document is far and away the more important of the two because it's actually legally binding, so you should look there first. What happens when we look at Craigslist's Terms of Service document? Well we read this:
 
 *"You agree not to copy/collect CL content via robots, spiders, scripts, scrapers, crawlers, or any automated or manual equivalent (e.g., by hand)."*
 
@@ -1397,7 +1409,7 @@ Webscraping is a powerful tool to gain data directly from the internet, but make
 
 ## Working with APIs
 
-```{r, echo = FALSE}
+```{r, echo = FALSE, out.width="50%", fig.align='center'}
 knitr::include_graphics("03-data/images/api.png")
 ```
 
@@ -1416,7 +1428,7 @@ To get the data from an API, you should first read the organization’s API docu
 
 Here is an example:
 
-The National Aeronautics and Space Administration (NASA) has an API for pulling the [Astronomy Picture of the Day](https://apod.nasa.gov/apod/astropix.html). In their API documentation, they specify that the base URL for the API request should be **https://api.nasa.gov/planetary/apod** and that you can include parameters to specify the date of the daily picture you want, whether to pull a high-resolution version of the picture, and a NOAA API key you have requested from NOAA.
+The National Aeronautics and Space Administration (NASA) has an API for pulling the [Astronomy Picture of the Day](https://apod.nasa.gov/apod/astropix.html). In their API documentation, they specify that the base URL for the API request should be *https://api.nasa.gov/planetary/apod* and that you can include parameters to specify the date of the daily picture you want, whether to pull a high-resolution version of the picture, and a NOAA API key you have requested from NOAA.
 
 Many organizations will require you to get an *API key* and use this key in each of your API requests. This key allows the organization to control API access, including enforcing rate limits per user. API rate limits restrict how often you can request data (such as an hourly limit of 1,000 requests per user for NASA APIs).
 
@@ -1426,11 +1438,9 @@ To find more R packages for accessing and exploring open data, check out the [Op
 
 The **riem** package, developed by Maelle Salmon and an ROpenSci package, is an excellent and straightforward example of how you can use R to pull open data through a web API. This package allows you to pull weather data from airports around the world directly from the Iowa Environmental Mesonet. To show you how to pull data into R through an API, in this section we will walk you through code in the **riem** package or code based closely on code in the package.
 
-To get a certain set of weather data from the Iowa Environmental Mesonet, you can send an HTTP request specifying a base URL, **https://mesonet.agron.iastate.edu/cgi-bin/request/asos.py/**, as well as some parameters describing the subset of dataset you want (e.g., date ranges, weather variables, output format). Once you know the rules for the names and possible values of these parameters (more on that below), you can submit an HTTP GET request using the function` GET()` from the **httr** package.
+To get a certain set of weather data from the Iowa Environmental Mesonet, you can send an HTTP request specifying a base URL, *https://mesonet.agron.iastate.edu/cgi-bin/request/asos.py/*, as well as some parameters describing the subset of dataset you want (e.g., date ranges, weather variables, output format). Once you know the rules for the names and possible values of these parameters (more on that below), you can submit an HTTP GET request using the function` GET()` from the **httr** package.
 
 When you are making an HTTP request using the `GET()` or `POST()` functions from the **httr** package, you can include the key-value pairs for any query parameters as a list object in the `query` argument of the function. For example, suppose you want to get wind speed in miles per hour (data = "sped") for Denver, CO, (station = "DEN") for the month of June 2016 (year1 = "2016", month1 = "6", etc.) in Denver’s local time zone (tz = "America/Denver") and in a comma-separated file (format = "comma"). To get this weather dataset, you can run:
-
-
 
 ```{r, message = FALSE}
 library(httr)
@@ -1492,6 +1502,101 @@ If an R package doesn’t exist for an open API and you’d like to write your o
 
 Information for this section on API's was taken from *Mastering Software Development in R* textbook, authored by Roger D. Peng, Sean Kross, and Brooke Anderson. 
 
+## Distill
+
+<!-- DK: Copied the below from bootcamp. Useful? -->
+
+<!-- [Distill for R Markdown](https://rstudio.github.io/distill/) is the main documentation page. Key sections are [Creating a Website](https://rstudio.github.io/distill/website.html) and [Publishing Websites](https://rstudio.github.io/distill/publish_website.html). Step-by-step guides include: -->
+
+<!--   + [Building a blog with distill](https://themockup.blog/posts/2020-08-01-building-a-blog-with-distill/) by Thomas Mock.   -->
+<!--   + [Building a {distill} website](https://lisalendway.netlify.app/posts/2020-12-09-buildingdistill/) by Lisa Lendway.   -->
+<!--   + [Create a distill website](https://aosmith16.github.io/spring-r-topics/materials.html#week-2-create-a-distill-website) and [More on distill articles and deploy website](https://aosmith16.github.io/spring-r-topics/materials.html#week-3-more-on-distill-articles-and-deploy-website) by Ariel Muldoon. -->
+
+<!-- Add one paragraph Distill section, including links, like from Bootcamp page. Point toward tutorial. -->
+
+Now, you may have noticed that whenever we knit our .Rmd files, we produce an HTML file. And just a little bit earlier in the [webscraping section](#website-structure), we talked about how websites using HTML to make up the basic structure. So by that logic, can't we make our own websites by using the HTML files that are created when we knit the .Rmd?
+
+That's exactly what the **distill** package does. Essentially, **distill** allows you to make websites using the HTML files that are output when you knit them. It also organizes the pages nicely to make the website navigable and look professional.
+
+Here's an [example of a distill website](https://bootcamp.davidkane.info/). As you can see, this is a clear, easy website with a few pages and easily distinguishable information.
+
+We cover how to use the **distill** package in the associated [primer tutorials](https://ppbds.github.io/primer.tutorials/), where we'll walk you through creating a distill page and developing your own citations.
+
+<!-- AG: As said during a past session, people don't read the primer but they do look back at the primer for a reference. It might be a good idea to include common errors since these people are almost definitely looking back because their website is ugly or they're getting stupid errors. As such, I'm including a short-ish description of useful distill functions and things like that for these references (having each of them as their own section makes things very simple as you can just click it). It may be better to just include all of the things that the tutorial has, but that's very long and includes a few things that I think are somewhat unnecessary in the primer (like all of the plot and text sections). It's pretty simple to rework or delete this if it's wrong though, so don't spare any criticism. -->
+
+### Common Errors and Functions
+
+As you forge onwards into the world of distill, you will likely encounter a variety of errors that'll make you want to throw your computer away. As such, we'll go through a few of the common functions and errors encountered while making a distill page.
+
+#### `create_website()`
+
+The first step to creating a website is by using the `create_website()` function. This creates the entire distill website and should be the first function that you run whenever you want to make one. Just use the following syntax:
+
+```{r, eval=FALSE}
+library(distill)
+create_website(dir = ".", title = "title-of-your-website", gh_pages = TRUE)
+```
+
+This essentially creates a distill website in your current R project, titles it "title-of-your-website" and formats it so that we can publish it on [Github Pages](https://pages.github.com/) (Github's website publishing service). After you run this, you should see an `index.Rmd` and an `about.Rmd` file in your project, as well as some other miscellaneous files. These are the "Home" and "About" pages that you can use on your website.
+
+#### `create_article()`
+
+But what if I want more pages than that? Only being restricted to a Home and About page is pretty bad, especially when you want to have a bibliography. This is when we use `create_article()` to create a new page within our website. Just run the function with the title of the file and it'll automatically create the .Rmd file for you to code in.
+
+```{r, eval=FALSE}
+create_article("sources.Rmd")
+```
+
+Then, you need to put it into your website. Just go to the `_site.yml` file and add the page in using `text: "Sources"` and `"href: sources.html"`. This is what the `_site.yml` file should look like after you add the page.
+
+```
+name: "."
+title: "title-of-your-website"
+description: |
+  Welcome to the website. I hope you enjoy it!
+output_dir: "docs"
+navbar:
+  right:
+    # These two pages were automatically put in.
+    - text: "Home"
+      href: index.html
+    - text: "About"
+      href: about.html
+    # This page was added by us.
+    - text: "Sources"
+      href: sources.html
+output: distill::distill_article
+```
+
+The `_site.yml` is the file that keeps everything in line and organizes your distill website. *However, it's very specific as to the syntax, so you should take care to only add in specific things.* Additionally, keep in mind that you should always use the `create_article()` function whenever you need to create a new page or a .Rmd file. *Do not add in a .Rmd file manually.* These both lead to errors that can break your project.
+
+#### Formatting the article
+
+You can format the article just like you did before because it's still an RMarkdown file. However, you can also put more advanced features like block quotes [here](https://www.rstudio.com/wp-content/uploads/2015/02/rmarkdown-cheatsheet.pdf). Just make sure not to edit the headers at the top of the file without knowing exactly what you're doing in order to prevent any errors.
+
+#### `Error: $ operator is invalid for atomic vectors`
+
+This is the error caused by creating a .Rmd file without using it in your `_site.yml` or using `create_article()` to make it. Essentially, distill doesn't know how to deal with the extra .Rmd file and crashes because of it. This can normally be solved just by deleting the extra .Rmd, but it may be necessary to just nuke the project from orbit and restart.
+
+As such, make sure that you never create an extra .Rmd, as it's just going to be more work on your end when you start encountering this error. If you want to write R code for a graph so that you can put it into your website, just use a normal R script file by going to File -> New File -> R Script in RStudio.
+
+#### YAML Errors
+
+These are errors that are created by problems in your `_site.yml` file or in the headers (the --- part) at the top of your file. These parts essentially tell distill what the title and the description of your page is, as well as some other information. However, missing parts can cause pretty significant problems because distill just doesn't have the information that it needs. For example, deleting the `site: ` part of the header will not allow the website to work or not including `description: |` will stop the description from showing up.
+
+Here's what the YAML header at the top of your .Rmd file should look like. You can make some edits to it or add more information, but make sure to keep this basic structure in order to prevent any errors.
+
+```
+---
+title: "Home"
+description: |
+  Description of the page
+site: distill::distill_website
+---
+```
+
+Keep in mind that you can modify this when you need to make a new page. However, whenever you have an error beginning with `Error in yaml::yaml.load(..., eval.expr = TRUE) :`, that normally means that you have a YAML error and you need to fix this part of the code.
+
 ## Summary
 
 <!-- One paragraph for each subsection. Each paragraph tries to provide a brief summary, including package names and key commands. -->
@@ -1502,19 +1607,21 @@ Information for this section on API's was taken from *Mastering Software Develop
 
 *Use SelectorGadget to pull data off of websites, but make sure it's legal to.*
 
-*Use an API when to get data from government agencies*
+*Use an API when to get data from government agencies or companies.*
+
+*Publish your results on a website by using Distill.*
 
 This chapter is all about pulling data into R. It's not about graphing that data, cleaning it, wrangling it, or anything like that, it's just about pulling that data in without losing your mind.
 
-In this chapter, we looked at a few common file formats and used the **readr** package to read them and pull data from them so that we can use that data in our plots. This allowed us to download data from websites like [kaggle.com](https://kaggle.com) and use it in our dataset.
+In this chapter, we looked at a few common file formats and used the **readr** package to read them and pull data from them so that we can use that data in our plots. This allowed us to download data from websites like [kaggle.com](https://kaggle.com) and use it in our R session.
 
 We also looked at databases and how we can pull in a few select pieces of data from them so that we aren't overloading our computers with thousands or millions of data rows. We went over how we can write SQL queries so that we can acheive some special effects without causing errors or detonating our computers.
 
 And finally, we looked at how we can pull data from websites both through webscraping and through APIs, letting us pull data from the internet quickly and easily. This lets us find data for our projects and load it into our R session without having to create it ourselves or download a file from the internet.
 
-In the end, this chapter is about getting data from other people and using it inside your own projects. And make sure to use up to date data.
+In the end, this chapter is about getting data from other people and using it inside your own projects.
 
-```{r, echo = FALSE}
+```{r, echo = FALSE, fig.cap="Make sure to use up to date data."}
 knitr::include_graphics("03-data/images/suckville.png")
 ```
 
