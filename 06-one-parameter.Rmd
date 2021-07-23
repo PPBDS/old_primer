@@ -985,41 +985,43 @@ joint_dist %>%
 
 <!-- DK: Should also explain how this example, while still discrete, points us toward the continuous case. The mathematics of going from discrete to continuous is hard. The intuition is easy: just increase the number of models and number of possible results from the experiment. Then, squint and wave your arms. Ignore the mathematics, here and elsewhere. -->
 
-<!-- To better visualize this distribution, take a look at the 3D version of this plot. Note the saddle shape of the graphic. By this, we mean to note the peaks at the areas where the number of red beads in the shovel is 0 out of 50 and 50 out of 50. This is due to the fact that, when we draw 0 red beads in a sample of 50 beads, the possibilities for the number of red beads in the urn is consistently close to 0. Similarly, when our sample of 50 beads comes out with 50 red beads, the possibilities for the number of red beads in the urn is consistently closer to 1000.  -->
+To better visualize this distribution, take a look at the 3D version of this plot. Note the saddle shape of the graphic. By this, we mean to note the peaks at the areas where the number of red beads in the shovel is close to 0 and close to 50. Furthermore, as the number of red beads approaches halfway (25 red beads sampled from the urn), the "saddle" becomes the shortest. This is where the 3D model becomes especially handy, as it helps us visualize *variance*. When $p$ is close to 25, our "saddle" is wide because there are many possible population proportions that could yield a mid-sized number of red beads.  However, when we draw an extreme number of beads from the urn (extreme meaning close to 0 or 50), it is very likely the population proportion is close to 0 or 1, so there are fewer values for $p$ that are likely, and our "saddle" becomes narrower. 
 
+```{r, cache = TRUE, echo = FALSE}
+joint_dist_p <- joint_dist %>%
+  mutate(p = round(p, digits = 2)) %>%
+  group_by(p, red_in_shovel) %>%
+  summarize(total = n(), .groups = "drop") %>%
+  filter(red_in_shovel > 0 & red_in_shovel < 50) %>%
+  ggplot() +
+    geom_point(aes(x = red_in_shovel, y = p, color = total)) +
+    theme(legend.position = "none") +
+    labs(x = "Number of Reds in the Shovel",
+         y = expression(p),
+         title = "Empirical Distribution of Number of Reds",
+         subtitle = expression(paste("Based on simulations with various values of ",
+                                     p))) +
+    theme(title = element_text(size = 9),
+      axis.title.x = element_text(size = 7),
+      axis.title.y = element_text(size = 7),
+      axis.text.x = element_text(size = 5),
+      legend.position = "none")
 
-<!-- ```{r, cache = TRUE, echo = FALSE} -->
-<!-- joint_dist_p <- joint_dist %>%  -->
-<!--   group_by(p, red_in_shovel) %>% -->
-<!--   summarize(total = n(), .groups = "drop") %>%  -->
-<!--   mutate(p = as.factor(p)) %>%  -->
-<!--   mutate(red_in_shovel = as.factor(red_in_shovel)) %>%  -->
-<!--   ggplot() + -->
-<!--     geom_point(aes(x = red_in_shovel, y = p, color = total)) + -->
-<!--     theme(legend.position = "none") + -->
-<!--     labs(x = "Number of Reds in the Shovel", -->
-<!--          y = expression(p), -->
-<!--          title = "Empirical Distribution of Number of Reds", -->
-<!--          subtitle = expression(paste("Based on simulations with various values of ",  -->
-<!--                                      p))) + -->
-<!--     theme(title = element_text(size = 9), -->
-<!--           axis.text.x = element_text(size = 7), -->
-<!--           axis.title.y = element_text(size = 7), -->
-<!--           legend.position = "none") -->
+plot_gg(joint_dist_p,
+        width = 3.5,
+        zoom = 0.65,
+        theta = 25,
+        phi = 30,
+        sunangle = 225,
+        soliddepth = -50,
+        windowsize = c(2048,1536),
+        triangulate = TRUE,
+        reduce_size = .5)
 
-<!-- plot_gg(joint_dist_p, -->
-<!--         width = 3.5, -->
-<!--         zoom = 0.65, -->
-<!--         theta = 25, -->
-<!--         phi = 30, -->
-<!--         sunangle = 225, -->
-<!--         soliddepth = -50, -->
-<!--         windowsize = c(2048,1536)) -->
+rglwidget()
 
-<!-- rglwidget() -->
-
-<!-- rgl.close() -->
-<!-- ``` -->
+rgl.close()
+```
 
 Now, we have explored the most likely possibilities according to all possible models of this scenario. Let's create a posterior distribution by taking a *slice* of our joint distribution based on the number of red beads in the shovel. 
 
@@ -1054,9 +1056,9 @@ joint_dist %>%
     scale_y_continuous(labels = scales::percent_format()) +
     theme_classic()
 ```
-<!-- RS: This section seems messed up, maybe something was removed? No 3d models in sight. -->
 
-To visualize this in a 3D plot, see the slice in the figure below. There are a few things to note. First, the x-axis only extends to 600 (rather than the total 1000) due to the fact that, when the shovel only draws 17/50 = .34 = 34% red beads, it is almost impossible for the total number red beads in the total urn to exceed 600. The most likely number of red beads in the total urn, when the shovel draws 17/50 red beads, is somewhere in the 290-350 range. This is signified by the peak between these points. The probability is lower below 280 and above 350 because it is less likely that this is the number of red beads in the urn, conditional on the fact that the shovel drew 17/50 red beads. This is our posterior distribution. 
+<!-- RS: Remove references to rayshader slicing for now, add back if there is time later.  -->
+Let's examine our posterior distribution. First, the x-axis only extends to a $p$ value of .6 (rather than 1) due to the fact that, when the shovel only draws 17/50 = .34 = 34% red beads, it is almost impossible for the proportion of red beads in the urn to exceed .6. Using our distribution we can see that when we draw 17 beads it is most likely that the *actual* proportion of red beads in the urn, is somewhere in between .29 and .35. This is signified by the peak between these points. The probability is lower below .28 and above .35 because it is less likely that this is the number of red beads in the urn, conditional on the fact that the shovel drew 17/50 red beads. This is our posterior distribution. 
 
 For any value of red beads found in the shovel (from 0 to 50), there is a posterior distribution of possible values of red beads in the total urn. This distribution is meant to illustrate that, though our sample gives an estimate of the total proportion of red beads in the entire urn, there is much variation in what the actual proportion might be. To summarize: the distribution of the hat things (the things we are predicting) is, more or less, your posterior.
 
