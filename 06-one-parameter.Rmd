@@ -170,15 +170,6 @@ Use the **tidyverse** package.
 library(tidyverse)
 ```
 
-```{r, echo = FALSE, message = FALSE}
-# Needed for the one 3-D plot below.
-options(rgl.useNULL = TRUE)
-library(rayshader)
-library(rgl)
-```
-
-<!-- RS: options command in above chunk should fix rayshader issues. This command suppresses the default behavior of rendering the rayshader in a dedicated XQuartz Window. Read here:  -->
-<!-- https://cran.r-project.org/web/packages/rgl/vignettes/rgl.html -->
 ## Real sampling activity {#sampling-activity}
 
 ```{r, echo = FALSE, fig.cap = "An urn with red and white beads."}
@@ -745,7 +736,7 @@ glimpse(shovels_100)
 
 Now, we have the standard deviation of `prop_red` for all shovel sizes from 1 to 100.  Let's plot that value to see how it changes as the shovel gets larger:
 
-```{r, echo = FALSE, fig.cap = "Comparing standard deviations of proportions red for 100 different shovels. The standard deviation decreases at the same rate as the square root of shovel size. The red line shows the standard error."}
+```{r, echo = FALSE, cache = TRUE, fig.cap = "Comparing standard deviations of proportions red for 100 different shovels. The standard deviation decreases at the same rate as the square root of shovel size. The red line shows the standard error."}
 shovels_100 %>%
  ggplot(aes(x = shovel_size, y = st_dev_p_hat)) +
  geom_point() +
@@ -939,10 +930,95 @@ Recall the questions we asked at the beginning of our chapter:
 
 *What is the probability, using the same urn, that we will draw more than 8 red beads if we use a shovel of size 20?*
 
+These are *real* questions which we can use to test what we have learned. For any question, we use the Cardinal Virtues to guide our thinking. While this may seem trivial at first, as our problems become more complex it will become useful to have a systematic approach to break each problem into its parts. Let's get to it.
+
+### Wisdom
+
+```{r echo = FALSE}
+knitr::include_graphics("other/images/Wisdom.jpg")
+```
+
+This essence of Wisdom is determining whether or not it is solvable, as it is futile to attempt to solve an impossible problem. First, let's break down our question into its key parts. Then we can construct a Preceptor Table to determine whether or not our data is viable to answer our question. 
 
 <!-- Change "centered at" to reference p. Use rho instead of p -->
 
-Instead of building the joint and conditional probability distributions "by hand" as we did in Chapter \@ref(probability), we can just use `stan_glm()` from the **rstanarm** package. For now, we will just walk through the code for doing this very quickly. Chapter \@ref(two-parameters) will provide a step-by-step explanation. **To be clear, you do not need to fully understand this section or how this code works. This is an introduction, not a formal lesson.**
+#### Getting started
+
+Virtually every problem boils down to attempting to answer a **question** about a **population** using the **data** we have. We should explicitly state all 3 before we proceed, to make sure we understand the task at hand. For example, drawing conclusions about the contents of one urn is extremely different than drawing conclusions about all urns. The concept of the population is critical.   
+
+Let's revisit our first question: *If we get 17 red beads in a random sample of size 50 taken from an urn, what proportion $p$ of the beads in the urn are red?*. We have some *data*: A sample of 50 beads returned 17 red. We also have a *question*: what proportion of the beads in the urn are red? The subject of the question is the *population*; in this case, the population is *an urn*. "An urn" is very ambiguous, and we do not even know its size, but that is what the question provides us. There is an urn out there, somewhere, for which we want to know the proportion of red beads. 
+
+Now let's break down our second question in a similar fashion to the first. Our *question* is: *what is the probability, using the same urn, that we will draw more than 8 red beads if we use a shovel of size 20?*. The question specifies using the "same urn", so the *population* for both questions is the same. However, where is the *data* for the second question? The reality is that we need to know the probability of selecting a red bead from the urn before we can determine the probability of selecting more than 8 red beads, and thus our second question is contingent on extracting a posterior probability distribution from the first question. As such, we will only worry about answering the second question after we answer the first. 
+
+After successfully breaking down the problem, our next step is to construct a Preceptor Table. 
+
+#### Preceptor Tables
+
+Recall that a Preceptor Table is a table with rows and columns for all the data we would (reasonably) like to have. There are two different types of Preceptor Tables that are applicable to our urn example: actual and ideal.
+
+```{r, echo = FALSE, fig.cap = "When you see another Precetor Table section."}
+knitr::include_graphics("06-one-parameter/images/here_we_go.png")
+```
+
+An actual Preceptor Table shows what we *actually* know. Accordingly, the table is riddled with question marks that the real world saddles us with. The ideal Preceptor Table is the Preceptor Table with no question marks, and a reasonable number of rows and columns. With an ideal Preceptor Table, there is no need for inference; the estimand is a simple matter of arithmetic. 
+
+To see if our data can answer our question, we first construct the ideal Preceptor Table, which simply requires knowing the color of every bead. Unlike the Rubin Casual Preceptor Tables in Section \@ref(rubin-causal-model), our actual preceptor table only requires one column. We can create the ideal Preceptor Table by performing the exhaustive census of the entire urn: 
+
+```{r, echo = FALSE}
+urn %>%
+  arrange(bead_ID, color) %>%
+  slice(1:2, 200, 201, 1000) %>%
+  mutate(bead_ID = as.character(bead_ID),
+         color = as.character(color)) %>%
+  add_row(bead_ID = "...", color = "...", .after  = 2) %>%
+  add_row(bead_ID = "...", color = "...", .after  = 5) %>% 
+  add_row(bead_ID = "...", color = "...", .after  = 7) %>% 
+  gt() %>%
+  cols_label(bead_ID = "ID",
+             color = "Color") %>%
+  tab_style(cell_borders(sides = "right"),
+            location = cells_body(columns = c(bead_ID))) %>%
+  tab_style(cell_text(weight = "bold"),
+            location = cells_body(columns = c(bead_ID))) %>%
+  cols_align(align = "center", columns = everything())
+```
+
+&nbsp;
+
+With an ideal Preceptor Table, the estimand, the proportion of red beads in the urn, is a simple matter of arithmetic: count the number of red beads and divide by the total number of beads in the urn. Note, however, that counting each bead in the urn would be impossible, as we have no access to the urn. This is denoted by the three dots at the bottom of our Preceptor Table, as our problem never specified whether our urn has a thousand, a million, or even a billion beads. Instead, we use our sample of data. 
+
+But can our data even answer our question? Above we determined that we need one column, bead color, in order to answer our question. If we use our sample, we have color identifications for 50 beads in the urn, so our data can technically be used. While determining if our data can be used is very basic in our urn scenario, let's turn to an alternate example: if we had a sample of housing prices in a neighborhood, can we use that data to draw conclusions about the income of individuals in the neighborhood? In this scenario we must consider if our housing data is enough to fill in our ideal preceptor table, and if we believe the data cannot accurately solve our problem, we need to stop and find new data!
+
+We now turn to our sampled data to create an actual Preceptor Table. Our data tells us that 17 out of the 50, or 34% of the *sampled* beads are red. Let's visualize this by looking at the entire urn after we have taken our sample. This is an actual Preceptor Table. We only know the colors of our randomly sampled 50 beads, the remaining bead colors are our missing data!
+
+```{r, echo = FALSE}
+# Actual Preceptor Table to be created by the very helpful Cass!
+
+tibble(bead_ID = c("1", "2", "...", "...", "200", "201", "...", "...", "999", "1000"),
+       color = c("?", "white", "...", "...", "red", "?", "...", "...", "white", "?")) %>%
+  gt() %>%
+  cols_label(bead_ID = "ID",
+             color = "Color") %>%
+  tab_style(cell_borders(sides = "right"),
+            location = cells_body(columns = c(bead_ID))) %>%
+  tab_style(cell_text(weight = "bold"),
+            location = cells_body(columns = c(bead_ID))) %>%
+  cols_align(align = "center", columns = everything())
+```
+
+&nbsp;
+
+Where is all of our data? Well, when we take a sample of 50 beads, we only have color identifications for 50 of the total 1000 beads in the urn. The rest of the beads were not sampled and we cannot say for certain whether they are white or red.
+
+Now, what does our actual Preceptor Table tell us, specifically, about Bead 1? Bead 2? We know the proportion of red beads in our sample is 34%. Does this mean that bead 1 has *precisely* a 34% chance of being red? As we learned in Chapter 5, this is not true! There is uncertainty.
+
+We can only claim *for certain* that, of the 50 beads that we sampled (of the total 1000 beads in the urn), 34% were red. If we were making a prediction of the probability of one of our **sampled** beads being red, 34% would be the correct probability. If we were making a prediction of the probability that an **unsampled** bead was red, the answer of 34% would be incorrect, but nor is it likely to be extremely incorrect. The sample does tell us something.
+
+The last step of Wisdom to consider is why some beads **do** get sampled, while others do not. This is a consequence of the sampling mechanism. We need to take any biases into consideration, so we can evaluate the validity and representatives of our data in Justice. Keep in mind that just because our data can answer our question **never** means that we should use it! For example, what if our beads were mixed poorly, and most of the red beads sit at the bottom of the urn. In this case, our sampling mechanism consisting of the shovel with 50 slots after mixing the urn, would produce biased samples that would not be conclusive about the contents of the entire urn. The effects of biases can be determined later in Justice, but we need to know they exist in Wisdom. 
+
+#### Justice
+
+Instead of building the joint and conditional probability distributions "by hand" as we did in Chapter \@ref(probability), we can just use `stan_glm()` from the **rstanarm** package. For now our goal is to learn how to interpret the results of `stan_glm()`. Chapter \@ref(two-parameters) will provide a more detailed explanation for the seemingly complex objects we will make. **To be clear, you do not need to fully understand this section or how this code works. This is an introduction, not a formal lesson.**
 
 Assume that, as before, a shovel of size 50 drawn from the urn has returned 17 red beads and 33 white. 
 
@@ -954,7 +1030,7 @@ fit_1 <- stan_glm(formula = red ~ 1,
                                         rep(0, 33))),
                   family = binomial,
                   refresh = 0,
-                  seed = 2021)
+                  seed = 10)
 ```
 
 This single function call has done all the work which we did by hand previously: created the joint distribution and then estimated the posterior probability distribution, conditional on the data which was passed in to the `data` argument. Once we have the `fit_1` object, it is easy to answer two sorts of questions: the posterior probability distribution for $p$ and predictions for new draws from the urn. The key new functions are `posterior_epred()` for the former and `posterior_predict()` for the latter.
@@ -1218,72 +1294,6 @@ In order to investigate this concept, let's revisit our Preceptor Tables.
 <!-- RS: I definetly support further exploring the Kennedy study further in this chapter, or in the tutorial because I feel like it would be much more informative than redoing the urn problem.  -->
 
 <!-- RS: Consider a brief section about observational study design? I know this isn't a stats class, but might be useful to at least discuss bad sampling methods (volunteer surveys, convienence, and other types of biases. ) -->
-
-#### Preceptor Tables
-
-Recall that a Preceptor Table is a table with rows and columns for all the data we would (reasonably) like to have. There are two different types of Preceptor Tables that are applicable to our urn example: actual and ideal.
-
-```{r, echo = FALSE, fig.cap = "When you see another Precetor Table section."}
-knitr::include_graphics("06-one-parameter/images/here_we_go.png")
-```
-
-An actual Preceptor Table shows what we *actually* know. Accordingly, the table is riddled with question marks that the real world saddles us with. The ideal Preceptor Table is the Preceptor Table with no question marks, and a reasonable number of rows and columns. With an ideal Preceptor Table, there is no need for inference; the estimand is a simple matter of arithmetic. 
-
-To visualize the different Preceptor Tables and their usefulness to us data scientists, let's revisit our urn.
-
-As is the case in the Rubin Causal Model, we *wish* we knew the values for every single unit in every possible scenario. The analogous ideal here would be a table where we know the color identity of every single bead. To compare to our previous Preceptor Table, this is what our ideal Preceptor Table would look like: 
-
-```{r, echo = FALSE}
-urn %>%
-  slice(1:2, 200, 201, 2399, 1000) %>%
-  mutate(bead_ID = as.character(bead_ID),
-         color = as.character(color)) %>%
-  add_row(bead_ID = "...", color = "...", .after  = 2) %>%
-  add_row(bead_ID = "...", color = "...", .after  = 5) %>% 
-  gt() %>%
-  cols_label(bead_ID = md("**ID**"),
-             color = "Year") %>%
-  tab_style(cell_borders(sides = "right"),
-            location = cells_body(columns = c(bead_ID))) %>%
-  tab_style(cell_text(weight = "bold"),
-            location = cells_body(columns = c(bead_ID))) %>%
-  cols_align(align = "center", columns = everything())
-```
-
-&nbsp;
-
-We can create the ideal Preceptor Table by performing the exhaustive census of the entire urn. Let's say that, after this tedious process, we find that the **true** and **real** proportion of red beads is exactly 40%. We know the color of every bead. 
-
-In this world, the estimand, the proportion of red beads in the urn, is a simple matter of arithmetic. However, as has been emphasized before, performing an exhaustive count is not the easiest way to estimate the proportion of red beads. Real life sampling is far more complex. The process is **extremely** prone to error. Despite that, most people overestimate the validity of conclusions drawn from sampling. To stress the unknowns in sampling, let's look at our actual Preceptor Table.
-
-
-Let's imagine we use our shovel and sample 100 beads from the urn. After taking our sample, we find that 40% of the *sampled* beads are red. Let's visualize this by looking at the entire urn after we have taken our sample. This is an actual Preceptor Table. We only know the colors of our randomly sampled 100 beads, the remaining bead colors are our missing data!
-
-```{r, echo = FALSE}
-# Actual Preceptor Table to be created by the very helpful Cass!
-
-tibble(bead_ID = c("1", "2", "...", "...", "200", "201", "...", "...", "999", "1000"),
-       color = c("?", "?", "...", "...", "red", "?", "...", "...", "red", "?")) %>%
-  gt() %>%
-  cols_label(bead_ID = md("**ID**"),
-             color = "Color") %>%
-  tab_style(cell_borders(sides = "right"),
-            location = cells_body(columns = c(bead_ID))) %>%
-  tab_style(cell_text(weight = "bold"),
-            location = cells_body(columns = c(bead_ID))) %>%
-  cols_align(align = "center", columns = everything())
-```
-
-&nbsp;
-
-Where is all of our data? Well, when we take a sample of 100 beads, we only have color identifications for 100 of the total 1000 beads in the urn. The rest of the beads were not sampled and we cannot say for certain whether they are white or red.
-
-Something else we must consider is why some beads **do** get sampled, while others do not. This is a consequence of the sampling mechanism. Because we are drawing the sample using a shovel with 100 slots, we only have 100 known values. Therefore, our shovel (in addition to mixing the urn beforehand) is our sampling mechanism.
-
-Consider this: what does this information tell us, specifically, about Bead 1? Bead 2? We know the proportion of red beads in our sample is 40%. Does this mean that bead 1 has *precisely* a 40% chance of being red? As we learned in Chapter 5, this is not true! There is uncertainty.
-
-We can only claim *for certain* that, of the 100 beads that we sampled (of the total 1000 beads in the urn), 40% were red. If we were making a prediction of the probability of one of our **sampled** beads being red, 40% would be the correct probability. If we were making a prediction of the probability that an **unsampled** bead was red, the answer of 40% would be incorrect, but nor is it likely to be extremely incorrect. The sample does tell us something.
-
 
 ### Precision versus accuracy (or bias versus variance)
 
