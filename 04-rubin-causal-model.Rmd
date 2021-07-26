@@ -4,6 +4,39 @@
 library(tidyverse)
 ```
 
+*This chapter is being re-drafted.*
+
+
+<!-- The Population Table always has a column for Time, by definition. Even in the case, like Chapter 6, with a single urn, we have the urn at 11:00 (when we drew our sample) and the urn at 11:05, when we will draw our second sample. The Population Table has that urn, at 5 minute intervals, from 9:00 to 5:00, or whatever. And so, every row in the Population Table is specified by an ID and Time combination.  -->
+
+<!-- First discussion of what is a population --- in Preceptor Tables section --- has no notion of time. -->
+
+<!-- Maybe there are three key assumptions in a data science problem. Validity allows us to collapse the columns of the infinite Preceptor Table. Stability allows us to estimate a model for time X and apply it in time Y. (The Population Table, by definition, has a column for time.) Representativeness allows us to assume that the model we estimate at time X applies to all units in time X. (Least sure of that last one.) -->
+
+
+
+<!-- Maybe (!) move more of the Complications (like Data Problems?) earlier in the chapter. Like Data Problems under Preceptor Tables?  -->
+
+<!-- Populations again section is especially a mess! Idea is to talk more about populations now that we have more of a framework in which to consider things. Make the distinction between the Preceptor table and the larger population from which it is drawn. -->
+
+<!-- Note that Internal/external validity section used to be after Data Problems in Complications. Now it is ahead! Unless we move Data Problems to Preceptor Table section . . . -->
+
+<!-- The infinite Preceptor Table is the perfect location to thoroughly and clearly explain Representativeness and Validity. -->
+
+<!-- No two people ever get the same version of the treatment. The issue of "validity" is whether or not we can ignore that fact. This works well! -->
+
+<!-- I want to make Representativeness have the same nice/clean connection to the infinite Preceptor Table which Validity has. Wouldn't that be nice! Can't do it! In fact, Validity is also connected to the rows. Or maybe it is Stability. -->
+
+<!-- Maybe there are really three key assumptions in every Data Science Problem: Validity, Stability and Representativeness. Maybe? -->
+
+<!-- Stability has two connotations. First, is Yao changing even if the world is not changing, i.e., he is 80 now and he used to be 20. Second, the world is changing, so Yao's outcome might be different a year from now even if he (in some sense) is the same guy.  -->
+
+<!-- https://stats.stackexchange.com/questions/3520/can-someone-explain-the-concept-of-exchangeability -->
+
+<!-- The infinite Preceptor Table is a nice way of understanding what the assumptions of validity and stability. -->
+
+<!-- This is all an incredibly sloppy and stupid way to get to the important concept of "exchangeability." -->
+
 <!-- Key changes to come: -->
 
 <!-- Need to emphasize units, outcomes and treatments throughout. -->
@@ -63,6 +96,8 @@ library(tidyverse)
 <!-- Adding onto that, maybe even a TLDR for the videos of lectures -->
 
 <!-- Also in the last part of tutorial B, the table needs to be updated so it has missing values -->
+
+
 
 Have you ever wondered what the world would be like without you?
 
@@ -192,6 +227,10 @@ tibble(ID = c("Student 1", "Student 2", "...", "Student 473", "Student 474",
 In this case, we know the covariates, gender and age, for students 2 and 3,258. But we do not know their heights, the outcome variable. We want to create a model which uses the covariates to predict the outcome.
 
 ### Population
+
+<!-- DK: This stinks! Fix it, please. Make sure to distinguish the larger context of a "population" from the very specific context of a "Preceptor Table," even if, in some cases, they can be the same.  -->
+
+<!-- Example: Harvard students. Initially, Preceptor Table and population may seem like the same thing. But what if I have no data on Harvard students, but I do have data on Yale students? Then, my Preceptor Table is still just Harvard students (for whom I have no data) but my population is a larger amorphous group, including all Ivy students (or all college students or all 18-22 years olds or whatever). -->
 
 One of the most important concepts in all of statistics is *population*, the set of all units with which we are concerned. In our first example, the population was the five brothers in one family. In the second, it was the 6,700 students at Harvard. In many cases, the *population* is a well-defined and (mostly) stable set. In other cases, the population is quite unstable, even ill-defined, and, perhaps, unknowable. Examples:
 
@@ -474,11 +513,21 @@ Calculating values from this table is no longer a simple math problem. See this 
 knitr::include_app("https://www.youtube.com/embed/gyRZSzCtU_o")
 ```
 
-### Populations again
+## Population Table
+
+<!-- Maybe start with the infinite Preceptor Table. Explain how the assumption of Validity allows us to collapse the columns. But we keep the extra rows! Time is inescapable! But, we can generally pick a sensible unit of time, consistent with how old our data is and how far in future the Preceptor Table is.  -->
+
+<!-- Implicit in the notion of a Preceptor Table is a moment in time. (That is a bit hazy, of course! Preceptor Table often extends over quite some time in itself. I get the postcard today and vote in two weeks. Both are part of the Preceptor Table.) -->
+
+<!-- As long as you add a time column, it is easy (?) to build a Population Table. Common sense guides us as to a reasonable unit of time to deal with.  -->
+
+<!-- Key step: The assumption of "Stability" between the different dates allows us to assume that inference using data from one time period applies to another time period. Recall the different urns on the table. -->
+
+<!-- Representativeness is a concept which applies only within a given time period. Ensures that the model we estimate in time X works in time X. -->
 
 We use Preceptor Tables both for predictive problems, like forecasting height on the basis of age/gender, and for causal problems, like estimating the effect of Spanish-speakers on immigration attitudes. So, our previous discussion of the *population* applies here as well. In general, we can divide units of the population in three broad categories: no missing data, all missing data and outcome missing. Consider:
 
-<!-- DK: Need a plot here. -->
+<!-- DK: Need a table here. -->
 
 
 #### Internal and external validity
@@ -661,6 +710,8 @@ Thus, whenever you are considering a causal question, the best way to think abou
 
 ## Simple models
 
+<!-- These are not, really, Preceptor Tables. These are the data rows from the Population Table. -->
+
 How can we fill in the question marks?  Because of the *Fundamental Problem of Causal Inference*, we can never *know* the missing values. Because we can never know the missing values, we must make assumptions. "Assumption" just means that we need a "model," and all models have parameters.
 
 ### A single value for tau
@@ -795,11 +846,13 @@ tibble(subject = c("Yao", "Emma", "Cassidy", "Tahmid", "Diego"),
   fmt_markdown(columns = everything())
 ```
 
+<!-- DK: Need a discussion here. -->
+
 &nbsp;
 
 ### Two values for tau
 
-A second model might assume that the causal effect is different between levels of a category but the same within those levels. For example, perhaps there is a $\tau_F$ for females and $\tau_M$ for males where $\tau_F != \tau_M$. We are making this assumption to give us a different model with which we can fill in the missing values in our Preceptor Table. The key concept is that we can't make any progress unless we make some assumptions. That is an inescapable result of the *Fundamental Problem of Causal Inference*.
+A second model might assume that the causal effect is different between levels of a category but the same within those levels. For example, perhaps there is a $\tau_F$ for females and $\tau_M$ for males where $\tau_F != \tau_M$. We are making this assumption to give us a different model with which we can fill in the missing values in our Preceptor Table. We can't make any progress unless we make some assumptions. That is an inescapable result of the *Fundamental Problem of Causal Inference*.
 
 Consider a model in which causal effects differ based on sex:
 
@@ -904,7 +957,7 @@ tibble(subject = c("Yao", "Emma", "Cassidy", "Tahmid", "Diego"),
 
 We now have two different estimates for Emma (and for everyone else in the table). When we estimate $Y_c(Emma)$ using an assumption of constant treatment effect (a single value for $\tau$), we get $Y_c(Emma) = 13$. When we estimate assuming treatment effect is constant for each sex, we calculate that $Y_c(Emma) = 8$. This difference between our estimates for Emma highlights the difficulties of inference. Models drive inference. Different models will produce different inferences.  
  
-
+<!-- DK: Need a smoother transition here. -->
 
 ### Heterogenous treatment effects
 
@@ -941,7 +994,7 @@ tibble(subject = c("Yao", "Emma", "Cassidy", "Tahmid", "Diego"),
 
 &nbsp;
 
-Can we solve for $\tau_{yao}$? No! That is the *Fundamental Problem of Causal Inference*. So how can we make any progress from here if we are unwilling to assume there is at least some structure to the causal effect across different individuals? Instead of worrying about the causal effect for specific individuals, we might, instead, focus on the causal effect for the entire population.
+Can we solve for $\tau_{yao}$? No! That is the *Fundamental Problem of Causal Inference*. So how can we make any progress from here if we are unwilling to assume there is at least some structure to the causal effect across different individuals? Instead of worrying about the causal effect for specific individuals, we, instead, focus on the causal effect for the entire population.
 
 
 ### Average treatment effect

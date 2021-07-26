@@ -66,12 +66,14 @@
 <h1>
 <span class="header-section-number">8</span> Three Parameters<a class="anchor" aria-label="anchor" href="#three-parameters"><i class="fas fa-link"></i></a>
 </h1>
-<!-- Go through old MM comments and ensure which ones stay for next meeting. -->
 <!-- Each new model starts with Justice, nodding toward the one true population table. Then discussion of representativeness and validity. -->
-<!-- DK: Where is the best place to modify income and discuss it? -->
 <!-- DK: Review concept of dummy variables in the context of the intercept model with categorical predictor. Or not? -->
+<!-- DK: Need a table which shows all 4 (?) languages for describing a model together: English, math, code, output. Do not do this now. -->
+<!-- DK: Should we use different parameter names like beta_r? Probably not. We should always use b_0, b_1 and so on. -->
+<!-- DK: Clean up these residuals plots to be similar across chapters! Also, we should ensure that the width of 10 units is the same in each plot. Or does that already happen? Want the intuition that, the more predictive the model, the smaller the remaining variation in the residuals. The below is from chapter 7. -->
+<!-- DK: Posterior predictive checks! -->
 <p>Models have parameters. In Chapter <a href="one-parameter.html#one-parameter">6</a> we created models with a single parameter <span class="math inline">\(p\)</span>, the proportion of red beads in an urn. In Chapter <a href="two-parameters.html#two-parameters">7</a>, we used models with two parameters: <span class="math inline">\(\mu\)</span> (the average height in the population, generically known as a model “intercept”) and <span class="math inline">\(\sigma\)</span> (the variation in height in the population). Here — can you guess where this is going? — we will build models with three parameters: <span class="math inline">\(\sigma\)</span> (which serves the same role throughout the book) and two coefficients. In models which relate a continuous predictor to the outcome, those two parameters will be labeled <span class="math inline">\(\beta_0\)</span> and <span class="math inline">\(\beta_1\)</span>. In models which estimate two averages, the parameters will be <span class="math inline">\(\beta_1\)</span> and <span class="math inline">\(\beta_2\)</span>. All this notation is confusing, not least because different academic fields use inconsistent schemes. Follow the Cardinal Virtues and tackle your problem step by step.</p>
-<!-- DK: More detail? -->
+<!-- More detail? -->
 <div id="wisdom-2" class="section level2" number="8.1">
 <h2>
 <span class="header-section-number">8.1</span> Wisdom<a class="anchor" aria-label="anchor" href="#wisdom-2"><i class="fas fa-link"></i></a>
@@ -82,48 +84,20 @@
 <h3>
 <span class="header-section-number">8.1.1</span> The Questions<a class="anchor" aria-label="anchor" href="#the-questions"><i class="fas fa-link"></i></a>
 </h3>
-<p><em>What is the expected age of a Democrat at the train station?</em></p>
-<p><em>In a group of three Democrats and three Republicans, what will the age difference be between the oldest Democrat and the youngest Republican?</em></p>
-<p><em>What is the average treatment effect, of exposing people to Spanish-speakers, on their attitudes toward immigration?</em></p>
-<p><em>What is the largest causal effect which still has a 1 in 10 chance of occurring?</em></p>
+<p><em>What is the expected age of a Democrat at a train station in the US today?</em></p>
+<p><em>In a group of train commuters in the US today with three Democrats and three Republicans, what will the age difference be between the oldest Democrat and the youngest Republican?</em></p>
+<p><em>What is the average treatment effect, of exposing US train commuters today to Spanish-speakers, on their attitudes toward immigration?</em></p>
+<p><em>What is the largest causal effect of exposing US train commuters today which still has a 1 in 10 chance of occurring?</em></p>
 <!-- Clairfy -->
-<p><em>What would you expect the income to be for a random 40 year old?</em></p>
-<p><em>Among all people who have an income $100,000, what proportion are liberal?</em></p>
-<p><em>Assume we have a group of eight people, two of whom make $100,000, two $200,000, two $300,000 and two $400,000. How many will be liberal?</em></p>
-<p>After determining the questions we would like to answer, we must then consider ideally what data we would have to do so and make our preceptor table. Recall: a Preceptor Table is the smallest possible table such that, if there is no missing data, all questions are easy to answer. In other words, for each individual in the population, what information do we need to answer each question. Look at the first question. Upon first glance, it appears that to answer this, we would like to have the age and party affiliation of those in population, and the same holds true for the second question. Therefore, we would need to have the columns of age and party affiliation in our preceptor table.</p>
-<p>The third and fourth question, however, would require individuals being exposed to Spanish-speakers and the their attitudes on immigration before and after the fact, so in our preceptor table, we would need the columns of attitude on immigration before and after being exposed to Spanish-speakers.</p>
-<p>Lastly, the fourth question would require income and age for every individual in the population, and the fifth and sixth would require knowing whether an individual is liberal or not as well as their income, so we would also need columns with information on income and if someone is liberal or not. Therefore, our preceptor table would appear as the following:</p>
+<p><em>What would you expect the income to be for a random 40 year old train commuterf in the US today?</em></p>
+<p><em>Among all train commuters in the US today who have an income $100,000, what proportion are liberal?</em></p>
+<p><em>Assume we have a group of eight train commuters in the US today, two of whom make $100,000, two $200,000, two $300,000 and two $400,000. How many will be liberal?</em></p>
+<p>After determining the questions we would like to answer, we must then consider ideally what data we would have to do so and make our Preceptor Table. Recall: a Preceptor Table is the smallest possible table such that, if there is no missing data, all questions are easy to answer. In other words, for each individual in the population, what columns would we need to answer each question? We must also determine for each question whether the model will be predictive or causal. Recall from chapter 4, that a predictive model is a model that only has a single outcome column whereas a causal model would have at least two, such as a treatment column and control column.</p>
+<p>Look at the first question. Upon first glance, it appears that to answer this, we would like to have the age and party affiliation of those in population, with age being our outcome variable since it was we are looking to predict. The same holds true for the second question, since knowing the party and the ages of everyone in the population would allow us to create a distribution that compares a group of three Democrats to that of three Republicans. Therefore, we would need to have the columns of age and party affiliation in our Preceptor Table.</p>
+<p>The third and fourth question, however, would require individuals being exposed to Spanish-speakers and the their attitudes on immigration before and after the fact, so in our Preceptor Table, we would need two columns of attitude on immigration: one for the treatment of being exposed and another for the control group.</p>
+<p>The fourth question would require income and age for every individual in the population. Lastly, the fifth and sixth would require knowing whether an individual is liberal or not as well as their income, so we would also need columns with information on income and if someone is liberal or not. Therefore, our Preceptor Table would appear as the following:</p>
 <!-- Make sample Preceptor Table. Need a column for all 6 (?) of the variables that are used in the four models. But need two columns for att_end, because it is the dependent variable in the only causal model, which means that there are two potential outcomes.  -->
-<!-- MM: Slow down above explanation and discuss why ending attitude is needed for treatment and control groups -->
-<div class="sourceCode" id="cb731"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://gt.rstudio.com/">gt</a></span><span class="op">)</span>
-<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyverse.tidyverse.org">tidyverse</a></span><span class="op">)</span>
-<span class="fu">tibble</span><span class="op">(</span>ID <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Commuter 1"</span>, <span class="st">"Commuter 2"</span>, <span class="st">"..."</span>, <span class="st">"Commuter 1000"</span>, <span class="st">"Commuter 1001"</span>, <span class="st">"..."</span><span class="op">)</span>,
-       age <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"23"</span>, <span class="st">"18"</span>, <span class="st">"..."</span>, <span class="st">"49"</span>, <span class="st">"38"</span>, <span class="st">"..."</span><span class="op">)</span>,
-       party <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Democrat"</span>, <span class="st">"Republican"</span>, <span class="st">"..."</span>, <span class="st">"Republican"</span>, <span class="st">"Democrat"</span>, <span class="st">"..."</span><span class="op">)</span>,
-       income <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"50000"</span>, <span class="st">"150000"</span>, <span class="st">"..."</span>, <span class="st">"100000"</span>, <span class="st">"200000"</span>, <span class="st">"..."</span><span class="op">)</span>,
-       liberal <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Liberal"</span>, <span class="st">"Not Liberal"</span>, <span class="st">"..."</span>, <span class="st">"Liberal"</span>, <span class="st">"Liberal"</span>, <span class="st">"..."</span><span class="op">)</span>,
-       attitude_after_control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"3"</span>, <span class="st">"7"</span>, <span class="st">"..."</span>, <span class="st">"4"</span>, <span class="st">"9"</span>, <span class="st">"..."</span><span class="op">)</span>,
-       attitude_after_treated <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"8"</span>, <span class="st">"7"</span>, <span class="st">"..."</span>, <span class="st">"8"</span>, <span class="st">"7"</span>, <span class="st">"..."</span><span class="op">)</span>
-       <span class="op">)</span> <span class="op">%&gt;%</span>
-  
-  <span class="co"># Then, we use the gt function to make it pretty</span>
-  
-  <span class="fu"><a href="https://gt.rstudio.com/reference/gt.html">gt</a></span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span>
-  <span class="fu"><a href="https://gt.rstudio.com/reference/cols_label.html">cols_label</a></span><span class="op">(</span>ID <span class="op">=</span> <span class="fu"><a href="https://gt.rstudio.com/reference/md.html">md</a></span><span class="op">(</span><span class="st">"ID"</span><span class="op">)</span>,
-             age <span class="op">=</span> <span class="fu"><a href="https://gt.rstudio.com/reference/md.html">md</a></span><span class="op">(</span><span class="st">"Age"</span><span class="op">)</span>,
-             party <span class="op">=</span> <span class="fu"><a href="https://gt.rstudio.com/reference/md.html">md</a></span><span class="op">(</span><span class="st">"Party"</span><span class="op">)</span>,
-             income <span class="op">=</span> <span class="fu"><a href="https://gt.rstudio.com/reference/md.html">md</a></span><span class="op">(</span><span class="st">"Income"</span><span class="op">)</span>,
-             liberal <span class="op">=</span> <span class="fu"><a href="https://gt.rstudio.com/reference/md.html">md</a></span><span class="op">(</span><span class="st">"Liberal"</span><span class="op">)</span>,
-             attitude_after_control <span class="op">=</span> <span class="fu"><a href="https://gt.rstudio.com/reference/md.html">md</a></span><span class="op">(</span><span class="st">"Control Ending Attitude"</span><span class="op">)</span>,
-             attitude_after_treated <span class="op">=</span> <span class="fu"><a href="https://gt.rstudio.com/reference/md.html">md</a></span><span class="op">(</span><span class="st">"Treated Ending Attitude"</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span>
-  <span class="fu"><a href="https://gt.rstudio.com/reference/tab_style.html">tab_style</a></span><span class="op">(</span><span class="fu"><a href="https://gt.rstudio.com/reference/cell_borders.html">cell_borders</a></span><span class="op">(</span>sides <span class="op">=</span> <span class="st">"right"</span><span class="op">)</span>,
-            location <span class="op">=</span> <span class="fu"><a href="https://gt.rstudio.com/reference/cells_body.html">cells_body</a></span><span class="op">(</span>columns <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">ID</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span>
-  <span class="fu"><a href="https://gt.rstudio.com/reference/tab_style.html">tab_style</a></span><span class="op">(</span>style <span class="op">=</span> <span class="fu"><a href="https://gt.rstudio.com/reference/cell_text.html">cell_text</a></span><span class="op">(</span>align <span class="op">=</span> <span class="st">"left"</span>, v_align <span class="op">=</span> <span class="st">"middle"</span>, size <span class="op">=</span> <span class="st">"large"</span><span class="op">)</span>, 
-            locations <span class="op">=</span> <span class="fu"><a href="https://gt.rstudio.com/reference/cells_column_labels.html">cells_column_labels</a></span><span class="op">(</span>columns <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">ID</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span>
-  <span class="fu"><a href="https://gt.rstudio.com/reference/cols_align.html">cols_align</a></span><span class="op">(</span>align <span class="op">=</span> <span class="st">"center"</span>, columns <span class="op">=</span> <span class="fu"><a href="https://tidyselect.r-lib.org/reference/everything.html">everything</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span>
-  <span class="fu"><a href="https://gt.rstudio.com/reference/cols_align.html">cols_align</a></span><span class="op">(</span>align <span class="op">=</span> <span class="st">"left"</span>, columns <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">ID</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span>
-  <span class="fu"><a href="https://gt.rstudio.com/reference/fmt_markdown.html">fmt_markdown</a></span><span class="op">(</span>columns <span class="op">=</span> <span class="fu"><a href="https://tidyselect.r-lib.org/reference/everything.html">everything</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<!-- Slow down above explanation and discuss why ending attitude is needed for treatment and control groups -->
 <div id="oungylvbgz" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
 <style>html {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
@@ -614,7 +588,7 @@
 </tbody>
 </table></div>
 </div>
-<!-- Recall: a Preceptor Table is the smallest possible table such that, if there is no missing data, all questions are easy to answer. -->
+<!-- Recall: a Preceptor Table is the smallest possible table such that, if there is no missing data, all questions are easy to answer. Done. -->
 <p>Now that we have determined the data we would ideally have to answer the above questions, we have to take a look at the data set we have. To demonstrate modeling with three parameters, we will use the <code>trains</code> data set from the <strong>primer.data</strong> package.</p>
 </div>
 <div id="eda-for-trains" class="section level3" number="8.1.2">
@@ -622,12 +596,12 @@
 <span class="header-section-number">8.1.2</span> EDA for <code>trains</code><a class="anchor" aria-label="anchor" href="#eda-for-trains"><i class="fas fa-link"></i></a>
 </h3>
 <p><em>Always explore your data.</em> Recall the discussion from Chapter <a href="rubin-causal-model.html#rubin-causal-model">4</a>. <span class="citation"><a href="references.html#ref-enos2014" role="doc-biblioref">Enos</a> (<a href="references.html#ref-enos2014" role="doc-biblioref">2014</a>)</span> randomly placed Spanish-speaking confederates on nine train platforms around Boston, Massachusetts. Exposure to Spanish-speakers – the <code>treatment</code> – influenced attitudes toward immigration. These reactions were measured through changes in answers to three survey questions. Load the necessary libraries and look at the data.</p>
-<div class="sourceCode" id="cb732"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb755"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">primer.data</span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://mc-stan.org/rstanarm/">rstanarm</a></span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://docs.ropensci.org/skimr/">skimr</a></span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyverse.tidyverse.org">tidyverse</a></span><span class="op">)</span></code></pre></div>
-<div class="sourceCode" id="cb733"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb756"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">glimpse</span><span class="op">(</span><span class="va">trains</span><span class="op">)</span></code></pre></div>
 <pre><code>## Rows: 115
 ## Columns: 15
@@ -647,12 +621,12 @@
 ## $ ideology_end        &lt;int&gt; 3, 4, 2, 4, 2, 5, 5, 4, 3, 4, 3, 4, 4, 1, 2, 3, 3,…
 ## $ income_in_thousands &lt;dbl&gt; 135, 105, 135, 300, 135, 88, 88, 135, 105, 135, 10…</code></pre>
 <p>The data include information about each respondent’s gender, political affiliations, age, income and so on. <code>treatment</code> indicates whether a subject was in the control or treatment group. The key outcomes are their attitudes toward immigration both before (<code>att_start</code>) and after (<code>att_end</code>) the experiment. We also have a measure of their ideology before and after the experiment, but there is little change. Type <code><a href="https://rdrr.io/pkg/primer.data/man/trains.html">?trains</a></code> to read the help page for more information about each variable.</p>
-<p>Let’s restrict attention to a subset of the variables by recalling the Preceptor table we made. By that, we can determine that the variables <code>age</code>, <code>party</code>, <code>liberal</code> and <code>income</code> are relevant to the questions we seek to answer. This is because <code>age</code> is the age of the respondent, <code>party</code> is their political party affiliation, <code>liberal</code> is whether they are liberal or not, and <code>income</code> is the income of the respondent. Additionally, since <code>treatment</code> tells us whether the respondent was given the treatment of being exposed to Spanish-speakers in the train station and <code>att_end</code> tell us about the respondent’s attitude on immigration after the treatment, these are also variables of interest to us since they will be useful in answering some questions.</p>
-<div class="sourceCode" id="cb735"><pre class="downlit sourceCode r">
+<p>Let’s restrict attention to a subset of the variables by recalling the Preceptor Table we made. By that, we can determine that the variables <code>age</code>, <code>party</code>, <code>liberal</code> and <code>income</code> are relevant to the questions we seek to answer. This is because <code>age</code> is the age of the respondent, <code>party</code> is their political party affiliation, <code>liberal</code> is whether they are liberal or not, and <code>income</code> is the income of the respondent. Additionally, since <code>treatment</code> tells us whether the respondent was given the treatment of being exposed to Spanish-speakers in the train station and <code>att_end</code> tell us about the respondent’s attitude on immigration after the treatment, these are also variables of interest to us since they will be useful in answering some questions.</p>
+<div class="sourceCode" id="cb758"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">ch8</span> <span class="op">&lt;-</span> <span class="va">trains</span> <span class="op">%&gt;%</span> 
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">age</span>, <span class="va">att_end</span>, <span class="va">party</span>, <span class="va">income</span>, <span class="va">treatment</span>, <span class="va">liberal</span><span class="op">)</span></code></pre></div>
 <p>It is always smart to look at a some random samples of the data:</p>
-<div class="sourceCode" id="cb736"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb759"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">ch8</span> <span class="op">%&gt;%</span> 
   <span class="fu">slice_sample</span><span class="op">(</span>n <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></code></pre></div>
 <pre><code>## # A tibble: 5 x 6
@@ -664,7 +638,7 @@
 ## 4    52      13 Democrat 135000 Treated   FALSE  
 ## 5    67       9 Democrat 135000 Control   TRUE</code></pre>
 <p><code>att_end</code> is a measure of person’s attitude toward immigration. A higher number means more conservative, i.e., a more exclusionary stance toward immigration into the United States.</p>
-<div class="sourceCode" id="cb738"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb761"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">ch8</span> <span class="op">%&gt;%</span> 
   <span class="fu">glimpse</span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <pre><code>## Rows: 115
@@ -676,12 +650,12 @@
 ## $ treatment &lt;fct&gt; Treated, Treated, Treated, Treated, Control, Treated, Contro…
 ## $ liberal   &lt;lgl&gt; FALSE, FALSE, TRUE, FALSE, TRUE, FALSE, FALSE, FALSE, FALSE,…</code></pre>
 <p>Pay attention to the variable types. Do they make sense? Perhaps. But there are certainly grounds for suspicion. Why is <code>att_end</code> a double rather than an integer? All the values in the data appear to be integers, so there is no benefit to having these variables be doubles. Why is <code>party</code> a character variable and <code>treatment</code> a factor variable? It could be that these are intentional choices made by the creator of the tibble, i.e., us. Or, these could be mistakes. Most likely, these choices are a mixture of sensible and arbitrary. Regardless, it is your responsibility to notice them. You can’t make a good model without looking closely at the data which you are using.</p>
-<div class="sourceCode" id="cb740"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb763"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">ch8</span> <span class="op">%&gt;%</span> 
   <span class="fu"><a href="https://docs.ropensci.org/skimr/reference/skim.html">skim</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <div class="inline-table"><table class="table table-sm">
 <caption>
-<span id="tab:unnamed-chunk-584">TABLE 8.1: </span>Data summary</caption>
+<span id="tab:unnamed-chunk-578">TABLE 8.1: </span>Data summary</caption>
 <tbody>
 <tr class="odd">
 <td align="left">Name</td>
@@ -847,28 +821,33 @@
 </table></div>
 <p><code><a href="https://docs.ropensci.org/skimr/reference/skim.html">skim()</a></code> shows us what the different values of <code>treatment</code> are because it is a factor. Unfortunately, it does not do the same for character variables like <code>party</code>. The ranges for <code>age</code> and <code>att_end</code> seem reasonable. Recall that participants were asked three questions about immigration issues, each of which allowed for an answer indicated strength of agreement on a scale form 1 to 5, with higher values indicating more agreement with conservative viewpoints. <code>att_end</code> is the sum of the responses to the three questions, so the most liberal possible value is 3 and the most conservative is 15.</p>
 <p>By taking our first glance at the data in the above manners, we gain greater understanding of the data we have to work with and whether it will be capable of answering our questions. However, we can’t make models and use the data for our analysis without also understanding the population that the data is from and whether it can be applied to the population we would like to work with.</p>
-<!-- Conclude this section with discussion of the population issue. -->
 </div>
 <div id="population-2" class="section level3" number="8.1.3">
 <h3>
 <span class="header-section-number">8.1.3</span> Population<a class="anchor" aria-label="anchor" href="#population-2"><i class="fas fa-link"></i></a>
 </h3>
-<p>The data that we have are very limited. There are only 115 observations, all from 2012 and involving train commuters to Boston. What me must ask ourselves is if this data can be applied to the population that we are answering our questions for. How useful will this data be today, or for other populations around Boston, or for other cities in the US? Only your judgment, along with advice from your colleagues, can guide you.</p>
-<p>The key concept is the idea of a “population.” From which larger population is the data we have being (conceptually) drawn? If we were only interested in the age of individuals in our data set, we would have no need for inference. <em>We know everyone’s ages already.</em> We only need tools like <code><a href="https://mc-stan.org/rstanarm/reference/stan_glm.html">stan_glm()</a></code> if we seek to understand individuals not in our data. Only if our data is “representative,” at least to some extent, of that larger population can we use our data to answer our questions.</p>
-<p>For our current questions, the population we are answering questions for is the general population of train commuters today. However, the data we have involves train commuters around Boston in 2012. So, what we must ask ourselves is if this data from 2012 can be used to draw conclusions to our questions for a population for today. Additionally, we must also questions whether this data which is specific to the Boston Area can be applied to all train commuters. If we believe that the data is representative enough of today’s population of train commuters, then we can continue with the process of answering our questions. We will assume that the data is drawn from the larger population of train commuters and that there isn’t very much change overtime within this population so we can apply our data to the population of train commuters today.</p>
+<!-- Combo of old things from different sections and new explanations, need to combine and clarify -->
+<p>The data that we have are very limited. There are only 115 observations, all from 2012 and involving train commuters to Boston. What me must ask ourselves is if the data we have and the data in our Preceptor Table are drawn from the same population. We therefore must consider how useful this data will be today, or for other populations around Boston, or for other cities in the US. Only your judgment, along with advice from your colleagues, can guide you.</p>
+<p>For our current questions, the population we are answering questions for is the general population of train commuters today. However, the data we have involves train commuters in the Boston area in 2012. So, what we must ask ourselves is if this data from Boston in 2012 can be drawn from the same population as all train commuters in the US today. If we believe that the data is representative enough of today’s population of train commuters and this can be considered to be true, then we can continue with the process of answering our questions. We will assume that the data is drawn from the larger population of train commuters and that there isn’t very much change overtime within this population so we can apply our data to the population of train commuters today.</p>
+<p>The key concept is the idea of a “population.” From which larger population is the data we have being (conceptually) drawn? If we were only interested in the age of individuals in our data set, we would have no need for inference. <em>We know everyone’s ages already.</em> We only need tools like <code><a href="https://mc-stan.org/rstanarm/reference/stan_glm.html">stan_glm()</a></code> if we seek to understand individuals not in our data.</p>
+<p>The issue is always: Do the data we have and the data we want to have come from the same population? If there is no connection between the two, progress is impossible. But, in this case, if we are willing to consider the population to be US residents over the last decade (including today), and if we are willing to assume that our data set of 115 individuals is representative of that population, then we can use our data to create a model to answer our question.</p>
+<p>Ethical issues are tricky, or at least trickier than they were in the context of models in which the dependent variable was height or age. (And the ethical issues in conducting the experiment in the first place are non-trivial.) Assume we make a good model. What is to prevent someone from using that information to, say, influence voting and donations? Imagine a Republican Senate candidate who hires Spanish-speakers to ride commuter trains in order to shift voters’ attitudes toward immigration in a conservative direction. She believes (correctly?) that doing so will increase her odds of winning the election. Is that the sort of knowledge we seek to create? We can make such models. Indeed, the purpose of this chapter is to show you how to do so! But should you make those models?</p>
+<p>The second part of Wisdom is examining whether the data we have is representative of the overall population about which we seek to draw inferences. Our data is from 2012 and includes only Boston-area commuters. Our questions are, apparently, about today. Are they for the world, the US, the Boston-area, or just commuters at these select train stations? We don’t know! The questions are not very precise.</p>
+<p>One of the key jobs of a data scientist is to guide people — our colleagues, bosses and clients — toward asking precise questions. We must help them to translate English into inference. That translation requires precision. In this case, let’s assume that the questions reference U.S train commuters in 2021.</p>
+<p>So, is the data we have from 2012 representative of the data from 2021 about which we seek to draw inferences? Maybe? There is rarely a correct answer to this question. Some things have changed in Boston and some things have not. Our job is to think about these changes and adjust our confidence in our final answers accordingly. Or, in the worst case scenario, if there is no way to understand our actual data and our desired data as coming from the same population, we must stop the project right there.</p>
 </div>
-<div id="population-table" class="section level3" number="8.1.4">
+<div id="population-table-1" class="section level3" number="8.1.4">
 <h3>
-<span class="header-section-number">8.1.4</span> Population Table<a class="anchor" aria-label="anchor" href="#population-table"><i class="fas fa-link"></i></a>
+<span class="header-section-number">8.1.4</span> Population Table<a class="anchor" aria-label="anchor" href="#population-table-1"><i class="fas fa-link"></i></a>
 </h3>
 <p>By determining that the data is drawn from the same population which we are analyzing, we can go on to produce a Population Table.</p>
 <p>The Population Table shows rows from three sources: the <strong>Preceptor Table</strong>, the <strong>actual data</strong>, and the <strong>population</strong> (outside of the data).</p>
 <p>Our <strong>Preceptor Table</strong> rows contain the information that we would <em>want</em> to know in order to answer our questions. These rows contain entries for our covariates (city and year) but they do not contain any outcome results. We are trying to answer questions about the train commuter population in 2021, so our city entries for these rows will vary and our year entries of these rows will read “2021.”</p>
 <p>Our <strong>actual data</strong> rows contain the information that we <em>do</em> know. These rows contain entries for both our covariates <em>and</em> the outcomes. In this case, the actual data comes from a study conducted on train commuters around Boston, MA in 2012, so our city entries for these rows will read “Boston, MA” and our year entries of these rows will read “2012.”</p>
-<p>Our <strong>population</strong> rows contain no data. These are subjects which fall under our desired population, but for which we have no data. As such, all rows are missing.</p>
-<p>The population table includes commuters from our Preceptor table with the information that we would ideally have to answer the questions and those from the data we have that is specific to Boston, MA. Additionally, the population table also includes the groups of people within our population that we don’t have</p>
-<div class="sourceCode" id="cb741"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu">tibble</span><span class="op">(</span>source <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Preceptor Table"</span>, <span class="st">"Preceptor Table"</span>, <span class="st">"Preceptor Table"</span>,  <span class="st">"..."</span>, <span class="st">"Data"</span>, <span class="st">"Data"</span>, <span class="st">"Data"</span>, <span class="st">"..."</span>, <span class="st">"Population"</span>, <span class="st">"Population"</span>, <span class="st">"Population"</span><span class="op">)</span>,
+<p>Our <strong>population</strong> rows contain no data. These are subjects which fall under our desired population, but for which we have no data. As such, all rows are missing. However, this may include, for example, data from a range of years before and after 2012, since we considered little change overtime, so we would also consider this data to be representative and drawn from the larger population of train commuters in years near 2012.</p>
+<p>The population table includes commuters from our Preceptor Table with the information that we would ideally have to answer the questions and those from the data we have that is specific to Boston, MA. Additionally, the population table also includes the groups of people within the population from which both the data we have and the Preceptor table is drawn from that we don’t have.</p>
+<div class="sourceCode" id="cb764"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu">tibble</span><span class="op">(</span>source <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Preceptor Table"</span>, <span class="st">"Preceptor Table"</span>, <span class="st">"Preceptor Table"</span>,  <span class="st">"..."</span>, <span class="st">"Data"</span>, <span class="st">"Data"</span>, <span class="st">"Data"</span>, <span class="st">"..."</span>, <span class="st">"Other"</span>, <span class="st">"Other"</span>, <span class="st">"Other"</span><span class="op">)</span>,
        city <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Chicago, IL"</span>, <span class="st">"Seattle, WA"</span>, <span class="st">"Atlanta, GA"</span>, <span class="st">"..."</span>,
                   <span class="st">"Boston, MA"</span>, <span class="st">"Boston, MA"</span>, <span class="st">"Boston, MA"</span>, <span class="st">"..."</span>,
                   <span class="st">"?"</span>, <span class="st">"?"</span>, <span class="st">"?"</span><span class="op">)</span>,
@@ -896,23 +875,23 @@
   
   <span class="co"># Then, we use the gt function to make it pretty</span>
   
-  <span class="fu"><a href="https://gt.rstudio.com/reference/gt.html">gt</a></span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span>
-  <span class="fu"><a href="https://gt.rstudio.com/reference/cols_label.html">cols_label</a></span><span class="op">(</span>source <span class="op">=</span> <span class="fu"><a href="https://gt.rstudio.com/reference/md.html">md</a></span><span class="op">(</span><span class="st">"Source"</span><span class="op">)</span>,
-             city <span class="op">=</span> <span class="fu"><a href="https://gt.rstudio.com/reference/md.html">md</a></span><span class="op">(</span><span class="st">"City"</span><span class="op">)</span>,
-             year <span class="op">=</span> <span class="fu"><a href="https://gt.rstudio.com/reference/md.html">md</a></span><span class="op">(</span><span class="st">"Year"</span><span class="op">)</span>,
-             age <span class="op">=</span> <span class="fu"><a href="https://gt.rstudio.com/reference/md.html">md</a></span><span class="op">(</span><span class="st">"Age"</span><span class="op">)</span>,
-             party <span class="op">=</span> <span class="fu"><a href="https://gt.rstudio.com/reference/md.html">md</a></span><span class="op">(</span><span class="st">"Party"</span><span class="op">)</span>,
-             income <span class="op">=</span> <span class="fu"><a href="https://gt.rstudio.com/reference/md.html">md</a></span><span class="op">(</span><span class="st">"Income"</span><span class="op">)</span>,
-             liberal <span class="op">=</span> <span class="fu"><a href="https://gt.rstudio.com/reference/md.html">md</a></span><span class="op">(</span><span class="st">"Liberal"</span><span class="op">)</span>,
-             att_treat <span class="op">=</span> <span class="fu"><a href="https://gt.rstudio.com/reference/md.html">md</a></span><span class="op">(</span><span class="st">"Treatment"</span><span class="op">)</span>,
-             att_control <span class="op">=</span> <span class="fu"><a href="https://gt.rstudio.com/reference/md.html">md</a></span><span class="op">(</span><span class="st">"Control"</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span>
-  <span class="fu"><a href="https://gt.rstudio.com/reference/tab_style.html">tab_style</a></span><span class="op">(</span><span class="fu"><a href="https://gt.rstudio.com/reference/cell_borders.html">cell_borders</a></span><span class="op">(</span>sides <span class="op">=</span> <span class="st">"right"</span><span class="op">)</span>,
-            location <span class="op">=</span> <span class="fu"><a href="https://gt.rstudio.com/reference/cells_body.html">cells_body</a></span><span class="op">(</span>columns <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">source</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span>
-  <span class="fu"><a href="https://gt.rstudio.com/reference/tab_style.html">tab_style</a></span><span class="op">(</span>style <span class="op">=</span> <span class="fu"><a href="https://gt.rstudio.com/reference/cell_text.html">cell_text</a></span><span class="op">(</span>align <span class="op">=</span> <span class="st">"left"</span>, v_align <span class="op">=</span> <span class="st">"middle"</span>, size <span class="op">=</span> <span class="st">"large"</span><span class="op">)</span>, 
-            locations <span class="op">=</span> <span class="fu"><a href="https://gt.rstudio.com/reference/cells_column_labels.html">cells_column_labels</a></span><span class="op">(</span>columns <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">source</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span>
-  <span class="fu"><a href="https://gt.rstudio.com/reference/cols_align.html">cols_align</a></span><span class="op">(</span>align <span class="op">=</span> <span class="st">"center"</span>, columns <span class="op">=</span> <span class="fu"><a href="https://tidyselect.r-lib.org/reference/everything.html">everything</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span>
-  <span class="fu"><a href="https://gt.rstudio.com/reference/cols_align.html">cols_align</a></span><span class="op">(</span>align <span class="op">=</span> <span class="st">"left"</span>, columns <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">source</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span>
-  <span class="fu"><a href="https://gt.rstudio.com/reference/fmt_markdown.html">fmt_markdown</a></span><span class="op">(</span>columns <span class="op">=</span> <span class="fu"><a href="https://tidyselect.r-lib.org/reference/everything.html">everything</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span>  </code></pre></div>
+  <span class="fu">gt</span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span>
+  <span class="fu">cols_label</span><span class="op">(</span>source <span class="op">=</span> <span class="fu">md</span><span class="op">(</span><span class="st">"Source"</span><span class="op">)</span>,
+             city <span class="op">=</span> <span class="fu">md</span><span class="op">(</span><span class="st">"City"</span><span class="op">)</span>,
+             year <span class="op">=</span> <span class="fu">md</span><span class="op">(</span><span class="st">"Year"</span><span class="op">)</span>,
+             age <span class="op">=</span> <span class="fu">md</span><span class="op">(</span><span class="st">"Age"</span><span class="op">)</span>,
+             party <span class="op">=</span> <span class="fu">md</span><span class="op">(</span><span class="st">"Party"</span><span class="op">)</span>,
+             income <span class="op">=</span> <span class="fu">md</span><span class="op">(</span><span class="st">"Income"</span><span class="op">)</span>,
+             liberal <span class="op">=</span> <span class="fu">md</span><span class="op">(</span><span class="st">"Liberal"</span><span class="op">)</span>,
+             att_treat <span class="op">=</span> <span class="fu">md</span><span class="op">(</span><span class="st">"Treatment"</span><span class="op">)</span>,
+             att_control <span class="op">=</span> <span class="fu">md</span><span class="op">(</span><span class="st">"Control"</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span>
+  <span class="fu">tab_style</span><span class="op">(</span><span class="fu">cell_borders</span><span class="op">(</span>sides <span class="op">=</span> <span class="st">"right"</span><span class="op">)</span>,
+            location <span class="op">=</span> <span class="fu">cells_body</span><span class="op">(</span>columns <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">source</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span>
+  <span class="fu">tab_style</span><span class="op">(</span>style <span class="op">=</span> <span class="fu">cell_text</span><span class="op">(</span>align <span class="op">=</span> <span class="st">"left"</span>, v_align <span class="op">=</span> <span class="st">"middle"</span>, size <span class="op">=</span> <span class="st">"large"</span><span class="op">)</span>, 
+            locations <span class="op">=</span> <span class="fu">cells_column_labels</span><span class="op">(</span>columns <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">source</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span>
+  <span class="fu">cols_align</span><span class="op">(</span>align <span class="op">=</span> <span class="st">"center"</span>, columns <span class="op">=</span> <span class="fu"><a href="https://tidyselect.r-lib.org/reference/everything.html">everything</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span>
+  <span class="fu">cols_align</span><span class="op">(</span>align <span class="op">=</span> <span class="st">"left"</span>, columns <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">source</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span>
+  <span class="fu">fmt_markdown</span><span class="op">(</span>columns <span class="op">=</span> <span class="fu"><a href="https://tidyselect.r-lib.org/reference/everything.html">everything</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span>  </code></pre></div>
 <div id="yukifobbeb" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
 <style>html {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
@@ -1498,7 +1477,7 @@
 </tr>
 <tr>
 <td class="gt_row gt_left" style="border-right-width: 1px; border-right-style: solid; border-right-color: #000000;"><div class="gt_from_md">
-<p>Population</p>
+<p>Other</p>
 </div></td>
 <td class="gt_row gt_center"><div class="gt_from_md">
 <p>?</p>
@@ -1527,7 +1506,7 @@
 </tr>
 <tr>
 <td class="gt_row gt_left" style="border-right-width: 1px; border-right-style: solid; border-right-color: #000000;"><div class="gt_from_md">
-<p>Population</p>
+<p>Other</p>
 </div></td>
 <td class="gt_row gt_center"><div class="gt_from_md">
 <p>?</p>
@@ -1556,7 +1535,7 @@
 </tr>
 <tr>
 <td class="gt_row gt_left" style="border-right-width: 1px; border-right-style: solid; border-right-color: #000000;"><div class="gt_from_md">
-<p>Population</p>
+<p>Other</p>
 </div></td>
 <td class="gt_row gt_center"><div class="gt_from_md">
 <p>?</p>
@@ -1592,295 +1571,43 @@
 <h2>
 <span class="header-section-number">8.2</span> age ~ party<a class="anchor" aria-label="anchor" href="#age-party"><i class="fas fa-link"></i></a>
 </h2>
-<p>No need to repeat the questions. You can make reference to them, and then just conclude that we are using party to model age.</p>
+<!-- No need to repeat the questions. You can make reference to them, and then just conclude that we are using party to model age. -->
 <p>We want to build a model and then use that model to make claims about the world.</p>
 <p><em>What is the expected age of a Democrat at the train station?</em></p>
 <p><em>In a group of three Democrats and three Republicans, what will the age difference be between the oldest Democrat and the youngest Republican?</em></p>
 <p>We can answer these and similar questions by creating a model that uses party affiliation to predict age</p>
-<div id="wisdom-3" class="section level3" number="8.2.1">
-<h3>
-<span class="header-section-number">8.2.1</span> Wisdom<a class="anchor" aria-label="anchor" href="#wisdom-3"><i class="fas fa-link"></i></a>
-</h3>
-<div class="figure">
-<span id="fig:unnamed-chunk-586"></span>
-<img src="other/images/Wisdom.jpg" alt="Wisdom" width="100%"><p class="caption">
-FIGURE 8.1: Wisdom
-</p>
-</div>
-<p>Wisdom begins with a look at your data.</p>
-<!-- Discuss to Preceptor Tables and ideal data to answer our questions -->
-<div id="eda-for-trains-1" class="section level4" number="8.2.1.1">
-<h4>
-<span class="header-section-number">8.2.1.1</span> EDA for <code>trains</code><a class="anchor" aria-label="anchor" href="#eda-for-trains-1"><i class="fas fa-link"></i></a>
-</h4>
-<p><em>Always explore your data.</em> To demonstrate modeling with three parameters, we will use the <code>trains</code> data set from the <strong>primer.data</strong> package. Recall the discussion from Chapter <a href="rubin-causal-model.html#rubin-causal-model">4</a>. <span class="citation"><a href="references.html#ref-enos2014" role="doc-biblioref">Enos</a> (<a href="references.html#ref-enos2014" role="doc-biblioref">2014</a>)</span> randomly placed Spanish-speaking confederates on nine train platforms around Boston, Massachusetts. Exposure to Spanish-speakers – the <code>treatment</code> – influenced attitudes toward immigration. These reactions were measured through changes in answers to three survey questions. Load the necessary libraries and look at the data.</p>
-<div class="sourceCode" id="cb742"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">primer.data</span><span class="op">)</span>
-<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://mc-stan.org/rstanarm/">rstanarm</a></span><span class="op">)</span>
-<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://docs.ropensci.org/skimr/">skimr</a></span><span class="op">)</span>
-<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyverse.tidyverse.org">tidyverse</a></span><span class="op">)</span></code></pre></div>
-<div class="sourceCode" id="cb743"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu">glimpse</span><span class="op">(</span><span class="va">trains</span><span class="op">)</span></code></pre></div>
-<pre><code>## Rows: 115
-## Columns: 15
-## $ treatment           &lt;fct&gt; Treated, Treated, Treated, Treated, Control, Treat…
-## $ att_start           &lt;dbl&gt; 11, 9, 3, 11, 8, 13, 13, 10, 12, 9, 10, 11, 13, 6,…
-## $ att_end             &lt;dbl&gt; 11, 10, 5, 11, 5, 13, 13, 11, 12, 10, 9, 9, 13, 7,…
-## $ gender              &lt;chr&gt; "Female", "Female", "Male", "Male", "Male", "Femal…
-## $ race                &lt;chr&gt; "White", "White", "White", "White", "White", "Whit…
-## $ liberal             &lt;lgl&gt; FALSE, FALSE, TRUE, FALSE, TRUE, FALSE, FALSE, FAL…
-## $ party               &lt;chr&gt; "Democrat", "Republican", "Democrat", "Democrat", …
-## $ age                 &lt;int&gt; 31, 34, 63, 45, 55, 37, 53, 36, 54, 42, 33, 50, 24…
-## $ income              &lt;dbl&gt; 135000, 105000, 135000, 300000, 135000, 87500, 875…
-## $ line                &lt;chr&gt; "Framingham", "Framingham", "Framingham", "Framing…
-## $ station             &lt;chr&gt; "Grafton", "Southborough", "Grafton", "Grafton", "…
-## $ hisp_perc           &lt;dbl&gt; 0.026, 0.015, 0.019, 0.019, 0.019, 0.023, 0.030, 0…
-## $ ideology_start      &lt;int&gt; 3, 4, 1, 4, 2, 5, 5, 4, 4, 4, 3, 5, 4, 1, 2, 2, 3,…
-## $ ideology_end        &lt;int&gt; 3, 4, 2, 4, 2, 5, 5, 4, 3, 4, 3, 4, 4, 1, 2, 3, 3,…
-## $ income_in_thousands &lt;dbl&gt; 135, 105, 135, 300, 135, 88, 88, 135, 105, 135, 10…</code></pre>
-<p>The data include information about each respondent’s gender, political affiliations, age, income and so on. <code>treatment</code> indicates whether a subject was in the control or treatment group. The key outcomes are their attitudes toward immigration both before (<code>att_start</code>) and after (<code>att_end</code>) the experiment. We also have a measure of their ideology before and after the experiment, but there is little change. Type <code><a href="https://rdrr.io/pkg/primer.data/man/trains.html">?trains</a></code> to read the help page for more information about each variable. Let’s restrict attention to a subset of the variables.</p>
-<!-- Tie above paragraph to selecting data that is relevant to the research question. Think about increasing levels of sophistication in dealing with the "population" question, and discussing examples of what can go wrong. -->
-<div class="sourceCode" id="cb745"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">ch8</span> <span class="op">&lt;-</span> <span class="va">trains</span> <span class="op">%&gt;%</span> 
-  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">age</span>, <span class="va">att_end</span>, <span class="va">party</span>, <span class="va">income</span>, <span class="va">treatment</span>, <span class="va">liberal</span><span class="op">)</span></code></pre></div>
-<p>It is always smart to look at a some random samples of the data:</p>
-<div class="sourceCode" id="cb746"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">ch8</span> <span class="op">%&gt;%</span> 
-  <span class="fu">slice_sample</span><span class="op">(</span>n <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></code></pre></div>
-<pre><code>## # A tibble: 5 x 6
-##     age att_end party      income treatment liberal
-##   &lt;int&gt;   &lt;dbl&gt; &lt;chr&gt;       &lt;dbl&gt; &lt;fct&gt;     &lt;lgl&gt;  
-## 1    55      12 Republican 250000 Control   FALSE  
-## 2    22       4 Democrat   105000 Treated   TRUE   
-## 3    55       5 Democrat   135000 Control   TRUE   
-## 4    44       6 Democrat    62500 Control   TRUE   
-## 5    44       9 Republican 250000 Control   FALSE</code></pre>
-<p><code>att_end</code> is a measure of person’s attitude toward immigration. A higher number means more conservative, i.e., a more exclusionary stance toward immigration into the United States.</p>
-<div class="sourceCode" id="cb748"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">ch8</span> <span class="op">%&gt;%</span> 
-  <span class="fu">glimpse</span><span class="op">(</span><span class="op">)</span></code></pre></div>
-<pre><code>## Rows: 115
-## Columns: 6
-## $ age       &lt;int&gt; 31, 34, 63, 45, 55, 37, 53, 36, 54, 42, 33, 50, 24, 40, 53, …
-## $ att_end   &lt;dbl&gt; 11, 10, 5, 11, 5, 13, 13, 11, 12, 10, 9, 9, 13, 7, 8, 13, 8,…
-## $ party     &lt;chr&gt; "Democrat", "Republican", "Democrat", "Democrat", "Democrat"…
-## $ income    &lt;dbl&gt; 135000, 105000, 135000, 300000, 135000, 87500, 87500, 135000…
-## $ treatment &lt;fct&gt; Treated, Treated, Treated, Treated, Control, Treated, Contro…
-## $ liberal   &lt;lgl&gt; FALSE, FALSE, TRUE, FALSE, TRUE, FALSE, FALSE, FALSE, FALSE,…</code></pre>
-<p>Pay attention to the variable types. Do they make sense? Perhaps. But there are certainly grounds for suspicion. Why is <code>att_end</code> a double rather than an integer? All the values in the data appear to be integers, so there is no benefit to having these variables be doubles. Why is <code>party</code> a character variable and <code>treatment</code> a factor variable? It could be that these are intentional choices made by the creator of the tibble, i.e., us. Or, these could be mistakes. Most likely, these choices are a mixture of sensible and arbitrary. Regardless, it is your responsibility to notice them. You can’t make a good model without looking closely at the data which you are using.</p>
-<div class="sourceCode" id="cb750"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">ch8</span> <span class="op">%&gt;%</span> 
-  <span class="fu"><a href="https://docs.ropensci.org/skimr/reference/skim.html">skim</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
-<div class="inline-table"><table class="table table-sm">
-<caption>
-<span id="tab:unnamed-chunk-592">TABLE 8.2: </span>Data summary</caption>
-<tbody>
-<tr class="odd">
-<td align="left">Name</td>
-<td align="left">Piped data</td>
-</tr>
-<tr class="even">
-<td align="left">Number of rows</td>
-<td align="left">115</td>
-</tr>
-<tr class="odd">
-<td align="left">Number of columns</td>
-<td align="left">6</td>
-</tr>
-<tr class="even">
-<td align="left">_______________________</td>
-<td align="left"></td>
-</tr>
-<tr class="odd">
-<td align="left">Column type frequency:</td>
-<td align="left"></td>
-</tr>
-<tr class="even">
-<td align="left">character</td>
-<td align="left">1</td>
-</tr>
-<tr class="odd">
-<td align="left">factor</td>
-<td align="left">1</td>
-</tr>
-<tr class="even">
-<td align="left">logical</td>
-<td align="left">1</td>
-</tr>
-<tr class="odd">
-<td align="left">numeric</td>
-<td align="left">3</td>
-</tr>
-<tr class="even">
-<td align="left">________________________</td>
-<td align="left"></td>
-</tr>
-<tr class="odd">
-<td align="left">Group variables</td>
-<td align="left">None</td>
-</tr>
-</tbody>
-</table></div>
-<p><strong>Variable type: character</strong></p>
-<div class="inline-table"><table class="table table-sm">
-<thead><tr class="header">
-<th align="left">skim_variable</th>
-<th align="right">n_missing</th>
-<th align="right">complete_rate</th>
-<th align="right">min</th>
-<th align="right">max</th>
-<th align="right">empty</th>
-<th align="right">n_unique</th>
-<th align="right">whitespace</th>
-</tr></thead>
-<tbody><tr class="odd">
-<td align="left">party</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">8</td>
-<td align="right">10</td>
-<td align="right">0</td>
-<td align="right">2</td>
-<td align="right">0</td>
-</tr></tbody>
-</table></div>
-<p><strong>Variable type: factor</strong></p>
-<div class="inline-table"><table class="table table-sm">
-<thead><tr class="header">
-<th align="left">skim_variable</th>
-<th align="right">n_missing</th>
-<th align="right">complete_rate</th>
-<th align="left">ordered</th>
-<th align="right">n_unique</th>
-<th align="left">top_counts</th>
-</tr></thead>
-<tbody><tr class="odd">
-<td align="left">treatment</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="left">FALSE</td>
-<td align="right">2</td>
-<td align="left">Con: 64, Tre: 51</td>
-</tr></tbody>
-</table></div>
-<p><strong>Variable type: logical</strong></p>
-<div class="inline-table"><table class="table table-sm">
-<thead><tr class="header">
-<th align="left">skim_variable</th>
-<th align="right">n_missing</th>
-<th align="right">complete_rate</th>
-<th align="right">mean</th>
-<th align="left">count</th>
-</tr></thead>
-<tbody><tr class="odd">
-<td align="left">liberal</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">0.44</td>
-<td align="left">FAL: 64, TRU: 51</td>
-</tr></tbody>
-</table></div>
-<p><strong>Variable type: numeric</strong></p>
-<div class="inline-table"><table class="table table-sm">
-<thead><tr class="header">
-<th align="left">skim_variable</th>
-<th align="right">n_missing</th>
-<th align="right">complete_rate</th>
-<th align="right">mean</th>
-<th align="right">sd</th>
-<th align="right">p0</th>
-<th align="right">p25</th>
-<th align="right">p50</th>
-<th align="right">p75</th>
-<th align="right">p100</th>
-<th align="left">hist</th>
-</tr></thead>
-<tbody>
-<tr class="odd">
-<td align="left">age</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">4.2e+01</td>
-<td align="right">12.2</td>
-<td align="right">20</td>
-<td align="right">33</td>
-<td align="right">43</td>
-<td align="right">52</td>
-<td align="right">68</td>
-<td align="left">▆▇▇▇▃</td>
-</tr>
-<tr class="even">
-<td align="left">att_end</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">9.1e+00</td>
-<td align="right">2.9</td>
-<td align="right">3</td>
-<td align="right">7</td>
-<td align="right">9</td>
-<td align="right">11</td>
-<td align="right">15</td>
-<td align="left">▂▃▇▃▃</td>
-</tr>
-<tr class="odd">
-<td align="left">income</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">1.4e+05</td>
-<td align="right">74476.6</td>
-<td align="right">23500</td>
-<td align="right">87500</td>
-<td align="right">135000</td>
-<td align="right">135000</td>
-<td align="right">300000</td>
-<td align="left">▅▇▇▁▆</td>
-</tr>
-</tbody>
-</table></div>
-<p><code><a href="https://docs.ropensci.org/skimr/reference/skim.html">skim()</a></code> shows us what the different values of <code>treatment</code> are because it is a factor. Unfortunately, it does not do the same for character variables like <code>party</code>. The ranges for <code>age</code> and <code>att_end</code> seem reasonable. Recall that participants were asked three questions about immigration issues, each of which allowed for an answer indicated strength of agreement on a scale form 1 to 5, with higher values indicating more agreement with conservative viewpoints. <code>att_end</code> is the sum of the responses to the three questions, so the most liberal possible value is 3 and the most conservative is 15.</p>
-<p>Always plot your data.</p>
-<div class="sourceCode" id="cb751"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">ch8</span> <span class="op">%&gt;%</span>
-  <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">party</span>, y <span class="op">=</span> <span class="va">age</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> 
-  <span class="fu">geom_jitter</span><span class="op">(</span>width <span class="op">=</span> <span class="fl">0.1</span>, height <span class="op">=</span> <span class="fl">0</span><span class="op">)</span> <span class="op">+</span> 
-  <span class="fu">labs</span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Age by Party Affiliation in Trains Dataset"</span>,
-       subtitle <span class="op">=</span> <span class="st">"Where are the old Republicans?"</span>,
-       x <span class="op">=</span> <span class="st">"Party"</span>,
-       y <span class="op">=</span> <span class="st">"Age"</span><span class="op">)</span></code></pre></div>
-<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-593-1.png" width="100%"></div>
-<p>There are more Democrats in this dataset than Republicans. Democrats also span a wider range of ages than Republicans.</p>
-<!-- DK: Could do more here. -->
-<p>The data that we have are very limited. There are only 115 observations, all from 2012 and involving train commuters to Boston. How useful will this data be today, or for other populations around Boston, or for other cities in the US? Only your judgment, along with advice from your colleagues, can guide you.</p>
-<p>The key concept is the idea of a “population.” From which larger population is the data we have being (conceptually) drawn? If we were only interested in the age of individuals in our data set, we would have no need for inference. <em>We know everyone’s ages already.</em> We only need tools like <code><a href="https://mc-stan.org/rstanarm/reference/stan_glm.html">stan_glm()</a></code> if we seek to understand individuals not in our data. Only if our data is “representative,” at least to some extent, of that larger population can we use our data to answer our questions.</p>
 <!-- Relate back to research questions and the population for them -->
-<!-- Discuss whether the data comes from the same population as preceptor table -->
+<!-- Discuss whether the data comes from the same population as Preceptor Table -->
 <!-- This sections ends with the Population  Table. -->
-</div>
-</div>
-<div id="justice-2" class="section level3" number="8.2.2">
+<div id="justice-2" class="section level3" number="8.2.1">
 <h3>
-<span class="header-section-number">8.2.2</span> Justice<a class="anchor" aria-label="anchor" href="#justice-2"><i class="fas fa-link"></i></a>
+<span class="header-section-number">8.2.1</span> Justice<a class="anchor" aria-label="anchor" href="#justice-2"><i class="fas fa-link"></i></a>
 </h3>
 <div class="figure">
-<span id="fig:unnamed-chunk-594"></span>
+<span id="fig:unnamed-chunk-580"></span>
 <img src="other/images/Justice.jpg" alt="Justice" width="100%"><p class="caption">
-FIGURE 8.2: Justice
+FIGURE 8.1: Justice
 </p>
 </div>
-<p>Justice, in data science, consists of three topics: predictive versus causal modeling, the Preceptor Table, and a mathematical formulation of the model.</p>
-<!-- Ch.5 states key aspects are representativeness, validity, and data generating mechanism. Correct! This is all garbage! -->
+<p>Justice consists of four topics: validity, stability, representativeness, and the model.</p>
+<p>When considering validity, we must figure out if the meaning of the columns is the same over the entire population table. For <code>party</code>, this could mean considering if the meaning of aligning as a “Democrat” or “Republican” has changed over the years.</p>
+<!-- MM: validity is same meaning down a column? -->
+<p>We then must consider the stability of our model. We are still using the data from <span class="citation"><a href="references.html#ref-enos2014" role="doc-biblioref">Enos</a> (<a href="references.html#ref-enos2014" role="doc-biblioref">2014</a>)</span>. Yet the world is a very different place today! Is data from 2012, four years before Donald Trump’s election as president, still relevant? Can we generalize data from Boston commuters to other train commuters in the US? There are no obvious answers to these questions. <em>The data we have is never a perfect match to the problem we face because data is always old.</em></p>
+<p>The world is constantly changing. To use old data, we need to make assumptions about the stability of our model of the world and of the parameters we are estimating. In other words, we must assume that the model doesn’t change over time. Whether those assumptions are reasonable is a difficult question, one that requires knowledge about the world as it was and the world as it now is. <em>Math won’t save us.</em></p>
+<p>Next, let’s consider representativeness. In order to do so, we must determine if the data is representative of the time period which the data is from. Essentially, can we consider the data of 2012 Boston train commuters representative of 2012 US train commuters? Well, probably not. While we may feel we can more confidently consider the data of the Boston train commuters to be representative of train commuters from a city similar to Boston, we probably feel less confident that the data is exchangeable to the general population of train commuters in the US due to the variance among many different locations in the US.</p>
+<!-- MM: check above representativeness explanation - is this matching with our newer definition? -->
+<!-- Explain more in above few paragraphs -->
 <p>Any model with age as its dependent variable will be predictive, not causal, for the simple reason that nothing, other than time, can change your age. You are X years old. It would not matter if you changed your party registration from Democrat to Republican or vice versa. Your age is your age.</p>
 <p>There is only one potential outcome, i.e., one outcome. There is not a potential outcome if you are Democrat and a different potential outcome if you are a Republican.</p>
 <p>When dealing with a non-causal model, the focus is on predicting things. The underlying mechanism which connects age with party is less important than the brute statistical fact that there is a connection. <em>Predictive models care little about causality.</em></p>
-<!-- DK: Preceptor Tables should be laid out like the formula: outcome on left, predictors on right. -->
-<!-- DK: Need a table which shows all 4 (?) languages for describing a model together: English, math, code, output. -->
+<!-- Preceptor Tables should be laid out like the formula: outcome on left, predictors on right. -->
 <p>A good way at looking at this is with a Preceptor Table, as seen below. Unlike the previous table in Chapter <a href="two-parameters.html#two-parameters">7</a>, we now have two columns in addition to ID. Since our data does not include all Republicans and Democrats in the world, not every row is filled in.</p>
-<div id="nyqffucgdr" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<div id="oevwanyqff" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
 <style>html {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
 }
 
-#nyqffucgdr .gt_table {
+#oevwanyqff .gt_table {
   display: table;
   border-collapse: collapse;
   margin-left: auto;
@@ -1905,7 +1632,7 @@ FIGURE 8.2: Justice
   border-left-color: #D3D3D3;
 }
 
-#nyqffucgdr .gt_heading {
+#oevwanyqff .gt_heading {
   background-color: #FFFFFF;
   text-align: center;
   border-bottom-color: #FFFFFF;
@@ -1917,7 +1644,7 @@ FIGURE 8.2: Justice
   border-right-color: #D3D3D3;
 }
 
-#nyqffucgdr .gt_title {
+#oevwanyqff .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -1927,7 +1654,7 @@ FIGURE 8.2: Justice
   border-bottom-width: 0;
 }
 
-#nyqffucgdr .gt_subtitle {
+#oevwanyqff .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -1937,13 +1664,13 @@ FIGURE 8.2: Justice
   border-top-width: 0;
 }
 
-#nyqffucgdr .gt_bottom_border {
+#oevwanyqff .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-#nyqffucgdr .gt_col_headings {
+#oevwanyqff .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -1958,7 +1685,7 @@ FIGURE 8.2: Justice
   border-right-color: #D3D3D3;
 }
 
-#nyqffucgdr .gt_col_heading {
+#oevwanyqff .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1978,7 +1705,7 @@ FIGURE 8.2: Justice
   overflow-x: hidden;
 }
 
-#nyqffucgdr .gt_column_spanner_outer {
+#oevwanyqff .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1990,15 +1717,15 @@ FIGURE 8.2: Justice
   padding-right: 4px;
 }
 
-#nyqffucgdr .gt_column_spanner_outer:first-child {
+#oevwanyqff .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-#nyqffucgdr .gt_column_spanner_outer:last-child {
+#oevwanyqff .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-#nyqffucgdr .gt_column_spanner {
+#oevwanyqff .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -2010,7 +1737,7 @@ FIGURE 8.2: Justice
   width: 100%;
 }
 
-#nyqffucgdr .gt_group_heading {
+#oevwanyqff .gt_group_heading {
   padding: 8px;
   color: #333333;
   background-color: #FFFFFF;
@@ -2032,7 +1759,7 @@ FIGURE 8.2: Justice
   vertical-align: middle;
 }
 
-#nyqffucgdr .gt_empty_group_heading {
+#oevwanyqff .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -2047,15 +1774,15 @@ FIGURE 8.2: Justice
   vertical-align: middle;
 }
 
-#nyqffucgdr .gt_from_md > :first-child {
+#oevwanyqff .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#nyqffucgdr .gt_from_md > :last-child {
+#oevwanyqff .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#nyqffucgdr .gt_row {
+#oevwanyqff .gt_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -2074,7 +1801,7 @@ FIGURE 8.2: Justice
   overflow-x: hidden;
 }
 
-#nyqffucgdr .gt_stub {
+#oevwanyqff .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -2086,7 +1813,7 @@ FIGURE 8.2: Justice
   padding-left: 12px;
 }
 
-#nyqffucgdr .gt_summary_row {
+#oevwanyqff .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -2096,7 +1823,7 @@ FIGURE 8.2: Justice
   padding-right: 5px;
 }
 
-#nyqffucgdr .gt_first_summary_row {
+#oevwanyqff .gt_first_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -2106,7 +1833,7 @@ FIGURE 8.2: Justice
   border-top-color: #D3D3D3;
 }
 
-#nyqffucgdr .gt_grand_summary_row {
+#oevwanyqff .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -2116,7 +1843,7 @@ FIGURE 8.2: Justice
   padding-right: 5px;
 }
 
-#nyqffucgdr .gt_first_grand_summary_row {
+#oevwanyqff .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -2126,11 +1853,11 @@ FIGURE 8.2: Justice
   border-top-color: #D3D3D3;
 }
 
-#nyqffucgdr .gt_striped {
+#oevwanyqff .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-#nyqffucgdr .gt_table_body {
+#oevwanyqff .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -2139,7 +1866,7 @@ FIGURE 8.2: Justice
   border-bottom-color: #D3D3D3;
 }
 
-#nyqffucgdr .gt_footnotes {
+#oevwanyqff .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -2153,13 +1880,13 @@ FIGURE 8.2: Justice
   border-right-color: #D3D3D3;
 }
 
-#nyqffucgdr .gt_footnote {
+#oevwanyqff .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding: 4px;
 }
 
-#nyqffucgdr .gt_sourcenotes {
+#oevwanyqff .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -2173,41 +1900,41 @@ FIGURE 8.2: Justice
   border-right-color: #D3D3D3;
 }
 
-#nyqffucgdr .gt_sourcenote {
+#oevwanyqff .gt_sourcenote {
   font-size: 90%;
   padding: 4px;
 }
 
-#nyqffucgdr .gt_left {
+#oevwanyqff .gt_left {
   text-align: left;
 }
 
-#nyqffucgdr .gt_center {
+#oevwanyqff .gt_center {
   text-align: center;
 }
 
-#nyqffucgdr .gt_right {
+#oevwanyqff .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#nyqffucgdr .gt_font_normal {
+#oevwanyqff .gt_font_normal {
   font-weight: normal;
 }
 
-#nyqffucgdr .gt_font_bold {
+#oevwanyqff .gt_font_bold {
   font-weight: bold;
 }
 
-#nyqffucgdr .gt_font_italic {
+#oevwanyqff .gt_font_italic {
   font-style: italic;
 }
 
-#nyqffucgdr .gt_super {
+#oevwanyqff .gt_super {
   font-size: 65%;
 }
 
-#nyqffucgdr .gt_footnote_marks {
+#oevwanyqff .gt_footnote_marks {
   font-style: italic;
   font-weight: normal;
   font-size: 65%;
@@ -2288,7 +2015,6 @@ FIGURE 8.2: Justice
 <p><span class="math display">\[\text{outcome} = \text{model} + \text{not in the model}\]</span></p>
 <p>In words, any event depends on our explicitly described model as well as on influences unknown to us. Everything that happens in the world is the result of various factors, and we can only consider some of them in our model (because we do not know about some influences, or because we have no data about them).</p>
 <p>The mathematics:</p>
-<!-- DK: Should standardize the notation across the book. -->
 <p><span class="math display">\[ y_i = \beta_1 republican_i + \beta_2 democrat_i + \epsilon_i\]</span></p>
 <p>where 
 <span class="math display">\[republican_i, democrat_i \in \{0,1\}\]</span> 
@@ -2300,7 +2026,7 @@ FIGURE 8.2: Justice
 <li><p>On the left-hand side we have the outcome, <span class="math inline">\(y_i\)</span>, which is the variable to be explained. In our case, this is the age of an individual in the population.</p></li>
 <li><p>On the right-hand side we first have the part contained in the model: two similar terms added together. Each term consists of a parameter and a data point. The betas are our two parameters: <span class="math inline">\(\beta_1\)</span> is the average age of Republicans in the population and <span class="math inline">\(\beta_2\)</span> is the average age of Democrats in the population. <span class="math inline">\(republican_i\)</span> and <span class="math inline">\(democrat_i\)</span> are our explanatory variables and take the values 1 or 0. If person <span class="math inline">\(i\)</span> is a Republican we have <span class="math inline">\(republican_i = 1\)</span> and <span class="math inline">\(democrat_i = 0\)</span>. If person <span class="math inline">\(i\)</span> is a Democrat we have <span class="math inline">\(republican_i = 0\)</span> and <span class="math inline">\(democrat_i = 1\)</span>. In other words, their values are mutually exclusive – if you are a Democrat, you cannot also be a Republican.</p></li>
 </ul>
-<!-- DK: "Connected to" is awkward here. --><ul>
+<!-- "Connected to" is awkward here. --><ul>
 <li><p>The last part, <span class="math inline">\(\epsilon_i\)</span> (“epsilon”), represents the unexplained part of the outcome and is called the error term. It is simply the difference between the outcome and our model predictions. This includes all factors that have an influence on someone’s age but are not connected to party affiliation. We assume that this error follows a normal distribution with an expected value of 0 (meaning it is 0 on average).</p></li>
 <li><p>The small <span class="math inline">\(i\)</span>’s are an index to number the observations. It is equivalent to the “ID” column in our Preceptor Table and simply states that the outcome for person <span class="math inline">\(i\)</span> is explained by the modeled and non-modeled factors for person <span class="math inline">\(i\)</span>.</p></li>
 <li><p>The model is a claim about how the world works, not just for the 115 individuals for which we have data but for the all the people in the population for which we seek to draw inferences.</p></li>
@@ -2309,19 +2035,19 @@ FIGURE 8.2: Justice
 </ul>
 <!-- Reinforce representativeness and validity of the data -->
 </div>
-<div id="courage-2" class="section level3" number="8.2.3">
+<div id="courage-2" class="section level3" number="8.2.2">
 <h3>
-<span class="header-section-number">8.2.3</span> Courage<a class="anchor" aria-label="anchor" href="#courage-2"><i class="fas fa-link"></i></a>
+<span class="header-section-number">8.2.2</span> Courage<a class="anchor" aria-label="anchor" href="#courage-2"><i class="fas fa-link"></i></a>
 </h3>
 <div class="figure">
-<span id="fig:unnamed-chunk-596"></span>
+<span id="fig:unnamed-chunk-582"></span>
 <img src="other/images/Courage.jpg" alt="Courage" width="100%"><p class="caption">
-FIGURE 8.3: Courage
+FIGURE 8.2: Courage
 </p>
 </div>
 <p>Courage allows us to translate math to code.</p>
 <p>To get posterior distributions for our three parameters, we will again use <code><a href="https://mc-stan.org/rstanarm/reference/stan_glm.html">stan_glm()</a></code>, just as we did in Chapter <a href="two-parameters.html#two-parameters">7</a>.</p>
-<div class="sourceCode" id="cb752"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb765"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">fit_1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://mc-stan.org/rstanarm/reference/stan_glm.html">stan_glm</a></span><span class="op">(</span><span class="va">age</span> <span class="op">~</span> <span class="va">party</span> <span class="op">-</span> <span class="fl">1</span>, 
                     data <span class="op">=</span> <span class="va">trains</span>, 
                     seed <span class="op">=</span> <span class="fl">17</span>,
@@ -2332,7 +2058,7 @@ FIGURE 8.3: Courage
 <li><p>We have also added <code>-1</code> at the end of the equation, indicating that we do not want an intercept, which would otherwise be added by default.</p></li>
 </ul>
 <p>The resulting output:</p>
-<div class="sourceCode" id="cb753"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb766"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">fit_1</span></code></pre></div>
 <pre><code>## stan_glm
 ##  family:       gaussian [identity]
@@ -2352,9 +2078,8 @@ FIGURE 8.3: Courage
 ## * For help interpreting the printed output see ?print.stanreg
 ## * For info on the priors used see ?prior_summary.stanreg</code></pre>
 <p><code>partyDemocrat</code> corresponds to <span class="math inline">\(\beta_1\)</span>, the average age of Democrats in the population. <code>partyRepublican</code> corresponds to <span class="math inline">\(\beta_2\)</span>, the average age of Republicans in the population. Since we don’t really care about the posterior distribution for <span class="math inline">\(\sigma\)</span>, we won’t discuss it here. Graphically:</p>
-<!-- DK: Lots to clean up about this plot! -->
-<!-- DK: Should we use different parameter names like beta_r? -->
-<div class="sourceCode" id="cb755"><pre class="downlit sourceCode r">
+<!-- Lots to clean up about this plot! -->
+<div class="sourceCode" id="cb768"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">fit_1</span> <span class="op">%&gt;%</span> 
   <span class="fu">as_tibble</span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span> 
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="op">-</span><span class="va">sigma</span><span class="op">)</span> <span class="op">%&gt;%</span> 
@@ -2373,24 +2098,22 @@ FIGURE 8.3: Courage
          y <span class="op">=</span> <span class="st">"Probability"</span><span class="op">)</span> <span class="op">+</span>
     <span class="fu">scale_y_continuous</span><span class="op">(</span>labels <span class="op">=</span> <span class="fu">scales</span><span class="fu">::</span><span class="fu"><a href="https://scales.r-lib.org/reference/label_percent.html">percent_format</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
     <span class="fu">theme_classic</span><span class="op">(</span><span class="op">)</span></code></pre></div>
-<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-599-1.png" width="100%"></div>
+<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-585-1.png" width="100%"></div>
 <p>The unknown parameters <span class="math inline">\(\beta_1\)</span> (partyDemocrat) and <span class="math inline">\(\beta_2\)</span> (partyRepublican) are still unknown. We can never know the true average age of all Democrats in the population. But we can calculate a posterior probability distribution for each parameter. Comments:</p>
 <ul>
 <li><p>Democrats seem slightly older than Republicans. That was true in the sample and so, almost (but not quite!) by definition, it will be true in our the posterior probability distributions.</p></li>
 <li><p>Our estimate for the average age of Democrats in the population is much more precise than that for Republicans because we have five times as many Democrats as Republicans in our sample. A central lesson from Chapter <a href="one-parameter.html#one-parameter">6</a> is that the more data you have related to a parameter, the narrower your posterior distribution will be.</p></li>
 <li><p>There is a great deal of overlap between the two distributions. Would we be surprised if, in truth, the average age of Republicans in the population was greater than that for Democrats? Not really. We don’t have enough data to be sure either way.</p></li>
 <li><p>The phrase “in the population” is doing a great deal of work because we have not said what, precisely, we mean by the “population.” Is it the set of people on those commuter platforms on those days in 2012 when the experiment was done? Is it the set of people on all platforms, including ones never visited? Is it the set of all Boston commuter? All Massachusetts residents? All US residents? Does it include people today, or can we only draw inferences for 2012? We will explore these questions in every model we create.</p></li>
-</ul>
-<!-- MM: touched on in the wisdom section in ch. 5, as well as justice in terms of representativeness does it belong there? --><ul>
-<li>The parameters <span class="math inline">\(\beta_1\)</span> and <span class="math inline">\(\beta_2\)</span> can be interpreted in two ways. First, like all parameters, they are a part of the model. We need to estimate them. But, in many cases, we don’t really care what the value of the parameter is. The exact value of <span class="math inline">\(\sigma\)</span>, for example, does not really matter. Second, some parameters have a substantive interpretaion, as with <span class="math inline">\(\beta_1\)</span> and <span class="math inline">\(\beta_2\)</span> being the average ages in the population. But this will often not be the case! Fortunately, with such models, we can use functions like <code><a href="https://mc-stan.org/rstanarm/reference/posterior_linpred.stanreg.html">posterior_epred()</a></code> and <code><a href="https://mc-stan.org/rstanarm/reference/posterior_predict.stanreg.html">posterior_predict()</a></code> to answer our questions.</li>
+<li><p>The parameters <span class="math inline">\(\beta_1\)</span> and <span class="math inline">\(\beta_2\)</span> can be interpreted in two ways. First, like all parameters, they are a part of the model. We need to estimate them. But, in many cases, we don’t really care what the value of the parameter is. The exact value of <span class="math inline">\(\sigma\)</span>, for example, does not really matter. Second, some parameters have a substantive interpretaion, as with <span class="math inline">\(\beta_1\)</span> and <span class="math inline">\(\beta_2\)</span> being the average ages in the population. But this will often not be the case! Fortunately, with such models, we can use functions like <code><a href="https://mc-stan.org/rstanarm/reference/posterior_linpred.stanreg.html">posterior_epred()</a></code> and <code><a href="https://mc-stan.org/rstanarm/reference/posterior_predict.stanreg.html">posterior_predict()</a></code> to answer our questions.</p></li>
 </ul>
 <p>Consider a table which shows a sample of 8 individuals.</p>
-<div id="apilzbnwsq" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<div id="ldiucvbapi" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
 <style>html {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
 }
 
-#apilzbnwsq .gt_table {
+#ldiucvbapi .gt_table {
   display: table;
   border-collapse: collapse;
   margin-left: auto;
@@ -2415,7 +2138,7 @@ FIGURE 8.3: Courage
   border-left-color: #D3D3D3;
 }
 
-#apilzbnwsq .gt_heading {
+#ldiucvbapi .gt_heading {
   background-color: #FFFFFF;
   text-align: center;
   border-bottom-color: #FFFFFF;
@@ -2427,7 +2150,7 @@ FIGURE 8.3: Courage
   border-right-color: #D3D3D3;
 }
 
-#apilzbnwsq .gt_title {
+#ldiucvbapi .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -2437,7 +2160,7 @@ FIGURE 8.3: Courage
   border-bottom-width: 0;
 }
 
-#apilzbnwsq .gt_subtitle {
+#ldiucvbapi .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -2447,13 +2170,13 @@ FIGURE 8.3: Courage
   border-top-width: 0;
 }
 
-#apilzbnwsq .gt_bottom_border {
+#ldiucvbapi .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-#apilzbnwsq .gt_col_headings {
+#ldiucvbapi .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -2468,7 +2191,7 @@ FIGURE 8.3: Courage
   border-right-color: #D3D3D3;
 }
 
-#apilzbnwsq .gt_col_heading {
+#ldiucvbapi .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -2488,7 +2211,7 @@ FIGURE 8.3: Courage
   overflow-x: hidden;
 }
 
-#apilzbnwsq .gt_column_spanner_outer {
+#ldiucvbapi .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -2500,15 +2223,15 @@ FIGURE 8.3: Courage
   padding-right: 4px;
 }
 
-#apilzbnwsq .gt_column_spanner_outer:first-child {
+#ldiucvbapi .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-#apilzbnwsq .gt_column_spanner_outer:last-child {
+#ldiucvbapi .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-#apilzbnwsq .gt_column_spanner {
+#ldiucvbapi .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -2520,7 +2243,7 @@ FIGURE 8.3: Courage
   width: 100%;
 }
 
-#apilzbnwsq .gt_group_heading {
+#ldiucvbapi .gt_group_heading {
   padding: 8px;
   color: #333333;
   background-color: #FFFFFF;
@@ -2542,7 +2265,7 @@ FIGURE 8.3: Courage
   vertical-align: middle;
 }
 
-#apilzbnwsq .gt_empty_group_heading {
+#ldiucvbapi .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -2557,15 +2280,15 @@ FIGURE 8.3: Courage
   vertical-align: middle;
 }
 
-#apilzbnwsq .gt_from_md > :first-child {
+#ldiucvbapi .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#apilzbnwsq .gt_from_md > :last-child {
+#ldiucvbapi .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#apilzbnwsq .gt_row {
+#ldiucvbapi .gt_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -2584,7 +2307,7 @@ FIGURE 8.3: Courage
   overflow-x: hidden;
 }
 
-#apilzbnwsq .gt_stub {
+#ldiucvbapi .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -2596,7 +2319,7 @@ FIGURE 8.3: Courage
   padding-left: 12px;
 }
 
-#apilzbnwsq .gt_summary_row {
+#ldiucvbapi .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -2606,7 +2329,7 @@ FIGURE 8.3: Courage
   padding-right: 5px;
 }
 
-#apilzbnwsq .gt_first_summary_row {
+#ldiucvbapi .gt_first_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -2616,7 +2339,7 @@ FIGURE 8.3: Courage
   border-top-color: #D3D3D3;
 }
 
-#apilzbnwsq .gt_grand_summary_row {
+#ldiucvbapi .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -2626,7 +2349,7 @@ FIGURE 8.3: Courage
   padding-right: 5px;
 }
 
-#apilzbnwsq .gt_first_grand_summary_row {
+#ldiucvbapi .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -2636,11 +2359,11 @@ FIGURE 8.3: Courage
   border-top-color: #D3D3D3;
 }
 
-#apilzbnwsq .gt_striped {
+#ldiucvbapi .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-#apilzbnwsq .gt_table_body {
+#ldiucvbapi .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -2649,7 +2372,7 @@ FIGURE 8.3: Courage
   border-bottom-color: #D3D3D3;
 }
 
-#apilzbnwsq .gt_footnotes {
+#ldiucvbapi .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -2663,13 +2386,13 @@ FIGURE 8.3: Courage
   border-right-color: #D3D3D3;
 }
 
-#apilzbnwsq .gt_footnote {
+#ldiucvbapi .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding: 4px;
 }
 
-#apilzbnwsq .gt_sourcenotes {
+#ldiucvbapi .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -2683,41 +2406,41 @@ FIGURE 8.3: Courage
   border-right-color: #D3D3D3;
 }
 
-#apilzbnwsq .gt_sourcenote {
+#ldiucvbapi .gt_sourcenote {
   font-size: 90%;
   padding: 4px;
 }
 
-#apilzbnwsq .gt_left {
+#ldiucvbapi .gt_left {
   text-align: left;
 }
 
-#apilzbnwsq .gt_center {
+#ldiucvbapi .gt_center {
   text-align: center;
 }
 
-#apilzbnwsq .gt_right {
+#ldiucvbapi .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#apilzbnwsq .gt_font_normal {
+#ldiucvbapi .gt_font_normal {
   font-weight: normal;
 }
 
-#apilzbnwsq .gt_font_bold {
+#ldiucvbapi .gt_font_bold {
   font-weight: bold;
 }
 
-#apilzbnwsq .gt_font_italic {
+#ldiucvbapi .gt_font_italic {
   font-style: italic;
 }
 
-#apilzbnwsq .gt_super {
+#ldiucvbapi .gt_super {
   font-size: 65%;
 }
 
-#apilzbnwsq .gt_footnote_marks {
+#ldiucvbapi .gt_footnote_marks {
   font-style: italic;
   font-weight: normal;
   font-size: 65%;
@@ -2785,12 +2508,11 @@ FIGURE 8.3: Courage
 </tbody>
 </table></div>
 </div>
-<!-- DK: More extreme awkwardness. -->
+<!-- More extreme awkwardness. -->
 <p> </p>
 <p>The fitted values are the same for all Republicans and for all Democrats, as the model produces one fitted value for each condition. This table shows how just a sample of 8 individuals captures a wide range of residuals, making it difficult to predict the age of a new individual. We can get a better picture of the unmodeled variation in our sample if we plot these three variables for all the individuals in our data.</p>
 <p>The following three histograms show the actual outcomes, fitted values, and residuals of all people in <code>trains</code>:</p>
-<!-- DK: Clean up these plots to be similar across chapters! Also, we should ensure that the width of 10 units is the same in each plot. Or does that already happen? Want the intuition that, the more predictive the model, the smaller the remaining variation in the residuals. The below is from chapter 7. -->
-<div class="sourceCode" id="cb756"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb769"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">outcome</span> <span class="op">&lt;-</span> <span class="va">ch8</span> <span class="op">%&gt;%</span> 
   <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span><span class="va">age</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
     <span class="fu">geom_histogram</span><span class="op">(</span>bins <span class="op">=</span> <span class="fl">100</span><span class="op">)</span> <span class="op">+</span>
@@ -2813,23 +2535,23 @@ FIGURE 8.3: Courage
 
 <span class="va">outcome</span> <span class="op">+</span> <span class="va">fitted</span> <span class="op">+</span> <span class="va">res</span> <span class="op">+</span>
   <span class="fu">plot_annotation</span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Decomposition of Height into Fitted Values and Residuals"</span><span class="op">)</span></code></pre></div>
-<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-601-1.png" width="100%"></div>
+<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-587-1.png" width="100%"></div>
 <p>The three plots are structured like our equation and table above. A value in the left plot is the sum of one value from the middle plot plus one from the right plot.</p>
 <ul>
 <li><p>The actual age distribution looks like a normal distribution. It is centered around 43, and it has a standard deviation of about 12 years.</p></li>
 <li><p>The middle plot for the fitted values shows only two adjacent spikes, which represent the estimates for Democrats and Republicans.</p></li>
 <li><p>Since the residuals plot represents the difference between the other two plots, its distribution looks like the first plot.</p></li>
 </ul>
-<!-- DK: All unclear and would benefit from clean up. -->
+<!-- All unclear and would benefit from clean up. -->
 </div>
-<div id="temperance-2" class="section level3" number="8.2.4">
+<div id="temperance-2" class="section level3" number="8.2.3">
 <h3>
-<span class="header-section-number">8.2.4</span> Temperance<a class="anchor" aria-label="anchor" href="#temperance-2"><i class="fas fa-link"></i></a>
+<span class="header-section-number">8.2.3</span> Temperance<a class="anchor" aria-label="anchor" href="#temperance-2"><i class="fas fa-link"></i></a>
 </h3>
 <div class="figure">
-<span id="fig:unnamed-chunk-602"></span>
+<span id="fig:unnamed-chunk-588"></span>
 <img src="other/images/Temperance.jpg" alt="Temperance" width="100%"><p class="caption">
-FIGURE 8.4: Temperance
+FIGURE 8.3: Temperance
 </p>
 </div>
 <p>Recall the first questions with which we began this section:</p>
@@ -2838,12 +2560,12 @@ FIGURE 8.4: Temperance
 </ul>
 <p>So far we have only tried our model on people from our data set whose real age we already knew. This is helpful to understand the model, but our ultimate goal is to understand more about the real world, about people we don’t yet know much about. Temperance guides us to make meaningful predictions and to become aware of their known and unknown limitations.</p>
 <p>Start with a simple question, what are the chances that a random Democrat is over 50 years old? First, we create a tibble with the desired input for our model. In our case the tibble has a variable named “party” which contains a single observation with the value “Democrat.” This is a bit different than Chapter <a href="two-parameters.html#two-parameters">7</a>.</p>
-<div class="sourceCode" id="cb757"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb770"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">new_obs</span> <span class="op">&lt;-</span> <span class="fu">tibble</span><span class="op">(</span>party <span class="op">=</span> <span class="st">"Democrat"</span><span class="op">)</span></code></pre></div>
-<!-- DK: Does this D_age work? If so, similar discussion should be used more broadly. Also discuss R_age. Even Person_age for a random person, an analysis which accounts for the mix of Rs and Ds in the sample/population. -->
+<!-- Does this D_age work? If so, similar discussion should be used more broadly. Also discuss R_age. Even Person_age for a random person, an analysis which accounts for the mix of Rs and Ds in the sample/population. -->
 <p>Use <code><a href="https://mc-stan.org/rstanarm/reference/posterior_predict.stanreg.html">posterior_predict()</a></code> to create draws from the posterior for this scenario. Note that we have a new posterior distribution under consideration here. The unknown parameter, call it <span class="math inline">\(D_{age}\)</span>, is the age of a Democrat. This could be the age of a randomly selected Democrat from the population or of the next Democrat we meet or of the next Democrat we interview on the train platform. The definition of “population” determines the appropriate interpretation. Yet, regardless, <span class="math inline">\(D_{age}\)</span> is an unknown parameter. But it is not one — like <span class="math inline">\(\beta_1\)</span>, <span class="math inline">\(\beta_2\)</span>, or <span class="math inline">\(\sigma\)</span> — for which we have already created a posterior probability distribution. That is why we need <code><a href="https://mc-stan.org/rstanarm/reference/posterior_predict.stanreg.html">posterior_predict()</a></code>.</p>
 <p><code><a href="https://mc-stan.org/rstanarm/reference/posterior_predict.stanreg.html">posterior_predict()</a></code> takes two arguments: the model for which the simulations should be run, and a tibble indicating for which and how many parameters we want to run these simulations. In this case, the model is the one from Courage and the tibble is the one we just created.</p>
-<div class="sourceCode" id="cb758"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb771"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">pp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://mc-stan.org/rstanarm/reference/posterior_predict.stanreg.html">posterior_predict</a></span><span class="op">(</span><span class="va">fit_1</span>, newdata <span class="op">=</span> <span class="va">new_obs</span><span class="op">)</span> <span class="op">%&gt;%</span>
     <span class="fu">as_tibble</span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span>
     <span class="fu">mutate_all</span><span class="op">(</span><span class="va">as.numeric</span><span class="op">)</span>
@@ -2852,19 +2574,19 @@ FIGURE 8.4: Temperance
 <pre><code>## # A tibble: 10 x 1
 ##      `1`
 ##    &lt;dbl&gt;
-##  1  49.1
-##  2  44.8
-##  3  55.0
-##  4  49.3
-##  5  50.9
-##  6  46.3
-##  7  59.8
-##  8  55.4
-##  9  42.2
-## 10  36.0</code></pre>
+##  1  53.3
+##  2  40.6
+##  3  37.0
+##  4  39.6
+##  5  47.0
+##  6  43.8
+##  7  53.1
+##  8  49.6
+##  9  51.9
+## 10  44.0</code></pre>
 <p>We might expect that we can use <code>as_tibble()</code> directly after the object returned <code><a href="https://mc-stan.org/rstanarm/reference/posterior_predict.stanreg.html">posterior_predict()</a></code>. Sadly, for obscure technical reasons, that won’t quite work. So, we need the incantation <code>mutate_all(as.numeric)</code> to make sure that the resulting tibble is well-behaved. This command ensures that every column in the tibble is a simple numeric vector, which is what we want.</p>
 <p>The result are draws from the posterior distribution of the age of a Democrat. It is important to understand that this is not a concrete person from the <code>trains</code> dataset - the algorithm in <code><a href="https://mc-stan.org/rstanarm/reference/posterior_predict.stanreg.html">posterior_predict()</a></code> simply uses the existing data from <code>trains</code> to estimate this posterior distribution.</p>
-<div class="sourceCode" id="cb760"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb773"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">pp</span> <span class="op">%&gt;%</span> 
   <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">`1`</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
     <span class="fu">geom_histogram</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>y <span class="op">=</span> <span class="fu">after_stat</span><span class="op">(</span><span class="va">count</span><span class="op">/</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">count</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>,
@@ -2875,9 +2597,9 @@ FIGURE 8.4: Temperance
          y <span class="op">=</span> <span class="st">"Probability"</span><span class="op">)</span> <span class="op">+</span>
     <span class="fu">scale_y_continuous</span><span class="op">(</span>labels <span class="op">=</span> <span class="fu">scales</span><span class="fu">::</span><span class="fu"><a href="https://scales.r-lib.org/reference/label_percent.html">percent_format</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
     <span class="fu">theme_classic</span><span class="op">(</span><span class="op">)</span></code></pre></div>
-<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-605-1.png" width="100%"></div>
+<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-591-1.png" width="100%"></div>
 <p>Once we have the posterior distribution, we can answer (almost) any reasonable question. In this case, the probability that the next Democrat will be over 50 is around 28%.</p>
-<div class="sourceCode" id="cb761"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb774"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">pp</span><span class="op">$</span><span class="va">`1`</span> <span class="op">&gt;</span> <span class="fl">50</span><span class="op">)</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html">nrow</a></span><span class="op">(</span><span class="va">pp</span><span class="op">)</span></code></pre></div>
 <pre><code>## [1] 0.27</code></pre>
 <p>Recall the second question:</p>
@@ -2885,7 +2607,7 @@ FIGURE 8.4: Temperance
 <li>In a group of three Democrats and three Republicans, what will the age difference be between the oldest Democrat and the youngest Republican?</li>
 </ul>
 <p>As before we start by creating a tibble with the desired input. Note that the name of the column (“party”) and the observations (“Democrat,” “Republican”) must always be <em>exactly</em> as they are in the original data set. This tibble as well as our model can then be used as arguments for <code><a href="https://mc-stan.org/rstanarm/reference/posterior_predict.stanreg.html">posterior_predict()</a></code>:</p>
-<div class="sourceCode" id="cb763"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb776"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">newobs</span> <span class="op">&lt;-</span> <span class="fu">tibble</span><span class="op">(</span>party <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Democrat"</span>, <span class="st">"Democrat"</span>, <span class="st">"Democrat"</span>, 
                         <span class="st">"Republican"</span>, <span class="st">"Republican"</span>,<span class="st">"Republican"</span><span class="op">)</span><span class="op">)</span>
 
@@ -2895,22 +2617,22 @@ FIGURE 8.4: Temperance
 <pre><code>## # A tibble: 4,000 x 6
 ##      `1`   `2`   `3`   `4`   `5`   `6`
 ##    &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
-##  1  42.9  51.9  66.2  51.5  25.3  42.5
-##  2  41.3  35.5  18.2  41.5  36.2  31.8
-##  3  46.1  31.3  55.5  38.4  15.2  37.2
-##  4  65.7  38.0  13.2  14.4  34.5  46.9
-##  5  45.4  59.7  47.9  33.3  43.3  28.9
-##  6  33.8  46.2  52.7  48.6  34.1  19.0
-##  7  55.8  29.4  28.4  25.9  32.6  43.0
-##  8  52.8  44.0  40.4  27.3  33.7  38.4
-##  9  56.4  26.8  62.0  37.8  45.6  54.2
-## 10  48.5  37.9  46.0  42.3  54.2  28.7
+##  1  41.9  58.1  60.5  42.9  40.6  49.7
+##  2  66.0  53.5  27.3  43.0  39.8  33.9
+##  3  13.3  41.1  35.1  26.5  42.4  27.6
+##  4  54.5  42.4  21.4  38.7  63.1  35.4
+##  5  13.9  17.5  37.0  44.9  41.3  55.6
+##  6  49.0  37.9  48.6  32.2  32.8  45.1
+##  7  51.3  48.6  36.3  20.8  53.0  26.6
+##  8  27.6  27.9  35.0  43.3  49.9  41.1
+##  9  38.4  26.1  33.8  41.5  58.5  28.9
+## 10  57.4  36.2  42.5  52.2  51.2  40.6
 ## # … with 3,990 more rows</code></pre>
-<!-- DK: These pp objects are fundamentally flawed because some of the predicted values are absurdly low, even negative! This is not the fault of the model or the code. It is simply that, if sigma is large enough, then the model thinks a negative age is plausible. We should at least mention this, ideally as part of a posterior predictive check, perhaps in a problem set. -->
+<!-- These pp objects are fundamentally flawed because some of the predicted values are absurdly low, even negative! This is not the fault of the model or the code. It is simply that, if sigma is large enough, then the model thinks a negative age is plausible. We should at least mention this, ideally as part of a posterior predictive check. -->
 <p>We have 6 columns: one for each person. <code><a href="https://mc-stan.org/rstanarm/reference/posterior_predict.stanreg.html">posterior_predict()</a></code> does not name the columns, but they are arranged in the same order in which we specified the persons in <code>newobs</code>: D, D, D, R, R, R. To determine the expected age difference, we add code which works with these posterior draws:</p>
 <!-- DK: I am unsure about this code. Would c() in place of c_across() work as well? -->
 <!-- DK: This works without mutate(all...), but it takes much more time than it should because the the pp object still has every column as a ppd object, even after as_tibble(). The rest of the code still works, but takes a 100x longer than it should. Maybe that is a better approach for handling the ppd problem? Just ignore it and take the time hit? -->
-<div class="sourceCode" id="cb765"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb778"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">pp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://mc-stan.org/rstanarm/reference/posterior_predict.stanreg.html">posterior_predict</a></span><span class="op">(</span><span class="va">fit_1</span>, newdata <span class="op">=</span> <span class="va">newobs</span><span class="op">)</span> <span class="op">%&gt;%</span>
     <span class="fu">as_tibble</span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span>
     <span class="fu">mutate_all</span><span class="op">(</span><span class="va">as.numeric</span><span class="op">)</span> <span class="op">%&gt;%</span> 
@@ -2937,19 +2659,19 @@ FIGURE 8.4: Temperance
 ## # Rowwise: 
 ##    dem_1 dem_2 dem_3 rep_1 rep_2 rep_3 dems_oldest reps_youngest age_diff
 ##    &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;       &lt;dbl&gt;         &lt;dbl&gt;    &lt;dbl&gt;
-##  1  25.4  32.9  60.1  20.0  53.4  18.3        60.1          18.3    41.8 
-##  2  47.1  58.3  32.7  38.8  45.6  46.0        58.3          38.8    19.5 
-##  3  26.9  46.2  60.3  55.0  71.2  32.7        60.3          32.7    27.6 
-##  4  17.8  26.2  25.5  31.4  27.5  54.8        26.2          27.5    -1.31
-##  5  48.2  51.2  40.0  31.3  36.4  51.4        51.2          31.3    19.9 
-##  6  29.3  29.2  33.5  52.1  24.4  38.7        33.5          24.4     9.07
-##  7  41.6  32.9  47.4  42.3  43.7  31.1        47.4          31.1    16.3 
-##  8  43.7  42.4  72.2  40.9  51.3  26.5        72.2          26.5    45.7 
-##  9  51.6  38.6  21.2  36.8  73.3  35.7        51.6          35.7    15.9 
-## 10  30.8  55.5  31.0  52.7  47.5  50.8        55.5          47.5     7.99
+##  1  81.0  30.7  40.6  61.6  23.1  30.6        81.0          23.1     57.8
+##  2  59.8  22.1  55.5  18.8  45.5  56.8        59.8          18.8     41.0
+##  3  29.6  38.1  45.7  42.4  23.2  42.4        45.7          23.2     22.5
+##  4  58.8  57.4  72.0  34.7  15.2  23.6        72.0          15.2     56.8
+##  5  25.8  34.0  30.2  52.5  44.1  47.1        34.0          44.1    -10.0
+##  6  40.6  35.7  41.2  56.1  28.3  28.2        41.2          28.2     13.0
+##  7  34.9  51.6  28.1  37.5  38.8  30.2        51.6          30.2     21.4
+##  8  47.9  45.3  46.9  30.5  40.8  39.4        47.9          30.5     17.4
+##  9  76.8  42.5  55.1  27.2  53.8  40.7        76.8          27.2     49.6
+## 10  24.5  35.4  64.9  37.2  33.5  58.2        64.9          33.5     31.4
 ## # … with 3,990 more rows</code></pre>
 <p>The plotting code is similar to what we have seen before:</p>
-<div class="sourceCode" id="cb767"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb780"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">pp</span> <span class="op">%&gt;%</span>  
   <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">age_diff</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
     <span class="fu">geom_histogram</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>y <span class="op">=</span> <span class="fu">after_stat</span><span class="op">(</span><span class="va">count</span><span class="op">/</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">count</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>,
@@ -2960,18 +2682,18 @@ FIGURE 8.4: Temperance
          y <span class="op">=</span> <span class="st">"Probability"</span><span class="op">)</span> <span class="op">+</span>
     <span class="fu">scale_y_continuous</span><span class="op">(</span>labels <span class="op">=</span> <span class="fu">scales</span><span class="fu">::</span><span class="fu"><a href="https://scales.r-lib.org/reference/label_percent.html">percent_format</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
     <span class="fu">theme_classic</span><span class="op">(</span><span class="op">)</span></code></pre></div>
-<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-609-1.png" width="100%"></div>
+<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-595-1.png" width="100%"></div>
 <p>In words, we would expect the oldest Democrat to be about 22 years older than the youngest Republican, but we would not be too surprised if the oldest Democrat was actually younger than the youngest Republican in a group of 6.</p>
 </div>
-<div id="addendum" class="section level3" number="8.2.5">
+<div id="addendum" class="section level3" number="8.2.4">
 <h3>
-<span class="header-section-number">8.2.5</span> Addendum<a class="anchor" aria-label="anchor" href="#addendum"><i class="fas fa-link"></i></a>
+<span class="header-section-number">8.2.4</span> Addendum<a class="anchor" aria-label="anchor" href="#addendum"><i class="fas fa-link"></i></a>
 </h3>
 <p>Instead of parameterizing this model without an intercept, we could have used one. In that case, the math would be:</p>
 <p><span class="math display">\[ y_i = \beta_0  + \beta_1 democratic_i + \epsilon_i\]</span>
 The interpretations of the parameters are different from the prior model. <span class="math inline">\(\beta_0\)</span> is now the average age of Republicans. This is the same interpretation as <span class="math inline">\(\beta_1\)</span> in the original set up. <span class="math inline">\(\beta_1\)</span> is now the difference between the the average age of Republicans and that of Democrats.</p>
 <p>To fit this model, we use the exact same code as before, except without the <code>-1</code> in the <code>formula</code> argument.</p>
-<div class="sourceCode" id="cb768"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb781"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://mc-stan.org/rstanarm/reference/stan_glm.html">stan_glm</a></span><span class="op">(</span><span class="va">age</span> <span class="op">~</span> <span class="va">party</span>, 
          data <span class="op">=</span> <span class="va">trains</span>, 
          seed <span class="op">=</span> <span class="fl">98</span>,
@@ -3006,47 +2728,20 @@ The interpretations of the parameters are different from the prior model. <span 
 <p><em>What is the average treatment effect, of exposing people to Spanish-speakers, on their attitudes toward immigration?</em></p>
 <p><em>What is the largest causal effect which still has a 1 in 10 chance of occurring?</em></p>
 <p>Models help us answer questions better than we could without those models, but only if we follow the Cardinal Virtues.</p>
-<div id="wisdom-4" class="section level3" number="8.3.1">
+<div id="justice-3" class="section level3" number="8.3.1">
 <h3>
-<span class="header-section-number">8.3.1</span> Wisdom<a class="anchor" aria-label="anchor" href="#wisdom-4"><i class="fas fa-link"></i></a>
+<span class="header-section-number">8.3.1</span> Justice<a class="anchor" aria-label="anchor" href="#justice-3"><i class="fas fa-link"></i></a>
 </h3>
 <div class="figure">
-<span id="fig:unnamed-chunk-611"></span>
-<img src="other/images/Wisdom.jpg" alt="Wisdom" width="100%"><p class="caption">
-FIGURE 8.5: Wisdom
-</p>
-</div>
-<p><em>Look at your data!</em> Before making a model which seeks to explain <code>att_end</code>, we should plot <code>att_end</code> and the variable we think is connected to it.</p>
-<div class="sourceCode" id="cb770"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">ch8</span> <span class="op">%&gt;%</span>
-  <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">treatment</span>, y <span class="op">=</span> <span class="va">att_end</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> 
-  <span class="fu">geom_jitter</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> 
-  <span class="fu">labs</span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Attitude End and Treatment in Enos (2014)"</span>,
-       subtitle <span class="op">=</span> <span class="st">"Did the treatment make people more conservative?"</span>,
-       x <span class="op">=</span> <span class="st">"Treatment"</span>,
-       y <span class="op">=</span> <span class="st">"Attitude After Experiment"</span><span class="op">)</span></code></pre></div>
-<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-612-1.png" width="100%"></div>
-<p>Treated individuals seem to have a higher values for <code>att_end</code> than control individuals, although there is a great deal of variation in both.</p>
-<!-- DK: Could do more here. -->
-<p>We are still using the data from <span class="citation"><a href="references.html#ref-enos2014" role="doc-biblioref">Enos</a> (<a href="references.html#ref-enos2014" role="doc-biblioref">2014</a>)</span>. Yet the world is a very different place today! Is data from 2012, four years before Donald Trump’s election as president, still relevant? Can we generalize data from Boston commuters to other people in Massachusetts, to other people in the US? There are no obvious answers to these questions. <em>The data we have is never a perfect match to the problem we face because data is always old.</em> The world is constantly changing. To use old data, we need to make assumptions about the stability of our model of the world and of the parameters we are estimating. Whether those assumptions are reasonable is a difficult question, one that requires knowledge about the world as it was and the world as it now is. <em>Math won’t save us.</em></p>
-<p>The issue is always: Do the data we have and the data we want to have come from the same population? If there is no connection between the two, progress is impossible. But, in this case, if we are willing to consider the population to be US residents over the last decade (including today), and if we are willing to assume that our data set of 115 individuals is representative of that population, then we can use our data to create a model to answer our question.</p>
-<p>Ethical issues are tricky, or at least trickier than they were in the context of models in which the dependent variable was height or age. (And the ethical issues in conducting the experiment in the first place are non-trivial.) Assume we make a good model. What is to prevent someone from using that information to, say, influence voting and donations? Imagine a Republican Senate candidate who hires Spanish-speakers to ride commuter trains in order to shift voters’ attitudes toward immigration in a conservative direction. She believes (correctly?) that doing so will increase her odds of winning the election. Is that the sort of knowledge we seek to create? We can make such models. Indeed, the purpose of this chapter is to show you how to do so! But should you make those models?</p>
-</div>
-<div id="justice-3" class="section level3" number="8.3.2">
-<h3>
-<span class="header-section-number">8.3.2</span> Justice<a class="anchor" aria-label="anchor" href="#justice-3"><i class="fas fa-link"></i></a>
-</h3>
-<div class="figure">
-<span id="fig:unnamed-chunk-613"></span>
+<span id="fig:unnamed-chunk-597"></span>
 <img src="other/images/Justice.jpg" alt="Justice" width="100%"><p class="caption">
-FIGURE 8.6: Justice
+FIGURE 8.4: Justice
 </p>
 </div>
 <p>The two elements of Justice in a data science project remain the same: the Preceptor Table and the mathematical formula.</p>
 <!-- Three elements: representativeness, validity, and functional form (linear or logistic or something else) -->
 <p>A Preceptor Table for this model would look very similar to the one in the first half of this chapter, except that we have now possible outcomes for each individual: <code>att_end</code> if they are exposed to treatment and <code>att_end</code> if they are exposed to control.</p>
-<!-- DK: We need to add Preceptor Tables here and elsewhere. The below one is wrong because it does not show two potential outcomes.  Should use proper potential outcome notation, as introduced in chapter 4. -->
-<!-- MM: Agree: Preceptor tables need to be added here as well as in wisdom -->
+<!-- We need to add Preceptor Tables here and in Wisdom. The below one is wrong because it does not show two potential outcomes.  Should use proper potential outcome notation, as introduced in chapter 4. -->
 <p>The math for this model is exactly the same as the math for the predictive model in the first part of this chapter, although we change the notation a bit for clarity.</p>
 <p><span class="math display">\[ y_i = \beta_1 treatment_i + \beta_2 control_i + \epsilon_i\]</span></p>
 <p>where 
@@ -3055,7 +2750,6 @@ FIGURE 8.6: Justice
 <span class="math display">\[\epsilon_i \sim N(0, \sigma^2)\]</span></p>
 <!-- DK: make these sections much more similar across the chapters, always separating out the data and the paramters -->
 <p>Nothing has changed, except for the meaning of the data items and the interpretations of the parameters.</p>
-<!-- MM: Possibly directly compare to add clarity to how meaning/interpretations change -->
 <ul>
 <li><p>On the left-hand side we have the outcome, <span class="math inline">\(y_i\)</span>, which is the variable to be explained. In our case, this is a person’s attitude toward immigration after the experiment is complete. <span class="math inline">\(y_i\)</span> takes on integer values between 3 and 15 inclusive.</p></li>
 <li><p>On the right-hand side we first have the part contained in the model, consisting of two similar terms. The two terms stand for Treated and Control and work as follows. Each term consists of a parameter and a data point. <span class="math inline">\(\beta_1\)</span> is the average attitude toward immigration for treated individuals — those exposed to Spanish-speakers — in the population. <span class="math inline">\(\beta_2\)</span> is the average attitude toward immigration for control individuals — those not exposed to Spanish-speakers — in the population. The <span class="math inline">\(x\)</span>’s are our explanatory variables and take the values 1 or 0. If person <span class="math inline">\(i\)</span> is Treated, <span class="math inline">\(treatment_i = 1\)</span> and <span class="math inline">\(control_i = 0\)</span>. If person <span class="math inline">\(i\)</span> is Control, <span class="math inline">\(treatment_i = 0\)</span> and <span class="math inline">\(control_i = 1\)</span>. In other words, these are binary variables and are mutually exclusive – if you are Treated, you cannot also be Control.</p></li>
@@ -3066,18 +2760,18 @@ FIGURE 8.6: Justice
 <li><p>The small <span class="math inline">\(i\)</span>’s are an index for the data set. It is equivalent to the “ID” column in our Preceptor Table and simply states that the outcome for person <span class="math inline">\(i\)</span> is explained by the predictor variables (<span class="math inline">\(treatment\)</span> and <span class="math inline">\(control\)</span>) for person <span class="math inline">\(i\)</span>, along with an error term.</p></li>
 </ul>
 </div>
-<div id="courage-3" class="section level3" number="8.3.3">
+<div id="courage-3" class="section level3" number="8.3.2">
 <h3>
-<span class="header-section-number">8.3.3</span> Courage<a class="anchor" aria-label="anchor" href="#courage-3"><i class="fas fa-link"></i></a>
+<span class="header-section-number">8.3.2</span> Courage<a class="anchor" aria-label="anchor" href="#courage-3"><i class="fas fa-link"></i></a>
 </h3>
 <div class="figure">
-<span id="fig:unnamed-chunk-614"></span>
+<span id="fig:unnamed-chunk-598"></span>
 <img src="other/images/Courage.jpg" alt="Courage" width="100%"><p class="caption">
-FIGURE 8.7: Courage
+FIGURE 8.5: Courage
 </p>
 </div>
 <p>With Justice satisfied, we gather our Courage and fit the model. Note that, except for the change in variable names, the code is exactly the same as it was above, in our predictive model for age. <em>Predictive models and causal models use the same math and the same code.</em> The differences, and they are very important, lie in the interpretation of the results, not in their creation.</p>
-<div class="sourceCode" id="cb771"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb783"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">fit_2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://mc-stan.org/rstanarm/reference/stan_glm.html">stan_glm</a></span><span class="op">(</span><span class="va">att_end</span> <span class="op">~</span> <span class="va">treatment</span> <span class="op">-</span> <span class="fl">1</span>, 
                       data <span class="op">=</span> <span class="va">trains</span>, 
                       seed <span class="op">=</span> <span class="fl">45</span>,
@@ -3107,7 +2801,7 @@ FIGURE 8.7: Courage
 <p>But, in contemporary academic research, the phrase “confidence interval” is usually given a “Frequentist” interpretation. (The biggest divide in statistics is between Bayesians and Frequentist interpretations. The Frequentist approach, also known as “Classical” statistics, has been dominant for 100 years. Its power is fading, which is why this textbook uses the Bayesian approach.) For a Frequentist, a 95% confidence interval means that, if we were to apply the procedure we used in an infinite number of future situations like this, we would expect the true value to fall within the calculated confidence intervals 95% of the time. In academia, a distinction is sometimes made between <em>confidence intervals</em> (which use the Frequentist interpretation) and <em>credible intervals</em> (which use the Bayesian interpretation). We won’t worry about that difference in this <em>Primer</em>.</p>
 <p>Let’s look at the full posteriors for both <span class="math inline">\(\beta_1\)</span> and <span class="math inline">\(\beta_2\)</span>.</p>
 <!-- DK: Change Parameter levels to something nice. -->
-<div class="sourceCode" id="cb773"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb785"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">fit_2</span> <span class="op">%&gt;%</span> 
   <span class="fu">as_tibble</span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span> 
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="op">-</span><span class="va">sigma</span><span class="op">)</span> <span class="op">%&gt;%</span> 
@@ -3125,21 +2819,21 @@ FIGURE 8.7: Courage
          y <span class="op">=</span> <span class="st">"Probability"</span><span class="op">)</span> <span class="op">+</span>
     <span class="fu">scale_y_continuous</span><span class="op">(</span>labels <span class="op">=</span> <span class="fu">scales</span><span class="fu">::</span><span class="fu"><a href="https://scales.r-lib.org/reference/label_percent.html">percent_format</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> 
     <span class="fu">theme_classic</span><span class="op">(</span><span class="op">)</span></code></pre></div>
-<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-616-1.png" width="100%"></div>
+<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-600-1.png" width="100%"></div>
 <p>It appears that the affect of the treatment is to change people’s attitudes to be more conservative about immigration issues. Which is somewhat surprising!</p>
 <p>We can decompose the the dependent variable, <code>att_end</code> into two parts: the fitted values and the residuals. There are only two possible fitted values, one for the Treated and one for the Control. The residuals, as always, are simply the difference between the outcomes and the fitted values.</p>
-<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-617-1.png" width="100%"></div>
+<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-601-1.png" width="100%"></div>
 <p>The smaller the spread of the residuals, the better a job the model is doing of explaining the outcomes.</p>
 <!-- dd explanation of fit similar to how it was done previously. Can go faster, because we do not need to repeat everything.  -->
 </div>
-<div id="temperance-3" class="section level3" number="8.3.4">
+<div id="temperance-3" class="section level3" number="8.3.3">
 <h3>
-<span class="header-section-number">8.3.4</span> Temperance<a class="anchor" aria-label="anchor" href="#temperance-3"><i class="fas fa-link"></i></a>
+<span class="header-section-number">8.3.3</span> Temperance<a class="anchor" aria-label="anchor" href="#temperance-3"><i class="fas fa-link"></i></a>
 </h3>
 <div class="figure">
-<span id="fig:unnamed-chunk-618"></span>
+<span id="fig:unnamed-chunk-602"></span>
 <img src="other/images/Temperance.jpg" alt="Temperance" width="100%"><p class="caption">
-FIGURE 8.8: Temperance
+FIGURE 8.6: Temperance
 </p>
 </div>
 <p>Recall the first question with which we began this section:</p>
@@ -3147,7 +2841,7 @@ FIGURE 8.8: Temperance
 <li>What is the average treatment effect, of exposing people to Spanish-speakers, on their attitudes toward immigration?</li>
 </ul>
 <!-- DK: Below is also not clear. --><p>Chapter <a href="rubin-causal-model.html#rubin-causal-model">4</a> defined the <em>average treatment effect</em>. One simple estimator of the average treatment effect is the difference between <span class="math inline">\(\beta_1\)</span> and <span class="math inline">\(\beta_2\)</span>. After all, the definition of <span class="math inline">\(\beta_1\)</span> is the average attitude toward immigration, of the population, for anyone, under exposure to the treatment. So, <span class="math inline">\(\beta_1 - \beta_2\)</span> is the average treatment effect for the population, roughly 1.5. However, estimating the posterior probability distribution for this parameter is tricky, unless we make use of the posterior distributions of <span class="math inline">\(\beta_1\)</span> and <span class="math inline">\(\beta_2\)</span>. With that information, the problem is simple:</p>
-<div class="sourceCode" id="cb774"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb786"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">fit_2</span> <span class="op">%&gt;%</span> 
   <span class="fu">as_tibble</span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span> 
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>ate <span class="op">=</span> <span class="va">treatmentTreated</span> <span class="op">-</span> <span class="va">treatmentControl</span><span class="op">)</span> <span class="op">%&gt;%</span> 
@@ -3160,11 +2854,11 @@ FIGURE 8.8: Temperance
          y <span class="op">=</span> <span class="st">"Probability"</span><span class="op">)</span> <span class="op">+</span>
     <span class="fu">scale_y_continuous</span><span class="op">(</span>labels <span class="op">=</span> <span class="fu">scales</span><span class="fu">::</span><span class="fu"><a href="https://scales.r-lib.org/reference/label_percent.html">percent_format</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
     <span class="fu">theme_classic</span><span class="op">(</span><span class="op">)</span></code></pre></div>
-<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-619-1.png" width="100%"></div>
+<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-603-1.png" width="100%"></div>
 <p>Could the true value of the average treatment effect be as much as 2 or as little as 1? Of course! The most likely value is around 1.5, but the variation in the data and the smallness of our sample cause the estimate to be imprecise. However, it is quite unlikely that the true average treatment effect is below zero.</p>
-<!-- MM: establish that approximate 1.5 difference can be seen by the attitude posterior from courage -->
+<!-- Establish that approximate 1.5 difference can be seen by the attitude posterior from courage -->
 <p>We can use <code><a href="https://mc-stan.org/rstanarm/reference/posterior_linpred.stanreg.html">posterior_epred()</a></code> to answer this question. Create a tibble and use it as we have done before:</p>
-<div class="sourceCode" id="cb775"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb787"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">newobs</span> <span class="op">&lt;-</span> <span class="fu">tibble</span><span class="op">(</span>treatment <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Treated"</span>, <span class="st">"Control"</span><span class="op">)</span><span class="op">)</span>
 
 <span class="va">pe</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://mc-stan.org/rstanarm/reference/posterior_linpred.stanreg.html">posterior_epred</a></span><span class="op">(</span><span class="va">fit_2</span>, <span class="va">newobs</span><span class="op">)</span> <span class="op">%&gt;%</span> 
@@ -3187,7 +2881,7 @@ FIGURE 8.8: Temperance
 ## 10 10.3   8.37 1.88 
 ## # … with 3,990 more rows</code></pre>
 <p>The posterior probability distribution created with <code><a href="https://mc-stan.org/rstanarm/reference/posterior_linpred.stanreg.html">posterior_epred()</a></code> is the same as the one produced by manipulating the parameters directly.</p>
-<div class="sourceCode" id="cb777"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb789"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">pe</span> <span class="op">%&gt;%</span> 
   <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">ate</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
     <span class="fu">geom_histogram</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>y <span class="op">=</span> <span class="fu">after_stat</span><span class="op">(</span><span class="va">count</span><span class="op">/</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">count</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>,
@@ -3198,7 +2892,7 @@ FIGURE 8.8: Temperance
          y <span class="op">=</span> <span class="st">"Probability"</span><span class="op">)</span> <span class="op">+</span>
     <span class="fu">scale_y_continuous</span><span class="op">(</span>labels <span class="op">=</span> <span class="fu">scales</span><span class="fu">::</span><span class="fu"><a href="https://scales.r-lib.org/reference/label_percent.html">percent_format</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
     <span class="fu">theme_classic</span><span class="op">(</span><span class="op">)</span></code></pre></div>
-<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-621-1.png" width="100%"></div>
+<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-605-1.png" width="100%"></div>
 <!-- DK: Much more discussion. Explain what a test might be used for in this situation and why we should reject testing. -->
 <p>Our second question:</p>
 <ul>
@@ -3207,7 +2901,7 @@ FIGURE 8.8: Temperance
 <p>Create a tibble which we can pass to <code><a href="https://mc-stan.org/rstanarm/reference/posterior_predict.stanreg.html">posterior_predict()</a></code>. The variables in the tibble which will be passed in as <code>newdata</code>. Fortunately, the tibble we created above is just what we need for this question also.</p>
 <p>Consider the result of <code><a href="https://mc-stan.org/rstanarm/reference/posterior_predict.stanreg.html">posterior_predict()</a></code> for two people, one treated and one control. Take the difference.</p>
 <!-- DK: This goes a bit fast. Slow down. -->
-<div class="sourceCode" id="cb778"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb790"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">pp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://mc-stan.org/rstanarm/reference/posterior_predict.stanreg.html">posterior_predict</a></span><span class="op">(</span><span class="va">fit_2</span>, 
                         newdata <span class="op">=</span> <span class="va">newobs</span><span class="op">)</span> <span class="op">%&gt;%</span>
     <span class="fu">as_tibble</span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span>
@@ -3216,21 +2910,21 @@ FIGURE 8.8: Temperance
   
 <span class="va">pp</span></code></pre></div>
 <pre><code>## # A tibble: 4,000 x 3
-##      `1`   `2`     te
-##    &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt;
-##  1 11.8   8.20  3.57 
-##  2 10.1   9.80  0.319
-##  3 14.7   7.87  6.86 
-##  4 14.8  10.2   4.60 
-##  5 10.8   7.15  3.70 
-##  6  8.39 10.2  -1.83 
-##  7 10.4   8.13  2.26 
-##  8 12.0   3.42  8.57 
-##  9 10.7   6.92  3.76 
-## 10 10.9   7.34  3.54 
+##      `1`   `2`       te
+##    &lt;dbl&gt; &lt;dbl&gt;    &lt;dbl&gt;
+##  1  9.80  4.31  5.49   
+##  2  7.34  6.84  0.505  
+##  3 12.0   7.13  4.89   
+##  4 14.7   9.67  5.04   
+##  5 13.5   7.54  5.91   
+##  6  9.65 14.4  -4.77   
+##  7  9.28  6.42  2.86   
+##  8 12.7   5.88  6.82   
+##  9 10.4  10.4  -0.00962
+## 10  9.68  9.59  0.0967 
 ## # … with 3,990 more rows</code></pre>
 <p>Create a graphic:</p>
-<div class="sourceCode" id="cb780"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb792"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">pp</span> <span class="op">%&gt;%</span> 
   <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">te</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
     <span class="fu">geom_histogram</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>y <span class="op">=</span> <span class="fu">after_stat</span><span class="op">(</span><span class="va">count</span><span class="op">/</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">count</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>,
@@ -3241,13 +2935,13 @@ FIGURE 8.8: Temperance
          y <span class="op">=</span> <span class="st">"Probability"</span><span class="op">)</span> <span class="op">+</span>
     <span class="fu">scale_y_continuous</span><span class="op">(</span>labels <span class="op">=</span> <span class="fu">scales</span><span class="fu">::</span><span class="fu"><a href="https://scales.r-lib.org/reference/label_percent.html">percent_format</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
     <span class="fu">theme_classic</span><span class="op">(</span><span class="op">)</span></code></pre></div>
-<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-623-1.png" width="100%"></div>
+<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-607-1.png" width="100%"></div>
 <p>In this case, we are looking at the distribution of the treatment effect for a single individual. This is very different than the <em>average</em> treatment effect. In particular, it is much more variable. We are looking at one row in the Preceptor Table. For a single individual, <code>att_end</code> can be anywhere from 3 to 15, both under treatment and under control. The causal effect — the difference between the two potential outcomes can, in theory, be anywhere from -12 to +12. Such extreme values are rare, but not impossible.</p>
 <p>The question, however, was interested in the value at the 90th percentile.</p>
-<div class="sourceCode" id="cb781"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb793"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/stats/quantile.html">quantile</a></span><span class="op">(</span><span class="va">pp</span><span class="op">$</span><span class="va">te</span>, prob <span class="op">=</span> <span class="fl">0.9</span><span class="op">)</span></code></pre></div>
 <pre><code>## 90% 
-## 6.9</code></pre>
+## 6.5</code></pre>
 <p>We would not expect a treatment effect of this magnitude to be common, but, at the same time, effects this big and bigger will occur about 10% of the time.</p>
 </div>
 </div>
@@ -3259,43 +2953,18 @@ FIGURE 8.8: Temperance
 <ul>
 <li><em>What would you expect the income to be for a 40-year old?</em></li>
 </ul>
-<div id="wisdom-5" class="section level3" number="8.4.1">
+<div id="justice-4" class="section level3" number="8.4.1">
 <h3>
-<span class="header-section-number">8.4.1</span> Wisdom<a class="anchor" aria-label="anchor" href="#wisdom-5"><i class="fas fa-link"></i></a>
+<span class="header-section-number">8.4.1</span> Justice<a class="anchor" aria-label="anchor" href="#justice-4"><i class="fas fa-link"></i></a>
 </h3>
+<!-- Add representativeness and validity -->
 <div class="figure">
-<span id="fig:unnamed-chunk-625"></span>
-<img src="other/images/Wisdom.jpg" alt="Wisdom" width="100%"><p class="caption">
-FIGURE 8.9: Wisdom
-</p>
-</div>
-<p>Before making a model which seeks to explain <code>income</code>, we should plot it and the variable we think is connected to it.</p>
-<!-- MM: Relate to ideal Preceptor tables -->
-<div class="sourceCode" id="cb783"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">ch8</span> <span class="op">%&gt;%</span>
-  <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">age</span>, y <span class="op">=</span> <span class="va">income</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> 
-  <span class="fu">geom_point</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> 
-  <span class="fu">labs</span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Income and Age"</span>,
-       subtitle <span class="op">=</span> <span class="st">"Older people make more money. Maybe?"</span>,
-       x <span class="op">=</span> <span class="st">"Age"</span>,
-       y <span class="op">=</span> <span class="st">"Income"</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu">scale_y_continuous</span><span class="op">(</span>labels <span class="op">=</span> <span class="fu">scales</span><span class="fu">::</span><span class="fu"><a href="https://scales.r-lib.org/reference/label_dollar.html">dollar_format</a></span><span class="op">(</span>accuracy <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></code></pre></div>
-<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-626-1.png" width="100%"></div>
-<p>Is that data believable? Maybe? One could imagine that income was not recorded exactly and that, therefore, it is not surprising that many people had exactly the same income. Rounding makes different numbers the same, after all. But what about the (almost) complete lack of people reporting income between $150,000 and $250,000? In a real data science project, this puzzle would require further investigation. For now, we ignore the issue and blithely press on.</p>
-<!-- MM: population? -->
-</div>
-<div id="justice-4" class="section level3" number="8.4.2">
-<h3>
-<span class="header-section-number">8.4.2</span> Justice<a class="anchor" aria-label="anchor" href="#justice-4"><i class="fas fa-link"></i></a>
-</h3>
-<!-- MM: Add representativeness and validity -->
-<div class="figure">
-<span id="fig:unnamed-chunk-627"></span>
+<span id="fig:unnamed-chunk-609"></span>
 <img src="other/images/Justice.jpg" alt="Justice" width="100%"><p class="caption">
-FIGURE 8.10: Justice
+FIGURE 8.7: Justice
 </p>
 </div>
-<p>The mathematics for a continuous predictor is unchanged from the intercept-including example we explored in Section <a href="three-parameters.html#addendum">8.2.5</a>:</p>
+<p>The mathematics for a continuous predictor is unchanged from the intercept-including example we explored in Section <a href="three-parameters.html#addendum">8.2.4</a>:</p>
 <p><span class="math display">\[y_i = \beta_0  + \beta_1 age_i + \epsilon_i\]</span></p>
 <p>When comparing two people (persons 1 and 2), the first one year older than the second, <span class="math inline">\(\beta_1\)</span> is the expected difference in their incomes. The algebra is simple. Start with the two individuals.</p>
 <p><span class="math display">\[y_1 = \beta_0  + \beta_1 age_1\]</span>
@@ -3311,18 +2980,18 @@ y_1 - y_2 = \beta_1\]</span></p>
 <p>The algebra demonstrates that <span class="math inline">\(\beta_1\)</span> is the same for all ages. The difference in expected income between two people aged 23 and 24 is the same as the difference between two people aged 80 and 81. Is that plausible? Maybe. <em>The algebra does not lie.</em> When we create a model like this, this is the assumption we are making.</p>
 <p>Note how careful we are not to imply that increasing age by one year “causes” an increase in income. That is nonsense! <em>No causation without manipulation.</em> Since it is impossible to change someone’s age, there is only one potential outcome. With only one potential outcome, a causal effect is not defined.</p>
 </div>
-<div id="courage-4" class="section level3" number="8.4.3">
+<div id="courage-4" class="section level3" number="8.4.2">
 <h3>
-<span class="header-section-number">8.4.3</span> Courage<a class="anchor" aria-label="anchor" href="#courage-4"><i class="fas fa-link"></i></a>
+<span class="header-section-number">8.4.2</span> Courage<a class="anchor" aria-label="anchor" href="#courage-4"><i class="fas fa-link"></i></a>
 </h3>
 <div class="figure">
-<span id="fig:unnamed-chunk-628"></span>
+<span id="fig:unnamed-chunk-610"></span>
 <img src="other/images/Courage.jpg" alt="Courage" width="100%"><p class="caption">
-FIGURE 8.11: Courage
+FIGURE 8.8: Courage
 </p>
 </div>
 <p>The use of <code><a href="https://mc-stan.org/rstanarm/reference/stan_glm.html">stan_glm()</a></code> is the same as usual.</p>
-<div class="sourceCode" id="cb784"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb795"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">fit_3</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://mc-stan.org/rstanarm/reference/stan_glm.html">stan_glm</a></span><span class="op">(</span><span class="va">income</span> <span class="op">~</span> <span class="va">age</span>, 
                   data <span class="op">=</span> <span class="va">trains</span>, 
                   seed <span class="op">=</span> <span class="fl">28</span>,
@@ -3355,26 +3024,25 @@ FIGURE 8.11: Courage
 <li><p>“When comparing” is a great phrase to start the summary of any non-causal model. Avoid language like “associated with” or “leads to” or “implies” or anything which even hints at a causal claim.</p></li>
 </ul>
 <p>Consider our usual decomposition of the outcome into two parts: the model and the error term.</p>
-<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-630-1.png" width="100%"></div>
+<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-612-1.png" width="100%"></div>
 <p>There are scores of different fitted values. Indeed, there are a greater number of different fitted values than there are different outcome values! This is often true for models which have continuous predictor variables, we have here with <code>age</code>.</p>
-<!-- DK: Next step: A scatter plot with the fitted line drawn through it and a residual highlighted. -->
-<!-- DK: Some more discussion! And some plots. Explain what the residuals are. And predicted values! Talk about sigma. More could be done. -->
+<!-- DK: Next step: A scatter plot with the fitted line drawn through it and a residual highlighted. Some more discussion! And some plots. Explain what the residuals are. And predicted values! Talk about sigma. More could be done. -->
 <!-- MM: Agree, some discussion could possibly be one earlier with residuals and predicted values and reinforced throughout -->
 </div>
-<div id="temperance-4" class="section level3" number="8.4.4">
+<div id="temperance-4" class="section level3" number="8.4.3">
 <h3>
-<span class="header-section-number">8.4.4</span> Temperance<a class="anchor" aria-label="anchor" href="#temperance-4"><i class="fas fa-link"></i></a>
+<span class="header-section-number">8.4.3</span> Temperance<a class="anchor" aria-label="anchor" href="#temperance-4"><i class="fas fa-link"></i></a>
 </h3>
 <div class="figure">
-<span id="fig:unnamed-chunk-631"></span>
+<span id="fig:unnamed-chunk-613"></span>
 <img src="other/images/Temperance.jpg" alt="Temperance" width="100%"><p class="caption">
-FIGURE 8.12: Temperance
+FIGURE 8.9: Temperance
 </p>
 </div>
 <p>Recall our question:</p>
 <p><em>What would you expect the income to be for a random 40 year old?</em></p>
 <p>Given that we are looking for an expected value, we use <code><a href="https://mc-stan.org/rstanarm/reference/posterior_linpred.stanreg.html">posterior_epred()</a></code>.</p>
-<div class="sourceCode" id="cb786"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb797"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">newobs</span> <span class="op">&lt;-</span> <span class="fu">tibble</span><span class="op">(</span>age <span class="op">=</span> <span class="fl">40</span><span class="op">)</span>
 
 <span class="va">pe</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://mc-stan.org/rstanarm/reference/posterior_linpred.stanreg.html">posterior_epred</a></span><span class="op">(</span><span class="va">fit_3</span>, newdata <span class="op">=</span> <span class="va">newobs</span><span class="op">)</span> <span class="op">%&gt;%</span> 
@@ -3396,7 +3064,7 @@ FIGURE 8.12: Temperance
 ## 10 147589.
 ## # … with 3,990 more rows</code></pre>
 <p>Plotting is the same as always.</p>
-<div class="sourceCode" id="cb788"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb799"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">pe</span> <span class="op">%&gt;%</span> 
   <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">`1`</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
     <span class="fu">geom_histogram</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>y <span class="op">=</span> <span class="fu">after_stat</span><span class="op">(</span><span class="va">count</span><span class="op">/</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">count</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>,
@@ -3408,8 +3076,8 @@ FIGURE 8.12: Temperance
     <span class="fu">scale_x_continuous</span><span class="op">(</span>labels <span class="op">=</span> <span class="fu">scales</span><span class="fu">::</span><span class="fu"><a href="https://scales.r-lib.org/reference/label_dollar.html">dollar_format</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
     <span class="fu">scale_y_continuous</span><span class="op">(</span>labels <span class="op">=</span> <span class="fu">scales</span><span class="fu">::</span><span class="fu"><a href="https://scales.r-lib.org/reference/label_percent.html">percent_format</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
     <span class="fu">theme_classic</span><span class="op">(</span><span class="op">)</span></code></pre></div>
-<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-633-1.png" width="100%"></div>
-<!-- DK: More discussion! -->
+<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-615-1.png" width="100%"></div>
+<!-- More discussion! -->
 </div>
 </div>
 <div id="liberal-income" class="section level2" number="8.5">
@@ -3420,33 +3088,11 @@ FIGURE 8.12: Temperance
 <p><code>liberal</code>, however, only takes on two values: TRUE and FALSE. In order to model it, we must use the <code>binomial</code> family. We begin, as always, with some questions:</p>
 <p><em>Among all people who have an income $100,000, what proportion are liberal?</em></p>
 <p><em>Assume we have a group of eight people, two of whom make $100,000, two $200,000, two $300,000 and two $400,000. How many will be liberal?</em></p>
-<div id="wisdom-6" class="section level3" number="8.5.1">
+<div id="justice-5" class="section level3" number="8.5.1">
 <h3>
-<span class="header-section-number">8.5.1</span> Wisdom<a class="anchor" aria-label="anchor" href="#wisdom-6"><i class="fas fa-link"></i></a>
+<span class="header-section-number">8.5.1</span> Justice<a class="anchor" aria-label="anchor" href="#justice-5"><i class="fas fa-link"></i></a>
 </h3>
-<!-- MM: Ideal preceptor table -->
-<p>Look at our data.</p>
-<div class="sourceCode" id="cb789"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">ch8</span> <span class="op">%&gt;%</span>
-  <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">income</span>, y <span class="op">=</span> <span class="va">liberal</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> 
-  <span class="fu">geom_jitter</span><span class="op">(</span>width <span class="op">=</span> <span class="fl">0</span>, height <span class="op">=</span> <span class="fl">0.1</span><span class="op">)</span> <span class="op">+</span> 
-  <span class="fu">labs</span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Liberal Status by Income in Trains Dataset"</span>,
-       subtitle <span class="op">=</span> <span class="st">"Where the gap in the income distribution?"</span>,
-       x <span class="op">=</span> <span class="st">"Income"</span>,
-       y <span class="op">=</span> <span class="st">"Liberal"</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu">scale_x_continuous</span><span class="op">(</span>labels <span class="op">=</span> <span class="fu">scales</span><span class="fu">::</span><span class="fu"><a href="https://scales.r-lib.org/reference/label_dollar.html">dollar_format</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></code></pre></div>
-<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-634-1.png" width="100%"></div>
-<p>Why is there only one observation with an income between $135,000 and $250,000? We don’t know. The important thing is to notice it, to explore the variables you are using in the model.</p>
-<!-- MM: Is the data of the same population or close enough? Ch.5 states representativeness is in Justice -->
-<p>The second part of Wisdom is examining whether the data we have is representative of the overall population about which we seek to draw inferences. Our data is from 2012 and includes only Boston-area commuters. Our questions are, apparently, about today. Are they for the world, the US, the Boston-area, or just commuters at these select train stations? We don’t know! The questions are not very precise.</p>
-<p>One of the key jobs of a data scientist is to guide people — our colleagues, bosses and clients — toward asking precise questions. We must help them to translate English into inference. That translation requires precision. In this case, let’s assume that the questions reference Boston-area commuters in 2021.</p>
-<p>So, is the data we have from 2012 representative of the data from 2021 about which we seek to draw inferences? Maybe? There is rarely a correct answer to this question. Some things have changed in Boston and some things have not. Our job is to think about these changes and adjust our confidence in our final answers accordingly. Or, in the worst case scenario, if there is no way to understand our actual data and our desired data as coming from the same population, we must stop the project right there.</p>
-</div>
-<div id="justice-5" class="section level3" number="8.5.2">
-<h3>
-<span class="header-section-number">8.5.2</span> Justice<a class="anchor" aria-label="anchor" href="#justice-5"><i class="fas fa-link"></i></a>
-</h3>
-<!-- MM: Add representativeness and validity -->
+<!-- Add representativeness and validity -->
 <p>Recall the discussion in Section <a href="two-parameters.html#zero-one-outcomes">7.5</a> about the logistic regression model which we use whenever the outcome or dependent variable is binary/logical. The math is there, if you care about math. We don’t, at least not too much. Reminder:</p>
 <p><span class="math display">\[p(\text{Liberal}_i = \text{TRUE}) = \frac{\text{exp}(\beta_0 + \beta_1 \text{income}_i)}{1 + \text{exp}(\beta_0 + \beta_1 \text{income}_i)}\]</span></p>
 <p>This model only has two parameters, <span class="math inline">\(\beta_0\)</span> and <span class="math inline">\(\beta_1\)</span>. But these parameters do not have simple interpretations, unlike the parameters in a linear (or gaussian) model.</p>
@@ -3456,19 +3102,19 @@ The exact mathematics of the model — the parameters, their interpretations —
 <p>Even if the math is ignorable, the causal versus predictive nature of the model is not. Is this a causal model or a predictive model? It depends! It could be causal if you assume that we can <em>manipulate</em> someone’s income, if, that is, there are at least two potential outcomes: person <span class="math inline">\(i\)</span>’s liberal status if she makes X dollars and person <span class="math inline">\(i\)</span>’s liberal status if she makes Y dollars. Remember: <em>No causation without manipulation</em>. The definition of a causal effect is the difference between two potential outcomes. If you only have one outcome, then your model can not be causal.</p>
 <p>In many circumstances, we don’t really care if a model is causal or not. We might only want to forecast/predict/explain the outcome variable. In that case, whether we can interpret the influence of a variable as causal is irrelevant to our use of that variable.</p>
 </div>
-<div id="courage-5" class="section level3" number="8.5.3">
+<div id="courage-5" class="section level3" number="8.5.2">
 <h3>
-<span class="header-section-number">8.5.3</span> Courage<a class="anchor" aria-label="anchor" href="#courage-5"><i class="fas fa-link"></i></a>
+<span class="header-section-number">8.5.2</span> Courage<a class="anchor" aria-label="anchor" href="#courage-5"><i class="fas fa-link"></i></a>
 </h3>
 <p>Fitting a logistic model is easy. We use all the same arguments as usual, but with <code>family = binomial</code> added.</p>
-<div class="sourceCode" id="cb790"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb800"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">fit_4</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://mc-stan.org/rstanarm/reference/stan_glm.html">stan_glm</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">ch8</span>,
                   formula <span class="op">=</span> <span class="va">liberal</span> <span class="op">~</span> <span class="va">income</span>,
                   family <span class="op">=</span> <span class="va">binomial</span>,
                   refresh <span class="op">=</span> <span class="fl">0</span>,
                   seed <span class="op">=</span> <span class="fl">365</span><span class="op">)</span></code></pre></div>
 <p>Having fit the model, we can look at a printed summary. Note the use of the <code>digits</code> argument to display more digits in the printout.</p>
-<div class="sourceCode" id="cb791"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb801"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://docs.ropensci.org/skimr/reference/print.html">print</a></span><span class="op">(</span><span class="va">fit_4</span>, digits <span class="op">=</span> <span class="fl">6</span><span class="op">)</span></code></pre></div>
 <pre><code>## stan_glm
 ##  family:       binomial [logit]
@@ -3486,20 +3132,20 @@ The exact mathematics of the model — the parameters, their interpretations —
 <p>Fitted models tell us about the posterior distributions for the parameters in the formula which defines the model we have estimated. <em>We are assuming that the model is true.</em> And, as discussed in Chapter <a href="one-parameter.html#one-parameter">6</a>, that assumption is always false! Our model is never a perfectly accurate representation of reality. But, if it were perfect, then the posterior distributions which we have created for <span class="math inline">\(\beta_0\)</span>, <span class="math inline">\(\beta_1\)</span>, and so on would be perfect as well.</p>
 <p>When working with a linear model, we will often interpret the meaning of the parameters, as we have already done in the first three sections of this chapter. Such interpretations are much harder with logistic models because the math is much less convenient. So, we won’t even bother to try to understand the meaning of these parameters. However, we can note that <span class="math inline">\(\beta_1\)</span> is negative, suggesting that people with higher incomes are less likely to be liberal.</p>
 </div>
-<div id="temperance-5" class="section level3" number="8.5.4">
+<div id="temperance-5" class="section level3" number="8.5.3">
 <h3>
-<span class="header-section-number">8.5.4</span> Temperance<a class="anchor" aria-label="anchor" href="#temperance-5"><i class="fas fa-link"></i></a>
+<span class="header-section-number">8.5.3</span> Temperance<a class="anchor" aria-label="anchor" href="#temperance-5"><i class="fas fa-link"></i></a>
 </h3>
 <p><em>Among all people who have an income $100,000, what proportion are liberal?</em></p>
 <p>Although our model is now logistic, all the steps in answering a question like this are the same as with a linear/guassian model.</p>
-<div class="sourceCode" id="cb793"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb803"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">newobs</span> <span class="op">&lt;-</span> <span class="fu">tibble</span><span class="op">(</span>income <span class="op">=</span> <span class="fl">100000</span><span class="op">)</span>
 
 <span class="va">pe</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://mc-stan.org/rstanarm/reference/posterior_linpred.stanreg.html">posterior_epred</a></span><span class="op">(</span><span class="va">fit_4</span>, 
                       newdata <span class="op">=</span> <span class="va">newobs</span><span class="op">)</span> <span class="op">%&gt;%</span> 
   <span class="fu">as_tibble</span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <p><code>pe</code> is a tibble with a single vector. That vector is 4,000 draws from the posterior distribution of proportion of people, among those who make $100,000, who are liberal. The population proportion is the same thing as the probability for any single individual.</p>
-<div class="sourceCode" id="cb794"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb804"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">pe</span> <span class="op">%&gt;%</span> 
   <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">`1`</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
     <span class="fu">geom_histogram</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>y <span class="op">=</span> <span class="fu">after_stat</span><span class="op">(</span><span class="va">count</span><span class="op">/</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">count</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>,
@@ -3511,11 +3157,11 @@ The exact mathematics of the model — the parameters, their interpretations —
     <span class="fu">scale_x_continuous</span><span class="op">(</span>labels <span class="op">=</span> <span class="fu">scales</span><span class="fu">::</span><span class="fu"><a href="https://scales.r-lib.org/reference/label_percent.html">percent_format</a></span><span class="op">(</span>accuracy <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
     <span class="fu">scale_y_continuous</span><span class="op">(</span>labels <span class="op">=</span> <span class="fu">scales</span><span class="fu">::</span><span class="fu"><a href="https://scales.r-lib.org/reference/label_percent.html">percent_format</a></span><span class="op">(</span>accuracy <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
     <span class="fu">theme_classic</span><span class="op">(</span><span class="op">)</span></code></pre></div>
-<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-638-1.png" width="100%"></div>
-<!-- MM: Mini discussion of graph? -->
+<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-619-1.png" width="100%"></div>
+<!-- Mini discussion of graph? -->
 <p><em>Assume we have a group of eight people, two of whom make $100,000, two $200,000, two $300,000 and two $400,000. How many will be liberal?</em></p>
 <p>Because we are trying to predict the outcome for a small number of units, we use <code><a href="https://mc-stan.org/rstanarm/reference/posterior_predict.stanreg.html">posterior_predict()</a></code>. The more complex the questions we ask, the more care we need to devote to making the <code>newobs</code> tibble. We use the same <code>rowwise()</code> and <code>c_across()</code> tricks as earlier in the chapter.</p>
-<div class="sourceCode" id="cb795"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb805"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">newobs</span> <span class="op">&lt;-</span> <span class="fu">tibble</span><span class="op">(</span>income <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span><span class="op">(</span><span class="fl">100000</span>, <span class="fl">2</span><span class="op">)</span>,
                             <span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span><span class="op">(</span><span class="fl">200000</span>, <span class="fl">2</span><span class="op">)</span>,
                             <span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span><span class="op">(</span><span class="fl">300000</span>, <span class="fl">2</span><span class="op">)</span>,
@@ -3534,16 +3180,16 @@ The exact mathematics of the model — the parameters, their interpretations —
 ## # Rowwise: 
 ##      `1`   `2`   `3`   `4`   `5`   `6`   `7`   `8` total
 ##    &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
-##  1     0     0     0     0     0     1     0     0     1
-##  2     1     0     1     1     0     1     1     0     5
-##  3     0     1     1     1     0     0     1     1     5
-##  4     1     0     0     0     0     0     1     1     3
-##  5     1     1     0     1     0     1     0     0     4
-##  6     0     1     0     0     1     0     0     0     2
-##  7     0     1     0     1     1     1     1     0     5
-##  8     1     1     1     1     0     1     1     0     6
-##  9     1     1     0     0     1     0     0     0     3
-## 10     0     0     0     0     0     1     1     0     2
+##  1     0     1     1     0     0     0     0     0     2
+##  2     0     0     0     1     0     0     1     0     2
+##  3     0     0     0     1     1     0     0     0     2
+##  4     1     1     0     0     1     0     0     0     3
+##  5     0     1     0     0     0     0     0     0     1
+##  6     0     0     0     0     0     0     0     1     1
+##  7     0     1     0     0     0     1     0     0     2
+##  8     0     1     1     0     0     0     0     0     2
+##  9     0     1     1     0     0     0     0     0     2
+## 10     0     0     0     0     1     0     1     0     2
 ## # … with 3,990 more rows</code></pre>
 <p>Study the <code>pp</code> tibble. Understand its component parts. The first column, for example, is 4,000 draws from the posterior distribution for the liberal status of a random person with an income of $100,000. Note how all the draws are zeroes or ones. That is very different from the draws we have seen before! But it also makes sense. We are making a prediction about a binary variable, a variable which only have two possible values: zero or one. So, any (reasonable!) predictions will only be zero or one.</p>
 <p>The second column is the same thing as the first column. Both are 4,000 draws from the posterior distribution for the liberal status of a random person with an income of $100,000. Yet they also have different values. They are both the same thing and different things, in the same way that <code><a href="https://rdrr.io/r/stats/Normal.html">rnorm(10)</a></code> and <code><a href="https://rdrr.io/r/stats/Normal.html">rnorm(10)</a></code> are the same thing — both are 10 draws from the standard normal distribution — and different things in that the values vary.</p>
@@ -3551,7 +3197,7 @@ The exact mathematics of the model — the parameters, their interpretations —
 <p>The <code>total</code> column is simply the sum of the first eight columns. Having created the building blocks with 8 columns of draws from four different posterior distributions, we can switch our focus to each row. Consider row 2. It has a vector of 8 numbers: <code>1 1 1 0 0 1 0 0</code>. We can treat that vector as a unit of analysis. This is what might happen with our 8 people. The first three might be liberal, the fourth not liberal and so on. This row is just one example of what might happen, one draw from the posterior distribution of possible outcomes for groups of eight people with these incomes.</p>
 <p>We can simplify this draw by taking the sum, or doing anything else which might answer the question with which we are confronted. Posterior distributions are as flexible as individual numbers. We can, more or less, just use algebra to work with them.</p>
 <p>Graphically we have:</p>
-<div class="sourceCode" id="cb797"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb807"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">pp</span> <span class="op">%&gt;%</span> 
   <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">total</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
     <span class="fu">geom_histogram</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>y <span class="op">=</span> <span class="fu">after_stat</span><span class="op">(</span><span class="va">count</span><span class="op">/</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">count</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>,
@@ -3563,7 +3209,7 @@ The exact mathematics of the model — the parameters, their interpretations —
     <span class="fu">scale_x_continuous</span><span class="op">(</span>labels <span class="op">=</span> <span class="fu">scales</span><span class="fu">::</span><span class="fu"><a href="https://scales.r-lib.org/reference/label_number.html">number_format</a></span><span class="op">(</span>accuracy <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
     <span class="fu">scale_y_continuous</span><span class="op">(</span>labels <span class="op">=</span> <span class="fu">scales</span><span class="fu">::</span><span class="fu"><a href="https://scales.r-lib.org/reference/label_percent.html">percent_format</a></span><span class="op">(</span>accuracy <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
     <span class="fu">theme_classic</span><span class="op">(</span><span class="op">)</span></code></pre></div>
-<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-640-1.png" width="100%"></div>
+<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-621-1.png" width="100%"></div>
 <p>As always, there is some <em>truth</em>. If, tomorrow, we were to meet 8 new people, with the specified incomes, a certain number of them would be liberal. If we had the ideal Preceptor Table, we could just look up that number. No data science required. Alas, we don’t know the truth. The bets we can do is to create a posterior distribution for that unknown value, as we have done here. We then need to translate that posterior into English — “The most likely number of liberals is 2 or 3, but a total as low as zero or as high as 5 is also plausible. Having 6 liberals would be really surprising. Having 7 or 8 is almost impossible.”</p>
 <p>Are these two posterior probability distributions perfect? No! This is the central message of the virtue of Temperance. We must demonstrate our humility when we use our models. Recall the distinction between the <em>unknown true distribution</em> and the <em>estimated distribution</em>. The first is the posterior distribution we would create of we understood every detail of the process and could accurately model it. We would still not know the true unknown number, but our posterior distribution for that number would be perfect. Yet, our model is never perfect. We are making all sorts of assumptions behind the scenes. Some of those assumptions are plausible. Others are less so. Either way, the <em>estimated distribution</em> is what we have graphed above.</p>
 <p>The central lesson of Temperance is: Don’t confuse the <em>estimated</em> posterior (which is what you have) with the <em>true</em> posterior (which is what you want). Recognize the unavoidable imperfections in the process. You can still use your estimated posterior — what choice do you have? — but be cautious and humble in doing so. The more that you suspect that your estimated posterior differs from the true posterior, the more humble and cautious you should be.</p>
@@ -3605,40 +3251,36 @@ The exact mathematics of the model — the parameters, their interpretations —
 <li><a class="nav-link" href="#the-questions"><span class="header-section-number">8.1.1</span> The Questions</a></li>
 <li><a class="nav-link" href="#eda-for-trains"><span class="header-section-number">8.1.2</span> EDA for trains</a></li>
 <li><a class="nav-link" href="#population-2"><span class="header-section-number">8.1.3</span> Population</a></li>
-<li><a class="nav-link" href="#population-table"><span class="header-section-number">8.1.4</span> Population Table</a></li>
+<li><a class="nav-link" href="#population-table-1"><span class="header-section-number">8.1.4</span> Population Table</a></li>
 </ul>
 </li>
 <li>
 <a class="nav-link" href="#age-party"><span class="header-section-number">8.2</span> age ~ party</a><ul class="nav navbar-nav">
-<li><a class="nav-link" href="#wisdom-3"><span class="header-section-number">8.2.1</span> Wisdom</a></li>
-<li><a class="nav-link" href="#justice-2"><span class="header-section-number">8.2.2</span> Justice</a></li>
-<li><a class="nav-link" href="#courage-2"><span class="header-section-number">8.2.3</span> Courage</a></li>
-<li><a class="nav-link" href="#temperance-2"><span class="header-section-number">8.2.4</span> Temperance</a></li>
-<li><a class="nav-link" href="#addendum"><span class="header-section-number">8.2.5</span> Addendum</a></li>
+<li><a class="nav-link" href="#justice-2"><span class="header-section-number">8.2.1</span> Justice</a></li>
+<li><a class="nav-link" href="#courage-2"><span class="header-section-number">8.2.2</span> Courage</a></li>
+<li><a class="nav-link" href="#temperance-2"><span class="header-section-number">8.2.3</span> Temperance</a></li>
+<li><a class="nav-link" href="#addendum"><span class="header-section-number">8.2.4</span> Addendum</a></li>
 </ul>
 </li>
 <li>
 <a class="nav-link" href="#att_end-treatment"><span class="header-section-number">8.3</span> att_end ~ treatment</a><ul class="nav navbar-nav">
-<li><a class="nav-link" href="#wisdom-4"><span class="header-section-number">8.3.1</span> Wisdom</a></li>
-<li><a class="nav-link" href="#justice-3"><span class="header-section-number">8.3.2</span> Justice</a></li>
-<li><a class="nav-link" href="#courage-3"><span class="header-section-number">8.3.3</span> Courage</a></li>
-<li><a class="nav-link" href="#temperance-3"><span class="header-section-number">8.3.4</span> Temperance</a></li>
+<li><a class="nav-link" href="#justice-3"><span class="header-section-number">8.3.1</span> Justice</a></li>
+<li><a class="nav-link" href="#courage-3"><span class="header-section-number">8.3.2</span> Courage</a></li>
+<li><a class="nav-link" href="#temperance-3"><span class="header-section-number">8.3.3</span> Temperance</a></li>
 </ul>
 </li>
 <li>
 <a class="nav-link" href="#income-age"><span class="header-section-number">8.4</span> income ~ age</a><ul class="nav navbar-nav">
-<li><a class="nav-link" href="#wisdom-5"><span class="header-section-number">8.4.1</span> Wisdom</a></li>
-<li><a class="nav-link" href="#justice-4"><span class="header-section-number">8.4.2</span> Justice</a></li>
-<li><a class="nav-link" href="#courage-4"><span class="header-section-number">8.4.3</span> Courage</a></li>
-<li><a class="nav-link" href="#temperance-4"><span class="header-section-number">8.4.4</span> Temperance</a></li>
+<li><a class="nav-link" href="#justice-4"><span class="header-section-number">8.4.1</span> Justice</a></li>
+<li><a class="nav-link" href="#courage-4"><span class="header-section-number">8.4.2</span> Courage</a></li>
+<li><a class="nav-link" href="#temperance-4"><span class="header-section-number">8.4.3</span> Temperance</a></li>
 </ul>
 </li>
 <li>
 <a class="nav-link" href="#liberal-income"><span class="header-section-number">8.5</span> liberal ~ income</a><ul class="nav navbar-nav">
-<li><a class="nav-link" href="#wisdom-6"><span class="header-section-number">8.5.1</span> Wisdom</a></li>
-<li><a class="nav-link" href="#justice-5"><span class="header-section-number">8.5.2</span> Justice</a></li>
-<li><a class="nav-link" href="#courage-5"><span class="header-section-number">8.5.3</span> Courage</a></li>
-<li><a class="nav-link" href="#temperance-5"><span class="header-section-number">8.5.4</span> Temperance</a></li>
+<li><a class="nav-link" href="#justice-5"><span class="header-section-number">8.5.1</span> Justice</a></li>
+<li><a class="nav-link" href="#courage-5"><span class="header-section-number">8.5.2</span> Courage</a></li>
+<li><a class="nav-link" href="#temperance-5"><span class="header-section-number">8.5.3</span> Temperance</a></li>
 </ul>
 </li>
 <li><a class="nav-link" href="#summary-8"><span class="header-section-number">8.6</span> Summary</a></li>
