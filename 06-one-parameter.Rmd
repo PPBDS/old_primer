@@ -286,7 +286,7 @@ tactile_sample_urn %>%
 
 What we just demonstrated in this activity is the statistical concept of **sampling**. We want to know the proportion of red beads in the urn, with the urn being our **population**. Performing an exhaustive count of the red and white beads would be too time-consuming. Therefore, it is much more practical to extract a *sample* of 50 beads using the shovel. Using this sample of 50 beads, we estimated the proportion of the urn's beads that are red to be about 34%.
 
-Moreover, because we mixed the beads before each use of the shovel, the samples were random and independent. Because each sample was drawn at random, the samples were different from each other. This is an example of  *sampling variation*. For example, what if instead of selecting 17 beads in our first sample we had selected just 11? Does that mean that the population proportion of the beads is 11/50 or 22%? No! Because we performed 33 trials we can look to our histogram, and see that the peak of the distribution occurs when .35 < $\hat{p}$ < .4 , so it is *very likely* that the proportion of red beads in the entire population will also fall in or near this range. 
+Moreover, because we mixed the beads before each use of the shovel, the samples were random and independent. Because each sample was drawn at random, the samples were different from each other. This is an example of  *sampling variation*. For example, what if instead of selecting 17 beads in our first sample we had selected just 11? Does that mean that the population proportion of the beads is 11/50 or 22%? No! Because we performed 33 trials we can look to our histogram, and see that the peak of the distribution occurs when $.35 < \hat{p} < .4$ , so it is *very likely* that the proportion of red beads in the entire population will also fall in or near this range. 
 
 ## Virtual sampling {#virtual-sampling}
 
@@ -342,7 +342,7 @@ tibble(trial_ID = 1) %>%
 
 There are two levels. There is one row in the tibble for each sample. So far, we have only drawn one sample. Within each row, there is a second level, the tibble which is the sample. That tibble has two variables: `trial_ID` and `color`. This is the advantage to using `slice_sample()`, because it selects all columns of our urn, whereas `sample()` can only sample from a single column. While identifying each individual bead could be irrelevant in our urn scenario, with other problems it could be very useful to have additional data about each individual.
 
-However, it is important to note that the extra data provided by `slice_sample()` comes at a cost: *efficiency*. Because most of us run R Studio on our local machines, each R variable is stored using memory on our computers. As we add more columns or more complex objects to our tibbles, they will take up more memory and become less efficient. For example, `slice_sample()` will store a tibble for each sample, while `sample()` will store a list. And the difference is not negligible!  We can use the handy utility function `object.size()` to know that a tibble with nothing in it takes up `r object.size(tibble())` bytes of memory, while an empty list takes up no memory. While our urn simulation takes up a relatively small amount of storage and we are not overly concerned with optimizing tibble size, it never hurts to practice making our tibbles more efficient. Before working with large data sets that may take several minutes to load, it may be helpful to read this [article about memory in R](http://adv-r.had.co.nz/memory.html) to make sure we understand the implications of using complex datatypes within tibbles, so we can make the most out of our future list-column mapping endeavors. 
+However, it is important to note that the extra data provided by `slice_sample()` comes at a cost: *efficiency*. Because most of us run R Studio on our local machines, each R variable is stored using memory on our computers. As we add more columns or more complex objects to our tibbles, they will take up more memory and become less efficient. For example, `slice_sample()` will store a tibble for each sample, while `sample()` will store a list. And the difference is not negligible!  We can use the handy utility function `object.size()` to know an empty tibble  takes up `r object.size(tibble())` bytes of memory, while an empty list takes up no memory. While our urn simulation takes up a relatively small amount of storage and we are not overly concerned with optimizing tibble size, it never hurts to practice making our tibbles more efficient. Before working with large data sets that may take several minutes to load, it may be helpful to read this [article about memory in R](http://adv-r.had.co.nz/memory.html) to make sure we understand the implications of using complex datatypes within tibbles, so we can make the most out of our future list-column mapping endeavors. 
 
 Now that we've evaluated the implications of `slice_sample()` for our tibble, let's add a column which indicates the number of red beads in the sample taken from the shovel.
 
@@ -951,13 +951,16 @@ This essence of Wisdom is determining whether or not it is solvable, as it is fu
 
 <!-- Change "centered at" to reference p. Use rho instead of p -->
 
+<!-- RS: Is there a specific paragraph you're referencing about changing "centered at" to reference p?   -->
+<!-- RS: Change all p's to rho? -->
+
 #### Getting started
 
-Virtually every problem boils down to attempting to answer a **question** about a **population** using the **prior data** we have. We should explicitly state all 3 before we proceed, to make sure we understand the task at hand. For example, drawing conclusions about the contents of one urn is extremely different than drawing conclusions about all urns. The concept of the population is critical.   
+Virtually every problem boils down to attempting to answer a **question** about a **population** using the **prior**. We should explicitly state all 3 before we proceed, to make sure we understand the task at hand. For example, drawing conclusions about the contents of one urn is extremely different than drawing conclusions about all urns. The concept of the population is critical.   
 
 Let's revisit our first question: *If we get 17 red beads in a random sample of size 50 taken from a mixed urn, what proportion $p$ of the beads in the urn are red?*. We have a *question*: what proportion of the beads in the urn are red? Our question is asking us to solve for one population parameter, $p$.  The subject of the question is the *population*; in this case, the population is *a mixed urn*. "A mixed urn" is very ambiguous, and we do not even know its size, but that is what the question provides us. There is an urn out there, somewhere, for which we want to know the proportion of red beads. 
 
-For the first question we also need to state **our prior**, which is all knowledge we know about a parameter beforehand. The prior is often denoted as $p(\theta)$, the probability distribution of a parameter $\theta$. Essentially, the prior tells us that some values are more likely than others. Without any prior information, the proportion of red beads in the urn is equally likely to be any continuous value between 0 and 1. However, we are given the prior that in a random sample of size 50, 17 beads were red, meaning that the proportion red in our sample is .34. With this knowledge we can realize that the proportion of beads in the urn is far more likely to be around .34 than an extreme value like 0 or 1. We will come back to the prior later in Courage to build our model.  
+For the first question we also need to state **our prior**, which is all knowledge we know about a parameter beforehand. The prior is often denoted as $p(\theta)$, the probability distribution of a parameter $\theta$. Essentially, the prior tells us that some values are more likely than others. Without any prior information, the proportion of red beads in the urn is equally likely to be any continuous value between 0 and 1. However, we are given the prior that in a random sample of size 50, 17 beads were red, meaning that the proportion red in our sample is .34. With this knowledge we can realize that the proportion of beads in the entire urn is far more likely to be around .34 than an extreme value like .02 or .86. We will come back to the prior later in Courage to build our model.  
 
 Now let's break down our second question in a similar fashion to the first. Our *question* is: *what is the probability, using the same urn, that we will draw more than 8 red beads if we use a shovel of size 20?*. The question specifies using the "same urn", so the *population* for both questions is the same. However, what is the *prior* for the second question? The reality is that we need to know the probability of selecting a red bead from the urn before we can determine the probability of selecting more than 8 red beads, and thus our second question is contingent on extracting a posterior probability distribution from the first question. As such, if we successfully pass through Wisdom and Justice, we can use the models we create in Courage to answer this question in Temperance. While that may be a mouthful at the moment, you will receive plenty of practice with the Cardinal Virtues throughout this *Primer*. 
 
@@ -1041,20 +1044,35 @@ Now that we've determined that our data *could* be used, Justice asks if it *sho
 
 **Validity** involves the columns of our data set. Is the meaning of our columns consistent across our prior dataset(s) and ideal Preceptor Table? In our urn scenario, does bead color in our sampled data and bead color in our Preceptor Table mean the same thing? The answer is yes, and validity can be assumed very easily. In Section \@href(two-parameters) analyzing representativeness and validity will become considerably more challenging.  
 
-#### The likelihood
+#### The DGM
 
-The final aspect of Justice is producing a mathematical formula that can model our situation.  
+The final aspect of Justice is producing a mathematical formula that can model our situation. Our models are only as good as the equations we use to make them, so choose with care. 
+
+One of the most important terms in statistics and data science is the **Data Generating Mechanism**, or DGM. The DGM simply is how each individual outcome, $y_i$, comes into existence. In general, the DGM is often denoted as follows: 
+
+$$ y_i  \sim p(y_i | \theta) $$
+
+Don't get caught up by the equation. It just means that our outcome variable is chosen based on some parameter, $\theta$. If we change the value of the parameter, our outcome is likely to change as well. 
+
+We can create a DGM for our specific urn scenario. In this *Primer*, we most frequently use either normal (Gausian) distributions or binomial distributions. In our urn we count the number of red beads selected, and do not count the white beads. This success/failure or TRUE/FALSE relationship strongly suggests we should use a binomial distribution to model our situation. We can rework the DGM equation to suit our needs: 
+
+$$ T_i  \sim B(\rho_r, n = 50) $$
+
+The total number of beads selected in ONE specific experiment with 50 sampled beads, $T_i$, is selected by taking one draw from a binomial distribution with $n = 20$ and an unknown probability $\rho_h$ of the proportion of red beads in the urn.
 
 ### Courage
 
+```{r echo = FALSE}
+knitr::include_graphics("other/images/Courage.jpg")
+```
+
+We've evaluated our data and questions and chosen a mathematical formula. Now it's time to work on our code to create a model to simulate the real world. 
 
 #### Bayesian framework
 
-#### 3 steps for success
+#### 4 steps for success
 
 #### stan_glm()
-
-#### posterior_epred()
 
 Instead of building the joint and conditional probability distributions "by hand" as we did in Chapter \@ref(probability), we can just use `stan_glm()` from the **rstanarm** package. For now our goal is to learn how to interpret the results of `stan_glm()`. Chapter \@ref(two-parameters) will provide a more detailed explanation for the seemingly complex objects we will make. **To be clear, you do not need to fully understand this section or how this code works. This is an introduction, not a formal lesson.**
 
