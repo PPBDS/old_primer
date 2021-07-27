@@ -157,7 +157,7 @@ knitr::include_graphics("06-one-parameter/images/sampling_bowl_1.jpg")
 
 One way to answer this question would be to perform an exhaustive count: remove each bead individually, count the number of red beads, count the number of white beads, and divide the number of red beads by the total number of beads. Call that ratio $p$, the proportion of red beads in the urn. However, this would be a long and tedious process. Therefore, we will use sampling! Consider two questions:
 
-*If we get 17 red beads in a random sample of size 50 taken from the urn, what proportion $p$ of the beads in the urn are red?*
+*If we get 17 red beads in a random sample of size 50 taken from a mixed urn, what proportion $p$ of the beads in the urn are red?*
 
 *What is the probability, using that same urn, that we will draw more than 8 red beads if we use a shovel of size 20?*
 
@@ -563,6 +563,7 @@ We choose a bin width of .04 for all histograms to more easily compare different
 
 Finally, we will perform the same process with 1000 replicates to map the histogram using a shovel size of **100**.
 
+
 ```{r}
 virtual_samples_100 <- tibble(trial_ID = 1:1000) %>% 
   mutate(shovel = map(trial_ID, ~ slice_sample(urn, n = 100))) %>% 
@@ -613,7 +614,7 @@ comparing_sampling_distributions
 
 Observe that as the sample size increases, the histogram becomes taller and narrower. This is because the *variation* of the proportion red for each sample decreases. Remember: A large variation means there are a wide range of values that can be achieved, while smaller variations are concentrated around a specific value. 
 
-Why does variation decrease as sample size increases? If we use a large sample size like 100 or 500, our sample is much more representative of the population simply because more of the population is included. As a result, the proportion red in our sample ($\hat{p}$) will be closer to the population proportion (p).  On the other hand, smaller samples have much more variation because of our old friend chance. We are much more likely to have extreme samples that are not representative of our population. 
+Why does variation decrease as sample size increases? If we use a large sample size like 100 or 500, our sample is much more representative of the population simply because more of the population is included. As a result, the proportion red in our sample ($\hat{p}$) will be closer to the population proportion ($p$).  On the other hand, smaller samples have much more variation because of our old friend chance. We are much more likely to have extreme samples that are not representative of our population. 
 
 Let's attempt to visualize the concept of *variation* a different way. For each sample size, let's plot the proportion red for *all* 1,000 samples. With 3 different shovel sizes, we will have 3,000 total points, with each point representing an instance of sampling from the urn with a specific shovel size. 
 
@@ -723,7 +724,13 @@ This is, approximately, the same result as we saw above, but with 1 re-factored 
 
 Now that we have this framework, there's no need to limit ourselves to the sizes 25, 50, and 100.  Why not try all integers from 1 to 100? We can use the same code, except we'll now set `shovel_size = 1:100`.
 
-```{r, cache = TRUE}
+```{r, echo = FALSE}
+options(rgl.useNULL = TRUE)
+library(rgl)
+library(rayshader)
+```
+
+```{r}
 shovels_100 <- expand_grid(trial_ID = c(1:1000), shovel_size = c(1:100)) %>% 
   mutate(shovel = map(shovel_size, ~ slice_sample(urn, n = .))) %>% 
   mutate(numb_red = map_int(shovel, ~ sum(.$color == "red"))) %>% 
@@ -736,12 +743,12 @@ glimpse(shovels_100)
 
 Now, we have the standard deviation of `prop_red` for all shovel sizes from 1 to 100.  Let's plot that value to see how it changes as the shovel gets larger:
 
-```{r, echo = FALSE, cache = TRUE, fig.cap = "Comparing standard deviations of proportions red for 100 different shovels. The standard deviation decreases at the same rate as the square root of shovel size. The red line shows the standard error."}
+```{r, echo = FALSE, fig.cap = "Comparing standard deviations of proportions red for 100 different shovels. The standard deviation decreases at the same rate as the square root of shovel size. The red line shows the standard error."}
 shovels_100 %>%
  ggplot(aes(x = shovel_size, y = st_dev_p_hat)) +
  geom_point() +
- stat_function(aes(x = 1:100, colour = "red"), 
-               fun = function(.x) 1/(2 * sqrt(.x)), 
+ stat_function(aes(x = 1:100, colour = "red"),
+               fun = function(.x) 1/(2 * sqrt(.x)),
                show.legend = FALSE) +
  labs(x = "Shovel size",
       y = "Standard deviation of the proportion red")
@@ -788,6 +795,8 @@ Third, a **census** is an exhaustive enumeration or counting of all $N$ units in
 Fourth, **sampling** is the act of collecting a sample from the population when we can not, or do not want to, perform a census. The sample size is lower case $n$, as opposed to upper case $N$ for the population's size. Typically the sample size $n$ is much smaller than the population size $N$. In our sampling activities, we used shovels with varying slots to extract samples of size $n$ = 1 through $n$ = 100. 
 
 Fifth, a **point estimate**, also known as a **sample statistic**, is a measure computed from a sample that *estimates* an unknown population parameter. In our sampling activities, recall that the unknown population parameter was the proportion of red beads and that this is mathematically denoted with $p$. Our point estimate is the *sample proportion*: the proportion of the shovel's beads that are red. In other words, it is our guess at the proportion of the urn's beads that are red. The point estimate of the parameter $p$ is $\hat{p}$. The "hat" on top of the $p$ indicates that it is an estimate of the unknown population proportion $p$. 
+
+<!-- RS: consider moving last 4 definitions to end discussion about sampling mechanisms, and first 4 definitions to the very start of the chapter. This vocab (with exception of point statistics) doesn't really have a purpose here, and should be used in a section where the words are actually used.  -->
 
 Sixth, a sample is said to be **representative** if it roughly *looks like* the population. In other words, are the sample's characteristics a good representation of the population's characteristics? In our sampling activity, are the samples of $n$ beads extracted using our shovels representative of the urn's $N$ = 1000 beads?
 
@@ -926,7 +935,7 @@ MADs and standard deviations are, more or less, the same thing. They are both me
 
 Recall the questions we asked at the beginning of our chapter: 
 
-*If we get 17 red beads in a random sample of size 50 taken from an urn, what proportion $p$ of the beads in the urn are red?*
+*If we get 17 red beads in a random sample of size 50 taken from a mixed urn, what proportion $p$ of the beads in the urn are red?*
 
 *What is the probability, using the same urn, that we will draw more than 8 red beads if we use a shovel of size 20?*
 
@@ -944,11 +953,13 @@ This essence of Wisdom is determining whether or not it is solvable, as it is fu
 
 #### Getting started
 
-Virtually every problem boils down to attempting to answer a **question** about a **population** using the **data** we have. We should explicitly state all 3 before we proceed, to make sure we understand the task at hand. For example, drawing conclusions about the contents of one urn is extremely different than drawing conclusions about all urns. The concept of the population is critical.   
+Virtually every problem boils down to attempting to answer a **question** about a **population** using the **prior data** we have. We should explicitly state all 3 before we proceed, to make sure we understand the task at hand. For example, drawing conclusions about the contents of one urn is extremely different than drawing conclusions about all urns. The concept of the population is critical.   
 
-Let's revisit our first question: *If we get 17 red beads in a random sample of size 50 taken from an urn, what proportion $p$ of the beads in the urn are red?*. We have some *data*: A sample of 50 beads returned 17 red. We also have a *question*: what proportion of the beads in the urn are red? The subject of the question is the *population*; in this case, the population is *an urn*. "An urn" is very ambiguous, and we do not even know its size, but that is what the question provides us. There is an urn out there, somewhere, for which we want to know the proportion of red beads. 
+Let's revisit our first question: *If we get 17 red beads in a random sample of size 50 taken from a mixed urn, what proportion $p$ of the beads in the urn are red?*. We have a *question*: what proportion of the beads in the urn are red? Our question is asking us to solve for one population parameter, $p$.  The subject of the question is the *population*; in this case, the population is *a mixed urn*. "A mixed urn" is very ambiguous, and we do not even know its size, but that is what the question provides us. There is an urn out there, somewhere, for which we want to know the proportion of red beads. 
 
-Now let's break down our second question in a similar fashion to the first. Our *question* is: *what is the probability, using the same urn, that we will draw more than 8 red beads if we use a shovel of size 20?*. The question specifies using the "same urn", so the *population* for both questions is the same. However, where is the *data* for the second question? The reality is that we need to know the probability of selecting a red bead from the urn before we can determine the probability of selecting more than 8 red beads, and thus our second question is contingent on extracting a posterior probability distribution from the first question. As such, we will only worry about answering the second question after we answer the first. 
+For the first question we also need to state **our prior**, which is all knowledge we know about a parameter beforehand. The prior is often denoted as $p(\theta)$, the probability distribution of a parameter $\theta$. Essentially, the prior tells us that some values are more likely than others. Without any prior information, the proportion of red beads in the urn is equally likely to be any continuous value between 0 and 1. However, we are given the prior that in a random sample of size 50, 17 beads were red, meaning that the proportion red in our sample is .34. With this knowledge we can realize that the proportion of beads in the urn is far more likely to be around .34 than an extreme value like 0 or 1. We will come back to the prior later in Courage to build our model.  
+
+Now let's break down our second question in a similar fashion to the first. Our *question* is: *what is the probability, using the same urn, that we will draw more than 8 red beads if we use a shovel of size 20?*. The question specifies using the "same urn", so the *population* for both questions is the same. However, what is the *prior* for the second question? The reality is that we need to know the probability of selecting a red bead from the urn before we can determine the probability of selecting more than 8 red beads, and thus our second question is contingent on extracting a posterior probability distribution from the first question. As such, if we successfully pass through Wisdom and Justice, we can use the models we create in Courage to answer this question in Temperance. While that may be a mouthful at the moment, you will receive plenty of practice with the Cardinal Virtues throughout this *Primer*. 
 
 After successfully breaking down the problem, our next step is to construct a Preceptor Table. 
 
@@ -962,11 +973,10 @@ knitr::include_graphics("06-one-parameter/images/here_we_go.png")
 
 An actual Preceptor Table shows what we *actually* know. Accordingly, the table is riddled with question marks that the real world saddles us with. The ideal Preceptor Table is the Preceptor Table with no question marks, and a reasonable number of rows and columns. With an ideal Preceptor Table, there is no need for inference; the estimand is a simple matter of arithmetic. 
 
-To see if our data can answer our question, we first construct the ideal Preceptor Table, which simply requires knowing the color of every bead. Unlike the Rubin Casual Preceptor Tables in Section \@ref(rubin-causal-model), our actual preceptor table only requires one column. We can create the ideal Preceptor Table by performing the exhaustive census of the entire urn: 
+To see if our data can answer our question, we first construct the ideal Preceptor Table, which simply requires knowing the color of every bead in our population. Unlike the Rubin Casual Preceptor Tables in Section \@ref(rubin-causal-model), our actual preceptor table only requires one column. We can create the ideal Preceptor Table by performing the exhaustive census of the entire urn: 
 
 ```{r, echo = FALSE}
 urn %>%
-  arrange(bead_ID, color) %>%
   slice(1:2, 200, 201, 1000) %>%
   mutate(bead_ID = as.character(bead_ID),
          color = as.character(color)) %>%
@@ -978,9 +988,8 @@ urn %>%
              color = "Color") %>%
   tab_style(cell_borders(sides = "right"),
             location = cells_body(columns = c(bead_ID))) %>%
-  tab_style(cell_text(weight = "bold"),
-            location = cells_body(columns = c(bead_ID))) %>%
-  cols_align(align = "center", columns = everything())
+  cols_align(align = "center", columns = everything()) %>%
+  cols_move_to_start(bead_ID)
 ```
 
 &nbsp;
@@ -1014,9 +1023,38 @@ Now, what does our actual Preceptor Table tell us, specifically, about Bead 1? B
 
 We can only claim *for certain* that, of the 50 beads that we sampled (of the total 1000 beads in the urn), 34% were red. If we were making a prediction of the probability of one of our **sampled** beads being red, 34% would be the correct probability. If we were making a prediction of the probability that an **unsampled** bead was red, the answer of 34% would be incorrect, but nor is it likely to be extremely incorrect. The sample does tell us something.
 
-The last step of Wisdom to consider is why some beads **do** get sampled, while others do not. This is a consequence of the sampling mechanism. We need to take any biases into consideration, so we can evaluate the validity and representatives of our data in Justice. Keep in mind that just because our data can answer our question **never** means that we should use it! For example, what if our beads were mixed poorly, and most of the red beads sit at the bottom of the urn. In this case, our sampling mechanism consisting of the shovel with 50 slots after mixing the urn, would produce biased samples that would not be conclusive about the contents of the entire urn. The effects of biases can be determined later in Justice, but we need to know they exist in Wisdom. 
+The last step of Wisdom to consider is why some beads **do** get sampled, while others do not. This is a consequence of the sampling mechanism. We need to take any biases into consideration, so we can evaluate the validity and representatives of our data in Justice. Keep in mind that just because our data can answer our question **never** means that we should use it! For example, what if our beads were mixed poorly, and most of the red beads sit at the bottom of the urn. In that case, our sampling mechanism consisting of the shovel with 50 slots after mixing the urn, would produce biased samples that would not be conclusive about the contents of the entire urn. The effects of biases can be determined later in Justice, but we need to know they exist in Wisdom. 
 
-#### Justice
+### Justice
+
+<!-- RS: This chapter is already going to be pretty long so I think discussion of Population Table is not worth the space, plus Ch. 7 does a pretty good job already.  -->
+
+```{r, echo = FALSE}
+knitr::include_graphics("other/images/Justice.jpg")
+```
+
+#### Representativeness and validity
+
+Now that we've determined that our data *could* be used, Justice asks if it *should* be used by analyzing the sampling mechanism. If we want to draw conclusions about an entire population using a small subset of its individuals, then we want to consider the representativeness and the validity of our data. Skipping Justice puts us at risk of creating models with "bad data", which would lead us to incorrect or misleading conclusions.  
+
+**Representativeness** involves our rows. More specifically, are the rows that we do have data for representative of the rows for which we do not have data? In our urn, our prior data is representative of the population if the proportion of red beads in our sample is close enough to the actual proportion of red beads in the whole urn. For the sample proportion to be similar to the actual population proportion, we ideally want the data we have to be a random, unbiased selection from our population, using a considerable sample size. This rarely occurs in real life! But in the context of our problem, the sampling mechanism of using a shovel of size 50 to sample beads from a **mixed** urn should be enough to consider our sample representative of the population, and we can move on. 
+
+**Validity** involves the columns of our data set. Is the meaning of our columns consistent across our prior dataset(s) and ideal Preceptor Table? In our urn scenario, does bead color in our sampled data and bead color in our Preceptor Table mean the same thing? The answer is yes, and validity can be assumed very easily. In Section \@href(two-parameters) analyzing representativeness and validity will become considerably more challenging.  
+
+#### The likelihood
+
+The final aspect of Justice is producing a mathematical formula that can model our situation.  
+
+### Courage
+
+
+#### Bayesian framework
+
+#### 3 steps for success
+
+#### stan_glm()
+
+#### posterior_epred()
 
 Instead of building the joint and conditional probability distributions "by hand" as we did in Chapter \@ref(probability), we can just use `stan_glm()` from the **rstanarm** package. For now our goal is to learn how to interpret the results of `stan_glm()`. Chapter \@ref(two-parameters) will provide a more detailed explanation for the seemingly complex objects we will make. **To be clear, you do not need to fully understand this section or how this code works. This is an introduction, not a formal lesson.**
 
@@ -1146,9 +1184,9 @@ ppd_reds_in_20  %>%
 See Chapter \@ref(two-parameters) for a thorough discussion of the use of **rstanarm**. This package will be our main tool for the rest of the *Primer*.
 
 
-### Hypothesis tests
+#### Hypothesis tests
 
-<!-- RS: I would reword this section a little bit, and make it explicitly clear where the BAD hypothesis testing begins and the GOOD sumarization begins. Maybe create 6.4.3.1 and 6.4.3.2-->
+<!-- RS: Use confidence intervals in this section, additional reinforcement.  -->
 
 Recall our view on hypothesis tests: **Amateurs test. Professionals summarize.** Traditionally, most scientific papers are not so much interested in estimating p. They are interested in testing specific hypotheses. What do we mean by that?
 
@@ -1281,15 +1319,7 @@ For example, what if Kennedy School's Institute of Politics at Harvard Universit
 What you have visualized in this chapter was a demonstration of a famous theorem, or mathematically proven truth, called the *Central Limit Theorem*. It loosely states that when sample means are based on larger and larger sample sizes, the sampling distribution of these sample means becomes both more and more normally shaped and more and more narrow. In other words, the sampling distribution increasingly follows a *normal distribution* and the variation of these sampling distributions gets smaller, as quantified by their standard errors.
 
 
-### Sampling Mechanism
-
-One of the most important aspects of sampling is the **sampling mechanism**: the mechanism through which we sample our population. This concept is related, but distinctly different, from the **assignment mechanism** that we learned about in Chapter 3. 
-
-The assignment mechanism sorts units into control and experiment groups, while the sampling mechanism is the means through which we acquire our sample. Assignment mechanisms do not have a place in our urn paradigm since we are not measuring any causal relationship or assigning beads to specific groups.  
-
-To think about the sampling mechanism further: why are certain beads sampled, while others are not? Is this completely random? 
-
-In order to investigate this concept, let's revisit our Preceptor Tables.
+<!-- RS: Add back discussion on sampling mechanisms but w/ Obama census.  -->
 
 <!-- RS: I definetly support further exploring the Kennedy study further in this chapter, or in the tutorial because I feel like it would be much more informative than redoing the urn problem.  -->
 
