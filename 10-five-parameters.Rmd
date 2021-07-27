@@ -1,26 +1,11 @@
 # Five Parameters {#five-parameters}
 
+<!-- MF: Mainly need to fix Temperance & Summary. --> 
 
-<!-- More sophisticated things to worry about and then pointers or ideas for how to deal with them. Maybe use female years to live versus male today. -->
-
-<!-- Put Population Table at start of Justice in the chapters with a Population Table. -->
-
-<!-- Cardinal virtues of Wisdom and Justice are mostly fixed. Courage and Temperance fixes are priority for next week. No! Priority next week is networking! -->
-
-<!-- Posterior for Expected and Individual Male Advantage plot looks weird. Why three colors? -->
-     
-
-<!-- At end of Justice section, review with math and plots what we have learned so far. No fitted models. No stan_glm(). No code for ho you made the plots. Do sex first and then age then parallel lines (like chapter 9) and then non-parallel lines.  Maybe we don't fit the first three of these. We just show the plots (and we don't even show the code which generates the plots). -->
-
-<!-- Courage is like other courage sections, first introduction of an interaction model. -->
-
-<!-- Show data and fitted values for simple gender model, like we do with age. -->
-
-<!-- Clean up all the plots, especially the legends. Huh? -->
 
 <!-- Add more discussion below? Perhaps use as a good example of how the estimated posterior is not the true posterior because of the assumptions we are making about the structure of the error term. -->
 
-<!-- Do we really believe the posterior for male/female expected years lived? No! Or, at the very least, we are suspicious. Discuss Preceptor's Posterior. -->
+<!-- Do we really believe the posterior for male/female expected years lived? No! Or, at the very least, we are suspicious. -->
 
 <!-- In Temperance connect the expected value to the ideal Preceptor table. -->
 
@@ -59,7 +44,7 @@ Note how far we have come in the *Primer*. These are difficult questions, involv
 knitr::include_graphics("other/images/Wisdom.jpg")
 ```
 
-Recall the most important aspects of wisdom: the Preceptor Table, the EDA (exploratory data analysis), the population, and the Population Table. As always, we start with the Preceptor Table --- the table of data that would make all of our questions answerable with mere arithmetic (no inferences). 
+Recall the most important aspects of Wisdom: the Preceptor Table, the EDA (exploratory data analysis), the population, and the Population Table. As always, we start with the Preceptor Table --- the table of data that would make all of our questions answerable with mere arithmetic (no inferences). 
 
 ### The Preceptor Table
 
@@ -172,7 +157,6 @@ ch10 %>%
   theme_classic() 
 ```
 
-<!-- DK: Fix -->
 
 Note that there is a rough line above which we see no observations. Why might this be? When looking at the year elected and years lived post-election, there is missing data in the upper right quadrant due to the fact that it is impossible to have been elected post-2000 and lived more than 21 years. Simply put: this "edge" of the data represents, approximately, the most years a candidate could have lived, and still have died, given the year that they were elected. 
 
@@ -233,6 +217,44 @@ Justice emphasizes a few key concepts:
 
 We inspect both representativeness and validity through our Population Table. Representativeness focuses on the rows of the table, while validity focuses on the columns.
 
+### Population Table
+
+By determining that the data is drawn from the same population which we are analyzing, we can go on to produce a Population Table. 
+
+The Population Table shows rows from three sources: the **Preceptor Table**, the **actual data**, and the **population** (outside of the data).
+
+Our **Preceptor Table** rows contain the information that we would *want* to know in order to answer our questions. These rows contain entries for our covariates (sex, election_age, year elected) but they do not contain any outcome results (lived_after). We are trying to answer questions about the train commuter population in 2021, so our year entries of these rows will read "2021". 
+
+Our **actual data** rows contain the information that we *do* know. These rows contain entries for both our covariates *and* the outcomes. In this case, the actual data comes from gubernatorial candidates who are deceased. All columns (covariates and outcomes) will be complete.
+
+Our **population** rows contain no data. These are subjects which fall under our desired population, but for which we have no data. As such, all rows are missing.
+
+
+```{r}
+tibble(source = c("Preceptor Table", "Preceptor Table", "Preceptor Table",  "...", "Data", "Data", "Data", "...", "Population", "Population", "Population"),
+       year_elected = c("2021", "2021", "2021", "...",
+                "1952", "1967", "2004", "...",
+                "?", "?", "?"),
+       election_age = c("50", "60", "52", "...",
+                 "43", "52", "67", "...",
+                 "?", "?", "?"),
+       sex = c("Male", "Female", "Male", "...",
+                 "Male", "Male", "Female", "...",
+                 "?", "?", "?"),
+       lived_after = c("?", "?", "?", "...", 
+                 "20", "19", "8", "...",
+                 "?", "?", "?")) %>%
+  
+  # Then, we use the gt function to make it pretty
+  
+  gt() %>%
+  cols_label(source = md("Source"),
+             year_elected = md("Year Elected"),
+             election_age = md("Election Age"),
+             sex = md("Sex"),
+             lived_after = md("Years Lived After")) 
+```
+
 ### Representativeness
 
 Recall that representativeness involves our rows; specifically, do the rows from our dataset match the rows from our desired population. 
@@ -259,19 +281,89 @@ This is not nearly as reliable as the data collection for candidates who won the
 
 For these candidates, then, our estimate for longevity will be inaccurate. We also have to *hope* that the birth and death dates listed on unreliable internet sources are accurate. It is possible that they are not, especially for older candidates.
 
-The mission of this exploration is to ensure validity as much as possible --- that is, to equate our columns when they are not equated themseleves. In this case, because we cannot fix the issues with data collection, we accept that our estimates may be slightly skewed. 
-
-### Functional form 
-
-
+The mission of this exploration is to ensure validity as much as possible --- that is, to equate our columns when they are not equated themselves. In this case, because we cannot fix the issues with data collection, we accept that our estimates may be slightly skewed. 
 
 ## Courage
-
 
 ```{r echo = FALSE, out.width="60%", fig.align='center', fig.cap = "Courage"}
 knitr::include_graphics("other/images/Courage.jpg")
 ```
 
+### sex
+
+Let's regress `lived_after` on `sex` to see how candidates' post-election lifespans differ by sex. 
+
+```{r}
+fit_2 <- stan_glm(data = ch10,
+                       formula = lived_after ~ sex,
+                       refresh = 0,
+                       seed = 76)
+```
+
+```{r}
+print(fit_2, detail = FALSE)
+```
+
+We do not have a value for female. However we do have an intercept. In this regression, our mathematical formula is:
+
+$$ lived\_after_i = \beta_0  + \beta_1 male_i + \epsilon_i$$
+
+$\beta_0$ is our intercept, around `r round(coef(fit_2)["(Intercept)"], 0)` years. In this type of model, our intercept represents the the variable which is not represented in the model. Therefore, the intercept value represents those who are not male (females). 
+
+$\beta_1$ only affects the outcome when the candidate is male. When the candidate is a male, we add the coefficient for male to the intercept value, which gives us the average lifespan of a male gubernatorial candidate after an election. 
+
+The posterior distribution for $\beta_0 + \beta_1$ can be constructed via simple addition.
+
+
+```{r}
+fit_2 %>% 
+  as_tibble() %>% 
+  mutate(male_intercept = `(Intercept)` + sexMale) %>% 
+  ggplot(aes(male_intercept)) + 
+    geom_histogram(aes(y = after_stat(count/sum(count))),
+                   bins = 100) +
+    labs(title = "Posterior Distribution of Average Male Candidate Years Left",
+         y = "Probability",
+         x = "Years To Live After the Election") + 
+    scale_x_continuous(labels = scales::number_format()) +
+    scale_y_continuous(labels = scales::percent_format()) +
+    theme_classic()
+```
+
+But is that actually so "simple?" Not really! Manipulating parameters directly is bothersome. Dealing with variables named `(Intercept)` is error-prone. Using `posterior_epred()` and associated functions is much easier.
+
+```{r}
+posterior_epred(fit_2,
+                tibble(sex = "Male")) %>% 
+  as_tibble() %>% 
+  ggplot(aes(`1`)) + 
+    geom_histogram(aes(y = after_stat(count/sum(count))),
+                   bins = 100) +
+    labs(title = "Posterior Distribution of Average Male Candidate",
+         y = "Probability",
+         x = "Expected Lifespan Post-Election") + 
+    scale_x_continuous(labels = scales::number_format()) +
+    scale_y_continuous(labels = scales::percent_format()) +
+    theme_classic()
+```
+
+The interpretation of this parameter is the same as we have seen before. There is a true average, across the entire population, of the number of years that male candidates live after the election. We can never know what that true average is. But, it seems very likely that the true average is somewhere between 27.5 and 29.5 years.
+
+```{r}
+posterior_epred(fit_2,
+                tibble(sex = "Female")) %>% 
+  as_tibble() %>% 
+  ggplot(aes(`1`)) + 
+    geom_histogram(aes(y = after_stat(count/sum(count))),
+                   bins = 100) +
+    labs(title = "Posterior Distribution of Average Female Candidate",
+         y = "Probability",
+         x = "Expected Lifespan Post-Election") + 
+    scale_x_continuous(labels = scales::number_format()) +
+    scale_y_continuous(labels = scales::percent_format()) +
+    theme_classic()
+```
+We see that the expected lifespan post-election is significantly lower for female candidates, with the average being around 15 years. 
 
 ### election_age
 
@@ -321,36 +413,19 @@ Either way, $\beta_0$ is the "intercept" of the regression, the average value fo
 
 $\beta_1$ is the "coefficient" of  $election\_age$. When comparing two individuals, the first with an $election\_age$ one year older than the second,  we expect the first to have a $lived\_after$ value $\beta_1$ different from the second. In other words, we expect the older to have fewer years remaining, because $\beta_1$ is negative. Again, this is the value for the population from which our data is drawn.  
 
-
 There are three unknown parameters --- $\beta_0$, $\beta_1$ and $\sigma$ --- just as with the models we used in Chapter \@ref(three-parameters). Before we get to the five parameter case, it is useful to review this earlier material.
 
 You may recall from middle school algebra that the equation of a line is $y = m x + b$. There are two parameters: $m$ and $b$. The intercept $b$ is the value of $y$ when $x = 0$. The slope coefficient $m$ for $x$ is the increase in $y$ for every one unit increase in $x$. When defining a regression line, we use slightly different notation but the fundamental relationship is the same. 
 
-We can implement this model with `stan_glm()`. 
+Rather repeat the process in Chapter 8, we will look at the resulting plot using a model that predicts years lived after as a factor of age at election. 
 
 
-```{r}
+```{r, echo = FALSE}
 fit_1 <- stan_glm(data = ch10,
                       formula = lived_after ~ election_age,
                       refresh = 0,
                       seed = 9)
-```
 
-As we discussed in Chapter \@ref(three-parameters), the most common term for a model like this is a "regression." We have "regressed" `lived_after`, our dependent variable, on `election_age`, our (only) independent variable.
-
-The parameter values:
-
-```{r}
-print(fit_1, detail = FALSE)
-```
-
-As is almost always the case, $\sigma$ is a nuisance parameter, a value we are not interested in. This is why `stan_glm()` refers to it as an "Auxiliary" parameter.
-
-The posterior distributions of $\beta_0$ (the intercept) and $\beta_1$ (the coefficient of $election\_age_i$), on the other hand, are important. Before looking at the posteriors themselves, let's examine the fitted values:
-
-<!-- DK: Use this trick to create parallel and non-parallel line plots later. -->
-
-```{r}
 ch10 %>% 
   ggplot(aes(x = election_age, y = lived_after)) +
     geom_point() +
@@ -371,32 +446,13 @@ ch10 %>%
     theme_classic()
 ```
 
+As we discussed in Chapter \@ref(three-parameters), the most common term for a model like this is a "regression." We have "regressed" `lived_after`, our dependent variable, on `election_age`, our (only) independent variable.
 
 Consider someone who is about 40 years old on Election Day. We have a score or more data points for candidates around that age. This area is highlighted by the red box on our plot. As we can see, two died soon after the election. Some of them lived for 50 or more years after the election. *Variation fills the world.* However, the fitted line tells us that, on average, we would expect a candidate that age to live about 37 years after the election. 
 
-This model, with a continuous independent (or "predictor") variable, has an infinite number of fitted values, one for each possible value of `election_age`. 
+This is a descriptive model, not a causal model. Remember our motto from Chapter \@ref(rubin-causal-model): *No causation without manipulation.* There is no way, for person $i$, to change the years that she has been alive on Election Day. On the day of this election, she is X years old. So, there are not two (or more) potential outcomes. Without more than one potential outcome, there can not be a causal effect.
 
-<!-- DK: I am nervous that election_age, as used here, is a different variable that election_age when, later, we transform it.  -->
-
-
-<!-- DK: Does this section work? If it does, we ought to do it in every chapter. If not, then why bother? It is certainly confusing to understand why sticking in the median is a good idea . . . Need to connected math to fitted values more clearly. But that might be difficult since I am hazy on how fitted values fit in a Bayesian context . . .-->
-
-We can create a formula for the fitted values by placing the median values of the posterior distribution of the parameters into the mathematical formula:
-
-<!-- DK: This seems sloppy. equinomatic usage case?-->
-
-
-$$lived\_after_i =  72.7 - 0.9 election\_age_i$$
-
-Consider the intercept. Since our independent variable is $election\_age_i$, the intercept is the $lived\_after_i$ value when $election\_age_i$ is zero. Here, we would interpret this intercept as the average lifespan of a gubernatorial candidate after the election, if the candidate was alive for zero years prior to the election. 
-
-This is, of course, substantively nonsense. No one runs for office in the year they are born. In the next model, we will explore ways of making the intercept more interpretable. In the meantime, the math is the math. 
-
-Consider the coefficient for $election\_age_i$, $\beta_1$. The median of the posterior, `r scales::comma(round(coef(fit_1)["election_age"], 1))`, represents the slope of the model. For every unit increase in our independent variable, our dependent variable will change by this amount. For every additional year a candidate is alive before an election, their lifespan after the election will be `r scales::comma(round(coef(fit_1)["election_age"], 1))` years lower, on average. If we are given the number of years a candidate lived before the election and want to estimate how long they will live for after, we will multiply the years they were alive prior by this beta of -0.9, and then combine that with the intercept. 
-
-This is a descriptive model, not a causal model. Remember our motto from Chapter \@ref(rubin-causal-model): *No causation without manipulation.* There is no way, for person $i$, to change the years that she has been alive on Election Day. On the day of this election, she is X years old. There is no way to change that. So, there are not two (or more) potential outcomes. Without more than one potential outcome, there can not be a causal effect.
-
-Given that, it is important to monitor our language. We do not believe that that changes in `election_age` "cause" changes in `lived_after`. That is obvious. But there are some words and phrases --- like "associated with" and "change by" --- which are too close to causal. (And which we are guilty of using just a few paragraphs ago!) Be wary of their use. *Always think in terms of comparisons when using a predictive model.* We can't change `election_age` from 40 to 50 for an individual candidate. We can only compare two candidates (or two groups of candidates), one with `election_age` equal to 40 and the other with `election_age` equal to 50. If our model is correct, such candidates will, on average, differ in `lived_after` by $\beta_1$ times the difference between 40 and 50.
+Given that, it is important to monitor our language. We do not believe that that changes in `election_age` "cause" changes in `lived_after`. That is obvious. But there are some words and phrases --- like "associated with" and "change by" --- which are too close to causal. (And which we are guilty of using just a few paragraphs ago!) Be wary of their use. *Always think in terms of comparisons when using a predictive model.* We can't change `election_age` for an individual candidate. We can only compare two candidates (or two groups of candidates).
 
 <!-- DK: THis is a critical point. Maybe give a precise example? Go through the math slowly, like ModernDive does? Highlight this somehow? At the very least, we should emphasize the point for each model going forward. -->
 
@@ -425,112 +481,6 @@ fit_1 %>%
 
 <!-- DK: Fix. -->
 
-### sex
-
-Let's now regress `lived_after` on `sex` to see how candidates' post-election lifespans differ by sex. 
-
-```{r, cache = TRUE}
-fit_2 <- stan_glm(data = ch10,
-                      formula = lived_after ~ sex - 1,
-                      refresh = 0,
-                      seed = 16)
-```
-
-Note this workflow. Try one model. Interpret it. Try another model. And then another. There is no one "true" model. There is an infinite number of possible models. Good data science involves an intelligent tour of that space.
-
-
-```{r}
-print(fit_2, detail = FALSE)
-```
-
-
-In this regression, we use the -1 in the formula to make the output more straightforward, with no intercept to interpret. The math of this model is the same as those we saw in Chapter \@ref(three-parameters):
-
-$$ lived\_after_i = \beta_1 female_i + \beta_2 male_i + \epsilon_i$$
-
-where \n
-$$female_i, male_i \in \{0,1\}$$ \n
-$$female_i +  male_i = 1$$ \n
-$$\epsilon_i \sim N(0, \sigma^2)$$  
-
-<!-- DK: Provide more details on what each of the items in the formula means, even though this is a repeat of what we did in chapter 8. Don't use "where" with line skips. Just one paragraph, like elsewhere. Discuss index and dummy variables somewhere. -->
-
-The meaning of $lived\_after_i$ and of $\epsilon_i$ is the same as in the first model. Indeed, they are the same throughout these exercises.  $female_i$ and $male_i$ are 0/1 variables, just like last chapter. They are *variables* whose values vary across individuals.
-
-The important parameters are $\beta_1$ and $\beta_2$. They are the average years-lived post-election for, respectively, women and men. Again, this is not the "average" for the data we have. That is easy to calculate! No estimation required. $\beta_1$ and $\beta_2$ are averages for the entire "population," however we have chosen to define that term. Those averages can not be calculated directly. They can only be estimated, by creating a posterior probability distribution.
-
-<!-- DK: Fix -->
-
-Looking back to the regression model we just created, we see that there is no intercept. Instead of having a $\beta_0$ value, we have $\beta_1$ and $\beta_2$ for female and male. This makes things easier to interpret. Without having to add or subtract anything from an intercept, this regression tells us that, on average, women are expected to live about `r round(coef(fit_2)["sexFemale"], 0)` years after running for governor, and men are expected to live about `r round(coef(fit_2)["sexMale"], 0)` years.
-
-This is a strange result. Why would men live almost twice as long as women after the election? One explanation for this might be that women don't run for governor until later in life, and therefore are not expected to live as long.
-
-
-Now that we have interpreted the model using a -1 in the formula to estimate $\beta_1$ and $\beta_2$, let's take away the -1 and regress `lived_after` on an intercept and  `sex` to see how our equation changes.
-
-
-```{r}
-fit_2a <- stan_glm(data = ch10,
-                       formula = lived_after ~ sex,
-                       refresh = 0,
-                       seed = 76)
-```
-
-```{r}
-print(fit_2a, detail = FALSE)
-```
-
-We no longer have a value for female. However we do have an intercept. In this regression our mathematical formula is:
-
-$$ lived\_after_i = \beta_0  + \beta_1 male_i + \epsilon_i$$
-
-$\beta_0$ is our intercept, around `r round(coef(fit_2a)["(Intercept)"], 0)` years. This result is very similar to the female value from before. In this type of model, our intercept represents the the variable which is not represented in the model.  $\beta_1$ only affects the outcome when the candidate is male. (If the candidate is female, then $male_i = 0$. Therefore, the intercept value represents those who are not male, i.e., females.)
-
-<!-- DK: This explanation should be better. -->
-
-When the candidate is a male, we add the coefficient for male to the intercept value, which gives us the average lifespan of a male gubernatorial candidate after an election. As we can see from adding $\beta_0$ and $\beta_1$, this value is the same as what we got for males in the previous model.
-
-Be careful with notation! $\beta_1$ in the no-intercept model is different from $\beta_1$  in the model with an intercept! Notation varies. We must pay attention each time we make a model.
-
-
-The posterior distribution for $\beta_0 + \beta_1$ can be constructed via simple addition.
-
-
-```{r}
-fit_2a %>% 
-  as_tibble() %>% 
-  mutate(male_intercept = `(Intercept)` + sexMale) %>% 
-  ggplot(aes(male_intercept)) + 
-    geom_histogram(aes(y = after_stat(count/sum(count))),
-                   bins = 100) +
-    labs(title = "Posterior Distribution of Average Male Candidate Years Left",
-         y = "Probability",
-         x = "Years To Live After the Election") + 
-    scale_x_continuous(labels = scales::number_format()) +
-    scale_y_continuous(labels = scales::percent_format()) +
-    theme_classic()
-```
-
-But is that actually so "simple?" Not really! Manipulating parameters directly is bothersome. Dealing with variables named `(Intercept)` is error-prone. Nothing about this approach scales to realistic cases involving numerous predictor variables. Using `posterior_epred()` and associated functions is much easier.
-
-```{r}
-posterior_epred(fit_2a,
-                tibble(sex = "Male")) %>% 
-  as_tibble() %>% 
-  ggplot(aes(`1`)) + 
-    geom_histogram(aes(y = after_stat(count/sum(count))),
-                   bins = 100) +
-    labs(title = "Posterior Distribution of Average Male Candidate Years Left",
-         y = "Probability",
-         x = "Years To Live After the Election") + 
-    scale_x_continuous(labels = scales::number_format()) +
-    scale_y_continuous(labels = scales::percent_format()) +
-    theme_classic()
-```
-
-The interpretation of this parameter is the same as we have seen before. There is a true average, across the entire population, of the number of years that male candidates live after the election. We can never know what that true average is. But, it seems very likely that the true average is somewhere between 27.5 and 29.5 years.
-
-
 ### election_age and sex
 
 In this model, our outcome variable continues to be `lived_after`, but now we will have two different explanatory variables: `election_age` and `sex`. Note that `sex` is a categorical explanatory variable and `election_age` is a continuous explanatory variable. This is the same type of model --- parallel slopes --- as we saw in Chapter \@ref(four-parameters).
@@ -547,11 +497,9 @@ The answer is that `male` is an *indicator* variable, meaning a 0/1 variable. `m
 
 * The outcome variable is $lived\_after_i$, the number of years a person is alive after the election. $male_i$ is one of our explanatory variables. If we are predicting the number of years a male candidate lives after the election, this value will be 1. When we are making this prediction for female candidates, this value will be 0. $c\_election\_age_i$ is our other explanatory variable. It is the number of years a candidate has lived before the election, scaled by subtracting the average number of years lived by all candidates. 
 
-
 * $\beta_0$ is the average number of years lived after the election for women, who on the day of election, have been alive the average number of years of all candidates (i.e. both male and female). $\beta_0$ is also the intercept of the equation. In other words, $\beta_0$ is the expected value of $lived\_after_i$, if $male_i = 0$ and $c\_election\_age_i = 0$. 
 
-
-* $\beta_1$ is almost meaningless by itself. The only time it has meaning is when its value is connected to our intercept (i.e. $\beta_0 + \beta_1$). When the two are added together, you get the average number of years lived after the election for men, who on the day of election, have been alive the average number of years for all candidates.
+* $\beta_1$ is almost meaningless by itself. The only time it has meaning is when its value is connected to our intercept (i.e. $\beta_0 + \beta_1$). When the two are added together, you get the average number of years lived after the election for males, who on the day of election, have been alive the average number of years for all candidates.
 
 * $\beta_2$ is, for the entire population, the average difference in $lived\_after_i$ between two individuals, one of whom has an $c\_election\_age_i$ value of 1 greater than the other. 
 
@@ -576,70 +524,84 @@ Note that `sexMale` is around `r round(coef(fit_3)["sexMale"], 0)`. This is our 
 
 Now take a look at the coefficient for $c\_election\_age_i$, $\beta_2$. The median of the posterior, `r round(coef(fit_3)["election_age"], 1)`, represents the slope of the model. When comparing two candates who differ by one year in `election_age`, we expect that they will differ by `r round(coef(fit_3)["election_age"], 1)` years in `lived_after`. It makes sense that this value is negative. The more years a candidate has lived, the fewer years the candidate has left to live. So, for every extra year a candidate is alive before an election, their lifespan after the election will be `r abs(round(coef(fit_3)["election_age"], 1))` years lower, on average.
 
+We will now show you the parallel slopes model, which was created using the same process explained in the prior chapter. All we've done here is extracted the values for our intercepts and slopes, and separated them into two groups. This allows us to create a `geom_abline` object that takes a unique slope and intercept value, so we can separate the male and female observations. 
 
-Let’s now look at some posteriors.
 
-```{r}
-fit_3 %>% 
-  as_tibble() %>% 
-  mutate(male_years = `(Intercept)` + sexMale) %>% 
-  rename(female_years = `(Intercept)`) %>% 
-  select(female_years, male_years) %>% 
-  pivot_longer(cols = female_years:male_years, 
-               names_to = "parameters",
-               values_to = "years") %>% 
-  ggplot(aes(years, fill = parameters)) +
-    geom_histogram(aes(y = after_stat(count/sum(count))),
-                   alpha = 0.5, 
-                   bins = 100, 
-                   position = "identity") +
-     labs(title = "Posterior Probability Distribution",
-         subtitle = "Men live longer",
-         x = "Average Years Lived Post Election",
-         y = "Probability",
-         fill = "Parameters") + 
-    scale_x_continuous(labels = scales::number_format(accuracy = 1)) +
-    scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
-    theme_classic()
+```{r, echo = FALSE}
+# First, we will tidy the data from our model and select the term and estimate.
+# This allows us to create our regression lines more easily.
+
+tidy <- fit_3 %>% 
+  tidy() %>% 
+  select(term, estimate)
+
+tidy
+
+# Extract and name the columns of our tidy object. By calling tidy$estimate[1],
+# we are telling R to extract the first value from the estimate column in our
+# tidy object.
+
+intercept <- tidy$estimate[1]
+sex_male <- tidy$estimate[2]
+election_age <- tidy$estimate[3]
+
 ```
+```{r, echo = FALSE}
+# Recall that the (Intercept) shows us the estimate for the case where liberal =
+# FALSE. We want to extract the female_intercept to indicate where the
+# intercept in our visualization should be. The slope for this case, and for the
+# liberal = TRUE case, is election_age.
 
-<!-- DK: Much more to say here, and say it clearly! -->
+female_intercept <- intercept
+female_slope <- election_age
 
+#  When wanting the intercept for liberal = TRUE, recall that the estimate for
+#  liberalTRUE is the offset from our (Intercept). Therefore, to know the true
+#  intercept, we must add sex_male to our intercept.
 
-The graph above displays the posterior probability distributions for $\beta_0$ and for $\beta_0 + \beta_1$. The two distributions are fairly different; the distribution for females is more spread out than that for males. There were a greater number of men in the dataset, while there were far fewer women. The more data we have, the more precise we can be.
-
-Let's now take a look at a posterior distribution for $\beta_2$, the coefficient of $c\_election\_age_i$. 
-
-```{r fit_gov3-p1, exercise = TRUE}
-fit_3 %>% 
-  as_tibble() %>% 
-  ggplot(aes(election_age)) + 
-    geom_histogram(aes(y = after_stat(count/sum(count))),
-                   bins = 100) +
-    labs(title = "Posterior Distribution of the Coefficient of `election_age`",
-         y = "Probability",
-         x = "Coefficient of `election_age`") + 
-    scale_y_continuous(labels = scales::percent_format()) +
-    theme_classic()
-
+sex_male_intercept <- intercept + sex_male
+sex_male_att_slope <- election_age
 ```
 
 
+```{r, echo = FALSE}
 
-<!-- DK: Need some commentary here. -->
+ggplot(ch10, aes(x = lived_after, y = election_age, color = sex)) +
+  
+  # Use geom_point to show the datapoints. 
+  
+  geom_point() +
+  
+  # Create a geom_abline object for the liberal false values. Set the intercept
+  # equal to our previously created female_intercept, while setting slope
+  # equal to our previously created female_slope. The color call is
+  # for coral, to match the colors used by tidyverse for geom_point().
+  
+  geom_abline(intercept = female_intercept,
+              slope = female_slope, 
+              color = "#F8766D", 
+              size = 1) +
+  
+  # Create a geom_abline object for the liberal TRUE values. Set the intercept
+  # equal to our previously created sex_male_intercept, while setting slope
+  # equal to our previously created sex_male_att_slope. The color call is
+  # for teal, to match the colors used by tidyverse for geom_point().
 
-<!-- DK: Show three posterior plots: one for beta_2, one for beta_0 (intercept) and one for beta_0 + beta_1.  Interpret them. This is a parallel slopes model. Can we show a parallel slopes graph by hand? Skip this for now. -->
+  geom_abline(intercept = sex_male_intercept,
+              slope = sex_male_att_slope,
+              color = "#00BFC4", 
+              size = 1) +
+  
+  # Add the appropriate titles and axis labels. 
+  
+  labs(title = "Parallel Slopes Model",
+       x = "Lifespan Post-Election", 
+       y = "Age at Election", 
+       color = "Sex") 
+```
 
+<!-- MF: NEED TO ADD COMMENTARY -->
 
-<!-- DK: Cool, eh? It is (mostly?) an age effect! Controlling for age at the election, women live about as long as men, but they are much more likely be candidates as an older age. Again, what we are doing is slowly building more complex models, understanding what they mean. -->
-
-<!-- Also, note that this is a "parallel slopes" model. Explain slowly what that means.  Create a plot. -->
-
-<!-- Side note: I would have thought that overlapping CIs for male/female would equate to insignificance of sex dummy when the regression includes a intercept. But that does not seem to be the case. Am I missing something? -->
-
-<!-- Make the graphic which shows two parallel lines, by calling two layers of geom_smooth().  -->
-
-<!-- With this as warm-up, we are now in a position to explore interactions. -->
 
 ### election_age, sex and election_age*sex
 
@@ -746,8 +708,6 @@ fit_4 %>%
 
 This posterior distribution shows the average slope values for men and women. You can see that men have a steeper slope, while the slope for women is practically 0! *If you are trying to forecast the number of years that a women will live after the election, you may ignore the number of years that she has already lived.* This is definitely not true for men. Why the difference?
 
-
-
 ### Interaction model
 
 Recall the parallel slopes model that we created in Chapter \@ref(four-parameters). Another visualization we can create, one that also uses slopes and intercepts for our model, is the interaction model. In this model, the slopes for our two groups **are different**, creating a non-parallel visualization. 
@@ -768,7 +728,6 @@ tidy
 After tidying our data, we will extract values and assign sensible names for later use. Note that this is identical to the process from Chapter \@ref(four-parameters), with the addition of a fourth term (the interaction term):
 
 ```{r}
-
 # Extract and name the columns of our tidy object. By calling tidy$estimate[1],
 # we are telling R to extract the first value from the estimate column in our
 # tidy object.
@@ -912,7 +871,6 @@ pe %>%
 
 Looking at our posterior probability distributions above, we can see that male candidates are expected to live longer. But how much longer? As in previous chapters, we can manipulate distributions in, more or less, the same way that we manipulate simple numbers. If we want to know the difference between two posterior distributions, we can simply subtract. 
 
-
 ```{r}
 pe <- posterior_epred(object = fit_4, 
                       newdata = newobs) %>% 
@@ -935,17 +893,13 @@ pe %>%
     theme_classic()
 ```
 
-
-
 The average value of the *difference* in years-to-live is probably positive, with the most likely value being around `r round(mean(pe$diff), 0)` years. But there still a `r round(sum(pe$diff < 0) / length(pe$diff), 2) * 100`% chance the true value is less than zero, i.e., that we should expect female candidates to live longer.
-
 
 Instead of using `posterior_epred()`, we could have answered these questions by using the posterior probability distributions for the parameters in the model, along with some simple math. Don't do this! First, you are much more likely to make a mistake. Second, this approach does not generalize well to complex models with scores of parameters and their interactions.
 
 ### Individual predictions
 
 If, instead, we interpret the question as asking for a prediction for a small number of individuals, then we need to use `posterior_predict()`.
-
 
 <!-- DK: Try again to explain what a posterior prediction is. -->
 
@@ -1078,15 +1032,37 @@ Expected values vary much less than predictions. The above chart makes that easy
 
 ### Testing
 
-<!-- DK: This is a mess! -->
+"Tests," "testing," "hypothesis tests," "tests of significance," and "null hypothesis significance testing" all refer to the same concept. We will refer to this collection of approaches as NHST, a common abbreviation derived from the initials of the last phrase. Wikipedia provides an [overview](https://en.wikipedia.org/wiki/Statistical_hypothesis_testing). 
 
-In a normal statistics book, we would have already discussed the concept of "testing" extensively. The terminology varies by field. "Tests," "testing," "hypothesis tests," "tests of significance," and "null hypothesis significance testing" all refer to the same concept. We will refer to this collection of approaches as NHST, a common abbreviation derived from the initials of the last phrase. Wikipedia provides an [overview](https://en.wikipedia.org/wiki/Statistical_hypothesis_testing). 
+In hypothesis testing, we have a null hypothesis --- this hypothesis represents a particular probability model. We also have an alternative hypothesis, which is typically the alternative to the null hypothesis. Let's look at an example that is unrelated to statistics first. 
 
-*Our view: Amateurs test. Professionals summarize.*
+Imagine a criminal trial held in the United States. Our criminal justice system assumes "the defendant is innocent until proven guilty." That is, our initial assumption is that the defendant is innocent.
 
-Consider the question of the expected difference in lifespans for our South Dakota and Washington candidates. Is that difference "significant?" Can we "reject the null hypothesis?" The conventional answer is Yes. Anytime that zero is outside of the 95% confidence interval, we can declare the result significant. But why should we? How does that help us? We already have the full posterior probability distribution. That is knowledge. A Yes/No question throws away too much information to (almost) ever be useful. There is no reason to *test* when you can *summarize* by providing the full posterior probability distribution.
+*Null hypothesis* ($H_0$): Defendent is not guilty (innocent)
+*Alternative hypothesis* ($H_a$): Defendant is guilty
 
-The same arguments apply in the case of "insignificant" results, with $p > 0.5$, when we can't "reject" the null hypothesis. Instead of expected values, consider the case of two candidates, one from South Dakota and one from Washington. Is the difference in their predicted lifespans "significant?" Who cares!? We have the full posterior probability distribution for that prediction --- also known as the posterior predictive distribution --- as graphed above. The 95% confidence interval includes zero. Does that mean we should throw it away? No! That would be nonsense. Yes, there is a 20% chance that the South Dakota candidate lives longer, so we can hardly be surprised when that happens. But we still think that it is much more likely that the Washington candidate lives longer. Indeed, we would consider 4-to-1 odds as fair. The fact that the difference is not "significant" has no relevance to how we use the posterior to make decisions.
+In statistics, we always assume the null hypothesis is true. That is, the null hypothesis is always our initial assumption.
+
+We then collect evidence — such as finger prints, blood spots, hair samples — with the hopes of finding "sufficient evidence" to make the assumption of innocence refutable.
+
+In statistics, the **data are the evidence**.
+
+The jury then makes a decision based on the available evidence:
+
+If the jury finds sufficient evidence — beyond a reasonable doubt — to make the assumption of innocence refutable, the jury *rejects the null hypothesis* and deems the defendant guilty. We behave as if the defendant is guilty. If there is insufficient evidence, then the jury *does not reject the null hypothesis*. We behave as if the defendant is innocent.
+
+In statistics, we always make one of two decisions. We either reject the null hypothesis or we fail to reject the null hypothesis. Rather than collect physical evidence, we test our hypothesis in our model. For example, say that we have a hypothesis that a certain parameter equals zero. The hypotheses are:
+
+$H_0$: The parameter equals 0. 
+$H_a$: The parameter does not equal 0. 
+
+The hypothesis that a parameter equals zero (or any other fixed value) can be directly tested by fitting the model that includes the parameter in question and examining the corresponding 95% interval. If the 95% interval excludes zero (or the specified fixed value), then the hypothesis is said to be rejected. If the 95% interval inclues zero, we do not reject the hypothesis. We also do not accept the hypothesis. 
+
+If this sounds nonsensical, it's because it is. *Our view: Amateurs test. Professionals summarize.*
+
+A Yes/No question throws away too much information to (almost) ever be useful. There is no reason to *test* when you can *summarize* by providing the full posterior probability distribution.
+
+The same arguments apply in the case of "insignificant" results when we can't "reject" the null hypothesis. In simple terms: who cares!? We have the full posterior probability distribution for that prediction --- also known as the posterior predictive distribution --- as graphed above. The fact that result is not "significant" has no relevance to how we use the posterior to make decisions. 
 
 The same reasoning applies to every parameter we estimate, to every prediction we make. Never test --- unless your boss demands a test. *Use your judgment, make your models, summarize your knowledge of the world, and use that summary to make decisions.*
 

@@ -1450,11 +1450,12 @@ jd_coin %>%
   theme_classic()
 
 ```
-Solution :
+
+Solution:
+
 *The most likely value of $\rho_h$ is 0.4, as before. But, it is much more likely that $p$ is either 0.3 or 0.5. And there is about an 8% chance that $\rho_h \ge 0.6$.*
 
-You might be wondering: what is the use of a model? Well, let's say we toss the coin 20 times and get 8 heads again. 
-Given this result, Question: *what is the probability that future samples of 20 flips will result in 10 or more heads?*
+You might be wondering: what is the use of a model? Well, let's say we toss the coin 20 times and get 8 heads again. Given this result, we can ask: *What is the probability that future samples of 20 flips will result in 10 or more heads?*
 
 There are three main ways you could go about solving this problem with simulations.
 
@@ -1488,11 +1489,13 @@ odds %>%
 ```
 
 Using this Posterior distribution derived from the (wrong way) simulated data, the probability results in 10 or more head is
+
 ```{r}
 odds %>%
-summarize(success = sum(above_ten)/sims)
+  summarize(success = sum(above_ten)/sims)
 ```
-about 24.5%
+
+about 24.5%.
 
 The second method involves sampling the whole posterior distribution vector we previously created. This would lead to the following correct code.
 
@@ -1526,9 +1529,10 @@ odds_2nd %>%
     theme_classic()
 ```
 Using this Posterior distribution derived from the (right way 1st) simulated data, the probability results in 10 or more head is
+
 ```{r}
 odds_2nd %>%
-summarize(success = sum(above_ten)/sims)
+  summarize(success = sum(above_ten)/sims)
 ```
 about 32.8%
 
@@ -1573,12 +1577,13 @@ odds_3rd %>%
 ```
 
 Using this Posterior distribution derived from the (right way 2nd) simulated data, the probability results in 10 or more head is
+
 ```{r}
 odds_3rd %>%
-summarize(success = sum(above_ten)/sims)
+  summarize(success = sum(above_ten)/sims)
 ```
-about 32% which is pretty close to the second method.
 
+about 32% which is pretty close to the second method.
 
 As you may have noticed, if you calculated the value using the first method, you would believe that getting 10 or more heads is less likely than it really is. If you were to run a casino based on these assumptions, you will lose all your money. It is very important to be careful about the assumptions you are making. We tossed a coin 20 times and got 8 heads. However, you would be wrong to assume that $\rho_h$ = 0.4 just based on this result.
 
@@ -1594,12 +1599,38 @@ As you may have noticed, if you calculated the value using the first method, you
 
 ## Cardinal Virtues
 
+<!-- Wisdom: Begin with the ideal Preceptor Table. Depends on the question. Might be all voters in Massachusetts. Might be just the Republican voters. This determines if we are causal or predictive.  Key is that sometimes you want to know multiple potential outcomes for person X. If so, you are doing a causal model. If, however, you only need to know one outcome --- often because just one outcome is conceivable --- then it is predictive. The ideal Preceptor table will generally not have any rows for data we actually have. We never really care about the causal effect in election X specifically. We want to make claims about elections in general. -->
 
-The four [Cardinal Virtues](https://en.wikipedia.org/wiki/Cardinal_virtues) are Wisdom, Justice, Courage, and Temperance. Because data science is, ultimately, a moral act, we use these virtues to guide our work.  
+<!-- Then look for data and explore that data. What must I assume about the population, to allow me to go forward? If the data is not "close enough" to my ideal Preceptor Table, I give up. Wisdom is about knowing when to quit. Going forward means assuming that the actual data and the data from the ideal Preceptor Table come from the same population. -->
 
-* *Wisdom* begins with the ideal Preceptor Table. What data, if we had it, would allow us to answer our question easily? Then, we explore the data we have. Are the data we have close enough to the data we want that we can consider all the data as coming from the same *population*? If not, we can't proceed further. 
 
-* *Justice* starts with the Population Table -- the data we want to have, the data which we actually have and all the other data from that same *population*. Is our data *representative* of the population? Is the meaning of the columns consistent, i.e., can we assume *validity*? We then make an assumption about the *data generating mechanism*. What general mathematical formula connects the outcome variable we are interested in with the other data that we have?
+<!-- With population, we make a distinction between Wisdom --- Are the rows from the same population? --- and Justice --- Are the rows we have data for *representative* of that population? That works nicely! Can we do the same thing wit columns? In our ideal Preceptor Table, we have a column called "treatment" which specifies the postcards we might send. With Wisdom, we need to decide if that treatment is drawn from the same population (?) of conceivable treatments as the "treatment" which was used in our data. Are the different things labelled "treatment" close enough that we can stack them in the same tibble? If no, then we give up. We can't go further. -->
+
+
+
+<!-- Justice: Actual Preceptor Table, which is different from the ideal Preceptor Table in two ways. First, it includes the data we have. That is, it has more rows. Second, it has a bunch of missing values. (We could make an artificial distinction and say that the ideal Preceptor table never includes rows for data we have, but that is probably a bidge too far. Then again, with a time column, it is almost always true.) Then, representativeness (rows), validity (columns). In the ideal case, the data we have is perfectly representative of the population we want to estimate. That is, it is a random sample. In the ideal case, the columns mean the same thing in all rows. They are perfectly valid, but that is often not true. -->
+
+<!-- If we lack perfect representativeness and/or perfect validity, then we can try to fix our mathematical structure. Or, we can just keep those failures in the back of our mind and then approach the posteriors we create -->
+
+<!-- Assignment mechanism? Sampling mechanism? Missing data mechanisms in general? -->
+
+
+<!-- Only the main functional form, with no variable names. Discussion of the error term. -->
+
+<!-- Courage: For each model, write down the math, estimate the model, say something sensible about the regression table. Testing is stupid. -->
+
+<!-- Temperance. Answer the question. Create a newobs, plug it into the model, calculate the outcome. Don't forget to add the error term if you are predicting. Then plot it. Be aware of the limits to the accuracy of your answer. Preceptor's Posterior.  All the cool themes. Bring it all together. Make the students say "Ahhh!" --> 
+
+
+
+
+The four [Cardinal Virtues](https://en.wikipedia.org/wiki/Cardinal_virtues) are Wisdom, Justice, Courage, and Temperance. Because data science is, ultimately, a moral act, we use these virtues to guide our work. Every data science project begins with a question.
+
+* *Wisdom* starts by creating the Preceptor Table. What data, if we had it, would allow us to answer our question easily? If the Preceptor Table has one outcome, then the model is predictive. If it has more than one (potential) ouctiome, then the model is causal. We then explore the data we have. You can never look too closely at your data. Key question: Are the data we have close enough to the data we want (i.e., the Preceptor Table) that we can consider both as coming from the same *population*? If not, we can't proceed further. 
+
+* *Justice* starts with the Population Table -- the data we want to have, the data which we actually have and all the other data from that same *population*. Each row of the Population Table is defined by a unique Unit/Time combination. We ask three key questions about the Population Table. First, do the columns demonstrate *validity*, meaning is the meaning consistent across the rows? Second, does the relationship among the variables demonstrate *stability*, meaning is the model stable across different Time periods? Third, are the rows associated with the data *representative* of all the units which we might have had data for?
+
+We then make an assumption about the *data generating mechanism*. What general mathematical formula connects the outcome variable we are interested in with the other data that we have?
 
 * *Courage* allows us to explore different models. Even though Justice has provided the basic mathematical structure of the model, we still need to decide which variables to include and to estimate the values of unknown parameters. We avoid hypothesis tests. We check our models for consistency with the data we have. We select one model. 
 
