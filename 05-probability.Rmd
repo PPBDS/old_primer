@@ -1,16 +1,11 @@
 # Probability {#probability}
 
-<!-- Put the empirical distribution first for our 4 probability distributions. Then, mathematical. Give the simple notation a single observation. Start the mathematical with the distribution of a single observation is described by this formula. y_i ~ Bernoulli(p). Expected value of y_i is this mathematical probability distribution. If your assumptions are correct, then as your sample size increases, the empirical probability distribution will look more and more like the mathematical distribution.  Done.-->
+
+<!-- 3d plot for marble example is wrong. There is a 1/8 chance of getting 0 or 3 whites. There is a 3/8 chance of getting either 1 or 2. So, the 0 and 3 towers should be 1/3 the height of the 1 and 2 towers. -->
+
+<!-- It would be nice if the 3d graphics did not "pop up" when knitting the chapter.  -->
 
 
-<!-- Note Bernoulli is for a single coin toss, Bernoulli(p). Binomial is for an arbitrary number of coin tosses, Binomial(p, n). Read about expected values. Done. -->
-
-<!-- Put in the same shorthand versions of probability notation as in chapter 2, to the extent we have them. Done.-->
-
-
-
-
-<!-- Start thinking about discussing "population". Maybe add a paragraph to each of the first three examples? (mostly in the first two because the third one posterior come from internet) Done.-->
 
 <!-- Maybe show (but don't explain!) the actual math formula. -->
 
@@ -694,7 +689,7 @@ die2_factor <- as.factor(mydata$die.2)
 
 mtplot <-  ggplot(mydata) +
               geom_point(aes(x = die1_factor, y = die2_factor, color = total)) +
-              scale_color_continuous(limits = c(0,100)) +
+              scale_color_continuous(limits = c(0, 100)) +
               labs(x = "Die 1", y = "Die 2") +
               theme(legend.position = "none")
 
@@ -878,16 +873,16 @@ How would you express this in statistical notation? $\text{Prob}(A|B)$ is the sa
 
 The simplest possible setting for inference involves two models --- meaning two possible states of the world --- and two outcomes from an experiment. Imagine that there is a disease --- *Probophobia*, an irrational fear of probability --- which you either have or don't have. We don't know if you have the diseases, but we do assume that there are only two possibilities. 
 
-We also have a test which is 50% accurate when giving test to an person who have *Probophobia*, and 99% accurate for people who don't. This is our experiment, one with only two possible outcomes: positive and negative. 
+We also have a test which is 99% accurate when given to a person who has *Probophobia*. Unfortunately, the test is only 50% accurate for people who do not have *Probophobia*. In this experiment, there only two possible outcomes: a positive and a negative result on the test. 
 
 Question: *If you test positive, what is the probability that you have Probophobia?*
 
 More generally, we are estimating a *conditional probability*. Conditional on the outcome of a postive test, what is the probability that you have Probophobia? Mathematically, we want:
 
-$$ \text{Prob}(\text{Disease | Test = Postive} ) $$
+$$ \text{Prob}(\text{Probophobia | Test = Postive} ) $$
 
 
-To answer this question, we need to use the tools of joint and conditional probability that we have learned earlier in this Chapter. We begin by building, by hand, the joint distribution of the possible models (you have the Probophobia or you do not) and of the possible outcomes (you test positive or negative). Building the joint distribution involves *assuming* that each model is true and then creating the distribution of outcomes which might occur if that assumption is true. 
+To answer this question, we need to use the tools of joint and conditional probability from earlier in the Chapter. We begin by building, by hand, the joint distribution of the possible models (you have the Probophobia or you do not) and of the possible outcomes (you test positive or negative). Building the joint distribution involves *assuming* that each model is true and then creating the distribution of outcomes which might occur if that assumption is true. 
 
 For example, assume you have Probophobia. There is then a 50% chance that you test positive and a 50% chance you test negative. Similarly, if we assume that the second model is true --- that you don't have Probophobia --- then there is 1% chance you test positive and a 99% you chance negative. Of course, for you (or any individual) we do not know for sure what is happening. We do not know if you have the disease. We do not know what your test will show. But we can use these relationships to construct the joint distribution.
 
@@ -896,6 +891,19 @@ For example, assume you have Probophobia. There is then a 50% chance that you te
 set.seed(9)
 ```
 
+<!-- DK: Redo this analysis, and perhaps other similar examples blow. First, column of tibble is the state of the world. Or list of all possible models. In this case, this would be `have_disease` which should be either TRUE or FALSE.  -->
+
+```{r}
+# tibble(have_disease = rep(c(TRUE, FALSE), 5000)) %>% 
+#   mutate(positive_test = 
+#            if_else(have_disease, 
+#                    map_int(have_disease, ~ rbinom(n = 1, size = 1, p = 0.99)),
+#                    map_int(have_disease, ~ rbinom(n = 1, size = 1, p = 0.5)))) 
+
+
+```
+
+
 
 ```{r}
 # Pipes generally start with tibbles, so we start with a tibble which just
@@ -903,7 +911,7 @@ set.seed(9)
 # organized. We call this object `jd_disease`, where the `jd` stands for
 # joint distribution.
 
-jd_disease <- tibble(p = rep(seq(0.01, 0.5, 0.49), 10000)) %>%
+jd_disease <- tibble(p = rep(c(0.01, 0.5), 10000)) %>%
   mutate(disease = map_int(p, ~ rbinom(n = 1, size = 1, p = .)))
 
 
@@ -924,7 +932,7 @@ jd_disease %>%
        subtitle = "Many False results in have disease than no disease",
        x = "Test Result",
        y = "Disease Status") +
-  scale_x_discrete(breaks = c(0,1), 
+  scale_x_discrete(breaks = c(0, 1), 
                    labels = c("Negative", "Positive")) +
   scale_y_discrete(breaks = c(0.01, 0.5), 
                    labels = c("No Disease", "Have Disease")) +
