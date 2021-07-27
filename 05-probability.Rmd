@@ -911,8 +911,12 @@ set.seed(9)
 # organized. We call this object `jd_disease`, where the `jd` stands for
 # joint distribution.
 
-jd_disease <- tibble(p = rep(c(0.01, 0.5), 10000)) %>%
-  mutate(disease = map_int(p, ~ rbinom(n = 1, size = 1, p = .)))
+jd_disease <- tibble(have_disease = rep(c(TRUE, FALSE), 5000)) %>%
+  mutate(positive_test =
+           if_else(have_disease,
+                   map_int(have_disease, ~ rbinom(n = 1, size = 1, p = 0.99)),
+                   map_int(have_disease, ~ rbinom(n = 1, size = 1, p = 0.5))))
+
 
 
 jd_disease
@@ -924,8 +928,8 @@ Plot the joint distribution:
 
 ```{r}
 jd_disease %>% 
-  ggplot(aes(x = as.factor(disease), 
-             y = as.factor(p))) +
+  ggplot(aes(x = as.factor(positive_test), 
+             y = as.factor(have_disease))) +
   geom_point() +
   geom_jitter(alpha = .2) +
   labs(title = "Unnormalized Distribution of Test Results and Disease Status",
@@ -934,7 +938,7 @@ jd_disease %>%
        y = "Disease Status") +
   scale_x_discrete(breaks = c(0, 1), 
                    labels = c("Negative", "Positive")) +
-  scale_y_discrete(breaks = c(0.01, 0.5), 
+  scale_y_discrete(breaks = c(FALSE, TRUE), 
                    labels = c("No Disease", "Have Disease")) +
   theme_classic()
 ```
@@ -945,16 +949,16 @@ Below is a joint distribution displayed in 3D. Instead of using the "jitter" fea
 ```{r, echo = FALSE}
 
 jd_disease_plot <- jd_disease %>%
-  group_by(p, disease) %>%
+  group_by(have_disease, positive_test) %>%
   summarize(total = n(),
             .groups = "drop") %>% 
-  ggplot(aes(x = as.factor(disease),
-             y = as.factor(p),
+  ggplot(aes(x = as.factor(positive_test),
+             y = as.factor(have_disease),
              color = total)) +
     geom_point(size = 5) +
     scale_x_discrete(breaks = c(0, 1),
                      labels = c("Negative", "Positive")) +
-    scale_y_discrete(breaks = c(0.01, 0.5),
+    scale_y_discrete(breaks = c(FALSE, TRUE),
                      labels = c("No Disease", "Have Disease")) +
     labs(x = "Test Result",
          y = "Disease Status",
@@ -994,21 +998,21 @@ We want to analyze these plots by looking at different slices. For instance, let
 
 ```{r}
 jd_disease %>% 
-  filter(disease == 1)
+  filter(positive_test == 1)
 ```
 
 **Most people test positive are infected** This is a result for common diseases like cold. We can easily create an unnormalized conditional distribution with:
 
 ```{r}
 jd_disease %>% 
-  filter(disease == 1) %>% 
-  ggplot(aes(p)) +
+  filter(positive_test == 1) %>% 
+  ggplot(aes(have_disease)) +
     geom_bar() +
     labs(title = "Disease Status Given Positive Test",
          subtitle = "Almost all of the cases were infected",
          x = "Disease Status",
          y = "Count") +
-    scale_x_continuous(breaks = c(0.01, 0.5),
+    scale_x_discrete(breaks = c(FALSE, TRUE),
                        labels = c("Healthy", "Infected")) +
   theme_classic()
 ```
@@ -1020,26 +1024,28 @@ Turn this unnormalized distribution into a posterior probability distribution:
 
 ```{r}
 jd_disease %>% 
-  filter(disease == 1) %>% 
-  ggplot(aes(p)) +
-    geom_histogram(aes(y = after_stat(count/sum(count))), 
+  filter(positive_test == 1) %>% 
+  ggplot(aes(have_disease)) +
+    geom_bar(aes(y = after_stat(count/sum(count))), 
                    binwidth = 0.25, 
                    color = "white") +
     labs(title = "Posterior for Probophobia Conditional on Positive Test",
          x = "Probophobia Status",
          y = "Probability") +
-    scale_x_continuous(breaks = c(0.01, 0.5),
+    scale_x_discrete(breaks = c(FALSE, TRUE),
                        labels = c("Healthy", "Infected")) +
     scale_y_continuous(labels = 
                          scales::percent_format(accuracy = 1)) +
     theme_classic()  
 ```
 
+If we zoom in on the plot, about 70% of people who tested positive have the disease and 30%  who tested positive do not have the disease. In this case, we are focusing on one slice of the probability distribution where the test result was positive. There are two disease outcomes: positive or negative. By isolating a section, we are looking at a conditional distribution. Conditional on a positive test, you can visualize the likelihood of actually having the disease versus not.
+
 Now recalled the question we asked at the start of the session:
 *If you test positive, what is the probability that you have Probophobia?*
 
 By looking at the posterior graph we just create, we can answer this question easily:
-*With a positive test, you can be almost 100% sure that you have Probophobia.*
+*With a positive test, you can be almost 70% sure that you have Probophobia, however there is a good chance about 30% that you receive a false positive, so don't worry too much there is still about a third of hope that you get the wrong result*
 
 <!-- DK: Insert a use of this posterior? How many positive tests before you have at least 10 sick people? -->
 
@@ -1060,7 +1066,7 @@ knitr::include_graphics("05-probability/images/marble.jpg")
 
 Imagine that your friend gives you a bag with two marbles. There could either be two white marbles, two black marbles, or one of each color. Thus, the bag could contain 0% white marbles, 50% white marbles, or 100% white marbles. Respectively, the proportion, $p$, of white marbles could be 0, 0.5, or 1.
 
-Question: *What is the chance of the bag contains exactly two white marbles, given that when we selected the white marbles three times, everytime we select a white marble?*
+Question: *What is the chance of the bag contains exactly two white marbles, given that when we selected the marbles three times, everytime we select a white marble?*
 
 $$ \text{Prob}(\text{2 Marbles in bag | White Marble Select=3} ) $$
 Just as during the *Probophobia* models, in order to answer this question, we need to start up with the simulated data and then graphing out the joint distribution of this sinerio because we need to considered all possible outcomes of this model, and then based on the joint distribution we can slice out the the part we want (Conditional distribution) in the end making an posterior graph as well as normalizing it to see the probability.
@@ -1074,7 +1080,7 @@ Let's say you take a marble out of the bag, record whether it's black or white, 
 # (in_bag) and the number of white marbles pulled out in the sample (in_sample),
 # one-by-one. in_bag takes three possible values: 0, 1 and 2, corresponding to
 # zero, one and two white marbles potentially in the bag.
-
+set.seed(3)
 sims <- 10000
 
 # We also start off with a tibble. It just makes things easier
@@ -1143,7 +1149,7 @@ jd_marbles_plot <- jd_marbles %>%
 
 plot_gg(jd_marbles_plot,
         width = 3.5,
-        zoom = 0.65,
+        zoom = 0.75,
         theta = 25,
         phi = 30,
         sunangle = 225,
