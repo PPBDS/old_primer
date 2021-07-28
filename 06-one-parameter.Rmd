@@ -960,7 +960,7 @@ Virtually every problem boils down to attempting to answer a **question** about 
 
 Let's revisit our first question: *If we get 17 red beads in a random sample of size 50 taken from a mixed urn, what proportion $p$ of the beads in the urn are red?*. We have a *question*: what proportion of the beads in the urn are red? Our question is asking us to solve for one population parameter, $p$.  The subject of the question is the *population*; in this case, the population is *a mixed urn*. "A mixed urn" is very ambiguous, and we do not even know its size, but that is what the question provides us. There is an urn out there, somewhere, for which we want to know the proportion of red beads. 
 
-For the first question we also need to state **our prior**, which is all knowledge we know about a parameter beforehand. The prior is often denoted as $p(\theta)$, the probability distribution of a parameter $\theta$. Essentially, the prior tells us that some values are more likely than others. Without any prior information, the proportion of red beads in the urn is equally likely to be any continuous value between 0 and 1. However, we are given the prior that in a random sample of size 50, 17 beads were red, meaning that the proportion red in our sample is .34. With this knowledge we can realize that the proportion of beads in the entire urn is far more likely to be around .34 than an extreme value like .02 or .86. We will come back to the prior later in Courage to build our model.  
+For the first question we also need to state **our prior**, which is all knowledge we know about a parameter beforehand. The prior is often denoted as $p(\theta)$, the probability distribution of a parameter $\theta$. Essentially, the prior tells us that some values are more likely than others. Without any prior information, the proportion of red beads in the urn is equally likely to be any continuous value between 0 and 1. However, we are given the prior that in a random sample of size 50, $17/50 = 34\%$ of beads are red. With this knowledge we can realize that the proportion of beads in the entire urn is far more likely to be around .34 than an extreme value like .02 or .86. We will come back to the prior later in Courage to build our model.  
 
 Now let's break down our second question in a similar fashion to the first. Our *question* is: *what is the probability, using the same urn, that we will draw more than 8 red beads if we use a shovel of size 20?*. The question specifies using the "same urn", so the *population* for both questions is the same. However, what is the *prior* for the second question? The reality is that we need to know the probability of selecting a red bead from the urn before we can determine the probability of selecting more than 8 red beads, and thus our second question is contingent on extracting a posterior probability distribution from the first question. As such, if we successfully pass through Wisdom and Justice, we can use the models we create in Courage to answer this question in Temperance. While that may be a mouthful at the moment, you will receive plenty of practice with the Cardinal Virtues throughout this *Primer*. 
 
@@ -1052,13 +1052,13 @@ One of the most important terms in statistics and data science is the **Data Gen
 
 $$ y_i  \sim p(y_i | \theta) $$
 
-Don't get caught up by the equation. It just means that our outcome variable is chosen based on some parameter, $\theta$. If we change the value of the parameter, our outcome is likely to change as well. 
+Don't get caught up by the equation. It just means that our outcome variable is chosen based on some given parameter, $\theta$. If we change the value of the parameter, our outcome is likely to change as well. 
 
 We can create a DGM for our specific urn scenario. In this *Primer*, we most frequently use either normal (Gausian) distributions or binomial distributions. In our urn we count the number of red beads selected, and do not count the white beads. This success/failure or TRUE/FALSE relationship strongly suggests we should use a binomial distribution to model our situation. We can rework the DGM equation to suit our needs: 
 
 $$ T_i  \sim B(\rho_r, n = 50) $$
 
-The total number of beads selected in ONE specific experiment with 50 sampled beads, $T_i$, is selected by taking one draw from a binomial distribution with $n = 20$ and an unknown probability $\rho_h$ of the proportion of red beads in the urn.
+The total number of red beads selected in ONE specific experiment with 50 sampled beads, $T_i$, occurs from taking one draw from a binomial distribution with $n = 50$ and an unknown probability $\rho_h$ of the proportion of red beads in the urn.
 
 ### Courage
 
@@ -1066,9 +1066,33 @@ The total number of beads selected in ONE specific experiment with 50 sampled be
 knitr::include_graphics("other/images/Courage.jpg")
 ```
 
-We've evaluated our data and questions and chosen a mathematical formula. Now it's time to work on our code to create a model to simulate the real world. 
+We've evaluated our data and questions and chosen a mathematical formula. Now it's time to work on our code to create a model that can simulate the real world. 
 
 #### Bayesian framework
+
+We are Bayesian data scientists that make Bayesian models. This means that we make specific assumptions and consider different things to be either fixed or variable compared to other data science frameworks. One of the most important distinctions is that in Bayesian data science, **we don't know the values of our parameters**. As such, Bayesians create a probability distribution for our parameters in addition to our outcomes. Consider the DGM created in Justice: 
+
+$$ T_i  \sim B(\rho_r, n = 50) $$
+
+Some non-Bayesian frameworks are concerned with the probability distribution of our prior observed data, but do not care much about the probability distribution for $\rho_r$ and assume it to be fixed. If $\rho_r$ is fixed, the equation above becomes one simple binomial distribution. Think of this as a standard 2 dimensional plot. 
+
+Us Bayesians consider our observed data to be fixed. We don't consider alternate realities where our observed data is different due to sampling variation. Instead, we are concerned with the probability distribution of our parameter. In our urn scenario, $\rho_r$ is variable, so we have to create a separate binomial distribution for each possible value of $\rho_r$. Think of this as a 3 dimensional plot similar to what we created in Section \@href(n-models).
+
+One of the foundations of Bayesian data science is Bayes' theorem, created by Thomas Bayes:
+
+$$  p(\theta | y) = \frac{p(y|\theta)p(\theta)}{p(y)} $$
+
+We do not care enough to try and understand how this equations works! The equation itself is not helpful to us, but understanding the different terms within it will help our modeling endeavors.  
+
+- **The likelihood**, $p(y|\theta)$, represents the joint probability distribution for each value of our parameter(s) $\theta$. This is the exact same concept we addressed while discussing the distinctions of Bayesian science: because our parameters are variable, we have to create distributions for each potential value. Combining all these distributions together creates a joint distribution that is 3 dimensional when plotted. 
+
+Careful readers may note that the equation for the likelihood, $p(y|\theta)$, appears to be very similar to the equation for the DGM, $p(y_i|\theta)$. They are indeed similar, but know that the likelihood is a distribution of all outcomes, while the DGM models selecting one individual outcome, $y_i$.  
+
+- **The prior**, $p(\theta)$, is the probability distribution that describes our uncertainty surrounding our parameter(s) $\theta$. We create the prior from any information we have going into the problem, and the more descriptive the information the more descriptive the prior. 
+
+In Wisdom, we stated that the prior for our urn problem is knowing that in a random sample of size 50, $17/50 = 34\%$ of beads are red. This information is useful, as without it the proportion of red beads in the urn could be any value between 0 and 1. However, we still need to acknowledge that due to sampling variation, we could have sampled a different value for $\rho$. This is why the prior is a distribution: we know that $\rho$ is more likely to be around .34 than extreme values, but there is a continuous range of values that $\rho$ *could* be. 
+
+- **The posterior**, $p(y|\theta)$, is the result of Bayes' theorem and is our coveted end goal. We have discussed the posterior many times throughout this primer
 
 #### 4 steps for success
 
