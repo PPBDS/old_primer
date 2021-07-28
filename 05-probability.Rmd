@@ -1,15 +1,21 @@
 # Probability {#probability}
 
 
-<!-- Disease example is wrong, as discussed.  -->
+<!-- Code blocks need comments. Teach students something! Approximately as many lines of comments as lines of code, or at least 50% as many.  -->
+
+<!-- Add ID variable to all data creates for Two Models, Three Models and so on. -->
 
 <!-- 3d plot for marble example is wrong. There is a 1/8 chance of getting 0 or 3 whites. There is a 3/8 chance of getting either 1 or 2. So, the 0 and 3 towers should be 1/3 the height of the 1 and 2 towers. -->
 
 <!-- Did we do the N models case correctly, given the errors above? I am not sure. But we ought to make these cases as similar as possible, especially in terms of the code we show students.  -->
 
-<!-- It would be nice if the 3d graphics did not "pop up" when knitting the chapter.  -->
+<!-- It would be nice if the 3d graphics did not "pop up" when knitting the chapter.  Create a reproducible example, with the reprex package (or with a new repo with a simple Rmd), to show the problem. Then ask on RStudio. -->
 
-<!-- Should discuss the concept of "population" in each example of probability distributions. The population is the imaginary urn from which our data has been, or will be, drawn.  -->
+<!-- Should discuss the concept of "population" in each example of probability distributions. The population is the imaginary urn from which our data has been, or will be, drawn. Check out Section 5.1. In fact, re-read the whole Cardinal Virtues section.   -->
+
+<!-- Explanation: There is a direct connection between the concept of the population and the concept of a probability distribution. But they are not the same thing! The connection is that the probability distribution --- whether it is empirical, mathematical, or posterior --- is a *description* of the contents of the urn, which is the population. -->
+
+<!-- How do we create a probability distribution for a given urn? Two approaches. First, assume that you know the data generating mechanism (DGM) --- the mathematical formula which describes the contents of the urn. Then just plot the formula. Second, if you don't know the DGM, you can just sample (a lot, you hope, and at random, you hope) from the urn. Plot what you get. And that is an estimate of the PDF. -->
 
 <!-- Learn about movies in rayshader.  Useful? https://joeystanley.com/blog/3d-vowel-plots-with-rayshader-->
 
@@ -534,7 +540,7 @@ nhanes %>%
 Mathematical Distribution:
 
 ```{r}
-tibble(height = rnorm(10000, mean = 175, sd = 9)) %>% 
+tibble(height = rnorm(1000000, mean = 175, sd = 9)) %>% 
   ggplot(aes(x = height)) +
     geom_histogram(aes(y = after_stat(count/sum(count))), 
                  binwidth = 1, 
@@ -879,17 +885,9 @@ For example, assume you have Probophobia. There is then a 50% chance that you te
 set.seed(9)
 ```
 
-<!-- DK: Redo this analysis, and perhaps other similar examples blow. First, column of tibble is the state of the world. Or list of all possible models. In this case, this would be `have_disease` which should be either TRUE or FALSE.  -->
-
-```{r}
-# tibble(have_disease = rep(c(TRUE, FALSE), 5000)) %>% 
-#   mutate(positive_test = 
-#            if_else(have_disease, 
-#                    map_int(have_disease, ~ rbinom(n = 1, size = 1, p = 0.99)),
-#                    map_int(have_disease, ~ rbinom(n = 1, size = 1, p = 0.5)))) 
+<!-- DK: Redo this analysis, and perhaps other similar examples below. First, column of tibble is the state of the world. Or list of all possible models. In this case, this would be `have_disease` which should be either TRUE or FALSE.  -->
 
 
-```
 
 
 
@@ -966,7 +964,7 @@ plot_gg(jd_disease_plot,
         phi = 30,
         sunangle = 225,
         soliddepth = -50,
-        windowsize = c(2048,1536))
+        windowsize = c(2048, 1536))
 
 rglwidget()
 
@@ -1015,7 +1013,6 @@ jd_disease %>%
   filter(positive_test == 1) %>% 
   ggplot(aes(have_disease)) +
     geom_bar(aes(y = after_stat(count/sum(count))), 
-                   binwidth = 0.25, 
                    color = "white") +
     labs(title = "Posterior for Probophobia Conditional on Positive Test",
          x = "Probophobia Status",
@@ -1046,6 +1043,8 @@ knitr::include_app("https://www.youtube.com/embed/by3_weGwnMg")
 
 ## Three models
 
+<!-- Handy? jd_marbles %>% filter(in_bag == 1) %>% group_by(in_sample) %>% count() -->
+
 <!-- DK: Should this be in terms of p or number of white marbles or both? -->
 
 ```{r, echo = FALSE}
@@ -1056,7 +1055,7 @@ Imagine that your friend gives you a bag with two marbles. There could either be
 
 Question: *What is the chance of the bag contains exactly two white marbles, given that when we selected the marbles three times, everytime we select a white marble?*
 
-$$ \text{Prob}(\text{2 Marbles in bag | White Marble Select=3} ) $$
+$$ \text{Prob}(\text{2 White Marbles in bag | White Marbles Sampled = 3} ) $$
 Just as during the *Probophobia* models, in order to answer this question, we need to start up with the simulated data and then graphing out the joint distribution of this sinerio because we need to considered all possible outcomes of this model, and then based on the joint distribution we can slice out the the part we want (Conditional distribution) in the end making an posterior graph as well as normalizing it to see the probability.
 
 Step 1: Simulate the data into an tibble
@@ -1068,6 +1067,7 @@ Let's say you take a marble out of the bag, record whether it's black or white, 
 # (in_bag) and the number of white marbles pulled out in the sample (in_sample),
 # one-by-one. in_bag takes three possible values: 0, 1 and 2, corresponding to
 # zero, one and two white marbles potentially in the bag.
+
 set.seed(3)
 sims <- 10000
 
