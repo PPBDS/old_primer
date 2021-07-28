@@ -15,9 +15,9 @@ library(tidyverse)
 
 
 
-<!-- Maybe (!) move more of the Complications (like Data Problems?) earlier in the chapter. Like Data Problems under Preceptor Tables?  -->
+<!-- Maybe (!) move more of the Complications (like Data Problems?) earlier in the chapter. Like Data Problems under Preceptor Tables? MF: Done. -->
 
-<!-- Populations again section is especially a mess! Idea is to talk more about populations now that we have more of a framework in which to consider things. Make the distinction between the Preceptor table and the larger population from which it is drawn. -->
+<!-- Populations again section is especially a mess! Idea is to talk more about populations now that we have more of a framework in which to consider things. Make the distinction between the Preceptor table and the larger population from which it is drawn. MF: Done. -->
 
 <!-- Note that Internal/external validity section used to be after Data Problems in Complications. Now it is ahead! Unless we move Data Problems to Preceptor Table section . . . -->
 
@@ -580,184 +580,6 @@ We use Preceptor Tables both for predictive problems, like forecasting height on
 <!-- DK: Need a table here. -->
 
 
-#### Internal and external validity
-
-
-There are two main sources of missing data:
-
-1. For the units in our sample, we only see one potential outcome
-2. For the units outside our sample, we see *no* potential outcomes
-
-If we have randomized assignment and a large sample, we can be confident that we have a good estimate of the average treatment effect *in that sample*.  We say that the experiment has high **internal validity**: the inferences we are making are likely to reflect the truth about that sample.  
-
-However, we may be interested in a population beyond our particular sample, the second main source of missing data.  For example, let's look at the broader context of the train experiment. You likely are not exclusively concerned about the attitudes of people who ride trains, but rather the attitudes of a larger population. Train platforms, however, are a convenient setting in which to run the experiment.  Let's say that we ran a randomized experiment with 10,000 people in Boston, and found an $\widehat{ATE} = -1$. Should we assume this estimate would be accurate for a larger general population?
-
-The answer to that question depends in part on the **external validity** of the study. Are the 10,000 people in the study similar to the people who we want to generalize the findings to? Perhaps we want to generalize to train commuters in other cities. Let's say that the 10,000 people in Boston all choose to ride trains for environmental reasons. That's another form of **selection bias**. The sample is not randomly selected from the population in which we are interested.  Why is that a problem?  Those people differ systematically from other people in a way that may affect their response to the experiment. For example, their preference of public transportation for environmental reasons may be correlated to other political beliefs.
-
-Note that this concern can be expressed in terms of the assignment mechanism.  People who don't ride the train have a 0% chance of receiving the treatment.  Thus, the study *can't* directly speak to how the treatment would impact their attitudes towards immigrants. The only way we can make such claims is by making additional assumptions, such as that train-riders reflect the same makeup of political beliefs as people who don't ride trains.
-
-The external validity of a study is often directly related to the **representativeness** of our sample. Representativeness has to do with how well our sample represents the larger population we are interested in generalizing to. Does the train experiment allow us to calculate a causal effect for people who commute by cars? Can we calculate the causal effect for people in New York City? Before we generalize to broader populations we have to consider if our experimental estimates are applicable beyond our experiment. Maybe we think that commuters in Boston and New York are similar enough, that our $\widehat{ATE}$ also is a good estimate for the causal effect of our treatment in NYC. We could also conclude that people who commute by car are fundamentally different than people who commute by train. If that was true, then we could not say our estimate is true for all commuters because our sample does not accurately represent the broader group we want to generalize to. 
-
-The circumstances of the experiment may also affect the external validity of the study. Perhaps the train study was conducted during the middle of the summer when platforms are uncomfortably hot. Then, while we have variation in one aspect of the treatment (whether there were Spanish-speakers nearby), we don't have variation in another (temperature of train platform). It may be that attitude towards immigrants is impacted when the train platform is uncomfortably hot, but the treatment has no impact on attitude otherwise.
-
-When dealing with human subjects, there is a particular concern regarding external validity: the [**Hawthorne effect**](https://en.wikipedia.org/wiki/Hawthorne_effect).  When human subjects know that they are part of an experiment, they may change their behavior.
-
-In this example, the Hawthorne effect can impact attitudes expressed on surveys. Maybe respondents are more extreme in their attitude in either direction (more liberal or more conservative) because the survey is an opportunity to express opinion. 
-
-
-There is a border concept of **validity** to consider as well. That is, if the data is *valid*, then it accurately captures the concepts we care about. We do not want to use data if there is not a connection between the problem we face and the data that we have. 
-
-#### The infinite Preceptor Table
-
-
-In reality, a Preceptor Table has an infinite number of rows, and therefore an infinite amount of missing data. We call this type of Preceptor Table an infinite Preceptor Table. Such a reality is unworkable, so we make assumptions to reduce the true problem to something more manageable.
-
-Let's start by looking at what kinds of missing data make up the infinite Preceptor Table. For example, say we only care about the causal effect of this experiment on Yao. Do we only care about his attitude right after the experiment? No! We also care about Yao's potential outcomes one year from now, two years from now, and so on.
-
-So our full Preceptor Table includes people we know (Yao) and people we don't (for example, Eliot), both now and in the future:
-
-```{r, echo = FALSE}
-# First, we create a tibble with the values we want for the table
-
-tibble(subject = c("Yao this year", "Yao next year", "Yao two years from now", "Eliot this year", "Eliot next year", "Eliot two years from now", "...", "Person n at time t"),
-       ytreat = c("13", "?", "?", "?", "?", "?", "?", "?"),
-       ycontrol = c("?", "?", "?", "?", "?", "?", "?", "?"),
-       ydiff = c("?", "?", "?", "?", "?", "?", "?", "?")) %>%
-  
-  # Then, we use the gt function to make it pretty
-  
-  gt() %>%
-  cols_label(subject = md("ID"),
-                ytreat = md("$$Y_t(u)$$"),
-                ycontrol = md("$$Y_c(u)$$"),
-                ydiff = md("$$Y_t(u) - Y_c(u)$$")) %>%
-  cols_move(columns = c(ytreat, ycontrol), after = c(subject)) %>%
-  tab_style(cell_borders(sides = "right"),
-            location = cells_body(columns = c(subject))) %>%
-  tab_style(style = cell_text(align = "left", v_align = "middle", size = "large"), 
-            locations = cells_column_labels(columns = c(subject))) %>%
-  cols_align(align = "center", columns = everything()) %>%
-  cols_align(align = "left", columns = c(subject)) %>%
-  tab_spanner(label = "$$\\text{Outcomes}$$", c(ytreat, ycontrol)) %>%
-  tab_spanner(label = "$$\\text{Causal Effect}$$", c(ydiff))
-```
-
-&nbsp;
-
-In fact, because time is continuous, there is a row for Yao now, Yao one second from now, Yao one day from now and so on. The Preceptor Table extends downward forever. Thus, in order to estimate any causal effect, we need *assumptions*, so we aren't dealing with an infinite table. 
-
-```{r echo = FALSE, out.width=="100%", fig.align='center'}
-knitr::include_graphics("04-rubin-causal-model/images/wonderfullifememe1.jpg")
-```
-
-The most obvious way to eliminate some rows from the table is to assume the causal effect for Yao now is the same as all the ones for Yao in the future. Is that plausible? Sort of. Yao now and Yao in one second are pretty similar! Yao now and Yao in 30 years are less so.  Unfortunately, there's no magic way to get a good estimate of every missing value in the infinite Preceptor Table! But through some assumptions, we can reduce the true problem to the problem we were dealing with before. 
-
-Not only can we extend the Preceptor Table by adding people not in our sample to the rows, but we can also add additional treatments to the columns.  Let's go back to the original five people in our sample. What if we also wanted to test the causal effect of another language being spoken on the platform?  We'll call the original treatment $t$ and the new treatment $t'$.
-
-```{r, echo = FALSE}
-# First, we create a tibble with the values we want for the table
-
-tibble(subject = c("Yao", "Emma", "Cassidy", "Tahmid", "Diego"),
-       ytreat = c("13", "11", "?", "?", "6"),
-       ytreat2 = c("?", "?", "?", "?", "?"),
-       ycontrol = c("?", "?", "10", "12", "?")) %>%
-  
-  # Then, we use the gt function to make it pretty
-  
-  gt() %>%
-  cols_label(subject = md("ID"),
-             ytreat = md("$$Y_t(u)$$"),
-             ytreat2 = md("$$Y_{t'}(u)$$"),
-             ycontrol = md("$$Y_c(u)$$")) %>%
-  tab_style(cell_borders(sides = "right"),
-            location = cells_body(columns = c(subject))) %>%
-  tab_style(style = cell_text(align = "left", v_align = "middle", size = "large"), 
-            locations = cells_column_labels(columns = c(subject))) %>%
-  cols_align(align = "center", columns = everything()) %>%
-  cols_align(align = "left", columns = c(subject)) %>%
-  tab_spanner(label = "$$\\text{Outcomes}$$", c(ytreat, ytreat2, ycontrol)) %>%
-  fmt_markdown(columns = everything())
-```
-
-&nbsp;
-
-Note that for Yao, we now have three causal effects we can estimate: the difference between the original treatment and the new treatment, the difference between the original treatment and control, and the difference between the new treatment and control. 
-
-Even if you have just one language you are testing, there still could be multiple treatments.  For example, the amount of time the commuter is on the platform with the Spanish-speakers might vary across commuters. In that case, each might receive a different treatment.
-
-```{r, echo = FALSE}
-# First, we create a tibble with the values we want for the table
-
-tibble(subject = c("Yao", "Emma", "Cassidy", "Tahmid", "Diego"),
-       ytreat = c("13", "11", "?", "?", "6"),
-       ytreat2 = c("?", "?", "?", "?", "?"),
-       ytreat3 = c("?", "?", "?", "?", "?"),
-       ytreat4 = c("?", "?", "?", "?", "?"),
-       ytreat5 = c("?", "?", "?", "?", "?"),
-       ycontrol = c("?", "?", "10", "12", "?")) %>%
-  
-  # Then, we use the gt function to make it pretty
-  
-  gt() %>%
-  cols_label(subject = md("ID"),
-             ytreat = md("$$Y_{\\text{1 min}}(u)$$"),
-             ytreat2 = md("$$Y_{\\text{5 mins}}(u)$$"),
-             ytreat3 = md("$$Y_{\\text{10 mins}}(u)$$"),
-             ytreat4 = md("$$Y_{\\text{15 mins}}(u)$$"),
-             ytreat5 = md("$$Y_{\\text{20 mins}}(u)$$"),
-             ycontrol = md("$$Y_c(u)$$")) %>%
-  tab_style(cell_borders(sides = "right"),
-            location = cells_body(columns = c(subject))) %>%
-  tab_style(style = cell_text(align = "left", v_align = "middle", size = "large"), 
-            locations = cells_column_labels(columns = c(subject))) %>%
-  cols_align(align = "center", columns = everything()) %>%
-  cols_align(align = "left", columns = c(subject)) %>%
-  tab_spanner(label = "$$\\text{Outcomes}$$", c(ytreat, ytreat2, ytreat3, ytreat4, ytreat5, ycontrol)) %>%
-  fmt_markdown(columns = everything())
-```
-
-&nbsp;
-
-Instead of considering the treatment in terms of duration, we could also consider different volume levels, measured in decibels (dB), at which Spanish is being spoken. 
-
-
-```{r, echo = FALSE}
-# First, we create a tibble with the values we want for the table
-
-tibble(subject = c("Yao", "Emma", "Cassidy", "Tahmid", "Diego"),
-       ytreat = c("13", "11", "?", "?", "6"),
-       ytreat1001 = c("?", "?", "?", "?", "?"),
-       ytreat1002 = c("?", "?", "?", "?", "?"),
-       yellipsis = c("?", "?", "?", "?", "?"),
-       ycontrol = c("?", "?", "10", "12", "?")) %>%
-  
-  # Then, we use the gt function to make it pretty
-  
-  gt() %>%
-  cols_label(subject = md("ID"),
-             ytreat = md("$$Y_{\\text{58 dB}}(u)$$"),
-             ytreat1001 = md("$$Y_{\\text{59 dB}}(u)$$"),
-             ytreat1002 = md("$$Y_{\\text{60 dB}}(u)$$"),
-             yellipsis = md("$$Y_{\\text{61 dB}}(u)$$"),
-             ycontrol = md("$$Y_c(u)$$")) %>%
-  tab_style(cell_borders(sides = "right"),
-            location = cells_body(columns = c(subject))) %>%
-  tab_style(style = cell_text(align = "left", v_align = "middle", size = "large"), 
-            locations = cells_column_labels(columns = c(subject))) %>%
-  cols_align(align = "center", columns = everything()) %>%
-  cols_align(align = "left", columns = c(subject)) %>%
-  tab_spanner(label = "$$\\text{Outcomes}$$", c(ytreat, ytreat1001, ytreat1002, yellipsis, ycontrol)) %>%
-  fmt_markdown(columns = everything())
-```
-
-&nbsp;
-
-Indeed, there are an infinite number of possible treatments. The Preceptor Table extends to the right forever. Again, assumptions come to our rescue. Or rather, we just throw up our hands and only try to estimate a few things. This is why it is crucial to define one's estimand precisely: if we are interested in the difference in potential outcomes between Spanish being spoken for 10 minutes at a 60 dB versus control, we can ignore all the other possible columns in the infinite Preceptor Table.
-
-Thus, whenever you are considering a causal question, the best way to think about it is to start with the infinite Preceptor Table.  First we throw out the rows we think are duplicates (such as all the observations for Yao one second from now, two seconds from now, etc.) or that are outside the scope of what we are interested in for now (maybe we don't care about outcomes 30 years in the future for this study).  Second, we throw out the columns that we don't care about, which are all the possible treatments we aren't considering.  Finally, we define precisely---in terms of potential outcomes---our estimand.  It may be something simple, such as the average treatment effect, or something more complex.  Once we have done these steps, we can start thinking about how to fill in the question marks.  But remember that the infinite Preceptor Table is always there, and you should be conscious of which rows and columns you are throwing out!
-
-
-
 ## Simple models
 
 <!-- These are not, really, Preceptor Tables. These are the data rows from the Population Table. -->
@@ -1111,7 +933,185 @@ In this example, there is indeed a constant treatment effect for everyone: $+3$.
 knitr::include_app("https://www.youtube.com/embed/cBYUuD2aVkA")
 ```
 
-## Complications
+## Validity
+
+#### Internal and external validity
+
+
+There are two main sources of missing data:
+
+1. For the units in our sample, we only see one potential outcome
+2. For the units outside our sample, we see *no* potential outcomes
+
+If we have randomized assignment and a large sample, we can be confident that we have a good estimate of the average treatment effect *in that sample*.  We say that the experiment has high **internal validity**: the inferences we are making are likely to reflect the truth about that sample.  
+
+However, we may be interested in a population beyond our particular sample, the second main source of missing data.  For example, let's look at the broader context of the train experiment. You likely are not exclusively concerned about the attitudes of people who ride trains, but rather the attitudes of a larger population. Train platforms, however, are a convenient setting in which to run the experiment.  Let's say that we ran a randomized experiment with 10,000 people in Boston, and found an $\widehat{ATE} = -1$. Should we assume this estimate would be accurate for a larger general population?
+
+The answer to that question depends in part on the **external validity** of the study. Are the 10,000 people in the study similar to the people who we want to generalize the findings to? Perhaps we want to generalize to train commuters in other cities. Let's say that the 10,000 people in Boston all choose to ride trains for environmental reasons. That's another form of **selection bias**. The sample is not randomly selected from the population in which we are interested.  Why is that a problem?  Those people differ systematically from other people in a way that may affect their response to the experiment. For example, their preference of public transportation for environmental reasons may be correlated to other political beliefs.
+
+Note that this concern can be expressed in terms of the assignment mechanism.  People who don't ride the train have a 0% chance of receiving the treatment.  Thus, the study *can't* directly speak to how the treatment would impact their attitudes towards immigrants. The only way we can make such claims is by making additional assumptions, such as that train-riders reflect the same makeup of political beliefs as people who don't ride trains.
+
+The external validity of a study is often directly related to the **representativeness** of our sample. Representativeness has to do with how well our sample represents the larger population we are interested in generalizing to. Does the train experiment allow us to calculate a causal effect for people who commute by cars? Can we calculate the causal effect for people in New York City? Before we generalize to broader populations we have to consider if our experimental estimates are applicable beyond our experiment. Maybe we think that commuters in Boston and New York are similar enough, that our $\widehat{ATE}$ also is a good estimate for the causal effect of our treatment in NYC. We could also conclude that people who commute by car are fundamentally different than people who commute by train. If that was true, then we could not say our estimate is true for all commuters because our sample does not accurately represent the broader group we want to generalize to. 
+
+The circumstances of the experiment may also affect the external validity of the study. Perhaps the train study was conducted during the middle of the summer when platforms are uncomfortably hot. Then, while we have variation in one aspect of the treatment (whether there were Spanish-speakers nearby), we don't have variation in another (temperature of train platform). It may be that attitude towards immigrants is impacted when the train platform is uncomfortably hot, but the treatment has no impact on attitude otherwise.
+
+When dealing with human subjects, there is a particular concern regarding external validity: the [**Hawthorne effect**](https://en.wikipedia.org/wiki/Hawthorne_effect).  When human subjects know that they are part of an experiment, they may change their behavior.
+
+In this example, the Hawthorne effect can impact attitudes expressed on surveys. Maybe respondents are more extreme in their attitude in either direction (more liberal or more conservative) because the survey is an opportunity to express opinion. 
+
+
+There is a border concept of **validity** to consider as well. That is, if the data is *valid*, then it accurately captures the concepts we care about. We do not want to use data if there is not a connection between the problem we face and the data that we have. 
+
+#### The infinite Preceptor Table
+
+
+In reality, a Preceptor Table has an infinite number of rows, and therefore an infinite amount of missing data. We call this type of Preceptor Table an infinite Preceptor Table. Such a reality is unworkable, so we make assumptions to reduce the true problem to something more manageable.
+
+Let's start by looking at what kinds of missing data make up the infinite Preceptor Table. For example, say we only care about the causal effect of this experiment on Yao. Do we only care about his attitude right after the experiment? No! We also care about Yao's potential outcomes one year from now, two years from now, and so on.
+
+So our full Preceptor Table includes people we know (Yao) and people we don't (for example, Eliot), both now and in the future:
+
+```{r, echo = FALSE}
+# First, we create a tibble with the values we want for the table
+
+tibble(subject = c("Yao this year", "Yao next year", "Yao two years from now", "Eliot this year", "Eliot next year", "Eliot two years from now", "...", "Person n at time t"),
+       ytreat = c("13", "?", "?", "?", "?", "?", "?", "?"),
+       ycontrol = c("?", "?", "?", "?", "?", "?", "?", "?"),
+       ydiff = c("?", "?", "?", "?", "?", "?", "?", "?")) %>%
+  
+  # Then, we use the gt function to make it pretty
+  
+  gt() %>%
+  cols_label(subject = md("ID"),
+                ytreat = md("$$Y_t(u)$$"),
+                ycontrol = md("$$Y_c(u)$$"),
+                ydiff = md("$$Y_t(u) - Y_c(u)$$")) %>%
+  cols_move(columns = c(ytreat, ycontrol), after = c(subject)) %>%
+  tab_style(cell_borders(sides = "right"),
+            location = cells_body(columns = c(subject))) %>%
+  tab_style(style = cell_text(align = "left", v_align = "middle", size = "large"), 
+            locations = cells_column_labels(columns = c(subject))) %>%
+  cols_align(align = "center", columns = everything()) %>%
+  cols_align(align = "left", columns = c(subject)) %>%
+  tab_spanner(label = "$$\\text{Outcomes}$$", c(ytreat, ycontrol)) %>%
+  tab_spanner(label = "$$\\text{Causal Effect}$$", c(ydiff))
+```
+
+&nbsp;
+
+In fact, because time is continuous, there is a row for Yao now, Yao one second from now, Yao one day from now and so on. The Preceptor Table extends downward forever. Thus, in order to estimate any causal effect, we need *assumptions*, so we aren't dealing with an infinite table. 
+
+```{r echo = FALSE, out.width=="100%", fig.align='center'}
+knitr::include_graphics("04-rubin-causal-model/images/wonderfullifememe1.jpg")
+```
+
+The most obvious way to eliminate some rows from the table is to assume the causal effect for Yao now is the same as all the ones for Yao in the future. Is that plausible? Sort of. Yao now and Yao in one second are pretty similar! Yao now and Yao in 30 years are less so.  Unfortunately, there's no magic way to get a good estimate of every missing value in the infinite Preceptor Table! But through some assumptions, we can reduce the true problem to the problem we were dealing with before. 
+
+Not only can we extend the Preceptor Table by adding people not in our sample to the rows, but we can also add additional treatments to the columns.  Let's go back to the original five people in our sample. What if we also wanted to test the causal effect of another language being spoken on the platform?  We'll call the original treatment $t$ and the new treatment $t'$.
+
+```{r, echo = FALSE}
+# First, we create a tibble with the values we want for the table
+
+tibble(subject = c("Yao", "Emma", "Cassidy", "Tahmid", "Diego"),
+       ytreat = c("13", "11", "?", "?", "6"),
+       ytreat2 = c("?", "?", "?", "?", "?"),
+       ycontrol = c("?", "?", "10", "12", "?")) %>%
+  
+  # Then, we use the gt function to make it pretty
+  
+  gt() %>%
+  cols_label(subject = md("ID"),
+             ytreat = md("$$Y_t(u)$$"),
+             ytreat2 = md("$$Y_{t'}(u)$$"),
+             ycontrol = md("$$Y_c(u)$$")) %>%
+  tab_style(cell_borders(sides = "right"),
+            location = cells_body(columns = c(subject))) %>%
+  tab_style(style = cell_text(align = "left", v_align = "middle", size = "large"), 
+            locations = cells_column_labels(columns = c(subject))) %>%
+  cols_align(align = "center", columns = everything()) %>%
+  cols_align(align = "left", columns = c(subject)) %>%
+  tab_spanner(label = "$$\\text{Outcomes}$$", c(ytreat, ytreat2, ycontrol)) %>%
+  fmt_markdown(columns = everything())
+```
+
+&nbsp;
+
+Note that for Yao, we now have three causal effects we can estimate: the difference between the original treatment and the new treatment, the difference between the original treatment and control, and the difference between the new treatment and control. 
+
+Even if you have just one language you are testing, there still could be multiple treatments.  For example, the amount of time the commuter is on the platform with the Spanish-speakers might vary across commuters. In that case, each might receive a different treatment.
+
+```{r, echo = FALSE}
+# First, we create a tibble with the values we want for the table
+
+tibble(subject = c("Yao", "Emma", "Cassidy", "Tahmid", "Diego"),
+       ytreat = c("13", "11", "?", "?", "6"),
+       ytreat2 = c("?", "?", "?", "?", "?"),
+       ytreat3 = c("?", "?", "?", "?", "?"),
+       ytreat4 = c("?", "?", "?", "?", "?"),
+       ytreat5 = c("?", "?", "?", "?", "?"),
+       ycontrol = c("?", "?", "10", "12", "?")) %>%
+  
+  # Then, we use the gt function to make it pretty
+  
+  gt() %>%
+  cols_label(subject = md("ID"),
+             ytreat = md("$$Y_{\\text{1 min}}(u)$$"),
+             ytreat2 = md("$$Y_{\\text{5 mins}}(u)$$"),
+             ytreat3 = md("$$Y_{\\text{10 mins}}(u)$$"),
+             ytreat4 = md("$$Y_{\\text{15 mins}}(u)$$"),
+             ytreat5 = md("$$Y_{\\text{20 mins}}(u)$$"),
+             ycontrol = md("$$Y_c(u)$$")) %>%
+  tab_style(cell_borders(sides = "right"),
+            location = cells_body(columns = c(subject))) %>%
+  tab_style(style = cell_text(align = "left", v_align = "middle", size = "large"), 
+            locations = cells_column_labels(columns = c(subject))) %>%
+  cols_align(align = "center", columns = everything()) %>%
+  cols_align(align = "left", columns = c(subject)) %>%
+  tab_spanner(label = "$$\\text{Outcomes}$$", c(ytreat, ytreat2, ytreat3, ytreat4, ytreat5, ycontrol)) %>%
+  fmt_markdown(columns = everything())
+```
+
+&nbsp;
+
+Instead of considering the treatment in terms of duration, we could also consider different volume levels, measured in decibels (dB), at which Spanish is being spoken. 
+
+
+```{r, echo = FALSE}
+# First, we create a tibble with the values we want for the table
+
+tibble(subject = c("Yao", "Emma", "Cassidy", "Tahmid", "Diego"),
+       ytreat = c("13", "11", "?", "?", "6"),
+       ytreat1001 = c("?", "?", "?", "?", "?"),
+       ytreat1002 = c("?", "?", "?", "?", "?"),
+       yellipsis = c("?", "?", "?", "?", "?"),
+       ycontrol = c("?", "?", "10", "12", "?")) %>%
+  
+  # Then, we use the gt function to make it pretty
+  
+  gt() %>%
+  cols_label(subject = md("ID"),
+             ytreat = md("$$Y_{\\text{58 dB}}(u)$$"),
+             ytreat1001 = md("$$Y_{\\text{59 dB}}(u)$$"),
+             ytreat1002 = md("$$Y_{\\text{60 dB}}(u)$$"),
+             yellipsis = md("$$Y_{\\text{61 dB}}(u)$$"),
+             ycontrol = md("$$Y_c(u)$$")) %>%
+  tab_style(cell_borders(sides = "right"),
+            location = cells_body(columns = c(subject))) %>%
+  tab_style(style = cell_text(align = "left", v_align = "middle", size = "large"), 
+            locations = cells_column_labels(columns = c(subject))) %>%
+  cols_align(align = "center", columns = everything()) %>%
+  cols_align(align = "left", columns = c(subject)) %>%
+  tab_spanner(label = "$$\\text{Outcomes}$$", c(ytreat, ytreat1001, ytreat1002, yellipsis, ycontrol)) %>%
+  fmt_markdown(columns = everything())
+```
+
+&nbsp;
+
+Indeed, there are an infinite number of possible treatments. The Preceptor Table extends to the right forever. Again, assumptions come to our rescue. Or rather, we just throw up our hands and only try to estimate a few things. This is why it is crucial to define one's estimand precisely: if we are interested in the difference in potential outcomes between Spanish being spoken for 10 minutes at a 60 dB versus control, we can ignore all the other possible columns in the infinite Preceptor Table.
+
+Thus, whenever you are considering a causal question, the best way to think about it is to start with the infinite Preceptor Table.  First we throw out the rows we think are duplicates (such as all the observations for Yao one second from now, two seconds from now, etc.) or that are outside the scope of what we are interested in for now (maybe we don't care about outcomes 30 years in the future for this study).  Second, we throw out the columns that we don't care about, which are all the possible treatments we aren't considering.  Finally, we define precisely---in terms of potential outcomes---our estimand.  It may be something simple, such as the average treatment effect, or something more complex.  Once we have done these steps, we can start thinking about how to fill in the question marks.  But remember that the infinite Preceptor Table is always there, and you should be conscious of which rows and columns you are throwing out!
+
+
 
 <!-- DK: Rewrite this whole sloppy section.  -->
 
@@ -1243,10 +1243,6 @@ We should consider what we are actually interested in knowing. In this case, we 
 Once we have a defined problem and a Preceptor Table, we can begin to deal with all those question marks. 
 
 
-
-
-
-
 ### The assignment mechanism
 
 The "assignment mechanism" is the process by which some units received the treatment while the other units got the control. 
@@ -1336,31 +1332,6 @@ Many statistical methods have been developed for causal inference when there is 
 
 
 <!-- SZ: Maybe add resources/bullet list of methods should people want further information -->
-
-
-
-
-### No causation without manipulation
-
-In order for a potential outcome to make sense, it must be possible, at least *a priori*. For example, if there is no way for Yao, under any circumstance, to ever be in the train study, then $Y_{t}(u)$ is impossible for him. It can never happen. And if $Y_{t}(u)$ can never be observed, even in theory, then the causal effect of treatment on Yao's attitude is undefined. 
-
-The causal effect of the train study is well defined because it is the simple difference of two potential outcomes, both of which might happen. In this case, we (or something else) can manipulate the world, at least conceptually, so that it is possible that one thing or a different thing might happen.
-
-This definition of causal effects becomes much more problematic if there is no way for one of the potential outcomes to happen, ever. For example, what is the causal effect of Yao's height on his weight? It might seem we would just need to compare two potential outcomes: what would Yao's weight be under the treatment (where treatment is defined as being 3 inches taller) and what would Yao's weight be under the control (where control is defined as his current height).
-
-A moment's reflection highlights the problem: we can't increase Yao's height. There is no way to observe, even conceptually, what Yao's weight would be if he were taller because there is no way to make him taller. We can't manipulate Yao's height, so it makes no sense to investigate the causal effect of height on weight. Hence the slogan: *No causation without manipulation.*
-
-This then raises the question of what can and cannot be manipulated. If something cannot be manipulated, we should not consider it causal. So can race ever be considered causal? What about sex? A genetic condition like color-blindness? Can we manipulate these characteristics? In the modern world these questions are not simple. 
-
-Take color-blindness for example. Say we are interested in how color-blindness impacts ability to complete a jig-saw puzzle. Because color-blindness is genetic some might argue it cannot be manipulated. But advances in technology like gene-therapy might allow us to actually change someone's genes. Could we then claim the ability to manipulate color-blindness? If yes, we could then measure the causal effect of color-blindness on ability to complete jig-saw puzzles.
-
-
-The slogan of "No causation without manipulation" may at first seem straight forward, but it is clearly not so simple. Questions about race, sex, gender and genetics are very complex and should be considered with care. 
-
-
-
-
-
 ### Correlation with potential outcomes
 
 <!-- DK: Replace with a shorter statement that causation is only easy to determine with random assignment. Otherwise, you can't be sure. Second semester course for those interested in learning those techniques. This duplicated, perhaps better, the noise discussion above. Only need to do this once. Need a clear list of things to be concerned about. If confounding is the biggest category, what are the three types of confounding we should understand and worry about? -->
@@ -1425,6 +1396,29 @@ tibble(subject = c("R", "R", "D", "R", "D"),
 &nbsp;
 
 Keep in mind that the problem arises when there is a correlation between treatment assignment and *potential* outcome, not simply a correlation between treatment assignment and outcome. In this case, the correlation between treatment assignment and outcome is zero! Just looking at the outcomes we observe is not enough. We must make assumptions about the outcomes we don't observe, about what would have happened.
+
+
+### No causation without manipulation
+
+In order for a potential outcome to make sense, it must be possible, at least *a priori*. For example, if there is no way for Yao, under any circumstance, to ever be in the train study, then $Y_{t}(u)$ is impossible for him. It can never happen. And if $Y_{t}(u)$ can never be observed, even in theory, then the causal effect of treatment on Yao's attitude is undefined. 
+
+The causal effect of the train study is well defined because it is the simple difference of two potential outcomes, both of which might happen. In this case, we (or something else) can manipulate the world, at least conceptually, so that it is possible that one thing or a different thing might happen.
+
+This definition of causal effects becomes much more problematic if there is no way for one of the potential outcomes to happen, ever. For example, what is the causal effect of Yao's height on his weight? It might seem we would just need to compare two potential outcomes: what would Yao's weight be under the treatment (where treatment is defined as being 3 inches taller) and what would Yao's weight be under the control (where control is defined as his current height).
+
+A moment's reflection highlights the problem: we can't increase Yao's height. There is no way to observe, even conceptually, what Yao's weight would be if he were taller because there is no way to make him taller. We can't manipulate Yao's height, so it makes no sense to investigate the causal effect of height on weight. Hence the slogan: *No causation without manipulation.*
+
+This then raises the question of what can and cannot be manipulated. If something cannot be manipulated, we should not consider it causal. So can race ever be considered causal? What about sex? A genetic condition like color-blindness? Can we manipulate these characteristics? In the modern world these questions are not simple. 
+
+Take color-blindness for example. Say we are interested in how color-blindness impacts ability to complete a jig-saw puzzle. Because color-blindness is genetic some might argue it cannot be manipulated. But advances in technology like gene-therapy might allow us to actually change someone's genes. Could we then claim the ability to manipulate color-blindness? If yes, we could then measure the causal effect of color-blindness on ability to complete jig-saw puzzles.
+
+
+The slogan of "No causation without manipulation" may at first seem straight forward, but it is clearly not so simple. Questions about race, sex, gender and genetics are very complex and should be considered with care. 
+
+
+
+
+
 
 
 
