@@ -23,6 +23,19 @@
 
 <!-- DK: Posterior predictive checks! -->
 
+<!-- Come up with common ways in which a lack of representativeness causes problems. This is a list of things that we can check each time when we are interrograting a data science problem. Key issue is the correlation, if anything, between the "assignment mechanism" or "sampling mechanism" and other variables. Discuss sampling mechanism in all cases except att_end ~ treatment. For that, use "assignment mechanism." -->
+
+<!-- If your sampling mechanism creates a correlation between your outcome variable and other stuff, then you may have a problem. -->
+
+<!-- Think about the different categories of correlations (is this the right word?) which can arise. Example: the sampling mechanism of surveys, which old people don't like to fill out, means that old people are less likely to be in the sample. So what?  -->
+
+<!-- Well, if age is your outcome, then you have one sort of problem. You want the distribution of the outcome variables in the sample to match the distribution in the population. Note the sloppiness here. Am I worried about the distribution of the data from the point in time from when the sample comes from? Or am I interested in the distribution of the outcome from the whole population? Answer: They are the same thing (I think). -->
+
+<!-- Third case: What if the sampling mechanism goes a bias among the indepdent variables? -->
+
+
+Even if the two outcome distributions are the same, then a second problem could be that the parameters of the model are different for different ranges of the independent variable.  (Grumpy people versus  non-grumpy people.)
+
 
 
 Models have parameters. In Chapter \@ref(one-parameter) we created models with a single parameter $p$, the proportion of red beads in an urn. In Chapter \@ref(two-parameters), we used models with two parameters: $\mu$ (the average height in the population, generically known as a model "intercept") and $\sigma$ (the variation in height in the population). Here --- can you guess where this is going? --- we will build models with three parameters: $\sigma$ (which serves the same role throughout the book) and two coefficients. In models which relate a continuous predictor to the outcome, those two parameters will be labeled $\beta_0$ and $\beta_1$. In models which estimate two averages, the parameters will be $\beta_1$ and $\beta_2$. All this notation is confusing, not least because different academic fields use inconsistent schemes. Follow the Cardinal Virtues and tackle your problem step by step.
@@ -31,35 +44,16 @@ Models have parameters. In Chapter \@ref(one-parameter) we created models with a
 
 ## Wisdom
 
-Wisdom begins with considering the questions we desire to answer and the data set we are given.
+Wisdom begins with considering the questions we desire to answer and the data set we are given. In this chapter, we are going to ask a series of questions involving train commuters' ages, party affiliations, incomes, political ideology, and attitude on immigration for those who were and were not exposed to Spanish-speakers. These questions will pertain to all train commuters in the US today. Given these types of questions, the Preceptor Table to answer every question would appear as the following:
 
-<!-- Add in that questions pertain to population of train commuters -->
 
-### The Questions
+<!-- After determining the questions we would like to answer, we must then consider ideally what data we would have to do so and make our Preceptor Table. Recall: a Preceptor Table is the smallest possible table such that, if there is no missing data, all questions are easy to answer. In other words, for each individual in the population, what columns would we need to answer each question? We must also determine for each question whether the model will be predictive or causal. Recall from chapter 4, that a predictive model is a model that only has a single outcome column whereas a causal model would have at least two, such as a treatment column and control column.  -->
 
-*What is the expected age of a Democrat at a train station in the US today?*
+<!-- Look at the first question. Upon first glance, it appears that to answer this, we would like to have the age and party affiliation of those in population, with age being our outcome variable since it was we are looking to predict. The same holds true for the second question, since knowing the party and the ages of everyone in the population would allow us to create a distribution that compares a group of three Democrats to that of three Republicans. Therefore, we would need to have the columns of age and party affiliation in our Preceptor Table.  -->
 
-*In a group of train commuters in the US today with three Democrats and three Republicans, what will the age difference be between the oldest Democrat and the youngest Republican?* 
+<!-- The third and fourth question, however, would require individuals being exposed to Spanish-speakers and the their attitudes on immigration after the fact, so in our Preceptor Table, we would need two columns of attitude on immigration: one for the treatment of being exposed and another for the control group. -->
 
-*What is the average treatment effect, of exposing US train commuters today to Spanish-speakers, on their attitudes toward immigration?* 
-
-*What is the largest causal effect of exposing US train commuters today which still has a 1 in 10 chance of occurring?*
-
-<!-- Clairfy -->
-
-*What would you expect the income to be for a random 40 year old train commuterf in the US today?*
-
-*Among all train commuters in the US today who have an income $100,000, what proportion are liberal?*
-
-*Assume we have a group of eight train commuters in the US today, two of whom make $100,000, two $200,000, two $300,000 and two $400,000. How many will be liberal?*
-
-After determining the questions we would like to answer, we must then consider ideally what data we would have to do so and make our Preceptor Table. Recall: a Preceptor Table is the smallest possible table such that, if there is no missing data, all questions are easy to answer. In other words, for each individual in the population, what columns would we need to answer each question? We must also determine for each question whether the model will be predictive or causal. Recall from chapter 4, that a predictive model is a model that only has a single outcome column whereas a causal model would have at least two, such as a treatment column and control column. 
-
-Look at the first question. Upon first glance, it appears that to answer this, we would like to have the age and party affiliation of those in population, with age being our outcome variable since it was we are looking to predict. The same holds true for the second question, since knowing the party and the ages of everyone in the population would allow us to create a distribution that compares a group of three Democrats to that of three Republicans. Therefore, we would need to have the columns of age and party affiliation in our Preceptor Table. 
-
-The third and fourth question, however, would require individuals being exposed to Spanish-speakers and the their attitudes on immigration after the fact, so in our Preceptor Table, we would need two columns of attitude on immigration: one for the treatment of being exposed and another for the control group.
-
-The fourth question would require income and age for every individual in the population. Lastly, the fifth and sixth would require knowing whether an individual is liberal or not as well as their income, so we would also need columns with information on income and if someone is liberal or not. Therefore, our Preceptor Table would appear as the following:
+<!-- The fourth question would require income and age for every individual in the population. Lastly, the fifth and sixth would require knowing whether an individual is liberal or not as well as their income, so we would also need columns with information on income and if someone is liberal or not. Therefore, our Preceptor Table would appear as the following: -->
 
 <!-- Make sample Preceptor Table. Need a column for all 6 (?) of the variables that are used in the four models. But need two columns for att_end, because it is the dependent variable in the only causal model, which means that there are two potential outcomes.  -->
 
@@ -102,6 +96,8 @@ tibble(ID = c("Commuter 1", "Commuter 2", "...", "Commuter 1000", "Commuter 1001
 
 
 <!-- Recall: a Preceptor Table is the smallest possible table such that, if there is no missing data, all questions are easy to answer. Done. -->
+
+<!-- MM: Add discussion on the Preceptor Table -->
 
 Now that we have determined the data we would ideally have to answer the above questions, we have to take a look at the data set we have. To demonstrate modeling with three parameters, we will use the `trains` data set from the **primer.data** package. 
 
@@ -266,22 +262,21 @@ We can answer these and similar questions by creating a model that uses party af
 knitr::include_graphics("other/images/Justice.jpg")
 ```
 
-Justice consists of four topics: validity, stability, representativeness, and the model.
+Justice consists of four topics: validity, stability, representativeness, and the data generating mechanism (DGM).
 
 When considering validity, we must look back upon our population table and consider if we are comfortable combining the data from our Preceptor Table and our data in the population table. For `party`, this could mean considering if the meaning of aligning as a "Democrat" or "Republican" has changed over the years and is it a valid assumption for us to consider `party` as a column from both. For example, if instead of comparing 2012 and 2021, we were comparing 2021 to 1850, we would need to recognize that the meaning of being a Democrat and Republican has drastically changed and we wouldn't feel comfortable making `party` one column for these years. In our scenario, we would consider this for 2012 and 2021, in that the meaning of party affiliation my have also changed between then and now. As we know, the political parties have become more polarized over the past few decades so is it valid to consider `party` to have the same meaning for 2012 data and our 2021 Preceptor Table? While the parties may have been more polarized, in our instance, we will consider this to be valid because the core beliefs have not changed too significantly.
 
-
-We then must consider the stability of our model. We are still using the data from @enos2014. Yet the world is a very different place today! *The data we have is never a perfect match to the problem we face because data is always old.* The world is constantly changing. To use old data, we need to make assumptions about the stability of our model of the world and of the parameters we are estimating. In other words, we must assume that the model doesn't change over time. So, in this scenario, we must assume that the relationship between age and party has not changed over time. Whether those assumptions are reasonable is a difficult question, one that requires knowledge about the world as it was and the world as it now is. For instance, with our knowledge about the world, we might know that Democrats have been getting younger, so our relationship between age and party now may not be the same as that in 2012. So is making the assumption that the relationship between age and party the same in 2012 and now reasonable? We will say yes, but this is a question you must consider.
+We then must consider the stability of our DGM. We are still using the data from @enos2014. Yet the world is a very different place today! *The data we have is never a perfect match to the problem we face because data is always old.* The world is constantly changing. To use old data, we need to make assumptions about the stability of our model of the world and of the parameters we are estimating. In other words, we must assume that the DGM doesn't change over time. So, in this scenario, we must assume that the relationship between age and party has not changed over time. Whether those assumptions are reasonable is a difficult question, one that requires knowledge about the world as it was and the world as it now is. For instance, with our knowledge about the world, we might know that Democrats have been getting younger, so our relationship between age and party now may not be the same as that in 2012. So is making the assumption that the relationship between age and party the same in 2012 and now reasonable? We will say yes, but this is a question you must consider.
 
 Next, let's consider representativeness. In order to do so, we must determine if the data is representative of the time period which the data is from. Essentially, can we consider the data of 2012 Boston train commuters representative of 2012 US train commuters? Well, no data will every be truly representative since random sampling will also never really be perfect, so what we are truly determining is if we can consider the data of 2012 Boston train commuters to be representative *enough* of train commuters in the US today. While we may feel we can more confidently consider the data of the Boston train commuters to be representative of train commuters from a city similar to Boston, we probably feel less confident that the data is representative of the general population of train commuters in the US due to the variance among many different locations in the US. 
 
-<!-- MM: kind of model should be discussing linear or logistic -->
+<!-- MM: kind of DGM should be discussing linear or logistic -->
 
-Now, let's consider the type of model. Any model with age as its dependent variable will be predictive, not causal, for the simple reason that nothing, other than time, can change your age. You are X years old. It would not matter if you changed your party registration from Democrat to Republican or vice versa. Your age is your age.
+Now, let's consider the type of DGM. Any DGM with age as its dependent variable will be predictive, not causal, for the simple reason that nothing, other than time, can change your age. You are X years old. It would not matter if you changed your party registration from Democrat to Republican or vice versa. Your age is your age.
 
 There is only one potential outcome, i.e., one outcome. There is not a potential outcome if you are Democrat and a different potential outcome if you are a Republican.
 
-When dealing with a non-causal model, the focus is on predicting things. The underlying mechanism which connects age with party is less important than the brute statistical fact that there is a connection.  *Predictive models care little about causality.*
+When dealing with a non-causal DGM, the focus is on predicting things. The underlying mechanism which connects age with party is less important than the brute statistical fact that there is a connection.  *Predictive models care little about causality.*
 
 <!-- Preceptor Tables should be laid out like the formula: outcome on left, predictors on right. -->
 
@@ -311,7 +306,7 @@ tibble(ID = c("1", "2", "...", "473", "474",
 
 &nbsp;
 
-We now know that we are working with a predictive model. Recall:
+We now know that we are working with a predictive DGM. Recall:
 
 $$\text{outcome} = \text{model} + \text{not in the model}$$
 
@@ -664,7 +659,7 @@ Next, we must consider the stability of our model for the relationship between `
 
 Let's now once again consider whether the data from 2012 train commuters around Boston is representative of 2012 train commuters in the US. In our last model, we discussed the issue about how Boston may be different from other cities and therefore not representative of the US, and we will now consider the issue of random sampling that may lead to representativeness issues.
 
-Let's say that even though Boston is different from other US cities, we considered Boston to be perfectly representative of the US. Great, but this 2012 data could still not be representative due to a sampling bias. 
+Let's say that even though Boston is different from other US cities, we considered Boston to be perfectly representative of the US. Great, but this 2012 data could still not be representative. This is because there could be bias within those who are chosen to give the survey, in that the commuters who are approached and receive the surveys may not be random or representative. What if the individuals giving out the surveys were younger and also tended to choose people to approach with a survey that were similar in age to them? A scenario like this could end up overestimating younger train commuters in the population, which could influence our answers to any of our questions. Specifically, when considering the relationship between `att_end` and `treatment`, this could influence the results of the model because younger individuals may have similar attitudes on immigration. 
 
 <!-- We need to add Preceptor Tables here and in Wisdom. The below one is wrong because it does not show two potential outcomes.  Should use proper potential outcome notation, as introduced in chapter 4. -->
 
@@ -898,7 +893,19 @@ So far, we have only created models in which the predictor variable is discrete,
 
 ### Justice
 
-<!-- Add representativeness and validity -->
+Once again, in Justice, we must consider validity, stability, representativeness, and the data generating mechanism.
+
+<!-- MM: validity of income and age? -->
+
+Let's look at the validity of `age` and `income`. Recall that validity refers to whether or not we can consider the columns `age` and `income` to have the same meaning in our data set of 2012 Boston train commuters as opposed to that of our Preceptor Table. Since `age` doesn't really change meaning over time, and neither does `income`, we can consider the data to be valid.
+
+Now, let's consider the stability of our model and if we believe that our relationship between age and income has changed between 2012 and now. We will consider this model to be stable.
+
+<!-- MM: Add explanation of why it may not be stable, but we think it's fine? -->
+
+Next, let's consider another issue that we may have with representativeness. What if we were now to assume that Boston train commuters are perfectly representative of US train commuters AND those who were approached to respond to the survey were also random? Even if this were true, we could still not assume representativeness because those who actually complete and submit the survey are not random. Instead of having more young people chosen to respond by those handing out surveys like we discussed in our last model, what if were to assume that when the surveys are handed out randomly, younger people tended to fill out and submit them more than those who are older? Well, this would still skew the age distribution and overestimate younger people in the population, and if younger people also tend to have a lower income than older people, this could also alter our answers to our current questions. 
+
+If we had reason to believe this is true, one way that we could fix this issue of representativeness is to alter our population to be train commuters in the US who would respond to the survey. In doing so, our population would then accommodate for the skewed age distribution under the assumption that younger individuals tend to respond to surveys at higher rates than older people.
 
 ```{r echo = FALSE, fig.cap = "Justice"}
 knitr::include_graphics("other/images/Justice.jpg")
@@ -1050,7 +1057,13 @@ So far in this chapter, we have only considered *continuous* outcome variables. 
 
 ### Justice
 
-<!-- Add representativeness and validity -->
+Let's now consider Justice for our relationship between `liberal` and `income`.
+
+First, let's look at validity, especially pertaining to `liberal`. As we know, this column has the values "Liberal" and "Not Liberal" to convey the political ideology of the train commuters. What we must determine if the column `liberal` and therefore the meaning of being liberal is the same in Boston in 2012 and Boston in 2021. If we can determine these to be the same, then we can assume validity, and in this case, because the core beliefs of being liberal have not changed very much between 2012 and 2021, we can determine that the data is valid.
+
+Now, let's consider stability. To do so, we must look at the relationship between `liberal` and `income` and determine whether or not we believe that this relationship has changed between 2012 and 2021. With our knowledge of the world, do we have any reason to believe that this has changed? Well, we might want to take into consideration events like the Covid-19 pandemic that could have impacted this relationship to income, however we will consider our model to be stable.
+
+In our past three models, we have considered 3 possible issues that we could have with the representativeness of our model, such as the difference between Boston and other cities, problems with random sampling, and bias in those who respond, and we will now consider how in this survey there were surveys given before and after treatment, and some people may have filled out only one of the surveys. People who only filled out one of the surveys could affect the representativeness of the data because they could not be included in the data and if those who only filled out one survey tended to be liberal, then this would affect our data because it would underestimate the amount of liberals in the survey. This is something we must consider when looking at representativeness, since we could otherwise not determine if this data from train commuters in Boston in 2012 is representative enough of train commuters in the US now to continue using our data.
 
 Recall the discussion in Section \@ref(zero-one-outcomes) about the logistic regression model which we use whenever the outcome or dependent variable is binary/logical. The math is there, if you care about math. We don't, at least not too much. Reminder:
 
