@@ -107,7 +107,7 @@ knitr::include_app("https://www.youtube.com/embed/cR7p-IB6INM")
 
 <!-- SZ: Movie clips are stupid. Students will never watch them. -->
 
-George Bailey, in the movie "It's a Wonderful Life," believes that his life has served no purpose. The movie follows George as he explores a world in which he was never born. It is clear that he had a profound impact on the lives of many people in his community. His actions mattered, more than he ever realized.
+George Bailey, a character from the movie "It's a Wonderful Life," believes that his life has served no purpose. The movie follows George as he explores a world in which he was never born. It is clear that he had a profound impact on the lives of many people in his community. His actions mattered, more than he ever realized. 
 
 By showing what the world would have been like without George, we get an idea of the *causal effect* of his life on his town and the people who live there. This chapter explains causation using the framework of *potential outcomes* and the *Rubin Causal Model* (RCM). 
 
@@ -140,11 +140,13 @@ tibble(ID = c("Robert", "Andy", "Beau", "Ishan", "Nicolas"),
 
 In this case, we have a row for each brother and a column for their height. An individual *unit* is a brother. An *outcome* is that brother's height. We will always have an ID column in Preceptor Tables so that we can identify different units. It is always furthest to the left. In addition to the ID column, we call the column with the brothers' heights the outcome column. 
 
-To estimate average height, we need to estimate Andy's height. One guess is just the average of the other four brothers: $$\frac{(178 + 165 + 172 + 173)}{4} = 172$$ Is that realistic? We should consider things like why we know the four other brothers' heights. Were they sampled randomly? Or do we know their heights because they are the tallest in the family? In that case would it make sense to use an average to estimate Andy's height? Probably not! 
+To estimate average height, we need to estimate Andy's height -- our missing data. One guess is just the average of the other four brothers: $$\frac{(178 + 165 + 172 + 173)}{4} = 172$$ Is that realistic? We should consider things like why we know the four other brothers' heights. Were they sampled randomly? Or do we know their heights because they are the tallest in the family? In that case would it make sense to use an average to estimate Andy's height? Probably not! 
 
 Keep in mind that there is a *truth* out there, a state of the world independent of our knowledge of it. Andy is a specific height. If we had a complete Preceptor Table, with no missing values, we could calculate the average height of the brothers exactly. No fancy statistics would be needed. Just arithmetic.
 
-Consider a more complex problem. We have the heights of 100 Harvard students, and from that we want to know the average height of students in the school. 
+### Harvard Height
+
+Consider a more complex problem. We have the heights of 100 Harvard students, and from that we want to know the average height of all students in the school. 
 
 
 ```{r echo = FALSE}
@@ -224,9 +226,9 @@ tibble(ID = c("Student 1", "Student 2", "...", "Student 473", "Student 474",
   tab_spanner(label = "Covariates", columns = c(Age, Sex))
 ```
 
-In this case, we know the covariates, gender and age, for students 2 and 3,258. But we do not know their heights, the outcome variable. We want to create a model which uses the covariates to predict the outcome.
+In this case, we know the covariates, gender and age, for students 2 and 3,258. But we do not know their heights, the outcome variable. We want to create a model which uses the covariates to predict the outcome. 
 
-### Population
+## Population
 
 <!-- DK: This stinks! Fix it, please. Make sure to distinguish the larger context of a "population" from the very specific context of a "Preceptor Table," even if, in some cases, they can be the same.  -->
 
@@ -234,19 +236,76 @@ In this case, we know the covariates, gender and age, for students 2 and 3,258. 
 
 One of the most important concepts in all of statistics is *population*, the set of all units with which we are concerned. In our first example, the population was the five brothers in one family. In the second, it was the 6,700 students at Harvard. In many cases, the *population* is a well-defined and (mostly) stable set. In other cases, the population is quite unstable, even ill-defined, and, perhaps, unknowable. Examples:
 
-* Does the population of [Heisman Trophy winners](https://en.wikipedia.org/wiki/List_of_Heisman_Trophy_winners) include Reggie Bush, who voluntarily forfeited the title?
+* Does the population of Harvard students include prospective students, who have been admitted but have not started their first term?
 
 * Does the population of Harvard students include those taking a leave of absence?
 
-<!-- DK: More examples? -->
+* Does the population of Harvard students include Student X, a student that has been kicked out by the AdBoard, but is appealing the ruling?
 
 There are rarely Yes/No answers to questions like these.
 
-<!-- Switch all this to Harvard students example? -->
+<!-- Switch all this to Harvard students example? MF: Done. -->
 
-Perhaps more importantly, most real world examples involve the future, meaning that specifying the population is impossible. The future is always cloudy. We can't know, perfectly, the population of voters for the next New York City election since we don't know who will die between now and then. 
+Perhaps more importantly, most real world examples involve the future, meaning that specifying the population is impossible. The future is always cloudy. We can't know, perfectly, the population of voters for the next New York City election. There are two main sources of issue: the changing population and the definition of the population. Let's explore what those mean in more depth. 
 
-The very language we use is imprecise. Does a phrase like "New York City voters" mean all the people who voted in the last election, all the people who would vote if the election were held today or all the people who will vote in the next election? Who knows? It is our responsibility as data scientists to be sure that we make clear the definitions we are using.
+### Defining population
+
+The act of defining a population may seem simple. After all, once we know who or what we want to study, it should be easy to define, right? Unfortunately, it is often more complicated than we assume! To explore this, we will look at both our Harvard population and the population of New York voters. 
+
+#### Harvard
+
+When defining the population of "current" Harvard students for our calculation of height, what exactly do we need to know? Surely a list of current students would help. Is that all? Not exactly. We may ask ourselves the following:
+
+* Does the population of Harvard students include prospective students, who have been admitted but have not started their first term?
+
+* Does the population of Harvard students include Student X, a student that has been kicked out by the AdBoard, but is appealing the ruling?
+
+* Does the population of Harvard students include those taking a leave of absence?
+
+As we can see, merely defining "current" students can be complicated. When deciding on our models, it is important to consider what our population means --- and whether we may need to modify our definition for exceptions. 
+
+#### New York Voters
+
+Now, we have the population of "New York City voters". But, what does the phrase "New York City voters" even mean? The very language we use is imprecise. There are a number of ways we may define NYC voters, such as:
+
+* All the people who voted in the last election
+* All of the people who are eligible to vote today
+* All of the people who are eligible to vote in the next election
+
+Are you only considered a "voter" if you have voted in the past, or is the term "voter" applied to any citizen who is eligible to vote? Who knows? It is our responsibility as data scientists to be sure that we make clear the definitions we are using.
+
+Once we have defined our population --- and made said population explicit --- we have yet another complication: the population, like the world, changes constantly.
+
+### Changing population 
+
+Even after considering the units which are included or excluded from our population, there is another problem: the world. New units enter our population constantly; existing units exit our population constantly. In other words, there is always going to be data that expires, and there is always going to be new data that we don't have.  What does this mean? 
+
+#### Harvard
+
+To begin, visualize the population of Harvard students for which we would like to estimate height. We are (presumably) predicting average height for **today**. The population of Harvard students today may sound relatively easy to conceptualize, but there are often questions we must ask in regards to a *changing* population. For the purposes of this exercise, assume that we have data for all current students at Harvard. 
+
+With all of the data, we should be able to say, with one-hundred percent certainty, the average height for Harvard students. Right? Not exactly. Consider the following complications:
+
+* A number of students graduate off-cycle, meaning that they are technically no longer a student at the time of our calculation.
+* A student has transferred to another college. This person no longer qualifies as a "Harvard student". 
+* A student has died. This piece of data is no longer useful. 
+* A transfer student has arrived on campus, but isn't included in our data!
+
+These changes in our population are going to cause some error in our calculations. With larger populations, this becomes even more apparent. To cement this concept, we will explore our New York City voters population.
+
+#### New York City voters
+
+For the sake of this exercise, we define NYC voters as any and all citizens who are eligible to vote today. Even will this *precise* population, our population changes drastically. In the course of a day:
+
+* People in NYC have died. 
+* Hundreds of people have just turned 18 and are now eligible to vote, who weren't eligible yesterday!
+* A number of people living in NYC *moved away*.
+* A number of people *moved into* NYC.
+* A number of people were arrested for a felony conviction and can no longer vote. 
+
+The world is an ever changing place, as are our populations. As such, it is virtually impossible to have the Preceptor Tables we wrote about earlier. How can we account for this randomness? 
+
+### Preceptor Table
 
 Given this, a better Preceptor Table for the population of Harvard students would look like this:
 
@@ -275,7 +334,6 @@ tibble(ID = c("Student 1", "Student 2", "...", "Student 473", "Student 474",
 ```
 
 The only difference is that we no longer know the exact number of students in the population. So, instead of referring to Student 6,700, we use Student $N$. Even though we don't know --- and often can't know --- the number of units in the population, we still want to be able to label those units and to count them up. $N$ is the variable which normally refers to the **n**number of units in the population.
-
 
 So far, we have only asked predictive questions. This chapter, however, primarily focuses on causal inference. 
 
