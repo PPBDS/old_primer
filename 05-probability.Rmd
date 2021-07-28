@@ -1,37 +1,31 @@
 # Probability {#probability}
 
 
+<!-- Disease example is wrong, as discussed.  -->
+
 <!-- 3d plot for marble example is wrong. There is a 1/8 chance of getting 0 or 3 whites. There is a 3/8 chance of getting either 1 or 2. So, the 0 and 3 towers should be 1/3 the height of the 1 and 2 towers. -->
+
+<!-- Did we do the N models case correctly, given the errors above? I am not sure. But we ought to make these cases as similar as possible, especially in terms of the code we show students.  -->
 
 <!-- It would be nice if the 3d graphics did not "pop up" when knitting the chapter.  -->
 
+<!-- Should discuss the concept of "population" in each example of probability distributions. The population is the imaginary urn from which our data has been, or will be, drawn.  -->
 
-
-<!-- Maybe show (but don't explain!) the actual math formula. -->
-
-<!-- Add, on the mathematical distribution sections, the actual math formual. Learn about putting math. $$x + 1$$ Done.-->
-
-<!-- When building the chapter, we don't want rayshader images to pop up! -->
-
-<!-- Learn about movies in rayshader.  -->
+<!-- Learn about movies in rayshader.  Useful? https://joeystanley.com/blog/3d-vowel-plots-with-rayshader-->
 
 <!-- What would be a fun theme/gif/movie clip to start and end the chapter with, like we do in chapters 4 and 6? Something having to do with betting . . . Connected to Kant? -->
 
-<!-- Old stuff -->
 
-<!-- Also good to get into the *scaling* of distributions, and the arbitrariness thereof. For example, trains$age is a distribution. Fine. What about rep(trains$age, 2)? What about rep(trains$age, 100)? Well, if any vector is a distribution, then all three of these are distributions. In fact, they are the same distribution, just scaled differently.  -->
+<!-- When discussing a parameter $p$ and a probability distribution p() in the absence of a specific context, then those simple terms are OK. But, whenever you are talking about specific parameters or specific probability distributions, you should have either subscripts or items in the parentheses, respectively.  Make this clear somewhere? -->
 
-<!-- When discussing a parameter $p$ and a probability distribution p() in the absence of a specific context, then those simple terms are OK. But, whenever you are talking about specific parameters or specific probability distributions, you should have either subscripts or items in the parentheses, respectively.  -->
 
-<!-- https://joeystanley.com/blog/3d-vowel-plots-with-rayshader -->
+<!-- Maybe add, after N models, a section on Infinity models, meaning a continuous parameter p. Note that we have a continuous distribution section now. Want to set the stage for Chapter 6, in which we are generating a posterior for p which we may think of as taking an infinite number of values. This is a key dimension on which chapter 5 and 6 need to connect. Maybe not necessary? -->
 
-<!-- Revisit these references and see if there is other stuff we should include:   -->
+<!-- Revisit these references and see if there is other stuff we should include. Rethinking marbles would make a nice tutorial. -->
 
 <!-- Teaching Bayes' Rule: A Data-Oriented Approach by Jim Albert. -->
 <!-- Rethinking Chapter 2. Garden of forking data is just excellent stuff. -->
 <!-- Bayesian Workshop -->
-
-<!-- Wait on this. Maybe add, after N models, a section on Infinity models, meaning a continuous parameter p. Note that we have a continuous distribution section now. Want to set the stage for Chapter 6, in which we are generating a posterior for p which we may think of as taking an infinite number of values. This is a key dimension on which chapter 5 and 6 need to connect. Maybe not necessary? -->
 
 *This chapter is being edited.*
 
@@ -223,20 +217,15 @@ tibble(results = sample(c(0, 1), 100, replace = TRUE)) %>%
     theme_classic()
 ```
 
-
-
-
 A *mathematical distribution* is based on a mathematical formula. Assuming that the coin is perfectly fair, we should, on average, get heads as often as we get tails.
 
 
 ```{r, echo = FALSE}
+# The mathematical case with the expected 50/50 outcome hard-coded.
 
-# Flipping one coin 100 times
-
-mydata <- tibble(results = c(rep(0, 50),
-                             rep(1, 50)))
-
-ggplot(mydata, aes(x = results)) +
+tibble(results = c(rep(0, 50),
+                   rep(1, 50))) %>% 
+ggplot(aes(x = results)) +
   geom_histogram(aes(y = after_stat(count/sum(count))), 
                  binwidth = 0.5, 
                  color = "white") +
@@ -255,8 +244,6 @@ ggplot(mydata, aes(x = results)) +
 The distribution of a single observation is described by this formula. $y_i ~ Bernoulli(p)$. Expected value of $y_i$ is this mathematical probability distribution. If the mathematical assumptions are correct, then as your sample size increases, the empirical probability distribution will look more and more like the mathematical distribution. 
 
 
-
-
 A *posterior distribution* is based on beliefs and expectations. It displays your belief about things you can't see right now. You may have posterior distributions for outcomes in the past, present, or future.
 
 In the case of the coin toss, the posterior distribution changes depending on your beliefs. For instance, let's say your friend brought a coin to school and asked to bet you. If the result is heads, you have to pay them $5. 
@@ -265,13 +252,11 @@ This makes you suspicious, or in other world you no longer trust the "population
 
 
 ```{r, echo = FALSE}
+# Hard-code the creation of the posterior.
 
-# Flipping one coin 100 times
-
-mydata <- tibble(results = c(rep(0, 95),
-    rep(1, 5)))
-
-ggplot(mydata, aes(x = results)) +
+tibble(results = c(rep(0, 95),
+                   rep(1, 5))) %>% 
+ggplot(aes(x = results)) +
   geom_histogram(aes(y = after_stat(count/sum(count))), 
                  binwidth = 0.5, 
                  color = "white") +
@@ -284,7 +269,6 @@ ggplot(mydata, aes(x = results)) +
   scale_y_continuous(labels = 
                        scales::percent_format(accuracy = 1)) +
   theme_classic()
-
 ```
 
 The full terminology is mathematical (or empirical or posterior) *probability* distribution. But we will often shorten this to just mathematical (or empirical or posterior) distribution. The word "probability" is understood, even if it is not present.
@@ -304,7 +288,9 @@ We get an *empirical distribution* by rolling two dice a hundred times, either b
 ```{r}
 # In the coin example, we create the vector ahead of time, and then assigned
 # that vector to a tibble. There was nothing wrong with that approach. And we
-# could do the same thing here. But the use of map_* functions is more powerful.
+# could do the same thing here. But the use of map_* functions is more powerful,
+# although it requires creating the 100 rows of the tibble at the start and then
+# doing things "row-by_row."
 
 set.seed(1)
 
@@ -654,6 +640,8 @@ emp_dist_dice
 
 
 The two plots --- unnormalized and normalized --- have the exact same shape. In many ways, they are the same object. Yet normalization is required if we want to work with a probability distribution.
+
+<!-- Should we get into the *scaling* of distributions, and the arbitrariness thereof? For example, trains$age is a distribution. Fine. What about rep(trains$age, 2)? What about rep(trains$age, 100)? Well, if any vector is a distribution, then all three of these are distributions. In fact, they are the same distribution, just scaled differently.  -->
 
 
 ### Joint distributions
@@ -1640,11 +1628,9 @@ As you may have noticed, if you calculated the value using the first method, you
 
 The four [Cardinal Virtues](https://en.wikipedia.org/wiki/Cardinal_virtues) are Wisdom, Justice, Courage, and Temperance. Because data science is, ultimately, a moral act, we use these virtues to guide our work. Every data science project begins with a question.
 
-* *Wisdom* starts by creating the Preceptor Table. What data, if we had it, would allow us to answer our question easily? If the Preceptor Table has one outcome, then the model is predictive. If it has more than one (potential) ouctiome, then the model is causal. We then explore the data we have. You can never look too closely at your data. Key question: Are the data we have close enough to the data we want (i.e., the Preceptor Table) that we can consider both as coming from the same *population*? If not, we can't proceed further. 
+* *Wisdom* starts by creating the Preceptor Table. What data, if we had it, would allow us to answer our question easily? If the Preceptor Table has one outcome, then the model is *predictive*. If it has more than one (potential) outcome, then the model is *causal*. We then explore the data we have. You can never look too closely at your data. Key question: Are the data we have close enough to the data we want (i.e., the Preceptor Table) that we can consider both as coming from the same *population*? If not, we can't proceed further. 
 
-* *Justice* starts with the Population Table -- the data we want to have, the data which we actually have and all the other data from that same *population*. Each row of the Population Table is defined by a unique Unit/Time combination. We ask three key questions about the Population Table. First, do the columns demonstrate *validity*, meaning is the meaning consistent across the rows? Second, does the relationship among the variables demonstrate *stability*, meaning is the model stable across different Time periods? Third, are the rows associated with the data *representative* of all the units which we might have had data for?
-
-We then make an assumption about the *data generating mechanism*. What general mathematical formula connects the outcome variable we are interested in with the other data that we have?
+* *Justice* starts with the Population Table -- the data we want to have, the data which we actually have and all the other data from that same *population*. Each row of the Population Table is defined by a unique Unit/Time combination. We explore three key issues about the Population Table. First, do the columns demonstrate *validity*, i.e., is the meaning consistent across the rows? Second, does the relationship among the variables demonstrate *stability*, meaning is the model stable across different time periods? Third, are the rows associated with the data *representative* of all the units which we might have had data for? Justice concludes by making an assumption about the *data generating mechanism*. What general mathematical formula connects the outcome variable we are interested in with the other data that we have?
 
 * *Courage* allows us to explore different models. Even though Justice has provided the basic mathematical structure of the model, we still need to decide which variables to include and to estimate the values of unknown parameters. We avoid hypothesis tests. We check our models for consistency with the data we have. We select one model. 
 
@@ -1662,19 +1648,19 @@ Wisdom helps us decide if we can even hope to answer our question with the data 
 
 First, start with the Preceptor Table. What rows and columns of data do you need such that, if you had them all, the calculation of the quantity of interest would be trivial? If you want to know the average height of an adult in India, then the Preceptor Table would include a row for each adult and a column for their height. With no missing data, the average is easy to determine, as are a wide variety of other *estimands*, other unknown numbers. 
 
-One key aspect of this Preceptor Table is whether or not we need more than one potential outcome in order to calculate our estimand. For example, if we want to know the causal effect of exposure to Spanish-speakers on attitude toward immigration then we need a causal model, one which estimates that attitude under both treatment and control. The Preceptor Table would require two columns for the outcome. If, on the other hand, we only want to predict someone's attitude, or compare one person's attitude to another's, then we would only need a Preceptor Table with one column for the outcome. 
+One key aspect of this Preceptor Table is whether or not we need more than one potential outcome in order to calculate our estimand. For example, if we want to know the causal effect of exposure to Spanish-speakers on attitude toward immigration then we need a causal model, one which estimates that attitude for each person under both treatment and control. The Preceptor Table would require two columns for the outcome. If, on the other hand, we only want to predict someone's attitude, or compare one person's attitude to another's, then we would only need a Preceptor Table with one column for the outcome. 
 
 Are we are modeling (just) for prediction or are we (also) modeling for causation? Predictive models care nothing about causation. Causal models are often also concerned with prediction, if only as a means of measuring the quality of the model. 
 
-Every model is predictive, in the sense that, if we give you new data --- and it is drawn from a the same population --- then you can create a predictive forecast. But only a subset of those models are causal, meaning that, for a given individual, you can change the value of one input and figure out what the new output would be and then, from that, calculate the causal effect by looking at the difference between two potential outcomes.
+Every model is predictive, in the sense that, if we give you new data --- and it is drawn from the same population --- then you can create a predictive forecast. But only a subset of those models are causal, meaning that, *for a given individual*, you can change the value of one input and figure out what the new output would be and then, from that, calculate the causal effect by looking at the difference between two potential outcomes.
 
-With prediction, all we care about is forecasting Y given X on some as-yet-unseen data. But there is no notion of "manipulation" in such models. We don't pretend that, for Joe, we could turn variable X from a value of 5 to a value of 30 by just turning some knob and, by doing so, cause Joe's value of Y to change from 17 to 23. We can compare two people (or two groups of people), one with X equal to 5 and one with X equal to 30, and see how they differ in Y. The basic assumption of predictive models is that there is only one possible Y for Joe. There are not, by assumption, two possible values for Y, one if X equal 5 and another if X equals 30. The Preceptor Table has a single column under Y.
+With prediction, all we care about is forecasting Y given X on some as-yet-unseen data. But there is no notion of "manipulation" in such models. We don't pretend that, for Joe, we could turn variable X from a value of 5 to a value of 6 by just turning some knob and, by doing so, cause Joe's value of Y to change from 17 to 23. We can compare two people (or two groups of people), one with X equal to 5 and one with X equal to 6, and see how they differ in Y. The basic assumption of predictive models is that there is only one possible Y for Joe. There are not, by assumption, two possible values for Y, one if X equal 5 and another if X equals 6. The Preceptor Table has a single column under Y.
 
-With causal inference, however, we can consider the case of Joe with $X = 5$ and Joe with $X = 30$. The same mathematical model can be used. And both models can be used for prediction, for estimating what the value of Y will be for a yet-unseen observation with a specified value for X. But, in this case, instead of only a single column in the Preceptor Table for Y, we have at least two (and possibly many) such columns, one for each of the potential outcomes under consideration.
+With causal inference, however, we can consider the case of Joe with $X = 5$ and Joe with $X = 6$. The same mathematical model can be used. And both models can be used for prediction, for estimating what the value of Y will be for a yet-unseen observation with a specified value for X. But, in this case, instead of only a single column in the Preceptor Table for Y, we have at least two (and possibly many) such columns, one for each of the potential outcomes under consideration.
 
 *The difference between prediction models and causal models is that the former have one column for the outcome variable and the latter have more than one.* 
 
-Second, we look at the data we have and perform an exploratory data analysis, an EDA. You can never look at your data too much. The most important variable is the one we most want to understand/explain/predict. In the models we create in later chapters, this variable will go on the lefthand side of our mathematical equations. Some academic fields refer to this as the "dependent variable." Others use terms like "regressor" or "outcome." Whatever the terminology, we need to explore the distribution of this variable, its min/max/range, its mean and median, its standard deviation, and so on.  
+Second, we look at the data we have and perform an exploratory data analysis, an EDA. You can never look at your data too much. The most important variable is the one we most want to understand/explain/predict. In the models we create in later chapters, this variable will go on the left-hand side of our mathematical equations. Some academic fields refer to this as the "dependent variable." Others use terms like "regressor" or "outcome." Whatever the terminology, we need to explore the distribution of this variable, its min/max/range, its mean and median, its standard deviation, and so on.  
 
 @roas write:
 
@@ -1686,9 +1672,9 @@ We care about other variables as well, especially those that are most correlated
 
 Third, a key concept is the "population." We need the data we want --- the Preceptor Table --- and the data we have to be similar enough that we can consider them as all having come from the same statistical population. From [Wikipedia](https://en.wikipedia.org/wiki/Statistical_population):
 
-> In statistics, a population is a set of similar items or events which is of interest for some question or experiment. A statistical population can be a group of existing objects (e.g. the set of all stars within the Milky Way galaxy) or a hypothetical and potentially infinite group of objects conceived as a generalization from experience (e.g. the set of all possible hands in a game of poker).
+> In statistics, a population is a set of similar items or events which is of interest for some question or experiment. A statistical population can be a group of existing objects (e.g. the set of all stars within the Milky Way galaxy) or a hypothetical and potentially infinite group of objects conceived as a generalization from experience (e.g. the set of all opening hands in all the poker games in Las Vegas tomorrow).
 
-If we assume that the data we have is drawn from the same population as the data in the Preceptor Table, then we can use information about the former to make inferences about the latter. We can combine the Preceptor Table and the data into a single hypothetical data set. If we can't do that, if we can't assume that the two sources come from the same population, then we can't use our data to answer our questions. We have no choice but to walk away. The heart of Wisdom is knowing when to walk away. As John Tukey noted: 
+If we assume that the data we have is drawn from the same population as the data in the Preceptor Table, then we can use information about the former to make inferences about the latter. We can combine the Preceptor Table and the data into a single *Population Table*. If we can't do that, if we can't assume that the two sources come from the same population, then we can't use our data to answer our questions. We have no choice but to walk away. The heart of Wisdom is knowing when to walk away. As John Tukey noted: 
 
 > The combination of some data and an aching desire for an answer does not ensure that a reasonable answer can be extracted from a given body of data.
 
@@ -1700,14 +1686,24 @@ knitr::include_graphics("other/images/Justice.jpg")
 
 After Wisdom, we have an *Population Table.* It includes rows for the data we have and the data we want to have. It has missing values, most importantly for potential outcomes which were not observed. The central problem in inference is to fill in the question marks in the Population Table.
 
-There are three key aspects of *Justice*: the data generating mechanism, representativeness and validity.
+There are three key issues to explore in any Population Table: validity, stability and representativeness.
 
-First, the *data generating mechanism* is the mathematical formula, and associated error term, which relates  our outcome variable to our covariates.  
+* *Validity* focuses on the columns of the Population Table. We should confirm that the data we have accurately captures the concepts we care about. Is the data *valid*, given the problem we are trying to solve? 
+
+<!-- DK: Add more! Columns from different sources really mean the same thing. Infinite preceptor table. Et cetera.-->
+
+* *Stability* assumes that the relationship between the outcome variable and the covariates is consistent over time. Never forget that *temporal* nature of almost all real data science problems. Our Preceptor Table will focus on rows for today or for the near future. The data we have will always be from before today. We must almost always assume that the future will be like the past in order to use data from the past to make predictions about the future.
+
+* *Representativeness* is a two-sided concern. We want the data we have to be representative of the population for which we need to calculate parameters. Ideally, we would love for our data to be randomly sampled from the population, but this is almost never the case. But this is concern, not just with our data, but also for our Preceptor Table. If the data we want is not representative of the entire population then we will need to be careful in the inferences which we draw. 
+
+*Validity is about the columns in our Population Table. Stability and representativeness are about the rows.*
+
+The last step of Justice is to make an assumption about the structure of the data generating mechanism (DGM): the mathematical formula, and associated error term, which relates  our outcome variable to our covariates.  
 
 *Justice requires math.* Consider a model of coin-tossing:
 
-
 $$ H_i  \sim B(\rho_H, n = 20) $$
+
 The total number $H$ of Heads in experiment $i$ with 20 flips of a single coin, $H_i$, is distributed as a binomial with $n = 20$ and an unknown probability $\rho_h$ of the coin coming up Heads. 
  
 Note:
@@ -1718,21 +1714,7 @@ Note:
 
 <!-- DK: Unclear -->
 
-* In this simple case, we are fortunate that the parameter $\rho_h$ has such a (mostly!) simple analog to a real world quantity. Much of the time, parameters are not so easy to interpret. In a more complex model, especially with one with interaction terms, we focus less on parameters and more on actual predictions.
-
-
-* Wisdom allowed us to assume that all the rows in the actual Preceptor Table come from the same population. If that is true, then it is also true that the mathematical relationship between outcomes and covariates is consistent across these rows.
-
-Second, we should check how "representative" the data we have, and the data we want to have, is of the entire population. Representativeness is a two-sided concern. We want the data we have to be representative of the population for which we need to calculate parameters. Ideally, we would love for our data to be randomly sampled from the population, but this is almost never the case. But this is concern, not just with our data, but also for our Preceptor Table. If the data we want is not representative of the entire population then we will need to be careful in the inferences which we draw. 
-
-Never forget that *temporal* nature of almost all real data science problems. Our Preceptor Table will focus on rows for today or for the near future. The data we have will always be from before today. We must almost always assume that the future will be like the past in order to use data from the past to make predictions about the future.
-
-Third, confirm that the data we have accurately capturing the concepts we care about. Is the data *valid*, given the problem we are trying to solve? 
-
-<!-- DK: Add more! -->
-
-*Validity is about the columns in our Population Table. Representativeness is about the rows.*
-
+* In this simple case, we are fortunate that the parameter $\rho_h$ has such a (mostly!) simple analog to a real world quantity. Most of the time, parameters are not so easy to interpret. In a more complex model, especially with one with interaction terms, we focus less on parameters and more on actual predictions.
 
 ### Courage
 
@@ -1743,8 +1725,6 @@ knitr::include_graphics("other/images/Courage.jpg")
 The three languages of data science are words, math and code, and the most important of these is code. We need to explain the structure of our model using all three languages, but we need *Courage* to implement the model in code.
 
 Courage requires us to take the general mathematical formula provide by Justice and then make it specific. Which variables should we include in the model and which do we exclude? Every data science project involves the creation of several models. For each, we specify the precise data generating mechanism. Using that formula, and some R code, we create a fitted model. All models have parameters. We can never know the true values of the parameters, but we can create, and explore, posterior distributions for those unknown true values.
-
-
 
 Code allows us to "fit" a model by estimating the values of the unknown parameters, like $\rho_h$. Sadly, we can never know the true values of these parameters. But, like all good data scientists, we can express our uncertain knowledge in the form of posterior probability distributions. With those distributions, we can compare the actual values of the outcome variable with the  "fitted" or "predicted" results of the model. We can examine the "residuals," the difference between the fitted and actual values.  
 
@@ -1769,7 +1749,7 @@ knitr::include_graphics("other/images/Temperance.jpg")
 ```
 
 
-There are few more important concepts in statistics and data science than the "Data Generating Mechanism." Our *data* --- the data that we collect and see --- has been *generated* by the complexity and confusion of the world. God's own *mechanism* has brought His data to us. Our job is to build a model of that process, to create, on the computer, a mechanism which generates fake data consistent with the data which we see. With that DGM, we can answer any question which we might have. In particular, with the DGM, we provide predictions of data we have not seen and estimates of the uncertainty associated with those predictions. *Courage* helped us to create the DGM. *Temperance* will guide us in its use.
+There are few more important concepts in statistics and data science than the "Data Generating Mechanism." Our *data* --- the data that we collect and see --- has been *generated* by the complexity and confusion of the world. God's own *mechanism* has brought His data to us. Our job is to build a model of that process, to create, on the computer, a mechanism which generates fake data consistent with the data which we see. With that DGM, we can answer any question which we might have. In particular, with the DGM, we provide predictions of data we have not seen and estimates of the uncertainty associated with those predictions. *Justice* gave us the structure of the DGM.  *Courage* created the DGM, the fitted model. *Temperance* will guide us in its use.
 
 Having created (and checked) a model, we now use the model to answer questions. Models are made for use, not for beauty. The world confronts us. Make decisions we must. Our decisions will be better ones if we use high quality models to help make them.
 
@@ -1807,9 +1787,7 @@ Even worse, we must always worry that our estimated posterior, despite all the w
 
 <!-- DK: Not a bad summary, but should hit the key points more clearly.  -->
 
-*Validity is about the columns in our tibble. Representativeness is about the rows.*
-
-Throughout this chapter, we spent time going through examples of conditional distributions. However, it's worth noting that all probability distributions are conditional on something. Even in the most simple examples, when we were flipping a coin multiple times, we were assuming that the probability of getting heads versus tails did not change between tosses.
+Throughout this Chapter, we spent time going through examples of conditional distributions. However, it's worth noting that all probability distributions are conditional on something. Even in the most simple examples, when we were flipping a coin multiple times, we were assuming that the probability of getting heads versus tails did not change between tosses.
 
 We also discussed the difference between empirical, mathematical, and posterior probability distributions. Even though we developed these heuristics to better understand distributions, every time we make a claim about the world, it is based on our beliefs - what we think about the world. We could be wrong. Our beliefs can differ. Two reasonable people can have conflicting beliefs about the fairness of a die.
 

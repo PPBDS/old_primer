@@ -1,0 +1,48 @@
+# For help debugging build failures open an issue on the RStudio community with the 'github-actions' tag.
+# https://community.rstudio.com/new-topic?category=Package%20development&tags=github-actions
+
+# The other workflow does not work on pushes to the master branch because the git
+# diff comparison with the master is identical to the branch on which the workflow
+# is running. In this workflow we  grep git log Merge pull requests and then
+# compare the current branch to the last two merges. For merged pull requests, this
+# finds Rmds that are not the same as those in most recent merge. For pushes which
+# Preceptor makes from the local master to origin, this compare, this finds Rmds that
+# are not the same as in the last two merges. To avoid testing the same Rmd twice,
+# sort -u is used.
+
+on:
+  push:
+    branches:
+      - master
+
+name: R-CMD-check
+
+jobs:
+  R-CMD-check:
+    runs-on: macOS-latest
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - uses: r-lib/actions/setup-r@v1
+      - uses: actions/cache@v1
+        with:
+          path: ~/Library/Application Support/renv
+          key: ${{ runner.os }}-renv-v2-${{ hashFiles('**/renv.lock') }}
+          restore-keys: |
+             ${{ runner.os }}-renv-v2
+      - name: Install dependencies
+        run: |
+          install.packages("renv")
+          renv::consent(provided = TRUE)
+          renv::restore()
+        shell: Rscript {0}
+      - name: Check
+        run: |
+          system('git log --grep="Merge pull request #[0-9]\\+" --pretty=oneline -2 | sed "s/ .*//g" > last_merge')
+          for(i in system('while read line; do git diff --name-only "$line" HEAD; done < last_merge | grep Rmd | sort -u', intern = TRUE)) {
+          knitr::knit2html(i)
+          }
+        shell: Rscript {0}

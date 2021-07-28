@@ -75,7 +75,7 @@
 <p>Last chapter, we studied four parameters: models in which we studied multiple right-hand side variables at once. The next step in our model building education is to learn about <em>interactions</em>. The effect of a treatment relative to a control is almost never uniform. The effect might be bigger in women than in men, smaller in the rich relative to the poor. The technical term for such effects is “heterogeneous,” which is just Ph.D.’ese for “different.” With enough data, all effects are heterogeneous. Causal effects, at least in the social science, always vary across units. To model this reality, we rely on interactions, on allowing the effect size to differ. The same applies for predictive models. The relationship between our outcome variable <span class="math inline">\(y\)</span> and a predictor variable <span class="math inline">\(x\)</span> is rarely constant. The relationship varies based on the values of other variables. To take account of interactions, we need models with at least 5 parameters.</p>
 <!-- DK: Add some more. What are the key lessons? What do we carry over from previous chapters? What is new? Hit the data science research cycle. -->
 <p>Packages:</p>
-<div class="sourceCode" id="cb865"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb866"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">primer.data</span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://gt.rstudio.com/">gt</a></span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/ddsjoberg/gtsummary">gtsummary</a></span><span class="op">)</span>
@@ -91,7 +91,7 @@
 <span class="header-section-number">10.1</span> Wisdom<a class="anchor" aria-label="anchor" href="#wisdom-4"><i class="fas fa-link"></i></a>
 </h2>
 <div class="figure">
-<span id="fig:unnamed-chunk-668"></span>
+<span id="fig:unnamed-chunk-669"></span>
 <img src="other/images/Wisdom.jpg" alt="Wisdom" width="100%"><p class="caption">
 FIGURE 10.1: Wisdom
 </p>
@@ -481,7 +481,7 @@ FIGURE 10.1: Wisdom
 </h3>
 <!-- We discuss below that we only have data for people who are already dead. That is an interesting restriction, and effects the Preceptor Table in interesting ways. Or is such a discussion too advanced? -->
 <p>The <strong>primer.data</strong> package includes the <code>governors</code> data set which features demographic information about candidates for governor in the United States. <span class="citation"><a href="references.html#ref-barfort2020" role="doc-biblioref">Barfort, Klemmensen, and Larsen</a> (<a href="references.html#ref-barfort2020" role="doc-biblioref">2020</a>)</span> gathered this data and concluded that winning a gubernatorial election increases a candidate’s lifespan.</p>
-<div class="sourceCode" id="cb866"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb867"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">glimpse</span><span class="op">(</span><span class="va">governors</span><span class="op">)</span></code></pre></div>
 <pre><code>## Rows: 1,092
 ## Columns: 14
@@ -501,14 +501,14 @@ FIGURE 10.1: Wisdom
 ## $ lived_after  &lt;dbl&gt; 41.0, 2.1, 14.6, 13.3, 33.0, 54.5, 35.9, 51.0, 1.5, 27.9,…</code></pre>
 <!-- DK: Should restrict the data to one observation per person. A subtle issue. Think about the infinite Preceptor Table. -->
 <p>There are 14 variables and 1,092 observations. In this Chapter, we will only be looking at the variables <code>last_name</code>, <code>year</code>, <code>state</code>, <code>sex</code>, <code>lived_after</code>, <code>election_age</code>, <code>won</code>, and <code>close_race</code>.</p>
-<div class="sourceCode" id="cb868"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb869"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">ch10</span> <span class="op">&lt;-</span> <span class="va">governors</span> <span class="op">%&gt;%</span> 
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>won <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html">ifelse</a></span><span class="op">(</span><span class="va">win_margin</span> <span class="op">&gt;</span> <span class="fl">0</span>, <span class="cn">TRUE</span>, <span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>close_race <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html">ifelse</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">abs</a></span><span class="op">(</span><span class="va">win_margin</span><span class="op">)</span> <span class="op">&lt;</span> <span class="fl">5</span>, <span class="cn">TRUE</span>, <span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">last_name</span>, <span class="va">year</span>, <span class="va">state</span>, <span class="va">sex</span>, <span class="va">lived_after</span>, <span class="va">election_age</span>, <span class="va">won</span>, <span class="va">close_race</span><span class="op">)</span></code></pre></div>
 <p><code>election_age</code> and <code>lived_after</code> are how many years a candidate lived before and after the election, respectively. As a consequence, only politicians who are already deceased are included in this data set. This means that there are only a handful of observations from elections in the last 20 years. Most candidates from that time period are still alive and are, therefore, excluded. We created the <code>won</code> variable to indicate whether or not the candidate won the election. We define <code>close_race</code> to be true if the winning margin was less than 5%.</p>
 <p>One subtle issue: Should the same candidate be included multiple times? For example:</p>
-<div class="sourceCode" id="cb869"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb870"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">ch10</span> <span class="op">%&gt;%</span> 
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span><span class="op">(</span><span class="va">last_name</span> <span class="op">==</span> <span class="st">"Cuomo"</span><span class="op">)</span></code></pre></div>
 <pre><code>## # A tibble: 4 x 8
@@ -520,7 +520,7 @@ FIGURE 10.1: Wisdom
 ## 4 Cuomo      1994 New York Male         20.2         62.4 FALSE TRUE</code></pre>
 <p>For now, we leave in multiple observations for a single person.</p>
 <p>First, let’s sample from our dataset.</p>
-<div class="sourceCode" id="cb871"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb872"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">ch10</span> <span class="op">%&gt;%</span> 
   <span class="fu">slice_sample</span><span class="op">(</span>n <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></code></pre></div>
 <pre><code>## # A tibble: 5 x 8
@@ -532,11 +532,11 @@ FIGURE 10.1: Wisdom
 ## 4 Turner     1946 Oklahoma     Male          26.6         52.0 TRUE  FALSE     
 ## 5 Williams   1948 Michigan     Male          39.2         37.7 TRUE  FALSE</code></pre>
 <p>As we might expect, <code>sex</code> is most often “Male.” To be more precise in inspecting our data, let’s <code><a href="https://docs.ropensci.org/skimr/reference/skim.html">skim()</a></code> the dataset.</p>
-<div class="sourceCode" id="cb873"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb874"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://docs.ropensci.org/skimr/reference/skim.html">skim</a></span><span class="op">(</span><span class="va">ch10</span><span class="op">)</span></code></pre></div>
 <div class="inline-table"><table class="table table-sm">
 <caption>
-<span id="tab:unnamed-chunk-675">TABLE 10.1: </span>Data summary</caption>
+<span id="tab:unnamed-chunk-676">TABLE 10.1: </span>Data summary</caption>
 <tbody>
 <tr class="odd">
 <td align="left">Name</td>
@@ -711,7 +711,7 @@ FIGURE 10.1: Wisdom
 <p><code><a href="https://docs.ropensci.org/skimr/reference/skim.html">skim()</a></code> groups the variable together by type, and provides some analysis for each variable. We are also given histograms of the numeric data.</p>
 <p>Looking at the histogram for <code>year</code>, we see that it is skewed right — meaning that most of the data is bunched to the left and that there is a smaller tail to the right — with half of the observations from election years between 1945 and 1962. This makes sense logically, because we are only looking at deceased candidates, and candidates from more recent elections are more likely to still be alive.</p>
 <p>In using this data set, our left-side variable will be <code>lived_after</code>. We are trying to understand/predict how many years a candidate will live after the election.</p>
-<div class="sourceCode" id="cb874"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb875"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">ch10</span> <span class="op">%&gt;%</span>
   <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">year</span>, y <span class="op">=</span> <span class="va">lived_after</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">geom_point</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
@@ -722,11 +722,11 @@ FIGURE 10.1: Wisdom
        y <span class="op">=</span> <span class="st">"Years Lived After Election"</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">scale_y_continuous</span><span class="op">(</span>labels <span class="op">=</span> <span class="fu">scales</span><span class="fu">::</span><span class="fu"><a href="https://scales.r-lib.org/reference/label_number.html">label_number</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">theme_classic</span><span class="op">(</span><span class="op">)</span> </code></pre></div>
-<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-676-1.png" width="100%"></div>
+<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-677-1.png" width="100%"></div>
 <p>Note that there is a rough line above which we see no observations. Why might this be? When looking at the year elected and years lived post-election, there is missing data in the upper right quadrant due to the fact that it is impossible to have been elected post-2000 and lived more than 21 years. Simply put: this “edge” of the data represents, approximately, the most years a candidate could have lived, and still have died, given the year that they were elected.</p>
 <p>The reason the data is slanted downward is because the maximum value for this scenario is greater in earlier years. That is, those candidates who ran for governor in earlier years could live a long time after the election and still have died prior to the data set creation, giving them higher <code>lived_after</code> values than those who ran for office in more recent years. The edge of the scatter plot is not perfectly straight because, for many election years, no candidate had the decency to die just before data collection. The reason for so few observations in later years is that fewer recent candidates have died.</p>
 <p>To begin visualizing our <code>lived_after</code> data, we will inspect the difference in years lived post election between male and female candidates.</p>
-<div class="sourceCode" id="cb875"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb876"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">ch10</span> <span class="op">%&gt;%</span>
   <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">sex</span>, y <span class="op">=</span> <span class="va">lived_after</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">geom_boxplot</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
@@ -737,7 +737,7 @@ FIGURE 10.1: Wisdom
        y <span class="op">=</span> <span class="st">"Years Lived After Election"</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">scale_y_continuous</span><span class="op">(</span>labels <span class="op">=</span> <span class="fu">scales</span><span class="fu">::</span><span class="fu"><a href="https://scales.r-lib.org/reference/label_number.html">label_number</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">theme_classic</span><span class="op">(</span><span class="op">)</span> </code></pre></div>
-<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-677-1.png" width="100%"></div>
+<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-678-1.png" width="100%"></div>
 <p>This plot shows that men live much longer, on average, than women after the election. Is there an intuitive explanation for why this might be?</p>
 </div>
 <div id="population-3" class="section level3" number="10.1.3">
@@ -759,7 +759,7 @@ FIGURE 10.1: Wisdom
 <span class="header-section-number">10.2</span> Justice<a class="anchor" aria-label="anchor" href="#justice-7"><i class="fas fa-link"></i></a>
 </h2>
 <div class="figure" style="text-align: center">
-<span id="fig:unnamed-chunk-678"></span>
+<span id="fig:unnamed-chunk-679"></span>
 <img src="other/images/Justice.jpg" alt="Justice" width="60%"><p class="caption">
 FIGURE 10.2: Justice
 </p>
@@ -781,7 +781,7 @@ FIGURE 10.2: Justice
 <p>Our <strong>Preceptor Table</strong> rows contain the information that we would <em>want</em> to know in order to answer our questions. These rows contain entries for our covariates (sex, election_age, year elected) but they do not contain any outcome results (lived_after). We are trying to answer questions about the train commuter population in 2021, so our year entries of these rows will read “2021.”</p>
 <p>Our <strong>actual data</strong> rows contain the information that we <em>do</em> know. These rows contain entries for both our covariates <em>and</em> the outcomes. In this case, the actual data comes from gubernatorial candidates who are deceased. All columns (covariates and outcomes) will be complete.</p>
 <p>Our <strong>population</strong> rows contain no data. These are subjects which fall under our desired population, but for which we have no data. As such, all rows are missing.</p>
-<div class="sourceCode" id="cb876"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb877"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">tibble</span><span class="op">(</span>source <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Preceptor Table"</span>, <span class="st">"Preceptor Table"</span>, <span class="st">"Preceptor Table"</span>,  <span class="st">"..."</span>, <span class="st">"Data"</span>, <span class="st">"Data"</span>, <span class="st">"Data"</span>, <span class="st">"..."</span>, <span class="st">"Population"</span>, <span class="st">"Population"</span>, <span class="st">"Population"</span><span class="op">)</span>,
        year_elected <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"2021"</span>, <span class="st">"2021"</span>, <span class="st">"2021"</span>, <span class="st">"..."</span>,
                 <span class="st">"1952"</span>, <span class="st">"1967"</span>, <span class="st">"2004"</span>, <span class="st">"..."</span>,
@@ -1264,7 +1264,7 @@ FIGURE 10.2: Justice
 <span class="header-section-number">10.3</span> Courage<a class="anchor" aria-label="anchor" href="#courage-7"><i class="fas fa-link"></i></a>
 </h2>
 <div class="figure" style="text-align: center">
-<span id="fig:unnamed-chunk-680"></span>
+<span id="fig:unnamed-chunk-681"></span>
 <img src="other/images/Courage.jpg" alt="Courage" width="60%"><p class="caption">
 FIGURE 10.3: Courage
 </p>
@@ -1274,12 +1274,12 @@ FIGURE 10.3: Courage
 <span class="header-section-number">10.3.1</span> sex<a class="anchor" aria-label="anchor" href="#sex"><i class="fas fa-link"></i></a>
 </h3>
 <p>Let’s regress <code>lived_after</code> on <code>sex</code> to see how candidates’ post-election lifespans differ by sex.</p>
-<div class="sourceCode" id="cb877"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb878"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">fit_2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://mc-stan.org/rstanarm/reference/stan_glm.html">stan_glm</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">ch10</span>,
                        formula <span class="op">=</span> <span class="va">lived_after</span> <span class="op">~</span> <span class="va">sex</span>,
                        refresh <span class="op">=</span> <span class="fl">0</span>,
                        seed <span class="op">=</span> <span class="fl">76</span><span class="op">)</span></code></pre></div>
-<div class="sourceCode" id="cb878"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb879"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://docs.ropensci.org/skimr/reference/print.html">print</a></span><span class="op">(</span><span class="va">fit_2</span>, detail <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></code></pre></div>
 <pre><code>##             Median MAD_SD
 ## (Intercept) 16.1    2.9  
@@ -1293,7 +1293,7 @@ FIGURE 10.3: Courage
 <p><span class="math inline">\(\beta_0\)</span> is our intercept, around 16 years. In this type of model, our intercept represents the the variable which is not represented in the model. Therefore, the intercept value represents those who are not male (females).</p>
 <p><span class="math inline">\(\beta_1\)</span> only affects the outcome when the candidate is male. When the candidate is a male, we add the coefficient for male to the intercept value, which gives us the average lifespan of a male gubernatorial candidate after an election.</p>
 <p>The posterior distribution for <span class="math inline">\(\beta_0 + \beta_1\)</span> can be constructed via simple addition.</p>
-<div class="sourceCode" id="cb880"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb881"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">fit_2</span> <span class="op">%&gt;%</span> 
   <span class="fu"><a href="https://tibble.tidyverse.org/reference/as_tibble.html">as_tibble</a></span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span> 
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>male_intercept <span class="op">=</span> <span class="va">`(Intercept)`</span> <span class="op">+</span> <span class="va">sexMale</span><span class="op">)</span> <span class="op">%&gt;%</span> 
@@ -1306,9 +1306,9 @@ FIGURE 10.3: Courage
     <span class="fu">scale_x_continuous</span><span class="op">(</span>labels <span class="op">=</span> <span class="fu">scales</span><span class="fu">::</span><span class="fu"><a href="https://scales.r-lib.org/reference/label_number.html">number_format</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
     <span class="fu">scale_y_continuous</span><span class="op">(</span>labels <span class="op">=</span> <span class="fu">scales</span><span class="fu">::</span><span class="fu"><a href="https://scales.r-lib.org/reference/label_percent.html">percent_format</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
     <span class="fu">theme_classic</span><span class="op">(</span><span class="op">)</span></code></pre></div>
-<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-683-1.png" width="100%"></div>
+<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-684-1.png" width="100%"></div>
 <p>But is that actually so “simple?” Not really! Manipulating parameters directly is bothersome. Dealing with variables named <code>(Intercept)</code> is error-prone. Using <code><a href="https://mc-stan.org/rstanarm/reference/posterior_linpred.stanreg.html">posterior_epred()</a></code> and associated functions is much easier.</p>
-<div class="sourceCode" id="cb881"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb882"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://mc-stan.org/rstanarm/reference/posterior_linpred.stanreg.html">posterior_epred</a></span><span class="op">(</span><span class="va">fit_2</span>,
                 <span class="fu">tibble</span><span class="op">(</span>sex <span class="op">=</span> <span class="st">"Male"</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
   <span class="fu"><a href="https://tibble.tidyverse.org/reference/as_tibble.html">as_tibble</a></span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span> 
@@ -1321,9 +1321,9 @@ FIGURE 10.3: Courage
     <span class="fu">scale_x_continuous</span><span class="op">(</span>labels <span class="op">=</span> <span class="fu">scales</span><span class="fu">::</span><span class="fu"><a href="https://scales.r-lib.org/reference/label_number.html">number_format</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
     <span class="fu">scale_y_continuous</span><span class="op">(</span>labels <span class="op">=</span> <span class="fu">scales</span><span class="fu">::</span><span class="fu"><a href="https://scales.r-lib.org/reference/label_percent.html">percent_format</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
     <span class="fu">theme_classic</span><span class="op">(</span><span class="op">)</span></code></pre></div>
-<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-684-1.png" width="100%"></div>
+<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-685-1.png" width="100%"></div>
 <p>The interpretation of this parameter is the same as we have seen before. There is a true average, across the entire population, of the number of years that male candidates live after the election. We can never know what that true average is. But, it seems very likely that the true average is somewhere between 27.5 and 29.5 years.</p>
-<div class="sourceCode" id="cb882"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb883"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://mc-stan.org/rstanarm/reference/posterior_linpred.stanreg.html">posterior_epred</a></span><span class="op">(</span><span class="va">fit_2</span>,
                 <span class="fu">tibble</span><span class="op">(</span>sex <span class="op">=</span> <span class="st">"Female"</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
   <span class="fu"><a href="https://tibble.tidyverse.org/reference/as_tibble.html">as_tibble</a></span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span> 
@@ -1337,7 +1337,7 @@ FIGURE 10.3: Courage
     <span class="fu">scale_y_continuous</span><span class="op">(</span>labels <span class="op">=</span> <span class="fu">scales</span><span class="fu">::</span><span class="fu"><a href="https://scales.r-lib.org/reference/label_percent.html">percent_format</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
     <span class="fu">theme_classic</span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <div class="inline-figure">
-<img src="book_temp_files/figure-html/unnamed-chunk-685-1.png" width="100%">
+<img src="book_temp_files/figure-html/unnamed-chunk-686-1.png" width="100%">
 We see that the expected lifespan post-election is significantly lower for female candidates, with the average being around 15 years.</div>
 </div>
 <div id="election_age" class="section level3" number="10.3.2">
@@ -1345,7 +1345,7 @@ We see that the expected lifespan post-election is significantly lower for femal
 <span class="header-section-number">10.3.2</span> election_age<a class="anchor" aria-label="anchor" href="#election_age"><i class="fas fa-link"></i></a>
 </h3>
 <p>To begin, let’s model candidate lifespan after the election as a function of candidate lifespan prior to the election. The data:</p>
-<div class="sourceCode" id="cb883"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb884"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">ch10</span> <span class="op">%&gt;%</span> 
   <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">election_age</span>, y <span class="op">=</span> <span class="va">lived_after</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
     <span class="fu">geom_point</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
@@ -1357,7 +1357,7 @@ We see that the expected lifespan post-election is significantly lower for femal
     <span class="fu">scale_x_continuous</span><span class="op">(</span>labels <span class="op">=</span> <span class="fu">scales</span><span class="fu">::</span><span class="fu"><a href="https://scales.r-lib.org/reference/label_number.html">label_number</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
     <span class="fu">scale_y_continuous</span><span class="op">(</span>labels <span class="op">=</span> <span class="fu">scales</span><span class="fu">::</span><span class="fu"><a href="https://scales.r-lib.org/reference/label_number.html">label_number</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
     <span class="fu">theme_classic</span><span class="op">(</span><span class="op">)</span></code></pre></div>
-<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-686-1.png" width="100%"></div>
+<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-687-1.png" width="100%"></div>
 <p>The math is fairly simple:</p>
 <p><span class="math display">\[ lived\_after_i =  \beta_0 + \beta_1 election\_age_i + \epsilon_i \]</span></p>
 <p>with <span class="math inline">\(\epsilon_i \sim N(0, \sigma^2)\)</span>.
@@ -1378,7 +1378,7 @@ We see that the expected lifespan post-election is significantly lower for femal
 <p>There are three unknown parameters — <span class="math inline">\(\beta_0\)</span>, <span class="math inline">\(\beta_1\)</span> and <span class="math inline">\(\sigma\)</span> — just as with the models we used in Chapter <a href="three-parameters.html#three-parameters">8</a>. Before we get to the five parameter case, it is useful to review this earlier material.</p>
 <p>You may recall from middle school algebra that the equation of a line is <span class="math inline">\(y = m x + b\)</span>. There are two parameters: <span class="math inline">\(m\)</span> and <span class="math inline">\(b\)</span>. The intercept <span class="math inline">\(b\)</span> is the value of <span class="math inline">\(y\)</span> when <span class="math inline">\(x = 0\)</span>. The slope coefficient <span class="math inline">\(m\)</span> for <span class="math inline">\(x\)</span> is the increase in <span class="math inline">\(y\)</span> for every one unit increase in <span class="math inline">\(x\)</span>. When defining a regression line, we use slightly different notation but the fundamental relationship is the same.</p>
 <p>Rather repeat the process in Chapter 8, we will look at the resulting plot using a model that predicts years lived after as a factor of age at election.</p>
-<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-687-1.png" width="100%"></div>
+<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-688-1.png" width="100%"></div>
 <p>As we discussed in Chapter <a href="three-parameters.html#three-parameters">8</a>, the most common term for a model like this is a “regression.” We have “regressed” <code>lived_after</code>, our dependent variable, on <code>election_age</code>, our (only) independent variable.</p>
 <p>Consider someone who is about 40 years old on Election Day. We have a score or more data points for candidates around that age. This area is highlighted by the red box on our plot. As we can see, two died soon after the election. Some of them lived for 50 or more years after the election. <em>Variation fills the world.</em> However, the fitted line tells us that, on average, we would expect a candidate that age to live about 37 years after the election.</p>
 <p>This is a descriptive model, not a causal model. Remember our motto from Chapter <a href="rubin-causal-model.html#rubin-causal-model">4</a>: <em>No causation without manipulation.</em> There is no way, for person <span class="math inline">\(i\)</span>, to change the years that she has been alive on Election Day. On the day of this election, she is X years old. So, there are not two (or more) potential outcomes. Without more than one potential outcome, there can not be a causal effect.</p>
@@ -1386,7 +1386,7 @@ We see that the expected lifespan post-election is significantly lower for femal
 <!-- DK: THis is a critical point. Maybe give a precise example? Go through the math slowly, like ModernDive does? Highlight this somehow? At the very least, we should emphasize the point for each model going forward. -->
 <p>Let’s look at the posterior of <span class="math inline">\(\beta_1\)</span>, the coefficient of <span class="math inline">\(election\_age_i\)</span>:</p>
 <!-- DK: We should standardize what these plots look like, both in this chapter and throughout the book. -->
-<div class="sourceCode" id="cb884"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb885"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">fit_1</span> <span class="op">%&gt;%</span> 
   <span class="fu"><a href="https://tibble.tidyverse.org/reference/as_tibble.html">as_tibble</a></span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span> 
   <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span><span class="va">election_age</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> 
@@ -1397,7 +1397,7 @@ We see that the expected lifespan post-election is significantly lower for femal
          x <span class="op">=</span> <span class="st">"Coefficient of `election_age`"</span><span class="op">)</span> <span class="op">+</span> 
     <span class="fu">scale_y_continuous</span><span class="op">(</span>labels <span class="op">=</span> <span class="fu">scales</span><span class="fu">::</span><span class="fu"><a href="https://scales.r-lib.org/reference/label_percent.html">percent_format</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
     <span class="fu">theme_classic</span><span class="op">(</span><span class="op">)</span></code></pre></div>
-<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-688-1.png" width="100%"></div>
+<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-689-1.png" width="100%"></div>
 <!-- DK: Add some interpretation. Need to explain how the uncertainty in beta_1 is connected to the uncertainty we will see in lived_after, for a given difference (not "change") in election_age. -->
 <!-- DK: Priority is to add a graphic which shows the "cloud" of possible regression lines, consistent with the posterior for beta_1.  -->
 <!-- DK: Would using 50-year-old be better? -->
@@ -1420,12 +1420,12 @@ We see that the expected lifespan post-election is significantly lower for femal
 <li><p><span class="math inline">\(\beta_2\)</span> is, for the entire population, the average difference in <span class="math inline">\(lived\_after_i\)</span> between two individuals, one of whom has an <span class="math inline">\(c\_election\_age_i\)</span> value of 1 greater than the other.</p></li>
 </ul>
 <p>Let’s translate the model into code.</p>
-<div class="sourceCode" id="cb885"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb886"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">fit_3</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://mc-stan.org/rstanarm/reference/stan_glm.html">stan_glm</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">ch10</span>,
                       formula <span class="op">=</span> <span class="va">lived_after</span> <span class="op">~</span> <span class="va">sex</span> <span class="op">+</span> <span class="va">election_age</span>,
                       refresh <span class="op">=</span> <span class="fl">0</span>,
                       seed <span class="op">=</span> <span class="fl">12</span><span class="op">)</span></code></pre></div>
-<div class="sourceCode" id="cb886"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb887"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://docs.ropensci.org/skimr/reference/print.html">print</a></span><span class="op">(</span><span class="va">fit_3</span>, detail <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></code></pre></div>
 <pre><code>##              Median MAD_SD
 ## (Intercept)  66.0    3.2  
@@ -1445,7 +1445,7 @@ We see that the expected lifespan post-election is significantly lower for femal
 ## 1 (Intercept)    66.0  
 ## 2 sexMale         6.15 
 ## 3 election_age   -0.847</code></pre>
-<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-693-1.png" width="100%"></div>
+<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-694-1.png" width="100%"></div>
 <!-- MF: NEED TO ADD COMMENTARY -->
 </div>
 <div id="election_age-sex-and-election_agesex" class="section level3" number="10.3.4">
@@ -1464,12 +1464,12 @@ We see that the expected lifespan post-election is significantly lower for femal
 <li><p><span class="math inline">\(\beta_3\)</span> alone is difficult to interpret. However, when it is added to <span class="math inline">\(\beta_2\)</span>, the result in the slope for men.</p></li>
 </ul>
 <p>Code:</p>
-<div class="sourceCode" id="cb889"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb890"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">fit_4</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://mc-stan.org/rstanarm/reference/stan_glm.html">stan_glm</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">ch10</span>,
                       formula <span class="op">=</span> <span class="va">lived_after</span> <span class="op">~</span> <span class="va">sex</span><span class="op">*</span><span class="va">election_age</span>,
                       refresh <span class="op">=</span> <span class="fl">0</span>,
                       seed <span class="op">=</span> <span class="fl">13</span><span class="op">)</span></code></pre></div>
-<div class="sourceCode" id="cb890"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb891"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://docs.ropensci.org/skimr/reference/print.html">print</a></span><span class="op">(</span><span class="va">fit_4</span>, detail <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></code></pre></div>
 <pre><code>##                      Median MAD_SD
 ## (Intercept)          20.5   20.4  
@@ -1486,7 +1486,7 @@ We see that the expected lifespan post-election is significantly lower for femal
 <p>The coefficient for <span class="math inline">\(c\_election\_age_i\)</span>, <span class="math inline">\(\beta_2\)</span>, is -0.1. What does this mean? It is the slope for females. So, when comparing two female candidates who differ by one year in age, we expect that the older candidate will live 0.1 years less. Now direct your attention below at the coefficient of <code>sexMale:election_age</code>, <span class="math inline">\(\beta_3\)</span>, which is -0.8. This is the value that must be added to the coefficient of <span class="math inline">\(c\_election\_age_i\)</span> (recall <span class="math inline">\(\beta_2 + \beta_3\)</span>) in order to find the slope for males. When the two are added together, this value, or slope, is about -0.9. When comparing two male candidates who differ in age by one year, we expect the older candidate to live about 0.9 years less.</p>
 <p><em>Key point</em>: The interpretation of the intercepts only apply to candidates for whom <span class="math inline">\(c\_election\_age_i = 0\)</span>. Candidates who are not 52 years-old will have a different expected number of years to live. The interpretation of the slope applies to everyone. In other words, the relationship between <span class="math inline">\(lived\_after_i\)</span> and <span class="math inline">\(c\_election\_age_i\)</span> is the same, regardless of your gender or how old you are.</p>
 <p>The posterior:</p>
-<div class="sourceCode" id="cb892"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb893"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">fit_4</span> <span class="op">%&gt;%</span> 
   <span class="fu"><a href="https://tibble.tidyverse.org/reference/as_tibble.html">as_tibble</a></span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span> 
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>male_years <span class="op">=</span> <span class="va">`(Intercept)`</span> <span class="op">+</span> <span class="va">sexMale</span><span class="op">)</span> <span class="op">%&gt;%</span> 
@@ -1508,13 +1508,13 @@ We see that the expected lifespan post-election is significantly lower for femal
     <span class="fu">scale_x_continuous</span><span class="op">(</span>labels <span class="op">=</span> <span class="fu">scales</span><span class="fu">::</span><span class="fu"><a href="https://scales.r-lib.org/reference/label_number.html">number_format</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
     <span class="fu">scale_y_continuous</span><span class="op">(</span>labels <span class="op">=</span> <span class="fu">scales</span><span class="fu">::</span><span class="fu"><a href="https://scales.r-lib.org/reference/label_percent.html">percent_format</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
     <span class="fu">theme_classic</span><span class="op">(</span><span class="op">)</span></code></pre></div>
-<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-696-1.png" width="100%"></div>
+<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-697-1.png" width="100%"></div>
 <p>Again, <em>we do not recommend working directly with parameters.</em> The above analysis would be much easier with <code><a href="https://mc-stan.org/rstanarm/reference/posterior_linpred.stanreg.html">posterior_epred()</a></code>, as we will see in the Temperance Section.</p>
 <p>Male candidates live longer on average than female candidates. Note, also, that the average years to live after the election for females is about 20 with this model. With the previous model, it was 66 years. Why the difference? The interpretation of “average” is different! In the previous model, it was the average for all women. In this model, it is the average for all 52 years-old women. Those are different things, so we should hardly be surprised by different posteriors.</p>
 <!-- DK: Is the above right? -->
 <!-- DK: Need a better title. How do we describe the meaning of slope without using the word slope? -->
 <p><em>Slope</em> posteriors:</p>
-<div class="sourceCode" id="cb893"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb894"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">fit_4</span> <span class="op">%&gt;%</span> 
   <span class="fu"><a href="https://tibble.tidyverse.org/reference/as_tibble.html">as_tibble</a></span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span> 
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>slope_men <span class="op">=</span> <span class="va">election_age</span> <span class="op">+</span> <span class="va">`sexMale:election_age`</span><span class="op">)</span> <span class="op">%&gt;%</span> 
@@ -1534,7 +1534,7 @@ We see that the expected lifespan post-election is significantly lower for femal
          y <span class="op">=</span> <span class="st">"Probability"</span><span class="op">)</span> <span class="op">+</span> 
     <span class="fu">scale_y_continuous</span><span class="op">(</span>labels <span class="op">=</span> <span class="fu">scales</span><span class="fu">::</span><span class="fu"><a href="https://scales.r-lib.org/reference/label_percent.html">percent_format</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
     <span class="fu">theme_classic</span><span class="op">(</span><span class="op">)</span> </code></pre></div>
-<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-697-1.png" width="100%"></div>
+<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-698-1.png" width="100%"></div>
 <p>This posterior distribution shows the average slope values for men and women. You can see that men have a steeper slope, while the slope for women is practically 0! <em>If you are trying to forecast the number of years that a women will live after the election, you may ignore the number of years that she has already lived.</em> This is definitely not true for men. Why the difference?</p>
 </div>
 <div id="interaction-model" class="section level3" number="10.3.5">
@@ -1543,7 +1543,7 @@ We see that the expected lifespan post-election is significantly lower for femal
 </h3>
 <p>Recall the parallel slopes model that we created in Chapter <a href="four-parameters.html#four-parameters">9</a>. Another visualization we can create, one that also uses slopes and intercepts for our model, is the interaction model. In this model, the slopes for our two groups <strong>are different</strong>, creating a non-parallel visualization.</p>
 <p>The process for creating the interaction model is similar to creating the parallel slopes model. Let us begin the same way — by tidying our data and inspecting it.</p>
-<div class="sourceCode" id="cb894"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb895"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># First, we will tidy the data from our model and select the term and estimate.</span>
 <span class="co"># This allows us to create our regression lines more easily.</span>
 
@@ -1560,7 +1560,7 @@ We see that the expected lifespan post-election is significantly lower for femal
 ## 3 election_age          -0.0766
 ## 4 sexMale:election_age  -0.774</code></pre>
 <p>After tidying our data, we will extract values and assign sensible names for later use. Note that this is identical to the process from Chapter <a href="four-parameters.html#four-parameters">9</a>, with the addition of a fourth term (the interaction term):</p>
-<div class="sourceCode" id="cb896"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb897"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># Extract and name the columns of our tidy object. By calling tidy$estimate[1],</span>
 <span class="co"># we are telling R to extract the first value from the estimate column in our</span>
 <span class="co"># tidy object.</span>
@@ -1576,7 +1576,7 @@ We see that the expected lifespan post-election is significantly lower for femal
 <li>The coefficient for <span class="math inline">\(c\_election\_age_i\)</span> is the slope for females.</li>
 <li>The coefficient of <code>sexMale:election_age</code> is the value that must be added to the coefficient of <span class="math inline">\(c\_election\_age_i\)</span> in order to find the slope for males.</li>
 </ul>
-<div class="sourceCode" id="cb897"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb898"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># Recall that the intercept and the estimate for election_age act as the</span>
 <span class="co"># estimates for female candidates only. Accordingly, we have assigned those</span>
 <span class="co"># values (from the previous code chunk) to more sensible names: female_intercept</span>
@@ -1592,7 +1592,7 @@ We see that the expected lifespan post-election is significantly lower for femal
 <span class="va">male_intercept</span> <span class="op">&lt;-</span> <span class="va">intercept</span> <span class="op">+</span> <span class="va">sex_male</span>
 <span class="va">male_slope</span> <span class="op">&lt;-</span> <span class="va">election_age</span> <span class="op">+</span> <span class="va">interaction_term</span></code></pre></div>
 <p>After creating objects for our different intercepts and slopes, we will now create the interaction model using <code>geom_abline()</code> for a male and female line.</p>
-<div class="sourceCode" id="cb898"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb899"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># From the ch10 data, create a ggplot object with election_age as the x-axis</span>
 <span class="co"># and lived_after as the y-axis. We will use color = sex.</span>
 
@@ -1630,7 +1630,7 @@ We see that the expected lifespan post-election is significantly lower for femal
        y <span class="op">=</span> <span class="st">"Years Lived Post-Election"</span>, 
        color <span class="op">=</span> <span class="st">"Sex"</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">theme_classic</span><span class="op">(</span><span class="op">)</span></code></pre></div>
-<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-701-1.png" width="100%"></div>
+<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-702-1.png" width="100%"></div>
 <p>This is our final interaction model! There are some interesting takeaways. First, we may note that there are far fewer data points for female candidates — a concern we previously mentioned. It makes sense, then, that the slope would be less dramatic when compared with male candidates. We also see that most female candidates run when they are older, as compared with male candidates. This might explain why our intercept for years lived post-election is lower for female candidates.</p>
 <p>The male line seems more sensible, as we might expect with far more datapoints. For male candidates, we see a clear (logical) pattern: the older candidates are at the time of election, the less years post-election they live. This makes sense, as we are limited by the human lifespan.</p>
 <!-- DK: Answer this question!  -->
@@ -1641,7 +1641,7 @@ We see that the expected lifespan post-election is significantly lower for femal
 <span class="header-section-number">10.4</span> Temperance<a class="anchor" aria-label="anchor" href="#temperance-7"><i class="fas fa-link"></i></a>
 </h2>
 <div class="figure">
-<span id="fig:unnamed-chunk-702"></span>
+<span id="fig:unnamed-chunk-703"></span>
 <img src="other/images/Temperance.jpg" alt="Temperance" width="100%"><p class="caption">
 FIGURE 10.4: Temperance
 </p>
@@ -1657,7 +1657,7 @@ FIGURE 10.4: Temperance
 </h3>
 <p>Consider the “on average” interpretation first. The answer begins with the posterior distributions of the parameters in <code>fit_4</code>.</p>
 <!-- DK: We need to walk through the math. Start with the original formula. Replace the x's with the values for this person. Simplify. Plug in the parameters, which are distributions. This gives us the answer. It goes too fast to just go straight for the code. -->
-<div class="sourceCode" id="cb899"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb900"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">newobs</span> <span class="op">=</span> <span class="fu">tibble</span><span class="op">(</span>sex <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Male"</span>, <span class="st">"Female"</span><span class="op">)</span>, 
                  election_age <span class="op">=</span> <span class="fl">10</span><span class="op">)</span>
 
@@ -1686,11 +1686,11 @@ FIGURE 10.4: Temperance
     <span class="fu">scale_y_continuous</span><span class="op">(</span>labels <span class="op">=</span> 
                          <span class="fu">scales</span><span class="fu">::</span><span class="fu"><a href="https://scales.r-lib.org/reference/label_percent.html">percent_format</a></span><span class="op">(</span>accuracy <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
     <span class="fu">theme_classic</span><span class="op">(</span><span class="op">)</span></code></pre></div>
-<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-703-1.png" width="100%"></div>
+<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-704-1.png" width="100%"></div>
 <!-- DK: Do males live longer than females, even when both of 62? That is surprising! -->
 <!-- DK: Need to discuss if we would get the same answer for candidates of ages other than 62. Not sure myself! -->
 <p>Looking at our posterior probability distributions above, we can see that male candidates are expected to live longer. But how much longer? As in previous chapters, we can manipulate distributions in, more or less, the same way that we manipulate simple numbers. If we want to know the difference between two posterior distributions, we can simply subtract.</p>
-<div class="sourceCode" id="cb900"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb901"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">pe</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://mc-stan.org/rstanarm/reference/posterior_linpred.stanreg.html">posterior_epred</a></span><span class="op">(</span>object <span class="op">=</span> <span class="va">fit_4</span>, 
                       newdata <span class="op">=</span> <span class="va">newobs</span><span class="op">)</span> <span class="op">%&gt;%</span> 
   <span class="fu"><a href="https://tibble.tidyverse.org/reference/as_tibble.html">as_tibble</a></span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span> 
@@ -1710,7 +1710,7 @@ FIGURE 10.4: Temperance
     <span class="fu">scale_x_continuous</span><span class="op">(</span>labels <span class="op">=</span> <span class="fu">scales</span><span class="fu">::</span><span class="fu"><a href="https://scales.r-lib.org/reference/label_number.html">number_format</a></span><span class="op">(</span>accuracy <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
     <span class="fu">scale_y_continuous</span><span class="op">(</span>labels <span class="op">=</span> <span class="fu">scales</span><span class="fu">::</span><span class="fu"><a href="https://scales.r-lib.org/reference/label_percent.html">percent_format</a></span><span class="op">(</span>accuracy <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
     <span class="fu">theme_classic</span><span class="op">(</span><span class="op">)</span></code></pre></div>
-<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-704-1.png" width="100%"></div>
+<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-705-1.png" width="100%"></div>
 <p>The average value of the <em>difference</em> in years-to-live is probably positive, with the most likely value being around 45 years. But there still a 1% chance the true value is less than zero, i.e., that we should expect female candidates to live longer.</p>
 <p>Instead of using <code><a href="https://mc-stan.org/rstanarm/reference/posterior_linpred.stanreg.html">posterior_epred()</a></code>, we could have answered these questions by using the posterior probability distributions for the parameters in the model, along with some simple math. Don’t do this! First, you are much more likely to make a mistake. Second, this approach does not generalize well to complex models with scores of parameters and their interactions.</p>
 </div>
@@ -1721,7 +1721,7 @@ FIGURE 10.4: Temperance
 <p>If, instead, we interpret the question as asking for a prediction for a small number of individuals, then we need to use <code><a href="https://mc-stan.org/rstanarm/reference/posterior_predict.stanreg.html">posterior_predict()</a></code>.</p>
 <!-- DK: Try again to explain what a posterior prediction is. -->
 <p>Use <code><a href="https://mc-stan.org/rstanarm/reference/posterior_predict.stanreg.html">posterior_predict()</a></code> to create draws from the posterior probability distribution for our prediction for these cases. <code><a href="https://mc-stan.org/rstanarm/reference/posterior_predict.stanreg.html">posterior_predict()</a></code> takes two arguments: the model for which the simulations should be run, and a tibble indicating the covariate values for the individual(s) we want to predict. In this case, we are using the <code>fit_4</code> model and the tibble is the one we just created above. In other words, the inputs for <code><a href="https://mc-stan.org/rstanarm/reference/posterior_predict.stanreg.html">posterior_predict()</a></code> and <code><a href="https://mc-stan.org/rstanarm/reference/posterior_linpred.stanreg.html">posterior_epred()</a></code> are identical.</p>
-<div class="sourceCode" id="cb901"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb902"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">pp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://mc-stan.org/rstanarm/reference/posterior_predict.stanreg.html">posterior_predict</a></span><span class="op">(</span>object <span class="op">=</span> <span class="va">fit_4</span>, 
                         newdata <span class="op">=</span> <span class="va">newobs</span><span class="op">)</span> <span class="op">%&gt;%</span>
   <span class="fu"><a href="https://tibble.tidyverse.org/reference/as_tibble.html">as_tibble</a></span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span> 
@@ -1748,7 +1748,7 @@ FIGURE 10.4: Temperance
 <!-- DK: Already explained mutate_all(as.numeric) in previous chapters. -->
 <p>Why do we need the weird <code>mutate_all(as.numeric)</code> incantation? The reason is that <code><a href="https://mc-stan.org/rstanarm/reference/posterior_linpred.stanreg.html">posterior_epred()</a></code> returns a simple matrix, which is easy to transform into a tibble. <code><a href="https://mc-stan.org/rstanarm/reference/posterior_predict.stanreg.html">posterior_predict()</a></code>, on the other hand, returns a special sort of matrix which is much harder to work with. So, we need a little hackery to make the next steps easier.</p>
 <p>Let’s look at the posterior predictive distribution for each candidate.</p>
-<div class="sourceCode" id="cb903"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb904"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">pp</span> <span class="op">%&gt;%</span> 
   <span class="fu">pivot_longer</span><span class="op">(</span>cols <span class="op">=</span> <span class="va">Male</span><span class="op">:</span><span class="va">Female</span>, 
                names_to <span class="op">=</span> <span class="st">"Gender"</span>,
@@ -1766,10 +1766,10 @@ FIGURE 10.4: Temperance
     <span class="fu">scale_y_continuous</span><span class="op">(</span>labels <span class="op">=</span> 
                          <span class="fu">scales</span><span class="fu">::</span><span class="fu"><a href="https://scales.r-lib.org/reference/label_percent.html">percent_format</a></span><span class="op">(</span>accuracy <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
     <span class="fu">theme_classic</span><span class="op">(</span><span class="op">)</span></code></pre></div>
-<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-706-1.png" width="100%"></div>
+<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-707-1.png" width="100%"></div>
 <p>There is a big overlap in the predictions for individuals while, at the same time, there is much less overlap in the averages. Random stuff happens to an individual all the time. Random stuff cancels out when you take the average for many individuals. Consider the difference in the posterior predictive distributions for the two individuals.</p>
 <!-- DK: Example "Posterior Predictive Distribution" -->
-<div class="sourceCode" id="cb904"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb905"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">pp</span> <span class="op">%&gt;%</span> 
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>diff <span class="op">=</span> <span class="va">Male</span> <span class="op">-</span> <span class="va">Female</span><span class="op">)</span> <span class="op">%&gt;%</span> 
   <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span><span class="va">diff</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
@@ -1785,10 +1785,10 @@ FIGURE 10.4: Temperance
     <span class="fu">scale_y_continuous</span><span class="op">(</span>labels <span class="op">=</span> 
                          <span class="fu">scales</span><span class="fu">::</span><span class="fu"><a href="https://scales.r-lib.org/reference/label_percent.html">percent_format</a></span><span class="op">(</span>accuracy <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
     <span class="fu">theme_classic</span><span class="op">(</span><span class="op">)</span></code></pre></div>
-<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-707-1.png" width="100%"></div>
+<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-708-1.png" width="100%"></div>
 <!-- DK: Fix. Could not figure out how to calculate the 13 years on the fly. Code like this --- r round(mean(pp[,2] - pp[,1]), 0) --- did not work. Problem is that the pp tibble has variable names 1 and 2, but we can't grab those with pp$`1` because that expression is within the backticks of an inline R code chunk. -->
 <p>In words, we would predict that the male candidate would live longer than the female candidate. By how much? Well, that number is an unknown parameter. By looking at our posterior above, our best estimate is about 44.5 years. However, it is quite possible that, for any given male/female candidates, the female will live longer.</p>
-<div class="sourceCode" id="cb905"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb906"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">pp</span> <span class="op">%&gt;%</span> 
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>diff <span class="op">=</span> <span class="va">Male</span> <span class="op">-</span> <span class="va">Female</span><span class="op">)</span> <span class="op">%&gt;%</span> 
   <span class="fu">summarize</span><span class="op">(</span>f_live_longer <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">diff</span> <span class="op">&lt;</span> <span class="fl">0</span><span class="op">)</span>,
@@ -1806,7 +1806,7 @@ FIGURE 10.4: Temperance
 <span class="header-section-number">10.4.3</span> Expectation versus individual variation<a class="anchor" aria-label="anchor" href="#expectation-versus-individual-variation"><i class="fas fa-link"></i></a>
 </h3>
 <p>Let’s compare the results from <code><a href="https://mc-stan.org/rstanarm/reference/posterior_linpred.stanreg.html">posterior_epred()</a></code> and <code><a href="https://mc-stan.org/rstanarm/reference/posterior_predict.stanreg.html">posterior_predict()</a></code> for this scenario directly. Most of this code is the same as what we have shown you above, but we think it is useful to look at everything together.</p>
-<div class="sourceCode" id="cb907"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb908"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">newobs</span> <span class="op">&lt;-</span> <span class="fu">tibble</span><span class="op">(</span>sex <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Male"</span>, <span class="st">"Female"</span><span class="op">)</span>,
                   election_age <span class="op">=</span> <span class="fl">10</span><span class="op">)</span>
 
@@ -1839,7 +1839,7 @@ FIGURE 10.4: Temperance
     <span class="fu">scale_y_continuous</span><span class="op">(</span>labels <span class="op">=</span> 
                          <span class="fu">scales</span><span class="fu">::</span><span class="fu"><a href="https://scales.r-lib.org/reference/label_percent.html">percent_format</a></span><span class="op">(</span>accuracy <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
     <span class="fu">theme_classic</span><span class="op">(</span><span class="op">)</span></code></pre></div>
-<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-709-1.png" width="100%"></div>
+<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-710-1.png" width="100%"></div>
 <p>Expected values vary much less than predictions. The above chart makes that easy to see. We are somewhat sure that the true underlying average for the numbers of years that male candidates live post-election is more than female candidates. But, for any two individual candidates, there is a good chance that that the female candidate will live longer. We can not ignore <span class="math inline">\(\epsilon\)</span> when predicting the outcome for individuals. When estimating expected values or long-run averages, the <span class="math inline">\(\epsilon\)</span>’s cancel out.</p>
 <!-- DK: Discuss the substantive issue? How can it be that Washington candidates live longer? Also, compare these estimates to what naive lm() would tell us. -->
 <!-- DK: Finish with Temperance/population/exchangability discussion. -->

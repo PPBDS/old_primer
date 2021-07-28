@@ -87,12 +87,12 @@ Do we discuss anything in the "Other transformations section" (pg. 195)? This in
 <p>Recall our model of <code>income</code> as a function of <code>age</code>.</p>
 <p><span class="math display">\[ y_i = \beta_0  + \beta_1 age_i + \epsilon_i\]</span></p>
 <p>We fit this using the <code>trains</code> data from <strong>primer.data</strong>. We will also be using a new package, <strong>broom.mixed</strong>, which allows us to tidy regression data for plotting.</p>
-<div class="sourceCode" id="cb808"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb809"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyverse.tidyverse.org">tidyverse</a></span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">primer.data</span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://mc-stan.org/rstanarm/">rstanarm</a></span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="http://github.com/bbolker/broom.mixed">broom.mixed</a></span><span class="op">)</span></code></pre></div>
-<div class="sourceCode" id="cb809"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb810"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">fit_1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://mc-stan.org/rstanarm/reference/stan_glm.html">stan_glm</a></span><span class="op">(</span>formula <span class="op">=</span> <span class="va">income</span> <span class="op">~</span> <span class="va">age</span>, 
          data <span class="op">=</span> <span class="va">trains</span>, 
          refresh <span class="op">=</span> <span class="fl">0</span>,
@@ -108,7 +108,7 @@ Do we discuss anything in the "Other transformations section" (pg. 195)? This in
 ## sigma 74166.4  5146.6</code></pre>
 <p>There is nothing wrong with this model. Yet the interpretation of <span class="math inline">\(\beta_0\)</span>, the intercept in the regression, is awkward. It represents the average income for people of age zero. That is useless! There are no people of zero age in our data. And, even if there were, it would be weird to think about such people taking the commuter train into Boston and filling out our survey forms.</p>
 <p>It is easy, however, to <em>transform</em> <code>age</code> into a variable which makes the intercept more meaningful. Consider a new variable, <code>c_age</code>, which is <code>age</code> minus the average age in the sample. Using this <strong>c</strong>entered version of age does not change the predictions or residuals in the model, but it does make the intercept easier to interpret.</p>
-<div class="sourceCode" id="cb811"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb812"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">trains_2</span> <span class="op">&lt;-</span> <span class="va">trains</span> <span class="op">%&gt;%</span> 
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>c_age <span class="op">=</span> <span class="va">age</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span><span class="va">age</span><span class="op">)</span><span class="op">)</span>
 
@@ -132,7 +132,7 @@ Do we discuss anything in the "Other transformations section" (pg. 195)? This in
 <span class="header-section-number">9.1.2</span> Scaling<a class="anchor" aria-label="anchor" href="#scaling"><i class="fas fa-link"></i></a>
 </h3>
 <p>Centering — changing a variable via addition/subtraction — often makes the intercept easier to interpret. Scaling — changing a variable via multiplication/division — often makes it easier to interpret coefficients. The most common scaling method is to divide the variable by its standard deviation.</p>
-<div class="sourceCode" id="cb813"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb814"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">trains_3</span> <span class="op">&lt;-</span> <span class="va">trains</span> <span class="op">%&gt;%</span> 
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>s_age <span class="op">=</span> <span class="va">age</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/stats/sd.html">sd</a></span><span class="op">(</span><span class="va">age</span><span class="op">)</span><span class="op">)</span>
 
@@ -158,7 +158,7 @@ Do we discuss anything in the "Other transformations section" (pg. 195)? This in
 <span class="header-section-number">9.1.3</span> <em>z</em>-scores<a class="anchor" aria-label="anchor" href="#z-scores"><i class="fas fa-link"></i></a>
 </h3>
 <p>The most common transformation applies both centering and scaling. The base R function <code><a href="https://rdrr.io/r/base/scale.html">scale()</a></code> subtracts the mean and divides by the standard deviation. A variable so transformed is a “<em>z</em>-score,” meaning a variable with a mean of zero and a standard deviation of one. Using <em>z</em>-scores makes interpretation easier, especially when we seek to compare the importance of different predictors.</p>
-<div class="sourceCode" id="cb815"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb816"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">trains_4</span> <span class="op">&lt;-</span> <span class="va">trains</span> <span class="op">%&gt;%</span> 
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>z_age <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/scale.html">scale</a></span><span class="op">(</span><span class="va">age</span><span class="op">)</span><span class="op">)</span>
 
@@ -185,7 +185,7 @@ Do we discuss anything in the "Other transformations section" (pg. 195)? This in
 <span class="header-section-number">9.1.4</span> Taking logs<a class="anchor" aria-label="anchor" href="#taking-logs"><i class="fas fa-link"></i></a>
 </h3>
 <p>It is often helpful to take the log of predictor variables, especially in cases in which their distribution is skewed. You should generally only take the log of variables for which all the values are strictly positive. The log of a negative number is not defined. Consider the number of registered voters (<code>rv13</code>) at each of the polling stations in <code>kenya</code>.</p>
-<div class="sourceCode" id="cb817"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb818"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">x</span> <span class="op">&lt;-</span> <span class="va">kenya</span> <span class="op">%&gt;%</span> 
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span><span class="op">(</span><span class="va">rv13</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span>
 
@@ -205,7 +205,7 @@ Do we discuss anything in the "Other transformations section" (pg. 195)? This in
 <span class="va">rv_p</span> <span class="op">+</span> <span class="va">log_rv_p</span> <span class="op">+</span>
   <span class="fu">plot_annotation</span><span class="op">(</span>title <span class="op">=</span> <span class="st">'Registered Votes In Kenya Communities'</span>,
                   subtitle <span class="op">=</span> <span class="st">"Taking logs helps us deal with outliers"</span><span class="op">)</span></code></pre></div>
-<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-629-1.png" width="100%"></div>
+<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-630-1.png" width="100%"></div>
 <p>Most experienced data scientists would use the log of <code>rv13</code> rather than the raw value. Comments:</p>
 <ul>
 <li><p>We do not know the “true” model. Who is to say that a model using the raw value is right or wrong?</p></li>
@@ -221,12 +221,12 @@ Do we discuss anything in the "Other transformations section" (pg. 195)? This in
 <span class="header-section-number">9.1.5</span> Adding transformed terms<a class="anchor" aria-label="anchor" href="#adding-transformed-terms"><i class="fas fa-link"></i></a>
 </h3>
 <p>Instead of simply transforming variables, we can add more terms which are transformed versions of a variable. Consider the relation of <code>height</code> to <code>age</code> in <code>nhanes</code>. Let’s start by dropping the missing values.</p>
-<div class="sourceCode" id="cb818"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb819"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">no_na_nhanes</span> <span class="op">&lt;-</span> <span class="va">nhanes</span> <span class="op">%&gt;%</span> 
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">height</span>, <span class="va">age</span><span class="op">)</span> <span class="op">%&gt;%</span> 
   <span class="fu">drop_na</span><span class="op">(</span><span class="op">)</span> </code></pre></div>
 <p>Fit and plot a simple linear model:</p>
-<div class="sourceCode" id="cb819"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb820"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">nhanes_1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://mc-stan.org/rstanarm/reference/stan_glm.html">stan_glm</a></span><span class="op">(</span><span class="va">height</span> <span class="op">~</span> <span class="va">age</span>,
                      data <span class="op">=</span> <span class="va">no_na_nhanes</span>,
                      refresh <span class="op">=</span> <span class="fl">0</span>,
@@ -242,10 +242,10 @@ Do we discuss anything in the "Other transformations section" (pg. 195)? This in
          x <span class="op">=</span> <span class="st">"Age"</span>,
          y <span class="op">=</span> <span class="st">"Height (cm)"</span>,
          caption <span class="op">=</span> <span class="st">"Data source: NHANES"</span><span class="op">)</span></code></pre></div>
-<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-631-1.png" width="100%"></div>
+<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-632-1.png" width="100%"></div>
 <p>That is not a very good model, obviously.</p>
 <p>Adding a quadratic term makes it better. (Note the need for <code><a href="https://rdrr.io/r/base/AsIs.html">I()</a></code> in creating the squared term within the <code>formula</code> argument.)</p>
-<div class="sourceCode" id="cb820"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb821"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">nhanes_2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://mc-stan.org/rstanarm/reference/stan_glm.html">stan_glm</a></span><span class="op">(</span><span class="va">height</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/base/AsIs.html">I</a></span><span class="op">(</span><span class="va">age</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span>,
                      data <span class="op">=</span> <span class="va">no_na_nhanes</span>,
                      refresh <span class="op">=</span> <span class="fl">0</span>,
@@ -261,9 +261,9 @@ Do we discuss anything in the "Other transformations section" (pg. 195)? This in
          x <span class="op">=</span> <span class="st">"Age"</span>,
          y <span class="op">=</span> <span class="st">"Height (cm)"</span>,
          caption <span class="op">=</span> <span class="st">"Data source: NHANES"</span><span class="op">)</span></code></pre></div>
-<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-632-1.png" width="100%"></div>
+<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-633-1.png" width="100%"></div>
 <p>Still, we have not made use of our background knowledge in creating these variables. We know that people don’t get any taller after age 18 or so. Let’s create variables which capture that break.</p>
-<div class="sourceCode" id="cb821"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb822"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">nhanes_3</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://mc-stan.org/rstanarm/reference/stan_glm.html">stan_glm</a></span><span class="op">(</span><span class="va">height</span> <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/base/AsIs.html">I</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/ifelse.html">ifelse</a></span><span class="op">(</span><span class="va">age</span> <span class="op">&gt;</span> <span class="fl">18</span>, <span class="fl">18</span>, <span class="va">age</span><span class="op">)</span><span class="op">)</span>,
                      data <span class="op">=</span> <span class="va">no_na_nhanes</span>,
                      refresh <span class="op">=</span> <span class="fl">0</span>,
@@ -279,7 +279,7 @@ Do we discuss anything in the "Other transformations section" (pg. 195)? This in
          x <span class="op">=</span> <span class="st">"Age"</span>,
          y <span class="op">=</span> <span class="st">"Height (cm)"</span>,
          caption <span class="op">=</span> <span class="st">"Data source: NHANES"</span><span class="op">)</span></code></pre></div>
-<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-633-1.png" width="100%"></div>
+<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-634-1.png" width="100%"></div>
 <p>The point is that we should not take the variables we receive as <em>given</em>. We are the captains of our souls. We transform variables as needed.</p>
 <!-- ### If parameters are unicorns, why bother with transformations? -->
 <!-- * standardizing variables. Key advantage is to make the coefficients easier to interpret. Even though the "right" thing to do in looking at models is to use posterior_* to look at model predictions, this takes some time. It is very handy, first pass, to look at all the coefficients and get a sense of which ones are "interesting." Then, focus on those when making newobs tibbles. -->
@@ -341,7 +341,7 @@ Do we discuss anything in the "Other transformations section" (pg. 195)? This in
 <span class="header-section-number">9.2.3</span> att_end ~ treatment + att_start<a class="anchor" aria-label="anchor" href="#att_end-treatment-att_start"><i class="fas fa-link"></i></a>
 </h3>
 <p>First, let’s look at a model with a left hand variable, <code>att_end</code>, and two right side variables, <code>treatment</code> and <code>att_start</code>.</p>
-<div class="sourceCode" id="cb822"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb823"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">fit_1_model</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://mc-stan.org/rstanarm/reference/stan_glm.html">stan_glm</a></span><span class="op">(</span><span class="va">att_end</span> <span class="op">~</span> <span class="va">treatment</span> <span class="op">+</span> <span class="va">att_start</span>, 
                     data <span class="op">=</span> <span class="va">trains</span>, 
                     refresh <span class="op">=</span> <span class="fl">0</span><span class="op">)</span>
@@ -385,7 +385,7 @@ Do we discuss anything in the "Other transformations section" (pg. 195)? This in
 <span class="header-section-number">9.2.4</span> income ~ age + liberal<a class="anchor" aria-label="anchor" href="#income-age-liberal"><i class="fas fa-link"></i></a>
 </h3>
 <p>Now, we will look at <code>income</code> as a function of <code>age</code> and <code>liberal</code>, a proxy for political party.</p>
-<div class="sourceCode" id="cb824"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb825"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">fit_2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://mc-stan.org/rstanarm/reference/stan_glm.html">stan_glm</a></span><span class="op">(</span><span class="va">income</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">liberal</span>, 
                     data <span class="op">=</span> <span class="va">trains</span>, 
                     refresh <span class="op">=</span> <span class="fl">0</span><span class="op">)</span>
@@ -427,7 +427,7 @@ Do we discuss anything in the "Other transformations section" (pg. 195)? This in
 <span class="header-section-number">9.2.5</span> liberal ~ I(income/1e+05) + party<a class="anchor" aria-label="anchor" href="#liberal-iincome1e05-party"><i class="fas fa-link"></i></a>
 </h3>
 <p>We will now look at liberal as a function of a transformed <code>income</code> and <code>party</code>. The reason we have transformed <code>income</code> here is due to the fact that, without a transformation, income makes predictions according to <em>very small income disparities</em>. This is not helpful. To enhance the significance of income, we have divided the variable by <span class="math inline">\(100000\)</span>. (Note the need for <code><a href="https://rdrr.io/r/base/AsIs.html">I()</a></code> in creating the income term within the <code>formula</code> argument.)</p>
-<div class="sourceCode" id="cb826"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb827"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">fit_3</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://mc-stan.org/rstanarm/reference/stan_glm.html">stan_glm</a></span><span class="op">(</span><span class="va">liberal</span> <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/base/AsIs.html">I</a></span><span class="op">(</span><span class="va">income</span><span class="op">/</span><span class="fl">1e+05</span><span class="op">)</span> <span class="op">+</span> <span class="va">party</span>, 
                     data <span class="op">=</span> <span class="va">trains</span>, 
                     refresh <span class="op">=</span> <span class="fl">0</span><span class="op">)</span>
@@ -472,7 +472,7 @@ Do we discuss anything in the "Other transformations section" (pg. 195)? This in
 </h2>
 <p>Deciding which variables to include in a model is a subset of the larger question: How do we decide which model, out of the set of possible models, to choose?</p>
 <p>Consider two models which explain attitudes to immigration among Boston commuters.</p>
-<div class="sourceCode" id="cb828"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb829"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">fit_liberal</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://mc-stan.org/rstanarm/reference/stan_glm.html">stan_glm</a></span><span class="op">(</span>formula <span class="op">=</span> <span class="va">att_end</span> <span class="op">~</span> <span class="va">liberal</span>,
                   data <span class="op">=</span> <span class="va">trains</span>,
                   refresh <span class="op">=</span> <span class="fl">0</span>,
@@ -486,7 +486,7 @@ Do we discuss anything in the "Other transformations section" (pg. 195)? This in
 ## Auxiliary parameter(s):
 ##       Median MAD_SD
 ## sigma 2.7    0.2</code></pre>
-<div class="sourceCode" id="cb830"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb831"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">fit_att_start</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://mc-stan.org/rstanarm/reference/stan_glm.html">stan_glm</a></span><span class="op">(</span>formula <span class="op">=</span> <span class="va">att_end</span> <span class="op">~</span> <span class="va">att_start</span>,
                   data <span class="op">=</span> <span class="va">trains</span>,
                   refresh <span class="op">=</span> <span class="fl">0</span>,
@@ -507,7 +507,7 @@ Do we discuss anything in the "Other transformations section" (pg. 195)? This in
 <span class="header-section-number">9.3.1</span> Better models make better predictions<a class="anchor" aria-label="anchor" href="#better-models-make-better-predictions"><i class="fas fa-link"></i></a>
 </h3>
 <p>The most obvious criteria for comparing models is the accuracy of the predictions. For example, consider the use of <code>liberal</code> to predict <code>att_end</code>.</p>
-<div class="sourceCode" id="cb832"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb833"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">trains</span> <span class="op">%&gt;%</span> 
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>pred_liberal <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/fitted.values.html">fitted</a></span><span class="op">(</span><span class="va">fit_liberal</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
   <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">pred_liberal</span>, y <span class="op">=</span> <span class="va">att_end</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
@@ -528,11 +528,11 @@ Do we discuss anything in the "Other transformations section" (pg. 195)? This in
          subtitle <span class="op">=</span> <span class="st">"Liberals are less conservative"</span>,
          x <span class="op">=</span> <span class="st">"Predicted Attitude"</span>,
          y <span class="op">=</span> <span class="st">"True Attitude"</span><span class="op">)</span></code></pre></div>
-<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-640-1.png" width="100%"></div>
+<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-641-1.png" width="100%"></div>
 <!-- DK: Could put this discussion in fig.cap. Could add some details to the plots to indicate the points that I am talking about. Should create an animation, which brings in new point, forecasts it, and then measures how wrong the model was. -->
 <p>Because there are only two possible values for <code>liberal</code> — TRUE and FALSE — there are only two predictions which this model will make: about 10 for <code>liberal == FALSE</code> and about 8 for <code>liberal == TRUE</code>. (The points in the above plot are jittered.) For some individuals, these are perfect predictions. For others, they are poor predictions. the red circles on our plot illustrate the areas where our predictions are equal to true values. As we can see, the model isn’t great at predicting attitude end. (Note the two individuals who are <code>liberal == TRUE</code>, and who the model thinks will have <code>att_end == 8</code>, but who have <code>att_end == 15</code>. The model got them both very, very wrong.)</p>
 <p>Consider our second model, using <code>att_start</code> to forecast <code>att_end</code>.</p>
-<div class="sourceCode" id="cb833"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb834"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">trains</span> <span class="op">%&gt;%</span> 
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>pred_liberal <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/fitted.values.html">fitted</a></span><span class="op">(</span><span class="va">fit_att_start</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
   <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">pred_liberal</span>, y <span class="op">=</span> <span class="va">att_end</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
@@ -546,10 +546,10 @@ Do we discuss anything in the "Other transformations section" (pg. 195)? This in
          subtitle <span class="op">=</span> <span class="st">"Survey responses are somewhat consistent"</span>,
          x <span class="op">=</span> <span class="st">"Predicted Attitude"</span>,
          y <span class="op">=</span> <span class="st">"True Attitude"</span><span class="op">)</span></code></pre></div>
-<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-641-1.png" width="100%"></div>
+<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-642-1.png" width="100%"></div>
 <p>Because <code>att_end</code> takes on 13 unique values, the model makes 13 unique predictions. Some of those predictions are perfect! But others are very wrong. The red line shows the points where our predictions match the truth. Note the individual with a predicted <code>att_end</code> of around 9 but with an actual value of <code>15</code>. That is a big miss!</p>
 <p>Rather than looking at individual cases, we need to look at the errors for all the predictions. Fortunately, a prediction error is the same thing as a residual, which is easy enough to calculate.</p>
-<div class="sourceCode" id="cb834"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb835"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">trains</span> <span class="op">%&gt;%</span> 
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">att_end</span>, <span class="va">att_start</span>, <span class="va">liberal</span><span class="op">)</span> <span class="op">%&gt;%</span> 
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>pred_lib <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/fitted.values.html">fitted</a></span><span class="op">(</span><span class="va">fit_liberal</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
@@ -571,7 +571,7 @@ Do we discuss anything in the "Other transformations section" (pg. 195)? This in
 ## 10      10         9 FALSE      10.0     0.0259    8.97   -1.03 
 ## # … with 105 more rows</code></pre>
 <p>Let’s look at the square root of the average squared error.</p>
-<div class="sourceCode" id="cb836"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb837"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">trains</span> <span class="op">%&gt;%</span> 
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">att_end</span>, <span class="va">att_start</span>, <span class="va">liberal</span><span class="op">)</span> <span class="op">%&gt;%</span> 
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>lib_err <span class="op">=</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/fitted.values.html">fitted</a></span><span class="op">(</span><span class="va">fit_liberal</span><span class="op">)</span> <span class="op">-</span> <span class="va">att_end</span><span class="op">)</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span> <span class="op">%&gt;%</span> 
@@ -592,16 +592,16 @@ Do we discuss anything in the "Other transformations section" (pg. 195)? This in
 <span class="header-section-number">9.3.2</span> Beware overfitting<a class="anchor" aria-label="anchor" href="#beware-overfitting"><i class="fas fa-link"></i></a>
 </h3>
 <p>One of the biggest dangers in data science is <em>overfitting</em>, using a model with too many parameters which fits the data we have too well and, therefore, works poorly on data we have yet to see. Consider a simple example with 10 data points.</p>
-<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-644-1.png" width="100%"></div>
-<p>What happens when we fit a model with one predictor?</p>
 <div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-645-1.png" width="100%"></div>
+<p>What happens when we fit a model with one predictor?</p>
+<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-646-1.png" width="100%"></div>
 <p>That is a reasonable model. It does not fit the data particularly well, but we certainly believe that higher values of <code>x</code> are associated with higher values of <code>y</code>. A linear fit is not unreasonable.</p>
 <!-- DK: Add a discussion about the difference between plotting y versus x, as we do here, and y versus y_hat, which is what we did in the previous section. In fact, show y versus y_hat with this model, right now! -->
 <p>But we can also use some of the lessons from above and try a quadratic fit by adding <span class="math inline">\(x^2\)</span> as a predictor.</p>
-<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-646-1.png" width="100%"></div>
+<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-647-1.png" width="100%"></div>
 <p>Is this a better model? Maybe?</p>
 <p>But why stop at adding <span class="math inline">\(x^2\)</span> to the regression? Why not add <span class="math inline">\(x^3\)</span>, <span class="math inline">\(x^4\)</span> and all the way to <span class="math inline">\(x^9\)</span>? When we do so, the fit is much better.</p>
-<div class="sourceCode" id="cb838"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb839"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">nine_pred</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html">lm</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/stats/poly.html">poly</a></span><span class="op">(</span><span class="va">x</span>, <span class="fl">9</span><span class="op">)</span>,
                        data <span class="op">=</span> <span class="va">ovrftng</span><span class="op">)</span>
 
@@ -617,7 +617,7 @@ Do we discuss anything in the "Other transformations section" (pg. 195)? This in
     <span class="fu">labs</span><span class="op">(</span>title <span class="op">=</span> <span class="st">"`y` as a 9-Degree Polynomial Function of `x`"</span><span class="op">)</span> <span class="op">+</span>
     <span class="fu">scale_x_continuous</span><span class="op">(</span>breaks <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">10</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
     <span class="fu">scale_y_continuous</span><span class="op">(</span>breaks <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">10</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span> </code></pre></div>
-<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-647-1.png" width="100%"></div>
+<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-648-1.png" width="100%"></div>
 <p><em>If the only criteria we cared about was how well the model predicts using the data on which the parameters were estimated, then a model with more parameters will always be better.</em> But that is not what truly matters. What matters is how well the model works on data which was not used to create the model.</p>
 <!-- DK: Discuss how this is the perfect model. Plot y versus y_hat. It is a perfect line!  -->
 </div>
@@ -651,7 +651,7 @@ Do we discuss anything in the "Other transformations section" (pg. 195)? This in
 <p>In essence: <em>One piece of data is excluded from our model, the model is re-fit, the model attempts to predict the value of the missing piece, we compare the true value to the predicted value, and we assess the accuracy of our model’s prediction.</em> This process occurs for each piece of data, allowing us to assess the model’s accuracy in making predictions.</p>
 <p>To perform leave-one-out(LOO) cross validation, we will be using the function <code><a href="https://mc-stan.org/rstanarm/reference/loo.stanreg.html">loo()</a></code> from an R package. This is how we will determine which model is superior for our purposes.</p>
 <p>First, we will refamiliarize ourselves with our first model, <code>fit_liberal</code>.</p>
-<div class="sourceCode" id="cb839"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb840"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">fit_liberal</span></code></pre></div>
 <pre><code>## stan_glm
 ##  family:       gaussian [identity]
@@ -671,7 +671,7 @@ Do we discuss anything in the "Other transformations section" (pg. 195)? This in
 ## * For help interpreting the printed output see ?print.stanreg
 ## * For info on the priors used see ?prior_summary.stanreg</code></pre>
 <p>Now, we will perform <code><a href="https://mc-stan.org/rstanarm/reference/loo.stanreg.html">loo()</a></code> on our model and look at the results.</p>
-<div class="sourceCode" id="cb841"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb842"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">loo_liberal</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://mc-stan.org/rstanarm/reference/loo.stanreg.html">loo</a></span><span class="op">(</span><span class="va">fit_liberal</span><span class="op">)</span>
 
 <span class="va">loo_liberal</span></code></pre></div>
@@ -702,7 +702,7 @@ Do we discuss anything in the "Other transformations section" (pg. 195)? This in
 <p><strong>The higher our value for <code>elpd_loo</code>, the better our model performs.</strong> This means that, when comparing models, we want to select the model with the higher value for <code>elpd_loo</code>.</p>
 <!-- DK: Untrue! Hint: the higher value will be the the value closest to 0, as the results for `elpd_loo()` are negative.  -->
 <p>Let’s turn our attention to our second model. To begin, let’s observe the qualities of <code>fit_att_start</code> once again.</p>
-<div class="sourceCode" id="cb843"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb844"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">fit_att_start</span></code></pre></div>
 <pre><code>## stan_glm
 ##  family:       gaussian [identity]
@@ -722,7 +722,7 @@ Do we discuss anything in the "Other transformations section" (pg. 195)? This in
 ## * For help interpreting the printed output see ?print.stanreg
 ## * For info on the priors used see ?prior_summary.stanreg</code></pre>
 <p>Great! Now, let’s perform <code><a href="https://mc-stan.org/rstanarm/reference/loo.stanreg.html">loo()</a></code> on this model.</p>
-<div class="sourceCode" id="cb845"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb846"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">loo_att_start</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://mc-stan.org/rstanarm/reference/loo.stanreg.html">loo</a></span><span class="op">(</span><span class="va">fit_att_start</span><span class="op">)</span> 
 
 <span class="va">loo_att_start</span></code></pre></div>
@@ -746,7 +746,7 @@ Do we discuss anything in the "Other transformations section" (pg. 195)? This in
 <span class="header-section-number">9.4.2</span> Comparing models using <code>loo_compare()</code><a class="anchor" aria-label="anchor" href="#comparing-models-using-loo_compare"><i class="fas fa-link"></i></a>
 </h3>
 <p>To compare the two models directly, we can use the function <code>loo_compare</code> with our two <code>loo</code> objects created above. This will calculate the difference in <code>elpd_loo()</code> between our models for us, making our job easier:</p>
-<div class="sourceCode" id="cb847"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb848"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://mc-stan.org/rstanarm/reference/loo.stanreg.html">loo_compare</a></span><span class="op">(</span><span class="va">loo_att_start</span>, <span class="va">loo_liberal</span><span class="op">)</span></code></pre></div>
 <pre><code>##               elpd_diff se_diff
 ## fit_att_start   0.0       0.0  
@@ -783,20 +783,20 @@ Do we discuss anything in the "Other transformations section" (pg. 195)? This in
 <span class="header-section-number">9.6.1</span> Wisdom<a class="anchor" aria-label="anchor" href="#wisdom-3"><i class="fas fa-link"></i></a>
 </h3>
 <div class="figure">
-<span id="fig:unnamed-chunk-653"></span>
+<span id="fig:unnamed-chunk-654"></span>
 <img src="other/images/Wisdom.jpg" alt="Wisdom" width="100%"><p class="caption">
 FIGURE 9.1: Wisdom
 </p>
 </div>
 <p>Before making a model which seeks to explain <code>att_end</code>, we should plot it and the variables we think are connected to it:</p>
-<div class="sourceCode" id="cb849"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb850"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">ggplot</span><span class="op">(</span><span class="va">trains</span>, <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">att_start</span>, y <span class="op">=</span> <span class="va">att_end</span>, color <span class="op">=</span> <span class="va">liberal</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">geom_point</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">labs</span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Attitude End Compared with Attitude Start and Liberal"</span>,
        x <span class="op">=</span> <span class="st">"Attitude at Start of Study"</span>,
        y <span class="op">=</span> <span class="st">"Attitude at End of Study"</span>,
        color <span class="op">=</span> <span class="st">"Liberal?"</span><span class="op">)</span></code></pre></div>
-<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-654-1.png" width="100%"></div>
+<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-655-1.png" width="100%"></div>
 <p>Is that data believable? Maybe? One could imagine that <code>att_end</code> would be predicted fairly well by <code>att_start</code>. This makes sense for most of our data points, which show not much difference between the attitudes. But what about the great disparities in attitude shown for the individual with a starting attitude of 9 and an ending attitude around 15? In a real data science project, this would require further investigation. For now, we ignore the issue and blithely press on.</p>
 <p>Another component of Wisdom is the population. The concept of the “population” is subtle and important. <em>The population is not the set of commuters for which we have data.</em> That is the dataset. The population is the larger — potentially much larger — set of individuals about whom we want to make inferences. <em>The parameters in our models refer to the population, not to the dataset.</em></p>
 <p>There are many different populations, each with its own <span class="math inline">\(\mu\)</span>, in which we might be interested. For instance:</p>
@@ -813,7 +813,7 @@ FIGURE 9.1: Wisdom
 <span class="header-section-number">9.6.2</span> Justice<a class="anchor" aria-label="anchor" href="#justice-6"><i class="fas fa-link"></i></a>
 </h3>
 <div class="figure">
-<span id="fig:unnamed-chunk-655"></span>
+<span id="fig:unnamed-chunk-656"></span>
 <img src="other/images/Justice.jpg" alt="Justice" width="100%"><p class="caption">
 FIGURE 9.2: Justice
 </p>
@@ -839,13 +839,13 @@ Which equates to, in <code>y = b + mx</code> form:</p>
 <span class="header-section-number">9.6.3</span> Courage<a class="anchor" aria-label="anchor" href="#courage-6"><i class="fas fa-link"></i></a>
 </h3>
 <div class="figure">
-<span id="fig:unnamed-chunk-656"></span>
+<span id="fig:unnamed-chunk-657"></span>
 <img src="other/images/Courage.jpg" alt="Courage" width="100%"><p class="caption">
 FIGURE 9.3: Courage
 </p>
 </div>
 <p>The use of <code>stan_glm</code> is the same as usual. Using <code>stan_glm</code>, we will create our model, <code>fit_1</code>.</p>
-<div class="sourceCode" id="cb850"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb851"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">fit_1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://mc-stan.org/rstanarm/reference/stan_glm.html">stan_glm</a></span><span class="op">(</span>formula <span class="op">=</span> <span class="va">att_end</span> <span class="op">~</span> <span class="va">liberal</span> <span class="op">+</span> <span class="va">att_start</span>,
                   data <span class="op">=</span> <span class="va">trains</span>,
                   refresh <span class="op">=</span> <span class="fl">0</span>,
@@ -872,7 +872,7 @@ FIGURE 9.3: Courage
 ## * For info on the priors used see ?prior_summary.stanreg</code></pre>
 <p>To remind ourselves, recall that the <code>(Intercept)</code> here is representing the <code>att_end</code> value for cases where <code>liberal = FALSE</code> and <code>treatment does not equal Control</code>. The next row, <code>liberalTRUE</code> gives a median value which represents the <em>offset</em> in the prediction compared with the <code>(Intercept)</code>. In other words, the true intercept for cases where <code>liberal = TRUE</code> is represented by <span class="math inline">\((Intercept) + liberalTRUE\)</span>. The value of <code>treatmentControl</code> is the offset in <code>att_end</code> for those in the Control group.</p>
 <p>To find our intercepts, we will need to tidy our regression using the <code><a href="https://generics.r-lib.org/reference/tidy.html">tidy()</a></code> function from the <strong>broom.mixed</strong> package. We tidy our data and extract values to create a parallel slopes model. The parallel slopes model allows us to visualize multi-variate Bayesian modeling (i.e. modeling with more than one explanatory variable). That is a complicated way of saying that we will visualize the fitted model created above in a way that allows us to see the intercepts and slopes for two different groups, <code>liberalTRUE</code> and <code>liberalFALSE</code>:</p>
-<div class="sourceCode" id="cb852"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb853"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># First, we will tidy the data from our model and select the term and estimate.</span>
 <span class="co"># This allows us to create our regression lines more easily.</span>
 
@@ -887,7 +887,7 @@ FIGURE 9.3: Courage
 ## 1 (Intercept)    1.93 
 ## 2 liberalTRUE   -0.300
 ## 3 att_start      0.799</code></pre>
-<div class="sourceCode" id="cb854"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb855"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># Extract and name the columns of our tidy object. By calling tidy$estimate[1],</span>
 <span class="co"># we are telling R to extract the first value from the estimate column in our</span>
 <span class="co"># tidy object.</span>
@@ -896,7 +896,7 @@ FIGURE 9.3: Courage
 <span class="va">liberal_true</span> <span class="op">&lt;-</span> <span class="va">tidy</span><span class="op">$</span><span class="va">estimate</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span>
 <span class="va">att_start</span> <span class="op">&lt;-</span> <span class="va">tidy</span><span class="op">$</span><span class="va">estimate</span><span class="op">[</span><span class="fl">3</span><span class="op">]</span></code></pre></div>
 <p>Now, we can define the following terms—- <code>liberal_false_intercept</code> and <code>liberal_false_att_slope</code>; and <code>liberal_true_intercept</code> and <code>liberal_true_att_slope</code>:</p>
-<div class="sourceCode" id="cb855"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb856"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># Recall that the (Intercept) shows us the estimate for the case where liberal =</span>
 <span class="co"># FALSE. We want to extract the liberal_false_intercept to indicate where the</span>
 <span class="co"># intercept in our visualization should be. The slope for this case, and for the</span>
@@ -912,7 +912,7 @@ FIGURE 9.3: Courage
 <span class="va">liberal_true_intercept</span> <span class="op">&lt;-</span> <span class="va">intercept</span> <span class="op">+</span> <span class="va">liberal_true</span>
 <span class="va">liberal_true_att_slope</span> <span class="op">&lt;-</span> <span class="va">att_start</span></code></pre></div>
 <p>All we’ve done here is extracted the values for our intercepts and slopes, and named them to be separated into two groups. This allows us to create a <code>geom_abline</code> object that takes a unique slope and intercept value, so we can separate the <code>liberalTRUE</code> and <code>liberalFALSE</code> observations.</p>
-<div class="sourceCode" id="cb856"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb857"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># From the dataset trains, use att_start for the x-axis and att_end for</span>
 <span class="co"># the y-axis with color as liberal. This will split our data into two color</span>
 <span class="co"># coordinates (one for liberal = TRUE and one for liberal = FALSE)</span>
@@ -949,11 +949,11 @@ FIGURE 9.3: Courage
        x <span class="op">=</span> <span class="st">"Attitude at Start"</span>, 
        y <span class="op">=</span> <span class="st">"Attitude at End"</span>, 
        color <span class="op">=</span> <span class="st">"Liberal"</span><span class="op">)</span> </code></pre></div>
-<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-660-1.png" width="100%"></div>
+<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-661-1.png" width="100%"></div>
 <p>This is our parallel slopes model. What we have done, essentially, is created a unique line for <code>liberalTRUE</code> and <code>liberalFALSE</code> to observe the differences in the groups as related to attitude start and attitude end.</p>
 <p>As we can see, commuters who are <em>not</em> liberal tend to start with slightly higher values for <code>att_start</code>. Commuters who <em>are</em> liberal tend to have lower starting values for <code>att_start</code>.</p>
 <p>Now, what if we want to look at another model? To judge whether we can have a superior model? Let’s create another object, using <code>stan_glm</code>, that looks at <code>att_end</code> as a function of <code>treatment</code> and <code>att_start</code>.</p>
-<div class="sourceCode" id="cb857"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb858"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">fit_2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://mc-stan.org/rstanarm/reference/stan_glm.html">stan_glm</a></span><span class="op">(</span>formula <span class="op">=</span> <span class="va">att_end</span> <span class="op">~</span> <span class="va">treatment</span> <span class="op">+</span> <span class="va">att_start</span>,
                   data <span class="op">=</span> <span class="va">trains</span>,
                   refresh <span class="op">=</span> <span class="fl">0</span>,
@@ -987,7 +987,7 @@ FIGURE 9.3: Courage
 <p>An important point here is that <strong>these models are causal</strong>. When including the variable <code>treatment</code>, we have a measured causal effect of a condition. This is different from our prior parallel slopes model, where we were modeling for prediction, not causation.</p>
 <!-- DK: A causal model is one in which, at least in theory, one of the righthand side variables could have been manipulated, and when you care about estimating causal effects. If someone just needs to forecast or predict something that, almost always, she is not asking a causal question, so she does not care if the righthand side variables could be manipulated. Is the sunset beautiful if no one is looking at it? Is the model causal if I just want to predict? -->
 <p>To see how these models compare in performance, we will perform leave-one-out (LOO) cross validation again.</p>
-<div class="sourceCode" id="cb859"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb860"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">L1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://mc-stan.org/rstanarm/reference/loo.stanreg.html">loo</a></span><span class="op">(</span><span class="va">fit_1</span><span class="op">)</span>
 
 <span class="va">L1</span></code></pre></div>
@@ -1011,7 +1011,7 @@ FIGURE 9.3: Courage
 ## All Pareto k estimates are ok (k &lt; 0.7).
 ## See help('pareto-k-diagnostic') for details.</code></pre>
 <p>Perform <code><a href="https://mc-stan.org/rstanarm/reference/loo.stanreg.html">loo()</a></code> on our second model:</p>
-<div class="sourceCode" id="cb861"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb862"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">L2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://mc-stan.org/rstanarm/reference/loo.stanreg.html">loo</a></span><span class="op">(</span><span class="va">fit_2</span><span class="op">)</span>
 
 <span class="va">L2</span></code></pre></div>
@@ -1035,7 +1035,7 @@ FIGURE 9.3: Courage
 ## All Pareto k estimates are ok (k &lt; 0.7).
 ## See help('pareto-k-diagnostic') for details.</code></pre>
 <p>Recall that the relevant data is the data from <code>elpd_loo</code>. The estimates for <code>elpd_loo</code> vary quite a bit. Recall that the superior model will have a value of <code>elpd_loo()</code> that is closer to 0. The standard error (SE) for these models also differs some. To compare these directly, we will use <code>loo_compare</code>.</p>
-<div class="sourceCode" id="cb863"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb864"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://mc-stan.org/rstanarm/reference/loo.stanreg.html">loo_compare</a></span><span class="op">(</span><span class="va">L1</span>, <span class="va">L2</span><span class="op">)</span></code></pre></div>
 <pre><code>##       elpd_diff se_diff
 ## fit_2  0.0       0.0   

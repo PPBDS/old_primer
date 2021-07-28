@@ -43,9 +43,15 @@ jobs:
       - uses: actions/cache@v1
         with:
           path: ~/Library/Application Support/renv
-          key: ${{ runner.os }}-renv-${{ hashFiles('**/renv.lock') }}
+
+        # note that the v2 within the key. From my understanding, the cache is made after the first time the
+        # workflow is run and then used in all subsequent caches. If new packages are added to the lockfile,
+        # then these will not be included in the chache. There is no way to clear the cache,
+        # but by changing the key (i.e. updating the v2), a new cache will be generated.
+
+          key: ${{ runner.os }}-renv-v2-${{ hashFiles('**/renv.lock') }}
           restore-keys: |
-             ${{ runner.os }}-renv-
+             ${{ runner.os }}-renv-v2-
 
       - name: Install dependencies
 
@@ -70,10 +76,7 @@ jobs:
         run: |
           install.packages("renv")
           renv::consent(provided = TRUE)
-          system("git diff --name-only origin/master HEAD | grep Rmd > changes")
-          system('while read line; do grep "library(" "$line"; done < changes | sed -E  "s/.*library\\(|\\).*//g" > 1')
-          system('while read line; do grep -E ".*\\:\\:" "$line"; done < changes | sed -E "s/\\:\\:.*//g" | sed -E "s/.*[^A-Za-z1-9]//g" > 2')
-          renv::restore(packages = system('cat 1 2 | awk "NF" | sort -u', intern = TRUE))
+          renv::restore()
         shell: Rscript {0}
       - name: Check
 
@@ -98,7 +101,15 @@ jobs:
         #   cannot open file '_book/index.html': No such file or directory
 
         run: |
-          for(i in system("cat changes", intern = TRUE)) {
+          for(i in system("git diff --name-only origin/master HEAD | grep Rmd", intern = TRUE)) {
           knitr::knit2html(i)
           }
         shell: Rscript {0}
+
+# These lines read through changed files and locate the packages called either
+# using library() or with ::. If the cache were not being used they save significant time,
+# but including it with the cache is not good.
+# system('while read line; do grep "library(" "$line"; done < changes | sed -E  "s/.*library\\(|\\).*//g" > 1')
+# system('while read line; do grep -E ".*\\:\\:" "$line"; done < changes | sed -E "s/\\:\\:.*//g" | sed -E "s/.*[^A-Za-z1-9]//g" > 2')
+# renv::restore(packages = system('cat 1 2 | awk "NF" | sort -u', intern = TRUE))
+
