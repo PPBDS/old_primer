@@ -5,9 +5,9 @@
 
 <!-- Add ID variable to all data creates for Two Models, Three Models and so on. Done.-->
 
-<!-- 3d plot for marble example is wrong. There is a 1/8 chance of getting 0 or 3 whites. There is a 3/8 chance of getting either 1 or 2. So, the 0 and 3 towers should be 1/3 the height of the 1 and 2 towers. -->
+<!-- 3d plot for marble example is wrong. There is a 1/8 chance of getting 0 or 3 whites. There is a 3/8 chance of getting either 1 or 2. So, the 0 and 3 towers should be 1/3 the height of the 1 and 2 towers. -- Done.>
 
-<!-- Did we do the N models case correctly, given the errors above? I am not sure. But we ought to make these cases as similar as possible, especially in terms of the code we show students.  -->
+<!-- Did we do the N models case correctly, given the errors above? I am not sure. But we ought to make these cases as similar as possible, especially in terms of the code we show students.  Yes now. Done-->
 
 <!-- It would be nice if the 3d graphics did not "pop up" when knitting the chapter.  Create a reproducible example, with the reprex package (or with a new repo with a simple Rmd), to show the problem. Then ask on RStudio. Done. Huge thanks to Ryan-->
 
@@ -986,6 +986,7 @@ jd_disease_plot <- jd_disease %>%
              y = as.factor(have_disease),
              color = total)) +
     geom_point(size = 5) +
+    scale_color_continuous(limits = c(0, 5000)) +
     scale_x_discrete(breaks = c(0, 1),
                      labels = c("Negative", "Positive")) +
     scale_y_discrete(breaks = c(FALSE, TRUE),
@@ -1173,13 +1174,12 @@ Here is the 3D visualization:
 
 jd_marbles_plot <- jd_marbles %>%
   group_by(in_bag, in_sample) %>%
-  summarize(total = n(),
-            .groups = "drop") %>% 
+  summarize(total = n(), .groups = "drop") %>% 
   mutate(in_sample = as.factor(in_sample)) %>% 
   mutate(in_bag = as.factor(in_bag)) %>% 
   ggplot(aes(x=in_sample, y=in_bag, color = total)) +
     geom_point() +
-    scale_color_continuous() +
+    scale_color_continuous(limits = c(0, 3500)) +
     labs(x = "White Marbles Selected",
          y = "White Marbles in the Bag",
          title = "Black and White Marbles",
@@ -1191,7 +1191,7 @@ jd_marbles_plot <- jd_marbles %>%
     axis.text.y = element_text(size = 6))
 
 plot_gg(jd_marbles_plot,
-        width = 3.5,
+        width = 4,
         zoom = 0.75,
         theta = 25,
         phi = 30,
@@ -1361,6 +1361,7 @@ jd_coin_plot <- jd_coin %>%
   mutate(heads = as.factor(heads)) %>% 
   ggplot() +
     geom_point(aes(x = heads, y = p, color = total)) +
+    scale_color_continuous(limits = c(0, 1000)) +
     theme(legend.position = "none") +
     labs(x = "Number of Heads out of 20 Tosses",
          y = expression(rho[h]),
