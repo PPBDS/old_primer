@@ -1,26 +1,23 @@
 # Probability {#probability}
 
 
-<!-- Code blocks need comments. Teach students something! Approximately as many lines of comments as lines of code, or at least 50% as many.  -->
+<!-- Code blocks need comments. Teach students something! Approximately as many lines of comments as lines of code, or at least 50% as many.  Done-->
 
-<!-- Add ID variable to all data creates for Two Models, Three Models and so on. -->
+<!-- Add ID variable to all data creates for Two Models, Three Models and so on. Done.-->
 
 <!-- 3d plot for marble example is wrong. There is a 1/8 chance of getting 0 or 3 whites. There is a 3/8 chance of getting either 1 or 2. So, the 0 and 3 towers should be 1/3 the height of the 1 and 2 towers. -->
 
 <!-- Did we do the N models case correctly, given the errors above? I am not sure. But we ought to make these cases as similar as possible, especially in terms of the code we show students.  -->
 
-<!-- It would be nice if the 3d graphics did not "pop up" when knitting the chapter.  Create a reproducible example, with the reprex package (or with a new repo with a simple Rmd), to show the problem. Then ask on RStudio. -->
+<!-- It would be nice if the 3d graphics did not "pop up" when knitting the chapter.  Create a reproducible example, with the reprex package (or with a new repo with a simple Rmd), to show the problem. Then ask on RStudio. Done. Huge thanks to Ryan-->
 
-<!-- Should discuss the concept of "population" in each example of probability distributions. The population is the imaginary urn from which our data has been, or will be, drawn. Check out Section 5.1. In fact, re-read the whole Cardinal Virtues section.   -->
+<!-- Should discuss the concept of "population" in each example of probability distributions. The population is the imaginary urn from which our data has been, or will be, drawn. Check out Section 5.1. In fact, re-read the whole Cardinal Virtues section.  Done. -->
 
-<!-- Explanation: There is a direct connection between the concept of the population and the concept of a probability distribution. But they are not the same thing! The connection is that the probability distribution --- whether it is empirical, mathematical, or posterior --- is a *description* of the contents of the urn, which is the population. -->
+<!-- Explanation: There is a direct connection between the concept of the population and the concept of a probability distribution. But they are not the same thing! The connection is that the probability distribution --- whether it is empirical, mathematical, or posterior --- is a *description* of the contents of the urn, which is the population. Done. -->
 
-<!-- How do we create a probability distribution for a given urn? Two approaches. First, assume that you know the data generating mechanism (DGM) --- the mathematical formula which describes the contents of the urn. Then just plot the formula. Second, if you don't know the DGM, you can just sample (a lot, you hope, and at random, you hope) from the urn. Plot what you get. And that is an estimate of the PDF. -->
-
-<!-- Learn about movies in rayshader.  Useful? https://joeystanley.com/blog/3d-vowel-plots-with-rayshader-->
+<!-- How do we create a probability distribution for a given urn? Two approaches. First, assume that you know the data generating mechanism (DGM) --- the mathematical formula which describes the contents of the urn. Then just plot the formula. Second, if you don't know the DGM, you can just sample (a lot, you hope, and at random, you hope) from the urn. Plot what you get. And that is an estimate of the PDF. Done. -->
 
 <!-- What would be a fun theme/gif/movie clip to start and end the chapter with, like we do in chapters 4 and 6? Something having to do with betting . . . Connected to Kant? -->
-
 
 <!-- When discussing a parameter $p$ and a probability distribution p() in the absence of a specific context, then those simple terms are OK. But, whenever you are talking about specific parameters or specific probability distributions, you should have either subscripts or items in the parentheses, respectively.  Make this clear somewhere? -->
 
@@ -50,12 +47,13 @@ library(tidyverse)
  # the 3-D plots below. You can read more about **rayshader**
  # [here](https://www.rayshader.com/) but we will not be explaining how to use
  # it in this *Primer*.
-
+options(rgl.useNULL = TRUE)
 library(rayshader)
 library(rgl)
 library(tidyverse)
 library(magick)
 library(primer.data)
+
 ```
 
 ## List-columns and map functions
@@ -91,6 +89,7 @@ Notice this is a 1-by-1 tibble with one observation, which is a list of one elem
 A list column is a column of your data which is a [list](https://adv-r.hadley.nz/vectors-chap.html#lists) rather than an atomic vector.  As with stand-alone list objects, you can pipe to `str()` to examine the column.
 
 ```{r}
+# tibble() is what we use to generate a tibble, it acts sort of like the mutate(), but mutate() needs a data frame to add new column, tibble can survive on itself.
 tibble(col_1 = list(range(x))) %>%
   str()
 ```
@@ -99,6 +98,7 @@ tibble(col_1 = list(range(x))) %>%
 We can use `map_*` functions to both create a list-column and then, much more importantly, work with that list-column afterwards. 
 
 ```{r}
+# .x is col_1 from tibble and ~ sum(.) is the formula
 tibble(col_1 = list(range(x))) %>%
   mutate(col_2 = map_dbl(col_1, ~ sum(.))) %>% 
   str()
@@ -279,6 +279,9 @@ ggplot(aes(x = results)) +
 
 The full terminology is mathematical (or empirical or posterior) *probability* distribution. But we will often shorten this to just mathematical (or empirical or posterior) distribution. The word "probability" is understood, even if it is not present.
 
+*Population* is an very key concepts in data analysis, and will use throughout later chapters. The definition for Population is essentially the imaginary urn from which our data has been, or will be, drawn. 
+
+
 <!-- DK: Add a paragraph discussing the concept of a population. And why or why not we could use our empirical data. Thinking about the population helps you decide whether (or not) to make use of the mathematical and empirical distributions when you are creating your posterior. -->
 
 <!-- Determine a good definition of population. The population is the set of all units from which the data you have, and the data you want to have, has been, or will be, drawn. -->
@@ -376,6 +379,8 @@ tibble(results = c(rep(2, 15), rep(3, 15), rep(4, 7),
 
 Someone less suspicious of the casino would have a posterior distribution which looks more like the mathematical distribution.
 
+Recall *Population*, Population is the imaginary urn from which our data has been, or will be, drawn. A perfect probability distribution is simply pour all the data in the population (urn), and count them, however this is impossible because there are infinite or very large number of data out there. For rolling two dice for example, our population is rolling two dice infinite times and calculate the sum for each time. Because it's never possible to get access to all the data, that's why we need the *Mathematical* and the *Empirical* distribution. Yet, the *Posterior * distribution is different because we essenciaially switching to another population(urn) for the data we believe.
+
 ### Presidential elections
 
 Now let's say we are building probability distributions for political events, like a presidential election. We want to know the probability that Democratic candidate wins X electoral votes, where X comes from the range of possible outcomes: 0 to 538. (The total number of electoral votes in US elections since 1964 is 538.)
@@ -410,7 +415,8 @@ ggplot(mydata, aes(x = electoral_votes)) +
 We can build a *mathematical distribution* for X which assumes that the chances of the Democratic candidate winning any given state's electoral votes is 0.5 and the results from each state are independent.
 
 ```{r, echo = FALSE}
-# Add comments explaining what this does.
+# rep(3,8) means there are 8 states that have 3 electoral votes, via the same for the rest of the code chunck.
+# We use c() to make the rep() functions together, so that we can use it in tibble().
 
 ev <- c(rep(3, 8), rep(4, 5), rep(5, 3), rep(6, 6), rep(7, 3), rep(8,2),
         rep(9, 3), rep(10, 4), rep(11, 4), 12, 13, 14, 15, rep(16, 2), 18, 20 , 20, 19, 29, 38, 55)
@@ -447,6 +453,8 @@ The *posterior distribution* of electoral votes is a popular topic, and an area 
 ```{r, echo = FALSE}
 # DK: Some comments about this. Where did you get this data from? Why those
 # columns? 
+
+# Have to include these cols type, otherwise it will shows up this "Column specification", thing on the primer, not pretty.
 
 read_csv("./05-probability/data/election-forecasts-2020/prez_1.csv",
          col_types = cols(cycle = col_double(),
@@ -503,6 +511,14 @@ There are many political science questions you could explore with posterior dist
 * Present: What are the total campaign donations from Harvard faculty?
 * Future: How many electoral votes will the Democratic candidate for president win in 2024?
 
+The concept of population is key to this topic, because if we assume the *population* of the past is the same or very similar to the future population, then we can basically predict the future based on past performances. Let's now analyses the three different probability distribution of Presidential election.
+
+*Mathematical Distribution * is saying that if we know the Data-Generating Mechanisms (DGM), we can produce the data on our own, in this case our DGM is assuming for all 50 states in the US, the Democrats and Republicans have exactly equal chance of winning. 
+
+*Empirical Distribution * is saying that since it's impossible to get all the data for all presidential election results, past and future, we can look at the historical past elections results and assuming it's *representative* for all elections. 
+
+*Posterior Distribution* is saying that we don't believe what the above two is saying, in fact we believe that the current population is unreliable , so instead we want to create an new population, an new imaginary urn, where we think is trustworthy, and use the data in the new population to graph our probability distribution. 
+
 ### Height
 
 Question: *What is the height of the next adult male we will meet?*
@@ -514,7 +530,9 @@ All the characteristics for discrete probability distributions which we reviewed
 
 The *empirical distribution* involves using data from the National Health and Nutrition Examination Survey (NHANES). What we are doing here is instead making an model by ourself using some mathematical formula, we use the actual data, we can get the data from either simulated by our own like in the "flipping a coin" and "Rolling two dice" scenario, or we used the data from someone else, like the presidential election and this scenario. 
 
-```{r}
+```{r echo = FALSE}
+# Use nhanes dataset for this exercise, filter out Adult Male.
+
 nhanes %>%
   filter(gender == "Male", age >= 18) %>%
   select(height)%>%
@@ -539,7 +557,10 @@ nhanes %>%
 
 Mathematical Distribution:
 
-```{r}
+```{r echo = FALSE}
+
+# Greater the n size, the smoother the graph.
+
 tibble(height = rnorm(1000000, mean = 175, sd = 9)) %>% 
   ggplot(aes(x = height)) +
     geom_histogram(aes(y = after_stat(count/sum(count))), 
@@ -562,11 +583,16 @@ Each value $y_i$ is drawn from a normal distribution with parameters $\mu$ for t
 
 The *posterior distribution* for heights depends on the context. Are we considering all the adult men in America? In that case, our posterior would probably look a lot like the empirical distribution using NHANES data. If we are being asked about the distribution of heights among players in the NBA, then our posterior might look like:
 
-```{r}
-tibble(height = c(rep(165, 2), rep(167, 3), rep(170, 8), 
-                  rep(172, 9), rep(176, 9), rep(177, 8),
-                  rep(179, 10), rep(182, 18), rep(183, 23), 
-                  rep(189, 20),rep(193, 21), rep(200, 15),rep(205, 15),rep(212, 8),rep(220, 4)))%>% 
+```{r echo = FALSE}
+
+# Manually select the height, because it's posterior, could change base on belief
+
+tibble(height = c(rep(170, 2), rep(173, 3), rep(175, 8), 
+                  rep(177, 9), rep(178, 9), rep(182, 8),
+                  rep(186, 10), rep(190, 18), rep(193, 23), 
+                  rep(197, 20),rep(200, 21), rep(205, 20), 
+                  rep(207, 15),rep(210, 15), rep(213, 16), 
+                  rep(218, 14),rep(220, 8), rep(228, 4)))%>% 
     ggplot(aes(x = height)) +
     geom_histogram(aes(y = after_stat(count/sum(count))), 
                    binwidth = 5, 
@@ -581,18 +607,20 @@ tibble(height = c(rep(165, 2), rep(167, 3), rep(170, 8),
   
 ```
 
-In general when we think about the difference between these three distributions, we can think about the mathematical as completely theoretical, imagine we only have an paper and a pencil, and we were ask to create a model, that model is basically the *mathematical distributions*. *Empirical distribution* on the other hand is different, empirical distribution is completely based on data, there is no such thing as writing down formula or equation and coming up with a distribution based on that, we come up *empirical distribution* by analyzing data, you can think of empirical distribution as someone flip a coin 1000 times, and we record the data and creating a graph based on that. Last but not least, *Posterior distribution* this graph represents one's belief about certain situation, for example when we think about flipping a coin, our mathematical and empirical results would likely look similar, and if there is no other assumption our posterior should also looks similar, but if were in a casino, and someone tells you that they want to bet 100 bucks on head and you bet 100 bucks on tail, who wins we get's all the money. Now you maybe suspicious, you won't likely to trust this person who is convincing you to bet, now the *posterior distribution* could help you to visualize and quantified your beliefs which is extremely helpful when making decision. 
+In general when we think about the difference between these three distributions, we can think about the mathematical as completely theoretical, imagine we only have an paper and a pencil, and we were ask to create a model to represent our population,and that model is the *mathematical distributions*. *Empirical distribution* on the other hand is different, empirical distribution is completely based on data, there is no such thing as writing down formula or equation and coming up with a distribution based on that, we come up with *empirical distribution* by analyzing data, you can think of empirical distribution as someone flip a coin 1000 times, and we record the data and creating a graph based on that, and believe that the data we pulled up is representative for the entire population. Last but not least, *Posterior distribution* this graph represents one's belief about certain situation, for example when we think about flipping a coin, our mathematical and empirical results would likely look similar, and if there is no other assumption our posterior should also looks similar, but if were in a casino, and someone tells you that they want to bet 100 bucks on head and you bet 100 bucks on tail, who wins we get's all the money. Now you maybe suspicious, you won't likely to trust this person who is convincing you to bet, now the *posterior distribution* could help you to visualize and quantified your beliefs which is extremely helpful when making decision. 
 
 In short:
 * Mathematical distribution is based on mathematical formula and some basic assumptions
-* Empirical distribution is based on data, the data could eigther done by yourself or somebody else.
+* Empirical distribution is based on data, the data could either done by yourself or somebody else.
 * Posterior distribution is based on belief, the belief is usually shaped by added information about the scenario. 
 
-<!-- DK: Insert here mathematical, empirical and posterior examples. -->
+There is a direct connection between the concept of the population and the concept of a probability distribution. But they are not the same thing! The connection is that the probability distribution --- whether it is empirical, mathematical, or posterior --- is a *description* of the contents of the urn, which is the population.
+
+And Again:
+*Population* is the imaginary urn from which our data has been, or will be, drawn.
+
 
 Comments:
-
-<!-- Need X Files poster -->
 
 
 ```{r, echo = FALSE, fig.cap = "The truth is out there"}
@@ -622,6 +650,10 @@ Remember that *probability distributions are mathematical objects that cover a s
 For instance, we can generate the following unnormalized distribution for the sum of rolling two dice. (This uses the same code as above, but without the normalization step.)
 
 ```{r, echo = FALSE}
+
+# mutate(die_1 = map_dbl(ID, ~ sample(c(1:6), size = 1))) shoudl be handy for any dice
+# rolling simulation
+
 set.seed(1)
 
 tibble(ID = 1:100) %>% 
@@ -729,6 +761,8 @@ A probability distribution is not always easy to work with. It is a complex obje
 ```{r, echo = FALSE}
 # DK: This code is a mess! Please fix!
 
+# Have to include otherwise shows up coloumns specification.
+
 z <- read_csv("https://raw.githubusercontent.com/PPBDS/primer/master/05-probability/data/election-forecasts-2020/prez_1.csv", 
               col_types = cols(cycle = col_double(),
                                branch = col_character(),
@@ -780,6 +814,8 @@ The elements of these vectors are all "draws" from the specified probability dis
 
 
 ```{r}
+# recall mean, media, standard deviation and mad functions.
+
 key_stats <- draws %>% 
   summarize(mn = mean(electoral_votes),
             md = median(electoral_votes),
@@ -897,7 +933,9 @@ set.seed(9)
 # organized. We call this object `jd_disease`, where the `jd` stands for
 # joint distribution.
 
-jd_disease <- tibble(have_disease = rep(c(TRUE, FALSE), 5000)) %>%
+sims <- 10000
+
+jd_disease <- tibble(ID = 1:sims, have_disease = rep(c(TRUE, FALSE), 5000)) %>%
   mutate(positive_test =
            if_else(have_disease,
                    map_int(have_disease, ~ rbinom(n = 1, size = 1, p = 0.99)),
@@ -912,7 +950,10 @@ The first step is to simply create an tibble that consists of the simulated data
 
 Plot the joint distribution:
 
-```{r}
+```{r echo = FALSE}
+
+# Use discrete for FALSE and TRUE
+
 jd_disease %>% 
   ggplot(aes(x = as.factor(positive_test), 
              y = as.factor(have_disease))) +
@@ -933,6 +974,9 @@ Below is a joint distribution displayed in 3D. Instead of using the "jitter" fea
 
 
 ```{r, echo = FALSE}
+
+# group_by and summarize use for count, and pile up the dots in one point.
+# Later use for rayshader
 
 jd_disease_plot <- jd_disease %>%
   group_by(have_disease, positive_test) %>%
@@ -989,7 +1033,11 @@ jd_disease %>%
 
 **Most people test positive are infected** This is a result for common diseases like cold. We can easily create an unnormalized conditional distribution with:
 
-```{r}
+```{r echo = FALSE}
+# geom_histogram won't work because we are using non-continuous value.
+# geom_col won't work because need two aesthetic both x and y
+# geom_bar work
+
 jd_disease %>% 
   filter(positive_test == 1) %>% 
   ggplot(aes(have_disease)) +
@@ -1008,7 +1056,10 @@ jd_disease %>%
 Turn this unnormalized distribution into a posterior probability distribution:
 
 
-```{r}
+```{r echo = FALSE}
+
+# Use discrete for TRUE and FALSE
+
 jd_disease %>% 
   filter(positive_test == 1) %>% 
   ggplot(aes(have_disease)) +
@@ -1116,6 +1167,10 @@ jd_marbles %>%
 Here is the 3D visualization:
 
 ```{r, echo = FALSE}
+
+# Same process, first condense point plot to a single point, then use plot_gg make it 3d and 
+# give height.
+
 jd_marbles_plot <- jd_marbles %>%
   group_by(in_bag, in_sample) %>%
   summarize(total = n(),
@@ -1142,6 +1197,7 @@ plot_gg(jd_marbles_plot,
         phi = 30,
         sunangle = 225,
         soliddepth = -50,
+        raytrace = FALSE,
         windowsize = c(2048,1536))
 
 rglwidget()
@@ -1231,7 +1287,10 @@ To start, it is useful to consider all the things which might happen if, for exa
 ```{r, echo = FALSE}
 
 set.seed(9)
-x <- tibble(heads = rbinom(n = 1000, size = 20, p = 0.4)) 
+
+sims <- 1000
+
+x <- tibble(ID = 1: sims, heads = rbinom(n = 1000, size = 20, p = 0.4)) 
 
 x %>% 
   ggplot(aes(heads)) +
@@ -1268,9 +1327,13 @@ We can do the same thing for all 11 possible models, calculating what would happ
 
 ```{r, echo = FALSE}
 
+# sims size depends on your data size, or the number in rep().
+
 set.seed(10)
 
-jd_coin <- tibble(p = rep(seq(0, 1, 0.1), 1000)) %>%
+sims <- 11000
+
+jd_coin <- tibble(ID = 1:sims, p = rep(seq(0, 1, 0.1), 1000)) %>%
   mutate(heads = map_int(p, ~ rbinom(n = 1, size = 20, p = .)))
 
 jd_coin %>%
@@ -1288,6 +1351,9 @@ jd_coin %>%
 Here is the 3D version of the same plot.
 
 ```{r, echo = FALSE}
+
+#Condese point and make rayshader plot.
+
 jd_coin_plot <- jd_coin %>% 
   group_by(p, heads) %>%
   summarize(total = n(), .groups = "drop") %>% 
