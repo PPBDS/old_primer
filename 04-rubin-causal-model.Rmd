@@ -2,38 +2,41 @@
 
 ```{r, include=FALSE}
 library(tidyverse)
+library(gt)
+library(gtsummary)
 ```
 
 *This chapter is being re-drafted.*
 
+<!-- Get rid of infinite rows in infinite Preceptor Table. Just keep all the columns. It is a mental tool for thinking about the assumption of Validity. And that is all that it is. -->
 
-<!-- The Population Table always has a column for Time, by definition. Even in the case, like Chapter 6, with a single urn, we have the urn at 11:00 (when we drew our sample) and the urn at 11:05, when we will draw our second sample. The Population Table has that urn, at 5 minute intervals, from 9:00 to 5:00, or whatever. And so, every row in the Population Table is specified by an ID and Time combination.  -->
+<!-- Take a look at the new version of Cardinal Virtues in Chapter 5. It is not perfect! But it is not. -->
+
+<!-- Reserve the term "population" for the statistical definition: the imaginary urn from which we draw data, or could have drawn data. -->
+
+<!-- MF: Focusing on organization now. After removing the "Complications" section, relevant topics were added to other parts of the chapter. Main issue is finding where to include our new validity/stability/representativeness concepts. Perhaps this discussion should replace the newly created "validity" section? Or added separately? -->
+
+<!-- Maybe (!) move more of the Complications (like Data Problems?) earlier in the chapter. Like Data Problems under Preceptor Tables? MF: Done. -->
+
+<!-- Populations again section is especially a mess! Idea is to talk more about populations now that we have more of a framework in which to consider things. Make the distinction between the Preceptor table and the larger population from which it is drawn. MF: Done. -->
+
+<!-- Note that Internal/external validity section used to be after Data Problems in Complications. Now it is ahead! Unless we move Data Problems to Preceptor Table section . MF: Fixed. -->
+
+<!-- The Population Table always has a column for Time, by definition. Even in the case, like Chapter 6, with a single urn, we have the urn at 11:00 (when we drew our sample) and the urn at 11:05, when we will draw our second sample. The Population Table has that urn, at 5 minute intervals, from 9:00 to 5:00, or whatever. And so, every row in the Population Table is specified by an ID and Time combination.  MF: How do we show this with Height example? Data = Yale in 2018, Preceptor Table = Harvard in 2021, Population = Ivy League students from 2015-2020?  -->
 
 <!-- First discussion of what is a population --- in Preceptor Tables section --- has no notion of time. -->
 
 <!-- Maybe there are three key assumptions in a data science problem. Validity allows us to collapse the columns of the infinite Preceptor Table. Stability allows us to estimate a model for time X and apply it in time Y. (The Population Table, by definition, has a column for time.) Representativeness allows us to assume that the model we estimate at time X applies to all units in time X. (Least sure of that last one.) -->
 
-
-
-<!-- Maybe (!) move more of the Complications (like Data Problems?) earlier in the chapter. Like Data Problems under Preceptor Tables?  -->
-
-<!-- Populations again section is especially a mess! Idea is to talk more about populations now that we have more of a framework in which to consider things. Make the distinction between the Preceptor table and the larger population from which it is drawn. -->
-
-<!-- Note that Internal/external validity section used to be after Data Problems in Complications. Now it is ahead! Unless we move Data Problems to Preceptor Table section . . . -->
-
 <!-- The infinite Preceptor Table is the perfect location to thoroughly and clearly explain Representativeness and Validity. -->
 
-<!-- No two people ever get the same version of the treatment. The issue of "validity" is whether or not we can ignore that fact. This works well! -->
-
-<!-- I want to make Representativeness have the same nice/clean connection to the infinite Preceptor Table which Validity has. Wouldn't that be nice! Can't do it! In fact, Validity is also connected to the rows. Or maybe it is Stability. -->
+<!-- No two people ever get the same version of the treatment. The issue of "validity" is whether or not we can ignore that fact. This works well! 
+We want to make Representativeness have the same nice/clean connection to the infinite Preceptor Table which Validity has. Wouldn't that be nice! Can't do it! In fact, Validity is also connected to the rows. Or maybe it is Stability. 
+Stability has two connotations. First, is Yao changing even if the world is not changing, i.e., he is 80 now and he used to be 20. Second, the world is changing, so Yao's outcome might be different a year from now even if he (in some sense) is the same guy. -->
 
 <!-- Maybe there are really three key assumptions in every Data Science Problem: Validity, Stability and Representativeness. Maybe? -->
 
-<!-- Stability has two connotations. First, is Yao changing even if the world is not changing, i.e., he is 80 now and he used to be 20. Second, the world is changing, so Yao's outcome might be different a year from now even if he (in some sense) is the same guy.  -->
-
 <!-- https://stats.stackexchange.com/questions/3520/can-someone-explain-the-concept-of-exchangeability -->
-
-<!-- The infinite Preceptor Table is a nice way of understanding what the assumptions of validity and stability. -->
 
 <!-- This is all an incredibly sloppy and stupid way to get to the important concept of "exchangeability." -->
 
@@ -48,7 +51,6 @@ library(tidyverse)
 <!-- Or, better, population comes at the end of the Preceptor Table section, along with a discussion of the prediction problem. Need another table which splits rows into three parts: all variables known, only independent variables know, no variables known. -->
 
 <!-- Then revisit the population, and these issues, at the end of the Casual effect section. -->
-
 
 <!-- Put the Glossary at the start the summary. -->
 
@@ -107,7 +109,7 @@ knitr::include_app("https://www.youtube.com/embed/cR7p-IB6INM")
 
 <!-- SZ: Movie clips are stupid. Students will never watch them. -->
 
-George Bailey, in the movie "It's a Wonderful Life," believes that his life has served no purpose. The movie follows George as he explores a world in which he was never born. It is clear that he had a profound impact on the lives of many people in his community. His actions mattered, more than he ever realized.
+George Bailey, a character from the movie "It's a Wonderful Life," believes that his life has served no purpose. The movie follows George as he explores a world in which he was never born. It is clear that he had a profound impact on the lives of many people in his community. His actions mattered, more than he ever realized. 
 
 By showing what the world would have been like without George, we get an idea of the *causal effect* of his life on his town and the people who live there. This chapter explains causation using the framework of *potential outcomes* and the *Rubin Causal Model* (RCM). 
 
@@ -118,7 +120,7 @@ A **Preceptor Table** is a table with rows and columns such that, if none of the
 
 Assume that there are five adult brothers and you are given four of their heights. What is the average height of all five brothers? Consider a Preceptor Table for this problem:
 
-```{r echo = FALSE}
+```{r, echo = FALSE}
 tibble(ID = c("Robert", "Andy", "Beau", "Ishan", "Nicolas"),
        Heights = c("178", "?", "172", "173", "165")) %>%
   
@@ -136,15 +138,18 @@ tibble(ID = c("Robert", "Andy", "Beau", "Ishan", "Nicolas"),
   tab_spanner(label = "Outcome", columns = c(Heights))
 ```
 
+
 &nbsp;
 
 In this case, we have a row for each brother and a column for their height. An individual *unit* is a brother. An *outcome* is that brother's height. We will always have an ID column in Preceptor Tables so that we can identify different units. It is always furthest to the left. In addition to the ID column, we call the column with the brothers' heights the outcome column. 
 
-To estimate average height, we need to estimate Andy's height. One guess is just the average of the other four brothers: $$\frac{(178 + 165 + 172 + 173)}{4} = 172$$ Is that realistic? We should consider things like why we know the four other brothers' heights. Were they sampled randomly? Or do we know their heights because they are the tallest in the family? In that case would it make sense to use an average to estimate Andy's height? Probably not! 
+To estimate average height, we need to estimate Andy's height -- our missing data. One guess is just the average of the other four brothers: $$\frac{(178 + 165 + 172 + 173)}{4} = 172$$ Is that realistic? We should consider things like why we know the four other brothers' heights. Were they sampled randomly? Or do we know their heights because they are the tallest in the family? In that case would it make sense to use an average to estimate Andy's height? Probably not! 
 
 Keep in mind that there is a *truth* out there, a state of the world independent of our knowledge of it. Andy is a specific height. If we had a complete Preceptor Table, with no missing values, we could calculate the average height of the brothers exactly. No fancy statistics would be needed. Just arithmetic.
 
-Consider a more complex problem. We have the heights of 100 Harvard students, and from that we want to know the average height of students in the school. 
+### Harvard Height
+
+Consider a more complex problem. We have the heights of 100 Harvard students, and from that we want to know the average height of all students in the school. 
 
 
 ```{r echo = FALSE}
@@ -224,31 +229,80 @@ tibble(ID = c("Student 1", "Student 2", "...", "Student 473", "Student 474",
   tab_spanner(label = "Covariates", columns = c(Age, Sex))
 ```
 
-In this case, we know the covariates, gender and age, for students 2 and 3,258. But we do not know their heights, the outcome variable. We want to create a model which uses the covariates to predict the outcome.
+In this case, we know the covariates, gender and age, for students 2 and 3,258. But we do not know their heights, the outcome variable. We want to create a model which uses the covariates to predict the outcome. 
 
-### Population
+## Population
 
 <!-- DK: This stinks! Fix it, please. Make sure to distinguish the larger context of a "population" from the very specific context of a "Preceptor Table," even if, in some cases, they can be the same.  -->
 
 <!-- Example: Harvard students. Initially, Preceptor Table and population may seem like the same thing. But what if I have no data on Harvard students, but I do have data on Yale students? Then, my Preceptor Table is still just Harvard students (for whom I have no data) but my population is a larger amorphous group, including all Ivy students (or all college students or all 18-22 years olds or whatever). -->
 
-One of the most important concepts in all of statistics is *population*, the set of all units with which we are concerned. In our first example, the population was the five brothers in one family. In the second, it was the 6,700 students at Harvard. In many cases, the *population* is a well-defined and (mostly) stable set. In other cases, the population is quite unstable, even ill-defined, and, perhaps, unknowable. Examples:
+One of the most important concepts in all of statistics is *population*, the set of all units with which we are concerned. In our first example, the population was the five brothers in one family. In the second, it was the 6,700 students at Harvard. In many cases, the *population* is a well-defined and (mostly) stable set. In other cases, the population is quite unstable, even ill-defined, and, perhaps, unknowable. 
 
-* Does the population of [Heisman Trophy winners](https://en.wikipedia.org/wiki/List_of_Heisman_Trophy_winners) include Reggie Bush, who voluntarily forfeited the title?
+<!-- Switch all this to Harvard students example? MF: Done. -->
+
+Perhaps more importantly, most real world examples involve the future, meaning that specifying the population is impossible. The future is always cloudy. There are two main sources of issue: the definition of the population and the population's habit of changing. Let's explore what those mean in more depth. 
+
+### Defining population
+
+The act of defining a population may seem simple. After all, once we know who or what we want to study, it should be easy to define, right? Unfortunately, it is often more complicated than we assume! To explore this, we will look at both our Harvard population and the population of New York voters. 
+
+#### Harvard
+
+When defining the population of "current" Harvard students for our calculation of height, what exactly do we need to know? Surely a list of current students would help. Is that all? Not exactly. We may ask ourselves the following:
+
+* Does the population of Harvard students include prospective students, who have been admitted but have not started their first term?
+
+* Does the population of Harvard students include Student X, a student that has been kicked out by the AdBoard, but is appealing the ruling?
 
 * Does the population of Harvard students include those taking a leave of absence?
 
-<!-- DK: More examples? -->
+As we can see, merely defining "current" students can be complicated. When deciding on our models, it is important to consider what our population means --- and whether we may need to modify our definition for exceptions. 
 
-There are rarely Yes/No answers to questions like these.
+#### New York Voters
 
-<!-- Switch all this to Harvard students example? -->
+Now, we have the population of "New York City voters". But, what does the phrase "New York City voters" even mean? The very language we use is imprecise. There are a number of ways we may define NYC voters, such as:
 
-Perhaps more importantly, most real world examples involve the future, meaning that specifying the population is impossible. The future is always cloudy. We can't know, perfectly, the population of voters for the next New York City election since we don't know who will die between now and then. 
+* All the people who voted in the last election
+* All of the people who are eligible to vote today
+* All of the people who are eligible to vote in the next election
 
-The very language we use is imprecise. Does a phrase like "New York City voters" mean all the people who voted in the last election, all the people who would vote if the election were held today or all the people who will vote in the next election? Who knows? It is our responsibility as data scientists to be sure that we make clear the definitions we are using.
+Are you only considered a "voter" if you have voted in the past, or is the term "voter" applied to any citizen who is eligible to vote? Who knows? It is our responsibility as data scientists to be sure that we make clear the definitions we are using.
 
-Given this, a better Preceptor Table for the population of Harvard students would look like this:
+Once we have defined our population --- and made said population explicit --- we have yet another complication: the population, like the world, changes constantly.
+
+### Changing population 
+
+Even after considering the units which are included or excluded from our population, there is another problem: the world. New units enter our population constantly; existing units exit our population constantly. In other words, there is always going to be data that expires, and there is always going to be new data that we don't have.  What does this mean? 
+
+#### Harvard
+
+To begin, visualize the population of Harvard students for which we would like to estimate height. We are (presumably) predicting average height for **today**. The population of Harvard students today may sound relatively easy to conceptualize, but there are often questions we must ask in regards to a *changing* population. For the purposes of this exercise, assume that we have data for all current students at Harvard. 
+
+With all of the data, we should be able to say, with one-hundred percent certainty, the average height for Harvard students. Right? Not exactly. Consider the following complications:
+
+* A number of students graduate off-cycle, meaning that they are technically no longer a student at the time of our calculation.
+* A student has transferred to another college. This person no longer qualifies as a "Harvard student". 
+* A student has died. This piece of data is no longer useful. 
+* A transfer student has arrived on campus, but isn't included in our data!
+
+These changes in our population are going to cause some error in our calculations. With larger populations, this becomes even more apparent. To cement this concept, we will explore our New York City voters population.
+
+#### New York City voters
+
+For the sake of this exercise, we define NYC voters as any and all citizens who are eligible to vote today. Even will this *precise* population, our population changes drastically. In the course of a day:
+
+* People in NYC have died. 
+* Hundreds of people have just turned 18 and are now eligible to vote, who weren't eligible yesterday!
+* A number of people living in NYC *moved away*.
+* A number of people *moved into* NYC.
+* A number of people were arrested for a felony conviction and can no longer vote. 
+
+The world is an ever changing place, as are our populations. As such, it is virtually impossible to have the Preceptor Tables we wrote about earlier. How can we account for this randomness? 
+
+### Preceptor Table
+
+Given this, a better Preceptor Table for the set of Harvard students would look like this:
 
 ```{r echo = FALSE}
 
@@ -276,6 +330,21 @@ tibble(ID = c("Student 1", "Student 2", "...", "Student 473", "Student 474",
 
 The only difference is that we no longer know the exact number of students in the population. So, instead of referring to Student 6,700, we use Student $N$. Even though we don't know --- and often can't know --- the number of units in the population, we still want to be able to label those units and to count them up. $N$ is the variable which normally refers to the **n**number of units in the population.
 
+## Population Table
+
+<!-- Maybe start with the infinite Preceptor Table. Explain how the assumption of Validity allows us to collapse the columns. But we keep the extra rows! Time is inescapable! But, we can generally pick a sensible unit of time, consistent with how old our data is and how far in future the Preceptor Table is.  -->
+
+<!-- Implicit in the notion of a Preceptor Table is a moment in time. (That is a bit hazy, of course! Preceptor Table often extends over quite some time in itself. I get the postcard today and vote in two weeks. Both are part of the Preceptor Table.) -->
+
+<!-- As long as you add a time column, it is easy (?) to build a Population Table. Common sense guides us as to a reasonable unit of time to deal with.  -->
+
+<!-- Key step: The assumption of "Stability" between the different dates allows us to assume that inference using data from one time period applies to another time period. Recall the different urns on the table. -->
+
+<!-- Representativeness is a concept which applies only within a given time period. Ensures that the model we estimate in time X works in time X. -->
+
+We use Preceptor Tables both for predictive problems, like forecasting height on the basis of age/gender, and for causal problems, like estimating the effect of Spanish-speakers on immigration attitudes. So, our previous discussion of the *population* applies here as well. In general, we can divide units of the population in three broad categories: no missing data, all missing data and outcome missing. Consider:
+
+<!-- DK: Need a table here. -->
 
 So far, we have only asked predictive questions. This chapter, however, primarily focuses on causal inference. 
 
@@ -289,11 +358,11 @@ knitr::include_graphics("04-rubin-causal-model/images/enos_seal.png")
 
 <!-- SZ: Image is very out of the blue, at first seemed to have little correlation, espicially with seal -->
 
-The Rubin Causal Model (RCM) is based on the idea of **potential outcomes.** For example, @enos2014 measured attitudes toward immigration among Boston commuters. Individuals were exposed to one of two possible conditions, and then their attitudes towards immigrants were recorded. One condition was being on a train platform near individuals speaking Spanish. The other was being on a train platform without Spanish-speakers. To calculate the causal effect of having Spanish-speakers nearby, we need to compare the outcome for an individual in one possible state of the world (with Spanish-speakers) to the outcome for that same individual in another state of the world,  one without Spanish-speakers. It is impossible to observe both potential outcomes at once. One of the potential outcomes is always missing. This dilemma is the *Fundamental Problem of Causal Inference*.
+The Rubin Causal Model (RCM) is based on the idea of **potential outcomes.** For example, @enos2014 measured attitudes toward immigration among Boston commuters. Individuals were exposed to one of two possible conditions, and then their attitudes towards immigrants were recorded. One condition was waiting on a train platform near individuals speaking Spanish. The other was being on a train platform without Spanish-speakers. To calculate the causal effect of having Spanish-speakers nearby, we need to compare the outcome for an individual in one possible state of the world (with Spanish-speakers) to the outcome for that same individual in another state of the world (without Spanish-speakers). It is impossible to observe both potential outcomes at once. One of the potential outcomes is always missing, since a unit cannot experience both treatments. This dilemma is the *Fundamental Problem of Causal Inference*.
 
-In most circumstances, we are interested in comparing two experimental manipulations, one generally termed "treatment" and the other "control." The difference between the potential outcome under treatment and the potential outcome under control is a "causal effect" or a "treatment effect."  The scenario that didn't actually happen, and, therefore, that we didn't observe, is a "counterfactual." According to the RCM, the **causal effect** of being on the platform with Spanish-speakers is the *difference* between what your attitude would have been under "treatment" (with Spanish-speakers) and under "control" (no Spanish-speakers).
+In most circumstances, we are interested in comparing two experimental manipulations, one generally termed "treatment" and the other "control." The difference between the potential outcome under treatment and the potential outcome under control is a "causal effect" or a "treatment effect." According to the RCM, the **causal effect** of being on the platform with Spanish-speakers is the *difference* between what your attitude would have been under "treatment" (with Spanish-speakers) and under "control" (no Spanish-speakers).
 
-The commuter survey consisted of three questions, each measuring agreement on a 1 to 5 integer scale, with 1 being liberal and 5 being conservative. For each person, the three answers were summed, generating an overall measure of attitude toward immigration which ranged from 3 to 15. If your attitude towards immigrants would have been a 13 with Spanish-speakers and a 9 without Spanish-speakers, then the causal effect of being on a platform with Spanish-speakers is a 4-point increase in your score.
+The commuter survey consisted of three questions, each measuring agreement on a 1 to 5 integer scale, with 1 being liberal and 5 being conservative. For each person, the three answers were summed, generating an overall measure of attitude toward immigration which ranged from 3 (very liberal) to 15 (very conservative). If your attitude towards immigrants would have been a 13 with Spanish-speakers and a 9 without Spanish-speakers, then the causal effect of being on a platform with Spanish-speakers is a 4-point increase in your score.
 
 We will use the symbol $Y$ to represent potential outcomes, the variable we are interested in understanding and modeling. $Y$ is called the *response* or *outcome* variable. It is the variable we want to "explain." In our case this would be the attitude score. If we are trying to understand a causal effect, we need two symbols so that control and treated values can be represented separately: $Y_t$ and $Y_c$. 
 
@@ -327,10 +396,6 @@ tibble(ID = "Yao",
 
 
 From this table we only know the causal effect on Yao. Everyone else in the study might have a lower attitude score (more liberal) if treated. Regardless of what the causal effect is for other subjects, the causal effect for Yao of being on the train platform with Spanish-speakers is a shift towards a more conservative attitude.
-
-
-<!-- SZ: Is there a need to mention other people when we're focusing on Yao? -->
-
 
 Using the response variable --- the actual symbol rather than a written description --- makes for a more concise Preceptor Table.
 
@@ -391,9 +456,7 @@ tibble(subject = "Yao",
 
 &nbsp;
 
-
-
-Remember that in an *actual* Preceptor Table we will have a bunch of missing data! We can not use simple arithmetic to calculate the causal effect on Yao's attitude toward immigration. Instead, we will be required to estimate it. An **estimand** is some unknown variable in the real world that we are trying to measure. In this case, it is  $Y_{t}-Y_{c}$, not $+4$. An estimand is not the *value* you calculated, but is rather the *unknown variable* you want to estimate. 
+Remember that, in the real world, we will have a bunch of missing data! We can not use simple arithmetic to calculate the causal effect on Yao's attitude toward immigration. Instead, we will be required to estimate it. An **estimand** is some unknown variable in the real world that we are trying to measure. In this case, it is  $Y_{t}-Y_{c}$, not $+4$. An estimand is not the *value* you calculated, but is rather the *unknown variable* you want to estimate. 
 
 ```{r echo = FALSE, fig.cap = "Don Rubin was a professor of Statistics at  Harvard."}
 knitr::include_graphics("04-rubin-causal-model/images/don_rubin.jpg")
@@ -405,22 +468,21 @@ knitr::include_graphics("04-rubin-causal-model/images/don_rubin.jpg")
 
 Causal inference is often compared with prediction.  In prediction, we want to know an outcome, $Y(u)$.  In causal inference, we want to know a function of *potential* outcomes, such as a the treatment effect: $Y_t(u) - Y_c(u)$.
 
-These are both missing data problems.  Prediction involves getting an estimate for an outcome variable that we don't have, and thus is missing, whether because it is in the future or because it is from data that we are unable to collect.  Thus, prediction is the term for using statistical inference to fill in missing data for individual outcomes, for situations in which the concept of potential outcomes does not apply.
+These are both missing data problems. Prediction involves getting an estimate for an outcome variable that we don't have, and thus is missing, whether because it is in the future or because it is from data that we are unable to collect.  Thus, prediction is the term for using statistical inference to fill in missing data for individual outcomes, for situations in which the concept of potential outcomes does not apply. 
 
-Causal inference, however, is the term for filling in missing data for potential outcomes.  This is unlike prediction, where only one potential outcome can *ever* be observed, even in principle.  
+Causal inference, however, is the term for filling in missing data for potential outcomes. This is unlike prediction, where only one potential outcome can *ever* be observed, even in principle.  
 
 In both causal inference and prediction, the process by which some data is missing and some is observed is crucial.  If we think that the missing data is similar to the observed data, we can make inferences more easily.  If not, we have to think through the dissimilarities and consider how to model them.
 
-
-Key point: In a predictive model, there is only one $Y(u)$ value for each unit. This is very different to the RCM where there are (at least) two potential outcomes (treated and control). There is only one outcome column in a predictive model, whereas there are two or more in a causal model.
+Key point: In a predictive model, there is only one $Y(u)$ value for each unit. This is very different to the RCM where there are (at least) two potential outcomes (treatment and control). There is only one outcome column in a predictive model, whereas there are two or more in a causal model.
 
 With a predictive model we cannot infer what would happen to the outcome $Y(u)$ if we changed $X$ *for a given unit*. We can only *compare* two units, one with one value of $X$ and another with a different value of $X$. 
 
-In a sense, all models are predictive. If we had more data from a stable distribution, then we could make a predictive forecast of someone's attitude. Only a subset of models are causal, meaning that, for a given individual, you can change the value $X$ and observe a change in outcome, $Y(u)$, and from that calculate a causal effect.
+In a sense, all models are predictive. However, only a subset of models are causal, meaning that, for a given individual, you can change the value $X$ and observe a change in outcome, $Y(u)$, and from that calculate a causal effect.
 
 ### Multiple units
 
-Generally a study has many individuals (or, more broadly, "units") who each have their own potential outcomes. More notation is needed to allow us to differentiate between different units. 
+Generally, a study has many individuals (or, more broadly, "units") who each have their own potential outcomes. More notation is needed to allow us to differentiate between different units. 
 
 In other words, there needs to be a distinction between $Y_t$ for Yao, and $Y_t$ for Emma. We use the variable $u$ ($u$ for "unit") to indicate that the outcome under control and the outcome under treatment can differ for each individual unit (person). 
 
@@ -461,7 +523,7 @@ From this Preceptor Table, there are many possible estimands we might be interes
 
 ::: {.fullwidth} 
 
-- A potential outcome for one person, e.g., Yao's potential outcome under treatment: $13$.  
+- A potential outcome for one person, e.g., Yao's potential outcome under treatment: $13$.
 - A causal effect for one person, such as for Emma.  This is the difference between the potential outcomes: $14 - 11 = +3$.
 - The most positive causal effect: $+5$, for Cassidy.
 - The most negative causal effect: $-3$, for Tahmid.
@@ -472,11 +534,9 @@ From this Preceptor Table, there are many possible estimands we might be interes
 
 And so on. There are a lot of things one might care about!
 
-All of the variables we calculated above are examples of estimands we might be interested in. One estimand is important enough that it has its own name: the **average treatment effect**, often abbreviated as **ATE**. The average treatment effect is the mean of all the individual causal effects. Here, the mean is $+1.6$.
+All of the variables calculated above are examples of estimands we might be interested in. One estimand is important enough that it has its own name: the **average treatment effect**, often abbreviated as **ATE**. The average treatment effect is the mean of all the individual causal effects. Here, the mean is $+1.6$.
 
-Remember what an actual Preceptor Table riddled, as it always is, with question marks, looks like:
-
-
+What does our real-world Preceptor Table look like?
 
 ```{r, echo = FALSE}
 # First, we create a tibble with the values we want for the table
@@ -512,199 +572,6 @@ Calculating values from this table is no longer a simple math problem. See this 
 ```{r echo = FALSE}
 knitr::include_app("https://www.youtube.com/embed/gyRZSzCtU_o")
 ```
-
-## Population Table
-
-<!-- Maybe start with the infinite Preceptor Table. Explain how the assumption of Validity allows us to collapse the columns. But we keep the extra rows! Time is inescapable! But, we can generally pick a sensible unit of time, consistent with how old our data is and how far in future the Preceptor Table is.  -->
-
-<!-- Implicit in the notion of a Preceptor Table is a moment in time. (That is a bit hazy, of course! Preceptor Table often extends over quite some time in itself. I get the postcard today and vote in two weeks. Both are part of the Preceptor Table.) -->
-
-<!-- As long as you add a time column, it is easy (?) to build a Population Table. Common sense guides us as to a reasonable unit of time to deal with.  -->
-
-<!-- Key step: The assumption of "Stability" between the different dates allows us to assume that inference using data from one time period applies to another time period. Recall the different urns on the table. -->
-
-<!-- Representativeness is a concept which applies only within a given time period. Ensures that the model we estimate in time X works in time X. -->
-
-We use Preceptor Tables both for predictive problems, like forecasting height on the basis of age/gender, and for causal problems, like estimating the effect of Spanish-speakers on immigration attitudes. So, our previous discussion of the *population* applies here as well. In general, we can divide units of the population in three broad categories: no missing data, all missing data and outcome missing. Consider:
-
-<!-- DK: Need a table here. -->
-
-
-#### Internal and external validity
-
-
-There are two main sources of missing data:
-
-1. For the units in our sample, we only see one potential outcome
-2. For the units outside our sample, we see *no* potential outcomes
-
-If we have randomized assignment and a large sample, we can be confident that we have a good estimate of the average treatment effect *in that sample*.  We say that the experiment has high **internal validity**: the inferences we are making are likely to reflect the truth about that sample.  
-
-However, we may be interested in a population beyond our particular sample, the second main source of missing data.  For example, let's look at the broader context of the train experiment. You likely are not exclusively concerned about the attitudes of people who ride trains, but rather the attitudes of a larger population. Train platforms, however, are a convenient setting in which to run the experiment.  Let's say that we ran a randomized experiment with 10,000 people in Boston, and found an $\widehat{ATE} = -1$. Should we assume this estimate would be accurate for a larger general population?
-
-The answer to that question depends in part on the **external validity** of the study. Are the 10,000 people in the study similar to the people who we want to generalize the findings to? Perhaps we want to generalize to train commuters in other cities. Let's say that the 10,000 people in Boston all choose to ride trains for environmental reasons. That's another form of **selection bias**. The sample is not randomly selected from the population in which we are interested.  Why is that a problem?  Those people differ systematically from other people in a way that may affect their response to the experiment. For example, their preference of public transportation for environmental reasons may be correlated to other political beliefs.
-
-Note that this concern can be expressed in terms of the assignment mechanism.  People who don't ride the train have a 0% chance of receiving the treatment.  Thus, the study *can't* directly speak to how the treatment would impact their attitudes towards immigrants. The only way we can make such claims is by making additional assumptions, such as that train-riders reflect the same makeup of political beliefs as people who don't ride trains.
-
-The external validity of a study is often directly related to the **representativeness** of our sample. Representativeness has to do with how well our sample represents the larger population we are interested in generalizing to. Does the train experiment allow us to calculate a causal effect for people who commute by cars? Can we calculate the causal effect for people in New York City? Before we generalize to broader populations we have to consider if our experimental estimates are applicable beyond our experiment. Maybe we think that commuters in Boston and New York are similar enough, that our $\widehat{ATE}$ also is a good estimate for the causal effect of our treatment in NYC. We could also conclude that people who commute by car are fundamentally different than people who commute by train. If that was true, then we could not say our estimate is true for all commuters because our sample does not accurately represent the broader group we want to generalize to. 
-
-The circumstances of the experiment may also affect the external validity of the study. Perhaps the train study was conducted during the middle of the summer when platforms are uncomfortably hot. Then, while we have variation in one aspect of the treatment (whether there were Spanish-speakers nearby), we don't have variation in another (temperature of train platform). It may be that attitude towards immigrants is impacted when the train platform is uncomfortably hot, but the treatment has no impact on attitude otherwise.
-
-When dealing with human subjects, there is a particular concern regarding external validity: the [**Hawthorne effect**](https://en.wikipedia.org/wiki/Hawthorne_effect).  When human subjects know that they are part of an experiment, they may change their behavior.
-
-In this example, the Hawthorne effect can impact attitudes expressed on surveys. Maybe respondents are more extreme in their attitude in either direction (more liberal or more conservative) because the survey is an opportunity to express opinion. 
-
-
-There is a border concept of **validity** to consider as well. That is, if the data is *valid*, then it accurately captures the concepts we care about. We do not want to use data if there is not a connection between the problem we face and the data that we have. 
-
-#### The infinite Preceptor Table
-
-
-In reality, a Preceptor Table has an infinite number of rows, and therefore an infinite amount of missing data. We call this type of Preceptor Table an infinite Preceptor Table. Such a reality is unworkable, so we make assumptions to reduce the true problem to something more manageable.
-
-Let's start by looking at what kinds of missing data make up the infinite Preceptor Table. For example, say we only care about the causal effect of this experiment on Yao. Do we only care about his attitude right after the experiment? No! We also care about Yao's potential outcomes one year from now, two years from now, and so on.
-
-So our full Preceptor Table includes people we know (Yao) and people we don't (for example, Eliot), both now and in the future:
-
-```{r, echo = FALSE}
-# First, we create a tibble with the values we want for the table
-
-tibble(subject = c("Yao this year", "Yao next year", "Yao two years from now", "Eliot this year", "Eliot next year", "Eliot two years from now", "...", "Person n at time t"),
-       ytreat = c("13", "?", "?", "?", "?", "?", "?", "?"),
-       ycontrol = c("?", "?", "?", "?", "?", "?", "?", "?"),
-       ydiff = c("?", "?", "?", "?", "?", "?", "?", "?")) %>%
-  
-  # Then, we use the gt function to make it pretty
-  
-  gt() %>%
-  cols_label(subject = md("ID"),
-                ytreat = md("$$Y_t(u)$$"),
-                ycontrol = md("$$Y_c(u)$$"),
-                ydiff = md("$$Y_t(u) - Y_c(u)$$")) %>%
-  cols_move(columns = c(ytreat, ycontrol), after = c(subject)) %>%
-  tab_style(cell_borders(sides = "right"),
-            location = cells_body(columns = c(subject))) %>%
-  tab_style(style = cell_text(align = "left", v_align = "middle", size = "large"), 
-            locations = cells_column_labels(columns = c(subject))) %>%
-  cols_align(align = "center", columns = everything()) %>%
-  cols_align(align = "left", columns = c(subject)) %>%
-  tab_spanner(label = "$$\\text{Outcomes}$$", c(ytreat, ycontrol)) %>%
-  tab_spanner(label = "$$\\text{Causal Effect}$$", c(ydiff))
-```
-
-&nbsp;
-
-In fact, because time is continuous, there is a row for Yao now, Yao one second from now, Yao one day from now and so on. The Preceptor Table extends downward forever. Thus, in order to estimate any causal effect, we need *assumptions*, so we aren't dealing with an infinite table. 
-
-```{r echo = FALSE, out.width=="100%", fig.align='center'}
-knitr::include_graphics("04-rubin-causal-model/images/wonderfullifememe1.jpg")
-```
-
-The most obvious way to eliminate some rows from the table is to assume the causal effect for Yao now is the same as all the ones for Yao in the future. Is that plausible? Sort of. Yao now and Yao in one second are pretty similar! Yao now and Yao in 30 years are less so.  Unfortunately, there's no magic way to get a good estimate of every missing value in the infinite Preceptor Table! But through some assumptions, we can reduce the true problem to the problem we were dealing with before. 
-
-Not only can we extend the Preceptor Table by adding people not in our sample to the rows, but we can also add additional treatments to the columns.  Let's go back to the original five people in our sample. What if we also wanted to test the causal effect of another language being spoken on the platform?  We'll call the original treatment $t$ and the new treatment $t'$.
-
-```{r, echo = FALSE}
-# First, we create a tibble with the values we want for the table
-
-tibble(subject = c("Yao", "Emma", "Cassidy", "Tahmid", "Diego"),
-       ytreat = c("13", "11", "?", "?", "6"),
-       ytreat2 = c("?", "?", "?", "?", "?"),
-       ycontrol = c("?", "?", "10", "12", "?")) %>%
-  
-  # Then, we use the gt function to make it pretty
-  
-  gt() %>%
-  cols_label(subject = md("ID"),
-             ytreat = md("$$Y_t(u)$$"),
-             ytreat2 = md("$$Y_{t'}(u)$$"),
-             ycontrol = md("$$Y_c(u)$$")) %>%
-  tab_style(cell_borders(sides = "right"),
-            location = cells_body(columns = c(subject))) %>%
-  tab_style(style = cell_text(align = "left", v_align = "middle", size = "large"), 
-            locations = cells_column_labels(columns = c(subject))) %>%
-  cols_align(align = "center", columns = everything()) %>%
-  cols_align(align = "left", columns = c(subject)) %>%
-  tab_spanner(label = "$$\\text{Outcomes}$$", c(ytreat, ytreat2, ycontrol)) %>%
-  fmt_markdown(columns = everything())
-```
-
-&nbsp;
-
-Note that for Yao, we now have three causal effects we can estimate: the difference between the original treatment and the new treatment, the difference between the original treatment and control, and the difference between the new treatment and control. 
-
-Even if you have just one language you are testing, there still could be multiple treatments.  For example, the amount of time the commuter is on the platform with the Spanish-speakers might vary across commuters. In that case, each might receive a different treatment.
-
-```{r, echo = FALSE}
-# First, we create a tibble with the values we want for the table
-
-tibble(subject = c("Yao", "Emma", "Cassidy", "Tahmid", "Diego"),
-       ytreat = c("13", "11", "?", "?", "6"),
-       ytreat2 = c("?", "?", "?", "?", "?"),
-       ytreat3 = c("?", "?", "?", "?", "?"),
-       ytreat4 = c("?", "?", "?", "?", "?"),
-       ytreat5 = c("?", "?", "?", "?", "?"),
-       ycontrol = c("?", "?", "10", "12", "?")) %>%
-  
-  # Then, we use the gt function to make it pretty
-  
-  gt() %>%
-  cols_label(subject = md("ID"),
-             ytreat = md("$$Y_{\\text{1 min}}(u)$$"),
-             ytreat2 = md("$$Y_{\\text{5 mins}}(u)$$"),
-             ytreat3 = md("$$Y_{\\text{10 mins}}(u)$$"),
-             ytreat4 = md("$$Y_{\\text{15 mins}}(u)$$"),
-             ytreat5 = md("$$Y_{\\text{20 mins}}(u)$$"),
-             ycontrol = md("$$Y_c(u)$$")) %>%
-  tab_style(cell_borders(sides = "right"),
-            location = cells_body(columns = c(subject))) %>%
-  tab_style(style = cell_text(align = "left", v_align = "middle", size = "large"), 
-            locations = cells_column_labels(columns = c(subject))) %>%
-  cols_align(align = "center", columns = everything()) %>%
-  cols_align(align = "left", columns = c(subject)) %>%
-  tab_spanner(label = "$$\\text{Outcomes}$$", c(ytreat, ytreat2, ytreat3, ytreat4, ytreat5, ycontrol)) %>%
-  fmt_markdown(columns = everything())
-```
-
-&nbsp;
-
-Instead of considering the treatment in terms of duration, we could also consider different volume levels, measured in decibels (dB), at which Spanish is being spoken. 
-
-
-```{r, echo = FALSE}
-# First, we create a tibble with the values we want for the table
-
-tibble(subject = c("Yao", "Emma", "Cassidy", "Tahmid", "Diego"),
-       ytreat = c("13", "11", "?", "?", "6"),
-       ytreat1001 = c("?", "?", "?", "?", "?"),
-       ytreat1002 = c("?", "?", "?", "?", "?"),
-       yellipsis = c("?", "?", "?", "?", "?"),
-       ycontrol = c("?", "?", "10", "12", "?")) %>%
-  
-  # Then, we use the gt function to make it pretty
-  
-  gt() %>%
-  cols_label(subject = md("ID"),
-             ytreat = md("$$Y_{\\text{58 dB}}(u)$$"),
-             ytreat1001 = md("$$Y_{\\text{59 dB}}(u)$$"),
-             ytreat1002 = md("$$Y_{\\text{60 dB}}(u)$$"),
-             yellipsis = md("$$Y_{\\text{61 dB}}(u)$$"),
-             ycontrol = md("$$Y_c(u)$$")) %>%
-  tab_style(cell_borders(sides = "right"),
-            location = cells_body(columns = c(subject))) %>%
-  tab_style(style = cell_text(align = "left", v_align = "middle", size = "large"), 
-            locations = cells_column_labels(columns = c(subject))) %>%
-  cols_align(align = "center", columns = everything()) %>%
-  cols_align(align = "left", columns = c(subject)) %>%
-  tab_spanner(label = "$$\\text{Outcomes}$$", c(ytreat, ytreat1001, ytreat1002, yellipsis, ycontrol)) %>%
-  fmt_markdown(columns = everything())
-```
-
-&nbsp;
-
-Indeed, there are an infinite number of possible treatments. The Preceptor Table extends to the right forever. Again, assumptions come to our rescue. Or rather, we just throw up our hands and only try to estimate a few things. This is why it is crucial to define one's estimand precisely: if we are interested in the difference in potential outcomes between Spanish being spoken for 10 minutes at a 60 dB versus control, we can ignore all the other possible columns in the infinite Preceptor Table.
-
-Thus, whenever you are considering a causal question, the best way to think about it is to start with the infinite Preceptor Table.  First we throw out the rows we think are duplicates (such as all the observations for Yao one second from now, two seconds from now, etc.) or that are outside the scope of what we are interested in for now (maybe we don't care about outcomes 30 years in the future for this study).  Second, we throw out the columns that we don't care about, which are all the possible treatments we aren't considering.  Finally, we define precisely---in terms of potential outcomes---our estimand.  It may be something simple, such as the average treatment effect, or something more complex.  Once we have done these steps, we can start thinking about how to fill in the question marks.  But remember that the infinite Preceptor Table is always there, and you should be conscious of which rows and columns you are throwing out!
 
 
 
@@ -1061,141 +928,184 @@ In this example, there is indeed a constant treatment effect for everyone: $+3$.
 knitr::include_app("https://www.youtube.com/embed/cBYUuD2aVkA")
 ```
 
-## Complications
+## Validity
 
-<!-- DK: Rewrite this whole sloppy section.  -->
+#### Internal and external validity
 
-### Data problems
 
-<!-- DK: Delete this subsection? -->
+There are two main sources of missing data:
 
-Assume that before you run the train experiment, you want to know the average attitude towards immigrants of *all* United States adults. At first, this seems like an easy problem --- there's nothing causal here!  If you knew the true values, you could build a data set like this: 
+1. For the units in our sample, we only see one potential outcome
+2. For the units outside our sample, we see *no* potential outcomes
 
-&nbsp;
+If we have randomized assignment and a large sample, we can be confident that we have a good estimate of the average treatment effect *in that sample*.  We say that the experiment has high **internal validity**: the inferences we are making are likely to reflect the truth about that sample.  
 
-```{r, echo = FALSE}
-# First, we create a tibble with the values we want for the table
+However, we may be interested in a population beyond our particular sample, the second main source of missing data.  For example, let's look at the broader context of the train experiment. You likely are not exclusively concerned about the attitudes of people who ride trains, but rather the attitudes of a larger population. Train platforms, however, are a convenient setting in which to run the experiment.  Let's say that we ran a randomized experiment with 10,000 people in Boston, and found an $\widehat{ATE} = -1$. Should we assume this estimate would be accurate for a larger general population?
 
-tibble(subject = c("Person 1", "Person 2", "Person 3", "...", "Person N"),
-       `Attitude` = c("13", "11", "9", "...", "10")) %>%
-  
-  # Then, we use the gt function to make it pretty
-  
-  gt() %>%
-  cols_label(subject = md("ID")) %>%
-  tab_style(cell_borders(sides = "right"),
-            location = cells_body(columns = c(subject))) %>%
-  tab_style(style = cell_text(align = "left", v_align = "middle"), 
-            locations = cells_column_labels(columns = c(subject))) %>%
-  cols_align(align = "center", columns = everything()) %>%
-  cols_align(align = "left", columns = c(subject)) %>%
-  tab_spanner(label = "Outcome", c(`Attitude`))
-```
+The answer to that question depends in part on the **external validity** of the study. Are the 10,000 people in the study similar to the people who we want to generalize the findings to? Perhaps we want to generalize to train commuters in other cities. Let's say that the 10,000 people in Boston all choose to ride trains for environmental reasons. That's another form of **selection bias**. The sample is not randomly selected from the population in which we are interested.  Why is that a problem?  Those people differ systematically from other people in a way that may affect their response to the experiment. For example, their preference of public transportation for environmental reasons may be correlated to other political beliefs.
 
-&nbsp;
+Note that this concern can be expressed in terms of the assignment mechanism.  People who don't ride the train have a 0% chance of receiving the treatment.  Thus, the study *can't* directly speak to how the treatment would impact their attitudes towards immigrants. The only way we can make such claims is by making additional assumptions, such as that train-riders reflect the same makeup of political beliefs as people who don't ride trains.
 
-Then, your answer is simply the average of all the values. But do we have that table?  No!  What we actually have is this:
+The external validity of a study is often directly related to the **representativeness** of our sample. Representativeness has to do with how well our sample represents the larger population we are interested in generalizing to. Does the train experiment allow us to calculate a causal effect for people who commute by cars? Can we calculate the causal effect for people in New York City? Before we generalize to broader populations we have to consider if our experimental estimates are applicable beyond our experiment. Maybe we think that commuters in Boston and New York are similar enough, that our $\widehat{ATE}$ also is a good estimate for the causal effect of our treatment in NYC. We could also conclude that people who commute by car are fundamentally different than people who commute by train. If that was true, then we could not say our estimate is true for all commuters because our sample does not accurately represent the broader group we want to generalize to. 
 
-```{r, echo = FALSE}
-# First, we create a tibble with the values we want for the table
+The circumstances of the experiment may also affect the external validity of the study. Perhaps the train study was conducted during the middle of the summer when platforms are uncomfortably hot. Then, while we have variation in one aspect of the treatment (whether there were Spanish-speakers nearby), we don't have variation in another (temperature of train platform). It may be that attitude towards immigrants is impacted when the train platform is uncomfortably hot, but the treatment has no impact on attitude otherwise.
 
-tibble(subject = c("Person 1", "Person 2", "Person 3", "...", "Person N"),
-       `Attitude` = c("?", "?", "?", "...", "?")) %>%
-  
-  # Then, we use the gt function to make it pretty
-  
-  gt() %>%
-  cols_label(subject = md("ID")) %>%
-  tab_style(cell_borders(sides = "right"),
-            location = cells_body(columns = c(subject))) %>%
-  tab_style(style = cell_text(align = "left", v_align = "middle"), 
-            locations = cells_column_labels(columns = c(subject))) %>%
-  cols_align(align = "center", columns = everything()) %>%
-  cols_align(align = "left", columns = c(subject)) %>%
-  tab_spanner(label = "Outcome", c(`Attitude`))
-```
+When dealing with human subjects, there is a particular concern regarding external validity: the [**Hawthorne effect**](https://en.wikipedia.org/wiki/Hawthorne_effect).  When human subjects know that they are part of an experiment, they may change their behavior.
 
-&nbsp;
+In this example, the Hawthorne effect can impact attitudes expressed on surveys. Maybe respondents are more extreme in their attitude in either direction (more liberal or more conservative) because the survey is an opportunity to express opinion. 
 
-In reality, we don't know the attitude towards immigrants of any United States adults. That is, we have a lot of *missing data*.
+There is a border concept of **validity** to consider as well. That is, if the data is *valid*, then it accurately captures the concepts we care about. We do not want to use data if there is not a connection between the problem we face and the data that we have. 
 
-But maybe we could survey 1,000 people on their attitudes towards immigrants, and get a table that looks like this:
+#### The infinite Preceptor Table
 
-&nbsp;
+In reality, a Preceptor Table has an infinite number of rows, and therefore an infinite amount of missing data. We call this type of Preceptor Table an infinite Preceptor Table. Such a reality is unworkable, so we make assumptions to reduce the true problem to something more manageable.
+
+Let's start by looking at what kinds of missing data make up the infinite Preceptor Table. For example, say we only care about the causal effect of this experiment on Yao. Do we only care about his attitude right after the experiment? No! We also care about Yao's potential outcomes one year from now, two years from now, and so on.
+
+So our full Preceptor Table includes people we know (Yao) and people we don't (for example, Eliot), both now and in the future:
 
 ```{r, echo = FALSE}
 # First, we create a tibble with the values we want for the table
 
-tibble(subject = c("Respondent 1", "Respondent 2", "Respondent 3", "...", "Respondent 1,000"),
-       `Attitude` = c("13", "9", "11", "...", "10")) %>%
-  
-  # Then, we use the gt function to make it pretty
-  
-  gt() %>%
-  cols_label(subject = md("ID")) %>%
-  tab_style(cell_borders(sides = "right"),
-            location = cells_body(columns = c(subject))) %>%
-  tab_style(style = cell_text(align = "left", v_align = "middle"), 
-            locations = cells_column_labels(columns = c(subject))) %>%
-  cols_align(align = "center", columns = everything()) %>%
-  cols_align(align = "left", columns = c(subject)) %>%
-  tab_spanner(label = "Outcome", c(`Attitude`))
-```
-
-&nbsp;
-
-By surveying 1,000 people on their attitudes towards immigrants we now have some values to work with. This, however, does not solve the missing data problem. We are likely interested in attitudes toward immigration *for the entire population*, not just for our 1,000 person sample. We'll need to think about whether our *sample* is representative of the full population. For the vast majority of US adults we still have no value. This is the second of the two most common sources of missing data: 
-
-1. For the units in our sample, we only see *one* potential outcome.
-2. For the units outside our sample, we see *no* potential outcomes.
-
-There are in fact many other potential sources of missing data, as we will explore below in the discussion about the infinite Preceptor Table. This missing data problem is what creates the need for statistical inferences. If the data were not missing, inference would not be needed.
-
-
-```{r echo = FALSE, fig.cap = "This study was conducted by Barfort, Klemmensen and  Larsen.", out.width="70%", fig.align='center'}
-knitr::include_graphics("04-rubin-causal-model/images/governors.png")
-```
-
-<!-- DK: Too minor a point to be mentioned? Also, I am not explaining it well. Children probably don't belong in the Preceptor Table in the first place! They are not in the data nor in the population. -->
-
-Let's consider a new example experiment to highlight another type of data problem we might encounter. Say we want to know the causal effect of being elected governor on longevity. In most states the minimum age requirement to be elected governor is 30. People under the age of 30 have no chance of being elected governor. That means for people less than 30 there is only one possible potential outcome. In our actual Preceptor Table, this means we have some rows with 2 columns (people old enough to be elected), and some rows with only 1 column (people too young to be elected).
-
-A Preceptor Table for this problem might look something like this: 
-
-&nbsp;
-
-```{r echo = FALSE}
-tibble(subject = c("Yao", "Dean Khurana", "Cassidy", "Preceptor", "Tahmid"),
-       ytreat = c("--", "?", "--", "?", "--"),
-       ycontrol = c("?", "?", "?", "?", "?")) %>%
+tibble(subject = c("Yao this year", "Yao next year", "Yao two years from now", "Eliot this year", "Eliot next year", "Eliot two years from now", "...", "Person n at time t"),
+       ytreat = c("13", "?", "?", "?", "?", "?", "?", "?"),
+       ycontrol = c("?", "?", "?", "?", "?", "?", "?", "?"),
+       ydiff = c("?", "?", "?", "?", "?", "?", "?", "?")) %>%
   
   # Then, we use the gt function to make it pretty
   
   gt() %>%
   cols_label(subject = md("ID"),
                 ytreat = md("$$Y_t(u)$$"),
-                ycontrol = md("$$Y_c(u)$$")) %>%
+                ycontrol = md("$$Y_c(u)$$"),
+                ydiff = md("$$Y_t(u) - Y_c(u)$$")) %>%
+  cols_move(columns = c(ytreat, ycontrol), after = c(subject)) %>%
   tab_style(cell_borders(sides = "right"),
             location = cells_body(columns = c(subject))) %>%
   tab_style(style = cell_text(align = "left", v_align = "middle", size = "large"), 
             locations = cells_column_labels(columns = c(subject))) %>%
   cols_align(align = "center", columns = everything()) %>%
   cols_align(align = "left", columns = c(subject)) %>%
+  tab_spanner(label = "$$\\text{Outcomes}$$", c(ytreat, ycontrol)) %>%
+  tab_spanner(label = "$$\\text{Causal Effect}$$", c(ydiff))
+```
+
+&nbsp;
+
+In fact, because time is continuous, there is a row for Yao now, Yao one second from now, Yao one day from now and so on. The Preceptor Table extends downward forever. Thus, in order to estimate any causal effect, we need *assumptions*, so we aren't dealing with an infinite table. 
+
+```{r echo = FALSE, out.width=="100%", fig.align='center'}
+knitr::include_graphics("04-rubin-causal-model/images/wonderfullifememe1.jpg")
+```
+
+The most obvious way to eliminate some rows from the table is to assume the causal effect for Yao now is the same as all the ones for Yao in the future. Is that plausible? Sort of. Yao now and Yao in one second are pretty similar! Yao now and Yao in 30 years are less so.  Unfortunately, there's no magic way to get a good estimate of every missing value in the infinite Preceptor Table! But through some assumptions, we can reduce the true problem to the problem we were dealing with before. 
+
+Not only can we extend the Preceptor Table by adding people not in our sample to the rows, but we can also add additional treatments to the columns.  Let's go back to the original five people in our sample. What if we also wanted to test the causal effect of another language being spoken on the platform?  We'll call the original treatment $t$ and the new treatment $t'$.
+
+```{r, echo = FALSE}
+# First, we create a tibble with the values we want for the table
+
+tibble(subject = c("Yao", "Emma", "Cassidy", "Tahmid", "Diego"),
+       ytreat = c("13", "11", "?", "?", "6"),
+       ytreat2 = c("?", "?", "?", "?", "?"),
+       ycontrol = c("?", "?", "10", "12", "?")) %>%
+  
+  # Then, we use the gt function to make it pretty
+  
+  gt() %>%
+  cols_label(subject = md("ID"),
+             ytreat = md("$$Y_t(u)$$"),
+             ytreat2 = md("$$Y_{t'}(u)$$"),
+             ycontrol = md("$$Y_c(u)$$")) %>%
+  tab_style(cell_borders(sides = "right"),
+            location = cells_body(columns = c(subject))) %>%
+  tab_style(style = cell_text(align = "left", v_align = "middle", size = "large"), 
+            locations = cells_column_labels(columns = c(subject))) %>%
+  cols_align(align = "center", columns = everything()) %>%
+  cols_align(align = "left", columns = c(subject)) %>%
+  tab_spanner(label = "$$\\text{Outcomes}$$", c(ytreat, ytreat2, ycontrol)) %>%
   fmt_markdown(columns = everything())
 ```
 
 &nbsp;
 
-For Yao, Cassidy and Tahmid there is no question mark in the treatment column because they have no chance of being elected governor. Often in the real world a Preceptor Table might look like this. Some rows have two (or more) potential outcomes, and some have fewer. So where do we go from here?
+Note that for Yao, we now have three causal effects we can estimate: the difference between the original treatment and the new treatment, the difference between the original treatment and control, and the difference between the new treatment and control. 
 
-We should consider what we are actually interested in knowing. In this case, we don't really care what the causal effect is on people who can't possibly be elected governor. In other words, we don't care what the causal effect is on the whole population, but rather only a subset of the population. Just like in the case of the infinite Preceptor Table we need to throw out rows by being more specific about our problem. Instead of saying we want to know the causal effect of being elected governor, we might specify that we want to know the causal effect for the American population over 30. 
+Even if you have just one language you are testing, there still could be multiple treatments.  For example, the amount of time the commuter is on the platform with the Spanish-speakers might vary across commuters. In that case, each might receive a different treatment.
 
-Once we have a defined problem and a Preceptor Table, we can begin to deal with all those question marks. 
+```{r, echo = FALSE}
+# First, we create a tibble with the values we want for the table
+
+tibble(subject = c("Yao", "Emma", "Cassidy", "Tahmid", "Diego"),
+       ytreat = c("13", "11", "?", "?", "6"),
+       ytreat2 = c("?", "?", "?", "?", "?"),
+       ytreat3 = c("?", "?", "?", "?", "?"),
+       ytreat4 = c("?", "?", "?", "?", "?"),
+       ytreat5 = c("?", "?", "?", "?", "?"),
+       ycontrol = c("?", "?", "10", "12", "?")) %>%
+  
+  # Then, we use the gt function to make it pretty
+  
+  gt() %>%
+  cols_label(subject = md("ID"),
+             ytreat = md("$$Y_{\\text{1 min}}(u)$$"),
+             ytreat2 = md("$$Y_{\\text{5 mins}}(u)$$"),
+             ytreat3 = md("$$Y_{\\text{10 mins}}(u)$$"),
+             ytreat4 = md("$$Y_{\\text{15 mins}}(u)$$"),
+             ytreat5 = md("$$Y_{\\text{20 mins}}(u)$$"),
+             ycontrol = md("$$Y_c(u)$$")) %>%
+  tab_style(cell_borders(sides = "right"),
+            location = cells_body(columns = c(subject))) %>%
+  tab_style(style = cell_text(align = "left", v_align = "middle", size = "large"), 
+            locations = cells_column_labels(columns = c(subject))) %>%
+  cols_align(align = "center", columns = everything()) %>%
+  cols_align(align = "left", columns = c(subject)) %>%
+  tab_spanner(label = "$$\\text{Outcomes}$$", c(ytreat, ytreat2, ytreat3, ytreat4, ytreat5, ycontrol)) %>%
+  fmt_markdown(columns = everything())
+```
+
+&nbsp;
+
+Instead of considering the treatment in terms of duration, we could also consider different volume levels, measured in decibels (dB), at which Spanish is being spoken. 
 
 
+```{r, echo = FALSE}
+# First, we create a tibble with the values we want for the table
+
+tibble(subject = c("Yao", "Emma", "Cassidy", "Tahmid", "Diego"),
+       ytreat = c("13", "11", "?", "?", "6"),
+       ytreat1001 = c("?", "?", "?", "?", "?"),
+       ytreat1002 = c("?", "?", "?", "?", "?"),
+       yellipsis = c("?", "?", "?", "?", "?"),
+       ycontrol = c("?", "?", "10", "12", "?")) %>%
+  
+  # Then, we use the gt function to make it pretty
+  
+  gt() %>%
+  cols_label(subject = md("ID"),
+             ytreat = md("$$Y_{\\text{58 dB}}(u)$$"),
+             ytreat1001 = md("$$Y_{\\text{59 dB}}(u)$$"),
+             ytreat1002 = md("$$Y_{\\text{60 dB}}(u)$$"),
+             yellipsis = md("$$Y_{\\text{61 dB}}(u)$$"),
+             ycontrol = md("$$Y_c(u)$$")) %>%
+  tab_style(cell_borders(sides = "right"),
+            location = cells_body(columns = c(subject))) %>%
+  tab_style(style = cell_text(align = "left", v_align = "middle", size = "large"), 
+            locations = cells_column_labels(columns = c(subject))) %>%
+  cols_align(align = "center", columns = everything()) %>%
+  cols_align(align = "left", columns = c(subject)) %>%
+  tab_spanner(label = "$$\\text{Outcomes}$$", c(ytreat, ytreat1001, ytreat1002, yellipsis, ycontrol)) %>%
+  fmt_markdown(columns = everything())
+```
+
+&nbsp;
+
+Indeed, there are an infinite number of possible treatments. The Preceptor Table extends to the right forever. Again, assumptions come to our rescue. Or rather, we just throw up our hands and only try to estimate a few things. This is why it is crucial to define one's estimand precisely: if we are interested in the difference in potential outcomes between Spanish being spoken for 10 minutes at a 60 dB versus control, we can ignore all the other possible columns in the infinite Preceptor Table.
+
+Thus, whenever you are considering a causal question, the best way to think about it is to start with the infinite Preceptor Table.  First we throw out the rows we think are duplicates (such as all the observations for Yao one second from now, two seconds from now, etc.) or that are outside the scope of what we are interested in for now (maybe we don't care about outcomes 30 years in the future for this study).  Second, we throw out the columns that we don't care about, which are all the possible treatments we aren't considering.  Finally, we define precisely---in terms of potential outcomes---our estimand.  It may be something simple, such as the average treatment effect, or something more complex.  Once we have done these steps, we can start thinking about how to fill in the question marks.  But remember that the infinite Preceptor Table is always there, and you should be conscious of which rows and columns you are throwing out!
 
 
-
+<!-- DK: Rewrite this whole sloppy section.  -->
 
 ### The assignment mechanism
 
@@ -1271,7 +1181,6 @@ The assignment mechanism used distorts the averages of both $Y_t(u)$ and $Y_c(u)
 
 Therefore, the difference in means is no longer a good estimate of the ATE. In fact, in this case it has the wrong sign! This is not merely a consequence of our small sample: even if there were a million platforms in the experiment, we could not get a good estimate of the ATE.
 
-
 This is an extreme example of a problem called **selection bias**. Selection bias is when the person who is assigning treatment chooses on the basis of potential outcomes. The Spanish-speakers are not choosing platforms to stand on randomly. Rather, they are making treatment decisions based directly on the potential outcomes of each platform. Remember, whenever the assignment mechanism is correlated with the potential outcomes there is confounding, which is a problem because it means that our estimate is biased. Not all examples of confounding are caused by selection bias, but when there is selection bias there is *always* confounding.
 
 Much like how the best way to avoid making poor inferences from a sample to a population is to take a random sample of the population, the best assignment mechanism for avoiding confounding is **randomization**. For each platform we could flip a coin to determine if it is in the treatment or control group.
@@ -1283,33 +1192,6 @@ In many circumstances, however, randomized trials are not possible due to ethica
 For example, let's say some of the train platforms in the experiment are so loud the Spanish-speakers might not be heard by anyone nearby. Therefore by necessity, only quieter platforms can be assigned to the treatment group. This non-random assignment may introduce confounding. Say there is some systematic difference between the people on quieter platforms compared with the people on the louder platforms. In that case, the assignment mechanism is correlated with potential outcomes, so there is confounding. 
 
 Many statistical methods have been developed for causal inference when there is a non-random assignment mechanism. Those methods, however, are beyond the scope of this book.
-
-
-<!-- SZ: Maybe add resources/bullet list of methods should people want further information -->
-
-
-
-
-### No causation without manipulation
-
-In order for a potential outcome to make sense, it must be possible, at least *a priori*. For example, if there is no way for Yao, under any circumstance, to ever be in the train study, then $Y_{t}(u)$ is impossible for him. It can never happen. And if $Y_{t}(u)$ can never be observed, even in theory, then the causal effect of treatment on Yao's attitude is undefined. 
-
-The causal effect of the train study is well defined because it is the simple difference of two potential outcomes, both of which might happen. In this case, we (or something else) can manipulate the world, at least conceptually, so that it is possible that one thing or a different thing might happen.
-
-This definition of causal effects becomes much more problematic if there is no way for one of the potential outcomes to happen, ever. For example, what is the causal effect of Yao's height on his weight? It might seem we would just need to compare two potential outcomes: what would Yao's weight be under the treatment (where treatment is defined as being 3 inches taller) and what would Yao's weight be under the control (where control is defined as his current height).
-
-A moment's reflection highlights the problem: we can't increase Yao's height. There is no way to observe, even conceptually, what Yao's weight would be if he were taller because there is no way to make him taller. We can't manipulate Yao's height, so it makes no sense to investigate the causal effect of height on weight. Hence the slogan: *No causation without manipulation.*
-
-This then raises the question of what can and cannot be manipulated. If something cannot be manipulated, we should not consider it causal. So can race ever be considered causal? What about sex? A genetic condition like color-blindness? Can we manipulate these characteristics? In the modern world these questions are not simple. 
-
-Take color-blindness for example. Say we are interested in how color-blindness impacts ability to complete a jig-saw puzzle. Because color-blindness is genetic some might argue it cannot be manipulated. But advances in technology like gene-therapy might allow us to actually change someone's genes. Could we then claim the ability to manipulate color-blindness? If yes, we could then measure the causal effect of color-blindness on ability to complete jig-saw puzzles.
-
-
-The slogan of "No causation without manipulation" may at first seem straight forward, but it is clearly not so simple. Questions about race, sex, gender and genetics are very complex and should be considered with care. 
-
-
-
-
 
 ### Correlation with potential outcomes
 
@@ -1377,11 +1259,26 @@ tibble(subject = c("R", "R", "D", "R", "D"),
 Keep in mind that the problem arises when there is a correlation between treatment assignment and *potential* outcome, not simply a correlation between treatment assignment and outcome. In this case, the correlation between treatment assignment and outcome is zero! Just looking at the outcomes we observe is not enough. We must make assumptions about the outcomes we don't observe, about what would have happened.
 
 
+### No causation without manipulation
+
+In order for a potential outcome to make sense, it must be possible, at least *a priori*. For example, if there is no way for Yao, under any circumstance, to ever be in the train study, then $Y_{t}(u)$ is impossible for him. It can never happen. And if $Y_{t}(u)$ can never be observed, even in theory, then the causal effect of treatment on Yao's attitude is undefined. 
+
+The causal effect of the train study is well defined because it is the simple difference of two potential outcomes, both of which might happen. In this case, we (or something else) can manipulate the world, at least conceptually, so that it is possible that one thing or a different thing might happen.
+
+This definition of causal effects becomes much more problematic if there is no way for one of the potential outcomes to happen, ever. For example, what is the causal effect of Yao's height on his weight? It might seem we would just need to compare two potential outcomes: what would Yao's weight be under the treatment (where treatment is defined as being 3 inches taller) and what would Yao's weight be under the control (where control is defined as his current height).
+
+A moment's reflection highlights the problem: we can't increase Yao's height. There is no way to observe, even conceptually, what Yao's weight would be if he were taller because there is no way to make him taller. We can't manipulate Yao's height, so it makes no sense to investigate the causal effect of height on weight. Hence the slogan: *No causation without manipulation.*
+
+This then raises the question of what can and cannot be manipulated. If something cannot be manipulated, we should not consider it causal. So can race ever be considered causal? What about sex? A genetic condition like color-blindness? Can we manipulate these characteristics? In the modern world these questions are not simple. 
+
+Take color-blindness for example. Say we are interested in how color-blindness impacts ability to complete a jig-saw puzzle. Because color-blindness is genetic some might argue it cannot be manipulated. But advances in technology like gene-therapy might allow us to actually change someone's genes. Could we then claim the ability to manipulate color-blindness? If yes, we could then measure the causal effect of color-blindness on ability to complete jig-saw puzzles.
+
+The slogan of "No causation without manipulation" may at first seem straight forward, but it is clearly not so simple. Questions about race, sex, gender and genetics are very complex and should be considered with care. 
+
 
 ## Summary
 
 The fundamental components of every problem in causal inference are units, treatments and outcomes. The units are the rows in the tibble. The treatments are the columns. The outcomes are the values. Whenever you confront a problem is causal inference, start by identifying the units, treatments and outcomes.
-
 
 A causal effect is the difference between one potential outcome and another. How different would your life be if you missed the train?
 
