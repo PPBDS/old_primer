@@ -1,42 +1,22 @@
 # Probability {#probability}
 
-<!-- Put the empirical distribution first for our 4 probability distributions. Then, mathematical. Give the simple notation a single observation. Start the mathematical with the distribution of a single observation is described by this formula. y_i ~ Bernoulli(p). Expected value of y_i is this mathematical probability distribution. If your assumptions are correct, then as your sample size increases, the empirical probability distribution will look more and more like the mathematical distribution.  Done.-->
+<!-- Make sure no 3d plots pop up when knitting. Now it seems like the last one does. All plot_gg() tested nother shows up.-->
 
+<!-- Revise Overview tutorial to take account of all the changes you have made in the Chapter. -->
 
-<!-- Note Bernoulli is for a single coin toss, Bernoulli(p). Binomial is for an arbitrary number of coin tosses, Binomial(p, n). Read about expected values. Done. -->
-
-<!-- Put in the same shorthand versions of probability notation as in chapter 2, to the extent we have them. Done.-->
-
-
-
-
-<!-- Start thinking about discussing "population". Maybe add a paragraph to each of the first three examples? (mostly in the first two because the third one posterior come from internet) Done.-->
-
-<!-- Maybe show (but don't explain!) the actual math formula. -->
-
-<!-- Add, on the mathematical distribution sections, the actual math formual. Learn about putting math. $$x + 1$$ Done.-->
-
-<!-- When building the chapter, we don't want rayshader images to pop up! -->
-
-<!-- Learn about movies in rayshader.  -->
+<!-- 3d plot for marble example is wrong. There is a 1/8 chance of getting 0 or 3 whites. There is a 3/8 chance of getting either 1 or 2. So, the 0 and 3 towers should be 1/3 the height of the 1 and 2 towers. -- Done.>
 
 <!-- What would be a fun theme/gif/movie clip to start and end the chapter with, like we do in chapters 4 and 6? Something having to do with betting . . . Connected to Kant? -->
 
-<!-- Old stuff -->
+<!-- When discussing a parameter $p$ and a probability distribution p() in the absence of a specific context, then those simple terms are OK. But, whenever you are talking about specific parameters or specific probability distributions, you should have either subscripts or items in the parentheses, respectively.  Make this clear somewhere? -->
 
-<!-- Also good to get into the *scaling* of distributions, and the arbitrariness thereof. For example, trains$age is a distribution. Fine. What about rep(trains$age, 2)? What about rep(trains$age, 100)? Well, if any vector is a distribution, then all three of these are distributions. In fact, they are the same distribution, just scaled differently.  -->
+<!-- Maybe add, after N models, a section on Infinity models, meaning a continuous parameter p. Note that we have a continuous distribution section now. Want to set the stage for Chapter 6, in which we are generating a posterior for p which we may think of as taking an infinite number of values. This is a key dimension on which chapter 5 and 6 need to connect. -->
 
-<!-- When discussing a parameter $p$ and a probability distribution p() in the absence of a specific context, then those simple terms are OK. But, whenever you are talking about specific parameters or specific probability distributions, you should have either subscripts or items in the parentheses, respectively.  -->
-
-<!-- https://joeystanley.com/blog/3d-vowel-plots-with-rayshader -->
-
-<!-- Revisit these references and see if there is other stuff we should include:   -->
+<!-- Revisit these references and see if there is other stuff we should include. Rethinking marbles would make a nice tutorial. -->
 
 <!-- Teaching Bayes' Rule: A Data-Oriented Approach by Jim Albert. -->
 <!-- Rethinking Chapter 2. Garden of forking data is just excellent stuff. -->
 <!-- Bayesian Workshop -->
-
-<!-- Wait on this. Maybe add, after N models, a section on Infinity models, meaning a continuous parameter p. Note that we have a continuous distribution section now. Want to set the stage for Chapter 6, in which we are generating a posterior for p which we may think of as taking an infinite number of values. This is a key dimension on which chapter 5 and 6 need to connect. Maybe not necessary? -->
 
 *This chapter is being edited.*
 
@@ -55,12 +35,13 @@ library(tidyverse)
  # the 3-D plots below. You can read more about **rayshader**
  # [here](https://www.rayshader.com/) but we will not be explaining how to use
  # it in this *Primer*.
-
+options(rgl.useNULL = TRUE)
 library(rayshader)
 library(rgl)
 library(tidyverse)
 library(magick)
 library(primer.data)
+
 ```
 
 ## List-columns and map functions
@@ -96,6 +77,7 @@ Notice this is a 1-by-1 tibble with one observation, which is a list of one elem
 A list column is a column of your data which is a [list](https://adv-r.hadley.nz/vectors-chap.html#lists) rather than an atomic vector.  As with stand-alone list objects, you can pipe to `str()` to examine the column.
 
 ```{r}
+# tibble() is what we use to generate a tibble, it acts sort of like the mutate(), but mutate() needs a data frame to add new column, tibble can survive on itself.
 tibble(col_1 = list(range(x))) %>%
   str()
 ```
@@ -104,6 +86,7 @@ tibble(col_1 = list(range(x))) %>%
 We can use `map_*` functions to both create a list-column and then, much more importantly, work with that list-column afterwards. 
 
 ```{r}
+# .x is col_1 from tibble and ~ sum(.) is the formula
 tibble(col_1 = list(range(x))) %>%
   mutate(col_2 = map_dbl(col_1, ~ sum(.))) %>% 
   str()
@@ -228,20 +211,15 @@ tibble(results = sample(c(0, 1), 100, replace = TRUE)) %>%
     theme_classic()
 ```
 
-
-
-
 A *mathematical distribution* is based on a mathematical formula. Assuming that the coin is perfectly fair, we should, on average, get heads as often as we get tails.
 
 
 ```{r, echo = FALSE}
+# The mathematical case with the expected 50/50 outcome hard-coded.
 
-# Flipping one coin 100 times
-
-mydata <- tibble(results = c(rep(0, 50),
-                             rep(1, 50)))
-
-ggplot(mydata, aes(x = results)) +
+tibble(results = c(rep(0, 50),
+                   rep(1, 50))) %>% 
+ggplot(aes(x = results)) +
   geom_histogram(aes(y = after_stat(count/sum(count))), 
                  binwidth = 0.5, 
                  color = "white") +
@@ -260,8 +238,6 @@ ggplot(mydata, aes(x = results)) +
 The distribution of a single observation is described by this formula. $y_i ~ Bernoulli(p)$. Expected value of $y_i$ is this mathematical probability distribution. If the mathematical assumptions are correct, then as your sample size increases, the empirical probability distribution will look more and more like the mathematical distribution. 
 
 
-
-
 A *posterior distribution* is based on beliefs and expectations. It displays your belief about things you can't see right now. You may have posterior distributions for outcomes in the past, present, or future.
 
 In the case of the coin toss, the posterior distribution changes depending on your beliefs. For instance, let's say your friend brought a coin to school and asked to bet you. If the result is heads, you have to pay them $5. 
@@ -270,13 +246,11 @@ This makes you suspicious, or in other world you no longer trust the "population
 
 
 ```{r, echo = FALSE}
+# Hard-code the creation of the posterior.
 
-# Flipping one coin 100 times
-
-mydata <- tibble(results = c(rep(0, 95),
-    rep(1, 5)))
-
-ggplot(mydata, aes(x = results)) +
+tibble(results = c(rep(0, 95),
+                   rep(1, 5))) %>% 
+ggplot(aes(x = results)) +
   geom_histogram(aes(y = after_stat(count/sum(count))), 
                  binwidth = 0.5, 
                  color = "white") +
@@ -289,10 +263,12 @@ ggplot(mydata, aes(x = results)) +
   scale_y_continuous(labels = 
                        scales::percent_format(accuracy = 1)) +
   theme_classic()
-
 ```
 
 The full terminology is mathematical (or empirical or posterior) *probability* distribution. But we will often shorten this to just mathematical (or empirical or posterior) distribution. The word "probability" is understood, even if it is not present.
+
+*Population* is an very key concepts in data analysis, and will use throughout later chapters. The definition for Population is essentially the imaginary urn from which our data has been, or will be, drawn. 
+
 
 <!-- DK: Add a paragraph discussing the concept of a population. And why or why not we could use our empirical data. Thinking about the population helps you decide whether (or not) to make use of the mathematical and empirical distributions when you are creating your posterior. -->
 
@@ -309,7 +285,9 @@ We get an *empirical distribution* by rolling two dice a hundred times, either b
 ```{r}
 # In the coin example, we create the vector ahead of time, and then assigned
 # that vector to a tibble. There was nothing wrong with that approach. And we
-# could do the same thing here. But the use of map_* functions is more powerful.
+# could do the same thing here. But the use of map_* functions is more powerful,
+# although it requires creating the 100 rows of the tibble at the start and then
+# doing things "row-by_row."
 
 set.seed(1)
 
@@ -389,6 +367,8 @@ tibble(results = c(rep(2, 15), rep(3, 15), rep(4, 7),
 
 Someone less suspicious of the casino would have a posterior distribution which looks more like the mathematical distribution.
 
+Recall *Population*, Population is the imaginary urn from which our data has been, or will be, drawn. A perfect probability distribution is simply pour all the data in the population (urn), and count them, however this is impossible because there are infinite or very large number of data out there. For rolling two dice for example, our population is rolling two dice infinite times and calculate the sum for each time. Because it's never possible to get access to all the data, that's why we need the *Mathematical* and the *Empirical* distribution. Yet, the *Posterior * distribution is different because we essenciaially switching to another population(urn) for the data we believe.
+
 ### Presidential elections
 
 Now let's say we are building probability distributions for political events, like a presidential election. We want to know the probability that Democratic candidate wins X electoral votes, where X comes from the range of possible outcomes: 0 to 538. (The total number of electoral votes in US elections since 1964 is 538.)
@@ -423,7 +403,8 @@ ggplot(mydata, aes(x = electoral_votes)) +
 We can build a *mathematical distribution* for X which assumes that the chances of the Democratic candidate winning any given state's electoral votes is 0.5 and the results from each state are independent.
 
 ```{r, echo = FALSE}
-# Add comments explaining what this does.
+# rep(3,8) means there are 8 states that have 3 electoral votes, via the same for the rest of the code chunck.
+# We use c() to make the rep() functions together, so that we can use it in tibble().
 
 ev <- c(rep(3, 8), rep(4, 5), rep(5, 3), rep(6, 6), rep(7, 3), rep(8,2),
         rep(9, 3), rep(10, 4), rep(11, 4), 12, 13, 14, 15, rep(16, 2), 18, 20 , 20, 19, 29, 38, 55)
@@ -460,6 +441,8 @@ The *posterior distribution* of electoral votes is a popular topic, and an area 
 ```{r, echo = FALSE}
 # DK: Some comments about this. Where did you get this data from? Why those
 # columns? 
+
+# Have to include these cols type, otherwise it will shows up this "Column specification", thing on the primer, not pretty.
 
 read_csv("./05-probability/data/election-forecasts-2020/prez_1.csv",
          col_types = cols(cycle = col_double(),
@@ -516,6 +499,14 @@ There are many political science questions you could explore with posterior dist
 * Present: What are the total campaign donations from Harvard faculty?
 * Future: How many electoral votes will the Democratic candidate for president win in 2024?
 
+The concept of population is key to this topic, because if we assume the *population* of the past is the same or very similar to the future population, then we can basically predict the future based on past performances. Let's now analyses the three different probability distribution of Presidential election.
+
+*Mathematical Distribution * is saying that if we know the Data-Generating Mechanisms (DGM), we can produce the data on our own, in this case our DGM is assuming for all 50 states in the US, the Democrats and Republicans have exactly equal chance of winning. 
+
+*Empirical Distribution * is saying that since it's impossible to get all the data for all presidential election results, past and future, we can look at the historical past elections results and assuming it's *representative* for all elections. 
+
+*Posterior Distribution* is saying that we don't believe what the above two is saying, in fact we believe that the current population is unreliable , so instead we want to create an new population, an new imaginary urn, where we think is trustworthy, and use the data in the new population to graph our probability distribution. 
+
 ### Height
 
 Question: *What is the height of the next adult male we will meet?*
@@ -527,7 +518,9 @@ All the characteristics for discrete probability distributions which we reviewed
 
 The *empirical distribution* involves using data from the National Health and Nutrition Examination Survey (NHANES). What we are doing here is instead making an model by ourself using some mathematical formula, we use the actual data, we can get the data from either simulated by our own like in the "flipping a coin" and "Rolling two dice" scenario, or we used the data from someone else, like the presidential election and this scenario. 
 
-```{r}
+```{r echo = FALSE}
+# Use nhanes dataset for this exercise, filter out Adult Male.
+
 nhanes %>%
   filter(gender == "Male", age >= 18) %>%
   select(height)%>%
@@ -552,8 +545,11 @@ nhanes %>%
 
 Mathematical Distribution:
 
-```{r}
-tibble(height = rnorm(10000, mean = 175, sd = 9)) %>% 
+```{r echo = FALSE}
+
+# Greater the n size, the smoother the graph.
+
+tibble(height = rnorm(1000000, mean = 175, sd = 9)) %>% 
   ggplot(aes(x = height)) +
     geom_histogram(aes(y = after_stat(count/sum(count))), 
                  binwidth = 1, 
@@ -575,11 +571,16 @@ Each value $y_i$ is drawn from a normal distribution with parameters $\mu$ for t
 
 The *posterior distribution* for heights depends on the context. Are we considering all the adult men in America? In that case, our posterior would probably look a lot like the empirical distribution using NHANES data. If we are being asked about the distribution of heights among players in the NBA, then our posterior might look like:
 
-```{r}
-tibble(height = c(rep(165, 2), rep(167, 3), rep(170, 8), 
-                  rep(172, 9), rep(176, 9), rep(177, 8),
-                  rep(179, 10), rep(182, 18), rep(183, 23), 
-                  rep(189, 20),rep(193, 21), rep(200, 15),rep(205, 15),rep(212, 8),rep(220, 4)))%>% 
+```{r echo = FALSE}
+
+# Manually select the height, because it's posterior, could change base on belief
+
+tibble(height = c(rep(170, 2), rep(173, 3), rep(175, 8), 
+                  rep(177, 9), rep(178, 9), rep(182, 8),
+                  rep(186, 10), rep(190, 18), rep(193, 23), 
+                  rep(197, 20),rep(200, 21), rep(205, 20), 
+                  rep(207, 15),rep(210, 15), rep(213, 16), 
+                  rep(218, 14),rep(220, 8), rep(228, 4)))%>% 
     ggplot(aes(x = height)) +
     geom_histogram(aes(y = after_stat(count/sum(count))), 
                    binwidth = 5, 
@@ -594,18 +595,20 @@ tibble(height = c(rep(165, 2), rep(167, 3), rep(170, 8),
   
 ```
 
-In general when we think about the difference between these three distributions, we can think about the mathematical as completely theoretical, imagine we only have an paper and a pencil, and we were ask to create a model, that model is basically the *mathematical distributions*. *Empirical distribution* on the other hand is different, empirical distribution is completely based on data, there is no such thing as writing down formula or equation and coming up with a distribution based on that, we come up *empirical distribution* by analyzing data, you can think of empirical distribution as someone flip a coin 1000 times, and we record the data and creating a graph based on that. Last but not least, *Posterior distribution* this graph represents one's belief about certain situation, for example when we think about flipping a coin, our mathematical and empirical results would likely look similar, and if there is no other assumption our posterior should also looks similar, but if were in a casino, and someone tells you that they want to bet 100 bucks on head and you bet 100 bucks on tail, who wins we get's all the money. Now you maybe suspicious, you won't likely to trust this person who is convincing you to bet, now the *posterior distribution* could help you to visualize and quantified your beliefs which is extremely helpful when making decision. 
+In general when we think about the difference between these three distributions, we can think about the mathematical as completely theoretical, imagine we only have an paper and a pencil, and we were ask to create a model to represent our population,and that model is the *mathematical distributions*. *Empirical distribution* on the other hand is different, empirical distribution is completely based on data, there is no such thing as writing down formula or equation and coming up with a distribution based on that, we come up with *empirical distribution* by analyzing data, you can think of empirical distribution as someone flip a coin 1000 times, and we record the data and creating a graph based on that, and believe that the data we pulled up is representative for the entire population. Last but not least, *Posterior distribution* this graph represents one's belief about certain situation, for example when we think about flipping a coin, our mathematical and empirical results would likely look similar, and if there is no other assumption our posterior should also looks similar, but if were in a casino, and someone tells you that they want to bet 100 bucks on head and you bet 100 bucks on tail, who wins we get's all the money. Now you maybe suspicious, you won't likely to trust this person who is convincing you to bet, now the *posterior distribution* could help you to visualize and quantified your beliefs which is extremely helpful when making decision. 
 
 In short:
 * Mathematical distribution is based on mathematical formula and some basic assumptions
-* Empirical distribution is based on data, the data could eigther done by yourself or somebody else.
+* Empirical distribution is based on data, the data could either done by yourself or somebody else.
 * Posterior distribution is based on belief, the belief is usually shaped by added information about the scenario. 
 
-<!-- DK: Insert here mathematical, empirical and posterior examples. -->
+There is a direct connection between the concept of the population and the concept of a probability distribution. But they are not the same thing! The connection is that the probability distribution --- whether it is empirical, mathematical, or posterior --- is a *description* of the contents of the urn, which is the population.
+
+And Again:
+*Population* is the imaginary urn from which our data has been, or will be, drawn.
+
 
 Comments:
-
-<!-- Need X Files poster -->
 
 
 ```{r, echo = FALSE, fig.cap = "The truth is out there"}
@@ -635,6 +638,10 @@ Remember that *probability distributions are mathematical objects that cover a s
 For instance, we can generate the following unnormalized distribution for the sum of rolling two dice. (This uses the same code as above, but without the normalization step.)
 
 ```{r, echo = FALSE}
+
+# mutate(die_1 = map_dbl(ID, ~ sample(c(1:6), size = 1))) shoudl be handy for any dice
+# rolling simulation
+
 set.seed(1)
 
 tibble(ID = 1:100) %>% 
@@ -659,6 +666,8 @@ emp_dist_dice
 
 
 The two plots --- unnormalized and normalized --- have the exact same shape. In many ways, they are the same object. Yet normalization is required if we want to work with a probability distribution.
+
+<!-- Should we get into the *scaling* of distributions, and the arbitrariness thereof? For example, trains$age is a distribution. Fine. What about rep(trains$age, 2)? What about rep(trains$age, 100)? Well, if any vector is a distribution, then all three of these are distributions. In fact, they are the same distribution, just scaled differently.  -->
 
 
 ### Joint distributions
@@ -694,7 +703,7 @@ die2_factor <- as.factor(mydata$die.2)
 
 mtplot <-  ggplot(mydata) +
               geom_point(aes(x = die1_factor, y = die2_factor, color = total)) +
-              scale_color_continuous(limits = c(0,100)) +
+              scale_color_continuous(limits = c(0, 100)) +
               labs(x = "Die 1", y = "Die 2") +
               theme(legend.position = "none")
 
@@ -739,6 +748,8 @@ A probability distribution is not always easy to work with. It is a complex obje
 
 ```{r, echo = FALSE}
 # DK: This code is a mess! Please fix!
+
+# Have to include otherwise shows up coloumns specification.
 
 z <- read_csv("https://raw.githubusercontent.com/PPBDS/primer/master/05-probability/data/election-forecasts-2020/prez_1.csv", 
               col_types = cols(cycle = col_double(),
@@ -791,6 +802,8 @@ The elements of these vectors are all "draws" from the specified probability dis
 
 
 ```{r}
+# recall mean, media, standard deviation and mad functions.
+
 key_stats <- draws %>% 
   summarize(mn = mean(electoral_votes),
             md = median(electoral_votes),
@@ -878,16 +891,16 @@ How would you express this in statistical notation? $\text{Prob}(A|B)$ is the sa
 
 The simplest possible setting for inference involves two models --- meaning two possible states of the world --- and two outcomes from an experiment. Imagine that there is a disease --- *Probophobia*, an irrational fear of probability --- which you either have or don't have. We don't know if you have the diseases, but we do assume that there are only two possibilities. 
 
-We also have a test which is 50% accurate when giving test to an person who have *Probophobia*, and 99% accurate for people who don't. This is our experiment, one with only two possible outcomes: positive and negative. 
+We also have a test which is 99% accurate when given to a person who has *Probophobia*. Unfortunately, the test is only 50% accurate for people who do not have *Probophobia*. In this experiment, there only two possible outcomes: a positive and a negative result on the test. 
 
 Question: *If you test positive, what is the probability that you have Probophobia?*
 
 More generally, we are estimating a *conditional probability*. Conditional on the outcome of a postive test, what is the probability that you have Probophobia? Mathematically, we want:
 
-$$ \text{Prob}(\text{Disease | Test = Postive} ) $$
+$$ \text{Prob}(\text{Probophobia | Test = Postive} ) $$
 
 
-To answer this question, we need to use the tools of joint and conditional probability that we have learned earlier in this Chapter. We begin by building, by hand, the joint distribution of the possible models (you have the Probophobia or you do not) and of the possible outcomes (you test positive or negative). Building the joint distribution involves *assuming* that each model is true and then creating the distribution of outcomes which might occur if that assumption is true. 
+To answer this question, we need to use the tools of joint and conditional probability from earlier in the Chapter. We begin by building, by hand, the joint distribution of the possible models (you have the Probophobia or you do not) and of the possible outcomes (you test positive or negative). Building the joint distribution involves *assuming* that each model is true and then creating the distribution of outcomes which might occur if that assumption is true. 
 
 For example, assume you have Probophobia. There is then a 50% chance that you test positive and a 50% chance you test negative. Similarly, if we assume that the second model is true --- that you don't have Probophobia --- then there is 1% chance you test positive and a 99% you chance negative. Of course, for you (or any individual) we do not know for sure what is happening. We do not know if you have the disease. We do not know what your test will show. But we can use these relationships to construct the joint distribution.
 
@@ -896,6 +909,11 @@ For example, assume you have Probophobia. There is then a 50% chance that you te
 set.seed(9)
 ```
 
+<!-- DK: Redo this analysis, and perhaps other similar examples below. First, column of tibble is the state of the world. Or list of all possible models. In this case, this would be `have_disease` which should be either TRUE or FALSE.  -->
+
+
+
+
 
 ```{r}
 # Pipes generally start with tibbles, so we start with a tibble which just
@@ -903,8 +921,14 @@ set.seed(9)
 # organized. We call this object `jd_disease`, where the `jd` stands for
 # joint distribution.
 
-jd_disease <- tibble(p = rep(seq(0.01, 0.5, 0.49), 10000)) %>%
-  mutate(disease = map_int(p, ~ rbinom(n = 1, size = 1, p = .)))
+sims <- 10000
+
+jd_disease <- tibble(ID = 1:sims, have_disease = rep(c(TRUE, FALSE), 5000)) %>%
+  mutate(positive_test =
+           if_else(have_disease,
+                   map_int(have_disease, ~ rbinom(n = 1, size = 1, p = 0.99)),
+                   map_int(have_disease, ~ rbinom(n = 1, size = 1, p = 0.5))))
+
 
 
 jd_disease
@@ -914,19 +938,22 @@ The first step is to simply create an tibble that consists of the simulated data
 
 Plot the joint distribution:
 
-```{r}
+```{r echo = FALSE}
+
+# Use discrete for FALSE and TRUE
+
 jd_disease %>% 
-  ggplot(aes(x = as.factor(disease), 
-             y = as.factor(p))) +
+  ggplot(aes(x = as.factor(positive_test), 
+             y = as.factor(have_disease))) +
   geom_point() +
   geom_jitter(alpha = .2) +
   labs(title = "Unnormalized Distribution of Test Results and Disease Status",
        subtitle = "Many False results in have disease than no disease",
        x = "Test Result",
        y = "Disease Status") +
-  scale_x_discrete(breaks = c(0,1), 
+  scale_x_discrete(breaks = c(0, 1), 
                    labels = c("Negative", "Positive")) +
-  scale_y_discrete(breaks = c(0.01, 0.5), 
+  scale_y_discrete(breaks = c(FALSE, TRUE), 
                    labels = c("No Disease", "Have Disease")) +
   theme_classic()
 ```
@@ -936,17 +963,21 @@ Below is a joint distribution displayed in 3D. Instead of using the "jitter" fea
 
 ```{r, echo = FALSE}
 
+# group_by and summarize use for count, and pile up the dots in one point.
+# Later use for rayshader
+
 jd_disease_plot <- jd_disease %>%
-  group_by(p, disease) %>%
+  group_by(have_disease, positive_test) %>%
   summarize(total = n(),
             .groups = "drop") %>% 
-  ggplot(aes(x = as.factor(disease),
-             y = as.factor(p),
+  ggplot(aes(x = as.factor(positive_test),
+             y = as.factor(have_disease),
              color = total)) +
     geom_point(size = 5) +
+    scale_color_continuous(limits = c(0, 5000)) +
     scale_x_discrete(breaks = c(0, 1),
                      labels = c("Negative", "Positive")) +
-    scale_y_discrete(breaks = c(0.01, 0.5),
+    scale_y_discrete(breaks = c(FALSE, TRUE),
                      labels = c("No Disease", "Have Disease")) +
     labs(x = "Test Result",
          y = "Disease Status",
@@ -966,7 +997,7 @@ plot_gg(jd_disease_plot,
         phi = 30,
         sunangle = 225,
         soliddepth = -50,
-        windowsize = c(2048,1536))
+        windowsize = c(2048, 1536))
 
 rglwidget()
 
@@ -986,21 +1017,25 @@ We want to analyze these plots by looking at different slices. For instance, let
 
 ```{r}
 jd_disease %>% 
-  filter(disease == 1)
+  filter(positive_test == 1)
 ```
 
 **Most people test positive are infected** This is a result for common diseases like cold. We can easily create an unnormalized conditional distribution with:
 
-```{r}
+```{r echo = FALSE}
+# geom_histogram won't work because we are using non-continuous value.
+# geom_col won't work because need two aesthetic both x and y
+# geom_bar work
+
 jd_disease %>% 
-  filter(disease == 1) %>% 
-  ggplot(aes(p)) +
+  filter(positive_test == 1) %>% 
+  ggplot(aes(have_disease)) +
     geom_bar() +
     labs(title = "Disease Status Given Positive Test",
          subtitle = "Almost all of the cases were infected",
          x = "Disease Status",
          y = "Count") +
-    scale_x_continuous(breaks = c(0.01, 0.5),
+    scale_x_discrete(breaks = c(FALSE, TRUE),
                        labels = c("Healthy", "Infected")) +
   theme_classic()
 ```
@@ -1010,28 +1045,32 @@ jd_disease %>%
 Turn this unnormalized distribution into a posterior probability distribution:
 
 
-```{r}
+```{r echo = FALSE}
+
+# Use discrete for TRUE and FALSE
+
 jd_disease %>% 
-  filter(disease == 1) %>% 
-  ggplot(aes(p)) +
-    geom_histogram(aes(y = after_stat(count/sum(count))), 
-                   binwidth = 0.25, 
+  filter(positive_test == 1) %>% 
+  ggplot(aes(have_disease)) +
+    geom_bar(aes(y = after_stat(count/sum(count))), 
                    color = "white") +
     labs(title = "Posterior for Probophobia Conditional on Positive Test",
          x = "Probophobia Status",
          y = "Probability") +
-    scale_x_continuous(breaks = c(0.01, 0.5),
+    scale_x_discrete(breaks = c(FALSE, TRUE),
                        labels = c("Healthy", "Infected")) +
     scale_y_continuous(labels = 
                          scales::percent_format(accuracy = 1)) +
     theme_classic()  
 ```
 
+If we zoom in on the plot, about 70% of people who tested positive have the disease and 30%  who tested positive do not have the disease. In this case, we are focusing on one slice of the probability distribution where the test result was positive. There are two disease outcomes: positive or negative. By isolating a section, we are looking at a conditional distribution. Conditional on a positive test, you can visualize the likelihood of actually having the disease versus not.
+
 Now recalled the question we asked at the start of the session:
 *If you test positive, what is the probability that you have Probophobia?*
 
 By looking at the posterior graph we just create, we can answer this question easily:
-*With a positive test, you can be almost 100% sure that you have Probophobia.*
+*With a positive test, you can be almost 70% sure that you have Probophobia, however there is a good chance about 30% that you receive a false positive, so don't worry too much there is still about a third of hope that you get the wrong result*
 
 <!-- DK: Insert a use of this posterior? How many positive tests before you have at least 10 sick people? -->
 
@@ -1044,6 +1083,8 @@ knitr::include_app("https://www.youtube.com/embed/by3_weGwnMg")
 
 ## Three models
 
+<!-- Handy? jd_marbles %>% filter(in_bag == 1) %>% group_by(in_sample) %>% count() -->
+
 <!-- DK: Should this be in terms of p or number of white marbles or both? -->
 
 ```{r, echo = FALSE}
@@ -1052,9 +1093,9 @@ knitr::include_graphics("05-probability/images/marble.jpg")
 
 Imagine that your friend gives you a bag with two marbles. There could either be two white marbles, two black marbles, or one of each color. Thus, the bag could contain 0% white marbles, 50% white marbles, or 100% white marbles. Respectively, the proportion, $p$, of white marbles could be 0, 0.5, or 1.
 
-Question: *What is the chance of the bag contains exactly two white marbles, given that when we selected the white marbles three times, everytime we select a white marble?*
+Question: *What is the chance of the bag contains exactly two white marbles, given that when we selected the marbles three times, everytime we select a white marble?*
 
-$$ \text{Prob}(\text{2 Marbles in bag | White Marble Select=3} ) $$
+$$ \text{Prob}(\text{2 White Marbles in bag | White Marbles Sampled = 3} ) $$
 Just as during the *Probophobia* models, in order to answer this question, we need to start up with the simulated data and then graphing out the joint distribution of this sinerio because we need to considered all possible outcomes of this model, and then based on the joint distribution we can slice out the the part we want (Conditional distribution) in the end making an posterior graph as well as normalizing it to see the probability.
 
 Step 1: Simulate the data into an tibble
@@ -1067,6 +1108,7 @@ Let's say you take a marble out of the bag, record whether it's black or white, 
 # one-by-one. in_bag takes three possible values: 0, 1 and 2, corresponding to
 # zero, one and two white marbles potentially in the bag.
 
+set.seed(3)
 sims <- 10000
 
 # We also start off with a tibble. It just makes things easier
@@ -1114,15 +1156,18 @@ jd_marbles %>%
 Here is the 3D visualization:
 
 ```{r, echo = FALSE}
+
+# Same process, first condense point plot to a single point, then use plot_gg make it 3d and 
+# give height.
+
 jd_marbles_plot <- jd_marbles %>%
   group_by(in_bag, in_sample) %>%
-  summarize(total = n(),
-            .groups = "drop") %>% 
+  summarize(total = n(), .groups = "drop") %>% 
   mutate(in_sample = as.factor(in_sample)) %>% 
   mutate(in_bag = as.factor(in_bag)) %>% 
   ggplot(aes(x=in_sample, y=in_bag, color = total)) +
     geom_point() +
-    scale_color_continuous() +
+    scale_color_continuous(limits = c(0, 3500)) +
     labs(x = "White Marbles Selected",
          y = "White Marbles in the Bag",
          title = "Black and White Marbles",
@@ -1134,12 +1179,13 @@ jd_marbles_plot <- jd_marbles %>%
     axis.text.y = element_text(size = 6))
 
 plot_gg(jd_marbles_plot,
-        width = 3.5,
-        zoom = 0.65,
+        width = 4,
+        zoom = 0.75,
         theta = 25,
         phi = 30,
         sunangle = 225,
         soliddepth = -50,
+        raytrace = FALSE,
         windowsize = c(2048,1536))
 
 rglwidget()
@@ -1229,7 +1275,10 @@ To start, it is useful to consider all the things which might happen if, for exa
 ```{r, echo = FALSE}
 
 set.seed(9)
-x <- tibble(heads = rbinom(n = 1000, size = 20, p = 0.4)) 
+
+sims <- 1000
+
+x <- tibble(ID = 1: sims, heads = rbinom(n = 1000, size = 20, p = 0.4)) 
 
 x %>% 
   ggplot(aes(heads)) +
@@ -1266,9 +1315,13 @@ We can do the same thing for all 11 possible models, calculating what would happ
 
 ```{r, echo = FALSE}
 
+# sims size depends on your data size, or the number in rep().
+
 set.seed(10)
 
-jd_coin <- tibble(p = rep(seq(0, 1, 0.1), 1000)) %>%
+sims <- 11000
+
+jd_coin <- tibble(ID = 1:sims, p = rep(seq(0, 1, 0.1), 1000)) %>%
   mutate(heads = map_int(p, ~ rbinom(n = 1, size = 20, p = .)))
 
 jd_coin %>%
@@ -1286,6 +1339,9 @@ jd_coin %>%
 Here is the 3D version of the same plot.
 
 ```{r, echo = FALSE}
+
+#Condese point and make rayshader plot.
+
 jd_coin_plot <- jd_coin %>% 
   group_by(p, heads) %>%
   summarize(total = n(), .groups = "drop") %>% 
@@ -1293,6 +1349,7 @@ jd_coin_plot <- jd_coin %>%
   mutate(heads = as.factor(heads)) %>% 
   ggplot() +
     geom_point(aes(x = heads, y = p, color = total)) +
+    scale_color_continuous(limits = c(0, 1000)) +
     theme(legend.position = "none") +
     labs(x = "Number of Heads out of 20 Tosses",
          y = expression(rho[h]),
@@ -1311,6 +1368,7 @@ plot_gg(jd_coin_plot,
         phi = 30,
         sunangle = 225,
         soliddepth = -50,
+        raytrace = FALSE,
         windowsize = c(2048,1536))
 
 rglwidget()
@@ -1619,18 +1677,16 @@ As you may have noticed, if you calculated the value using the first method, you
 
 <!-- Courage: For each model, write down the math, estimate the model, say something sensible about the regression table. Testing is stupid. -->
 
-<!-- Temperance. Answer the question. Create a newobs, plug it into the model, calculate the outcome. Don't forget to add the error term if you are predicting. Then plot it. Be aware of the limits to the accuracy of your answer. Preceptor's Posterior.  All the cool themes. Bring it all together. Make the students say "Ahhh!" --> -->
+<!-- Temperance. Answer the question. Create a newobs, plug it into the model, calculate the outcome. Don't forget to add the error term if you are predicting. Then plot it. Be aware of the limits to the accuracy of your answer. Preceptor's Posterior.  All the cool themes. Bring it all together. Make the students say "Ahhh!" --> 
 
 
 
 
 The four [Cardinal Virtues](https://en.wikipedia.org/wiki/Cardinal_virtues) are Wisdom, Justice, Courage, and Temperance. Because data science is, ultimately, a moral act, we use these virtues to guide our work. Every data science project begins with a question.
 
-* *Wisdom* starts by creating the Preceptor Table. What data, if we had it, would allow us to answer our question easily? If the Preceptor Table has one outcome, then the model is predictive. If it has more than one (potential) ouctiome, then the model is causal. We then explore the data we have. You can never look too closely at your data. Key question: Are the data we have close enough to the data we want (i.e., the Preceptor Table) that we can consider both as coming from the same *population*? If not, we can't proceed further. 
+* *Wisdom* starts by creating the Preceptor Table. What data, if we had it, would allow us to answer our question easily? If the Preceptor Table has one outcome, then the model is *predictive*. If it has more than one (potential) outcome, then the model is *causal*. We then explore the data we have. You can never look too closely at your data. Key question: Are the data we have close enough to the data we want (i.e., the Preceptor Table) that we can consider both as coming from the same *population*? If not, we can't proceed further. 
 
-* *Justice* starts with the Population Table -- the data we want to have, the data which we actually have and all the other data from that same *population*. Each row of the Population Table is defined by a unique Unit/Time combination. We ask three key questions about the Population Table. First, do the columns demonstrate *validity*, meaning is the meaning consistent across the rows? Second, does the relationship among the variables demonstrate *stability*, meaning is the model stable across different Time periods? Third, are the rows associated with the data *representative* of all the units which we might have had data for?
-
-We then make an assumption about the *data generating mechanism*. What general mathematical formula connects the outcome variable we are interested in with the other data that we have?
+* *Justice* starts with the Population Table -- the data we want to have, the data which we actually have and all the other data from that same *population*. Each row of the Population Table is defined by a unique Unit/Time combination. We explore three key issues about the Population Table. First, do the columns demonstrate *validity*, i.e., is the meaning consistent across the rows? Second, does the relationship among the variables demonstrate *stability*, meaning is the model stable across different time periods? Third, are the rows associated with the data *representative* of all the units which we might have had data for? Justice concludes by making an assumption about the *data generating mechanism*. What general mathematical formula connects the outcome variable we are interested in with the other data that we have?
 
 * *Courage* allows us to explore different models. Even though Justice has provided the basic mathematical structure of the model, we still need to decide which variables to include and to estimate the values of unknown parameters. We avoid hypothesis tests. We check our models for consistency with the data we have. We select one model. 
 
@@ -1648,19 +1704,19 @@ Wisdom helps us decide if we can even hope to answer our question with the data 
 
 First, start with the Preceptor Table. What rows and columns of data do you need such that, if you had them all, the calculation of the quantity of interest would be trivial? If you want to know the average height of an adult in India, then the Preceptor Table would include a row for each adult and a column for their height. With no missing data, the average is easy to determine, as are a wide variety of other *estimands*, other unknown numbers. 
 
-One key aspect of this Preceptor Table is whether or not we need more than one potential outcome in order to calculate our estimand. For example, if we want to know the causal effect of exposure to Spanish-speakers on attitude toward immigration then we need a causal model, one which estimates that attitude under both treatment and control. The Preceptor Table would require two columns for the outcome. If, on the other hand, we only want to predict someone's attitude, or compare one person's attitude to another's, then we would only need a Preceptor Table with one column for the outcome. 
+One key aspect of this Preceptor Table is whether or not we need more than one potential outcome in order to calculate our estimand. For example, if we want to know the causal effect of exposure to Spanish-speakers on attitude toward immigration then we need a causal model, one which estimates that attitude for each person under both treatment and control. The Preceptor Table would require two columns for the outcome. If, on the other hand, we only want to predict someone's attitude, or compare one person's attitude to another's, then we would only need a Preceptor Table with one column for the outcome. 
 
 Are we are modeling (just) for prediction or are we (also) modeling for causation? Predictive models care nothing about causation. Causal models are often also concerned with prediction, if only as a means of measuring the quality of the model. 
 
-Every model is predictive, in the sense that, if we give you new data --- and it is drawn from a the same population --- then you can create a predictive forecast. But only a subset of those models are causal, meaning that, for a given individual, you can change the value of one input and figure out what the new output would be and then, from that, calculate the causal effect by looking at the difference between two potential outcomes.
+Every model is predictive, in the sense that, if we give you new data --- and it is drawn from the same population --- then you can create a predictive forecast. But only a subset of those models are causal, meaning that, *for a given individual*, you can change the value of one input and figure out what the new output would be and then, from that, calculate the causal effect by looking at the difference between two potential outcomes.
 
-With prediction, all we care about is forecasting Y given X on some as-yet-unseen data. But there is no notion of "manipulation" in such models. We don't pretend that, for Joe, we could turn variable X from a value of 5 to a value of 30 by just turning some knob and, by doing so, cause Joe's value of Y to change from 17 to 23. We can compare two people (or two groups of people), one with X equal to 5 and one with X equal to 30, and see how they differ in Y. The basic assumption of predictive models is that there is only one possible Y for Joe. There are not, by assumption, two possible values for Y, one if X equal 5 and another if X equals 30. The Preceptor Table has a single column under Y.
+With prediction, all we care about is forecasting Y given X on some as-yet-unseen data. But there is no notion of "manipulation" in such models. We don't pretend that, for Joe, we could turn variable X from a value of 5 to a value of 6 by just turning some knob and, by doing so, cause Joe's value of Y to change from 17 to 23. We can compare two people (or two groups of people), one with X equal to 5 and one with X equal to 6, and see how they differ in Y. The basic assumption of predictive models is that there is only one possible Y for Joe. There are not, by assumption, two possible values for Y, one if X equal 5 and another if X equals 6. The Preceptor Table has a single column under Y.
 
-With causal inference, however, we can consider the case of Joe with $X = 5$ and Joe with $X = 30$. The same mathematical model can be used. And both models can be used for prediction, for estimating what the value of Y will be for a yet-unseen observation with a specified value for X. But, in this case, instead of only a single column in the Preceptor Table for Y, we have at least two (and possibly many) such columns, one for each of the potential outcomes under consideration.
+With causal inference, however, we can consider the case of Joe with $X = 5$ and Joe with $X = 6$. The same mathematical model can be used. And both models can be used for prediction, for estimating what the value of Y will be for a yet-unseen observation with a specified value for X. But, in this case, instead of only a single column in the Preceptor Table for Y, we have at least two (and possibly many) such columns, one for each of the potential outcomes under consideration.
 
 *The difference between prediction models and causal models is that the former have one column for the outcome variable and the latter have more than one.* 
 
-Second, we look at the data we have and perform an exploratory data analysis, an EDA. You can never look at your data too much. The most important variable is the one we most want to understand/explain/predict. In the models we create in later chapters, this variable will go on the lefthand side of our mathematical equations. Some academic fields refer to this as the "dependent variable." Others use terms like "regressor" or "outcome." Whatever the terminology, we need to explore the distribution of this variable, its min/max/range, its mean and median, its standard deviation, and so on.  
+Second, we look at the data we have and perform an exploratory data analysis, an EDA. You can never look at your data too much. The most important variable is the one we most want to understand/explain/predict. In the models we create in later chapters, this variable will go on the left-hand side of our mathematical equations. Some academic fields refer to this as the "dependent variable." Others use terms like "regressor" or "outcome." Whatever the terminology, we need to explore the distribution of this variable, its min/max/range, its mean and median, its standard deviation, and so on.  
 
 @roas write:
 
@@ -1672,9 +1728,9 @@ We care about other variables as well, especially those that are most correlated
 
 Third, a key concept is the "population." We need the data we want --- the Preceptor Table --- and the data we have to be similar enough that we can consider them as all having come from the same statistical population. From [Wikipedia](https://en.wikipedia.org/wiki/Statistical_population):
 
-> In statistics, a population is a set of similar items or events which is of interest for some question or experiment. A statistical population can be a group of existing objects (e.g. the set of all stars within the Milky Way galaxy) or a hypothetical and potentially infinite group of objects conceived as a generalization from experience (e.g. the set of all possible hands in a game of poker).
+> In statistics, a population is a set of similar items or events which is of interest for some question or experiment. A statistical population can be a group of existing objects (e.g. the set of all stars within the Milky Way galaxy) or a hypothetical and potentially infinite group of objects conceived as a generalization from experience (e.g. the set of all opening hands in all the poker games in Las Vegas tomorrow).
 
-If we assume that the data we have is drawn from the same population as the data in the Preceptor Table, then we can use information about the former to make inferences about the latter. We can combine the Preceptor Table and the data into a single hypothetical data set. If we can't do that, if we can't assume that the two sources come from the same population, then we can't use our data to answer our questions. We have no choice but to walk away. The heart of Wisdom is knowing when to walk away. As John Tukey noted: 
+If we assume that the data we have is drawn from the same population as the data in the Preceptor Table, then we can use information about the former to make inferences about the latter. We can combine the Preceptor Table and the data into a single *Population Table*. If we can't do that, if we can't assume that the two sources come from the same population, then we can't use our data to answer our questions. We have no choice but to walk away. The heart of Wisdom is knowing when to walk away. As John Tukey noted: 
 
 > The combination of some data and an aching desire for an answer does not ensure that a reasonable answer can be extracted from a given body of data.
 
@@ -1686,14 +1742,24 @@ knitr::include_graphics("other/images/Justice.jpg")
 
 After Wisdom, we have an *Population Table.* It includes rows for the data we have and the data we want to have. It has missing values, most importantly for potential outcomes which were not observed. The central problem in inference is to fill in the question marks in the Population Table.
 
-There are three key aspects of *Justice*: the data generating mechanism, representativeness and validity.
+There are three key issues to explore in any Population Table: validity, stability and representativeness.
 
-First, the *data generating mechanism* is the mathematical formula, and associated error term, which relates  our outcome variable to our covariates.  
+* *Validity* focuses on the columns of the Population Table. We should confirm that the data we have accurately captures the concepts we care about. Is the data *valid*, given the problem we are trying to solve? 
+
+<!-- DK: Add more! Columns from different sources really mean the same thing. Infinite preceptor table. Et cetera.-->
+
+* *Stability* assumes that the relationship between the outcome variable and the covariates is consistent over time. Never forget that *temporal* nature of almost all real data science problems. Our Preceptor Table will focus on rows for today or for the near future. The data we have will always be from before today. We must almost always assume that the future will be like the past in order to use data from the past to make predictions about the future.
+
+* *Representativeness* is a two-sided concern. We want the data we have to be representative of the population for which we need to calculate parameters. Ideally, we would love for our data to be randomly sampled from the population, but this is almost never the case. But this is concern, not just with our data, but also for our Preceptor Table. If the data we want is not representative of the entire population then we will need to be careful in the inferences which we draw. 
+
+*Validity is about the columns in our Population Table. Stability and representativeness are about the rows.*
+
+The last step of Justice is to make an assumption about the structure of the data generating mechanism (DGM): the mathematical formula, and associated error term, which relates  our outcome variable to our covariates.  
 
 *Justice requires math.* Consider a model of coin-tossing:
 
-
 $$ H_i  \sim B(\rho_H, n = 20) $$
+
 The total number $H$ of Heads in experiment $i$ with 20 flips of a single coin, $H_i$, is distributed as a binomial with $n = 20$ and an unknown probability $\rho_h$ of the coin coming up Heads. 
  
 Note:
@@ -1704,21 +1770,7 @@ Note:
 
 <!-- DK: Unclear -->
 
-* In this simple case, we are fortunate that the parameter $\rho_h$ has such a (mostly!) simple analog to a real world quantity. Much of the time, parameters are not so easy to interpret. In a more complex model, especially with one with interaction terms, we focus less on parameters and more on actual predictions.
-
-
-* Wisdom allowed us to assume that all the rows in the actual Preceptor Table come from the same population. If that is true, then it is also true that the mathematical relationship between outcomes and covariates is consistent across these rows.
-
-Second, we should check how "representative" the data we have, and the data we want to have, is of the entire population. Representativeness is a two-sided concern. We want the data we have to be representative of the population for which we need to calculate parameters. Ideally, we would love for our data to be randomly sampled from the population, but this is almost never the case. But this is concern, not just with our data, but also for our Preceptor Table. If the data we want is not representative of the entire population then we will need to be careful in the inferences which we draw. 
-
-Never forget that *temporal* nature of almost all real data science problems. Our Preceptor Table will focus on rows for today or for the near future. The data we have will always be from before today. We must almost always assume that the future will be like the past in order to use data from the past to make predictions about the future.
-
-Third, confirm that the data we have accurately capturing the concepts we care about. Is the data *valid*, given the problem we are trying to solve? 
-
-<!-- DK: Add more! -->
-
-*Validity is about the columns in our Population Table. Representativeness is about the rows.*
-
+* In this simple case, we are fortunate that the parameter $\rho_h$ has such a (mostly!) simple analog to a real world quantity. Most of the time, parameters are not so easy to interpret. In a more complex model, especially with one with interaction terms, we focus less on parameters and more on actual predictions.
 
 ### Courage
 
@@ -1729,8 +1781,6 @@ knitr::include_graphics("other/images/Courage.jpg")
 The three languages of data science are words, math and code, and the most important of these is code. We need to explain the structure of our model using all three languages, but we need *Courage* to implement the model in code.
 
 Courage requires us to take the general mathematical formula provide by Justice and then make it specific. Which variables should we include in the model and which do we exclude? Every data science project involves the creation of several models. For each, we specify the precise data generating mechanism. Using that formula, and some R code, we create a fitted model. All models have parameters. We can never know the true values of the parameters, but we can create, and explore, posterior distributions for those unknown true values.
-
-
 
 Code allows us to "fit" a model by estimating the values of the unknown parameters, like $\rho_h$. Sadly, we can never know the true values of these parameters. But, like all good data scientists, we can express our uncertain knowledge in the form of posterior probability distributions. With those distributions, we can compare the actual values of the outcome variable with the  "fitted" or "predicted" results of the model. We can examine the "residuals," the difference between the fitted and actual values.  
 
@@ -1755,7 +1805,7 @@ knitr::include_graphics("other/images/Temperance.jpg")
 ```
 
 
-There are few more important concepts in statistics and data science than the "Data Generating Mechanism." Our *data* --- the data that we collect and see --- has been *generated* by the complexity and confusion of the world. God's own *mechanism* has brought His data to us. Our job is to build a model of that process, to create, on the computer, a mechanism which generates fake data consistent with the data which we see. With that DGM, we can answer any question which we might have. In particular, with the DGM, we provide predictions of data we have not seen and estimates of the uncertainty associated with those predictions. *Courage* helped us to create the DGM. *Temperance* will guide us in its use.
+There are few more important concepts in statistics and data science than the "Data Generating Mechanism." Our *data* --- the data that we collect and see --- has been *generated* by the complexity and confusion of the world. God's own *mechanism* has brought His data to us. Our job is to build a model of that process, to create, on the computer, a mechanism which generates fake data consistent with the data which we see. With that DGM, we can answer any question which we might have. In particular, with the DGM, we provide predictions of data we have not seen and estimates of the uncertainty associated with those predictions. *Justice* gave us the structure of the DGM.  *Courage* created the DGM, the fitted model. *Temperance* will guide us in its use.
 
 Having created (and checked) a model, we now use the model to answer questions. Models are made for use, not for beauty. The world confronts us. Make decisions we must. Our decisions will be better ones if we use high quality models to help make them.
 
@@ -1793,9 +1843,7 @@ Even worse, we must always worry that our estimated posterior, despite all the w
 
 <!-- DK: Not a bad summary, but should hit the key points more clearly.  -->
 
-*Validity is about the columns in our tibble. Representativeness is about the rows.*
-
-Throughout this chapter, we spent time going through examples of conditional distributions. However, it's worth noting that all probability distributions are conditional on something. Even in the most simple examples, when we were flipping a coin multiple times, we were assuming that the probability of getting heads versus tails did not change between tosses.
+Throughout this Chapter, we spent time going through examples of conditional distributions. However, it's worth noting that all probability distributions are conditional on something. Even in the most simple examples, when we were flipping a coin multiple times, we were assuming that the probability of getting heads versus tails did not change between tosses.
 
 We also discussed the difference between empirical, mathematical, and posterior probability distributions. Even though we developed these heuristics to better understand distributions, every time we make a claim about the world, it is based on our beliefs - what we think about the world. We could be wrong. Our beliefs can differ. Two reasonable people can have conflicting beliefs about the fairness of a die.
 
