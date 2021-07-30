@@ -1,6 +1,5 @@
 # One Parameter {#one-parameter}
 
-
 <!-- Chat with Yuhan. Map functions and list-columns are taught in chapter 5, both the Primer and the tutorial. Take look. Ensure that Chapter 5 covers clearly anything you use. -->
 
 <!-- Read Chapter 7 again. We do not want to be so detailed in Chapter 6! In particular, I don't feel the need to understand fit_1. Nor do I care about parameters. Just using this as a black box, which allows me to answer questions. Which doesn't mean that we don't want several paragraphs about the box. Examples of stuff like: How do we calculate the probability that the true value of p is below 0.3? You can't give too many examples of area under the curve. -->
@@ -8,8 +7,6 @@
 <!-- Fix answering the question section. Key is explaining what objects like ppd_for_p are. How to plot them. How to use them to answer questions. -->
 
 <!-- Make the Overview tutorial match the chapter. -->
-
-<!-- Delete any images we no longer need. -->
 
 <!-- Why doesn't the percentage red match between the physical urn and the virtual urn? -->
 
@@ -63,9 +60,7 @@
 
 <!--  Maybe try and create widget where you can change the starting data?: What happens if our starting data was different? (Explore different packages that might allow readers to explore this for themselves in a cool way. Maybe crosstalk) -->
 
-
 <!-- 6.5 The Real World -->
-
 
 <!-- Questions: Use annual family survey (3000 people) instead of kennedy study? This provides an actual dataset we can work with. Introduce the vocab and write up in the primer, and then dive into the dataset in the tutorials. Data set has collumn for "are you married" which allows us to estimate a population proportion, but it also has other data that can allow us to calculate the population mu within a certain confidence interval if we know sigma, but this might be too much. However, I do think it is important to differentiate finding a population mu vs population proportion. Also should I incorporate this into the existing tutorial or make a new tutorial? -->
 
@@ -78,15 +73,9 @@
 
 <!-- Another paragraph or two of discussion about the final posterior. How do we use it? Within what range would you offer 50/50 odds that the true percentage lies? (use quantile(0.25, 0.75). Area under the curve? Explain clearly how that 26% is calculated. What is post_dist? What does it mean? How can I use it? Maybe show it sorted? Add some code comments. -->
 
-
-
 <!-- You must understand what the standard error of $\hat{\rho}$ means. You do not need to understand why. -->
 
-
-
 <!-- Explain in a comment the reason for  fun = function(.x) 1/(2 * sqrt(.x)) in the plot. I don't know why we need the 2. We would probably use geom_function(). Maybe using geom_function with the function for a standard error will just magically work! -->
-
-<!-- A paragraph about the distinction between distributions and probability distributions. We often can work with the former till the very end. When answering most questions, I can just work with the "raw" distribution. I don't need the posterior probability distribution. -->
 
 <!-- Make a 15 second video, put it on YouTube. "We don't estimate parameters because we care about parameters. Parameters are imaginary! Like unicorns! [Put finger on forehead and imitate unicorn.] We estimate parameters to build Data Generating Mechanisms. And with a DGM, you can move the world!" -->
 
@@ -112,9 +101,8 @@ One way to answer this question would be to perform an exhaustive count: remove 
 
 *What is the probability, using that same urn, that we will draw more than 8 red beads if we use a shovel of size 20?*
 
-To begin this chapter, we will look at a real sampling activity: the urn.  Then, we will simulate the urn example using R code. This will help us to understand the *standard error* and the ways in which uncertainty factors into our predictions. We then create a joint distribution of models and data for the urn example. We derive a posterior distribution from that joint distribution, and then use that posterior to answer our questions. 
+To begin this chapter, we will look at a real sampling activity: the urn.  Then, we will simulate the urn example using R code. This will help us to understand the *standard error* and the ways in which uncertainty factors into our predictions. We then attempt to estimate a single parameter, the proportion of red beads in the urn. 
 
-<!-- RS: Add foreshadowing to Ch. 7, saying something like: "To try and estimate the probability distribution of a single parameter, p." Ch.7 does a good job of explaining 1 param v. 2 params, but readers should know what they are getting into. (Include this when we get into "answering the questions")-->
 Use the **tidyverse** package.
 
 ```{r, message = FALSE}
@@ -899,7 +887,7 @@ This essence of Wisdom is determining whether or not a problem is even solvable.
 <!-- Change "centered at" to reference p. Use rho instead of p -->
 
 <!-- RS: Is there a specific paragraph you're referencing about changing "centered at" to reference p?   -->
-<!-- RS: Change all p's to rho? -->
+<!-- RS: I changed all p's to rho's but not 100% sure if that's what was desired.-->
 
 #### Getting started
 
@@ -1159,15 +1147,26 @@ With 95% confidence, the proportion of red beads in the urn is between 21% and 4
 
 > Why are there 4,000 rows in the stan_glm() tibble?
 
-By default, `stan_glm()` will sample from the posterior in 2 sets of 2,000 iterations. If needed we can change the default number of iterations using the `iter` argument, but there are few reasons to do so. Some of us may still want to know why we sample from the posterior in the first place. The posterior is a theoretical beast, which makes it difficult to work with. 
+By default, `stan_glm()` will sample from the posterior in 2 sets of 2,000 iterations. If needed we can change the default number of iterations using the `iter` argument, but there are few reasons to do so. Some of us may still want to know why we sample from the posterior in the first place. Why not use the entire posterior? The answer is that the posterior is a theoretical beast, which makes it difficult to work with. 
 
-For example, what if we wanted to know the probability that $\rho$ is above .4? To answer this, we would simply divide the number of draws that are above .4 by the total number of draws. However, the posterior is a distribution, so it has no indivisual observations because it's infinite! Instead, we can work with draws from the posterior. The more draws, the more our distribution looks like the posterior. We can easily answer our question: 
+For example, what if we wanted to know the probability that $\rho$ is between .3 and .4? To answer this using the pure posterior, we would need to calculate the area under the distribution from when $.3 < \rho < .4$. This is more difficult then it seems, as the posterior is a distribution, so it has no individual observations to work with as it's continuous! 
+
+Instead, we can work with draws from the posterior. With enough draws from the posterior distribution we create a close approximation which models the counts of our observations. This is an *approximation*; it is not exactly the posterior, but close enough for our purposes. We can easily convert our posterior distribution into a **posterior probability distribution**, by making the area under the graph sum to 1. The posterior probability distribution is often used as a visual aid, as percentages are more easy to conceptualize than raw numbers. One way to convert a posterior distribution into a probability distribution is to group by each value of $\rho$ and turning the counts into probabilities: 
 
 ```{r}
-sum(ppd_for_p$`1` > .4)/nrow(ppd_for_p)
+ppd_for_p %>%
+  group_by(`1`) %>%
+  summarize(prob = n()/nrow(ppd_for_p)) %>%
+  arrange(desc(prob))
 ```
 
-There is approximately a 20% chance that $\rho$ is above .4. Give me draws from the posterior and I can show you the world!
+We can also accomplish this by passing `aes(y = after_stat(count/sum(count))` into `geom_histogram()` when plotting.  Oftentimes, like in answering the probability that $\rho$ is between .3 and .4,  we can work with the posterior distribution to the very end. Just divide the number of draws that meet our condition (are between .3 and .4), by the total number of draws.   
+
+```{r}
+sum(ppd_for_p$`1` > .3 & ppd_for_p$`1` < .4)/nrow(ppd_for_p)
+```
+
+There is approximately a 54% chance that $\rho$ is between .3 and .4. Give me draws from the posterior and I can show you the world!
 
 ```{r, echo = FALSE, fig.cap = "Time for a quick musical interlude. We've earned it."}
 knitr::include_app("https://www.youtube.com/embed/sVxUUotm1P4")
