@@ -1,8 +1,6 @@
 # One Parameter {#one-parameter}
 
-<!-- Chat with Yuhan. Map functions and list-columns are taught in chapter 5, both the Primer and the tutorial. Take look. Ensure that Chapter 5 covers clearly anything you use. -->
-
-<!-- Read Chapter 7 again. We do not want to be so detailed in Chapter 6! In particular, I don't feel the need to understand fit_1. Nor do I care about parameters. Just using this as a black box, which allows me to answer questions. Which doesn't mean that we don't want several paragraphs about the box. Examples of stuff like: How do we calculate the probability that the true value of p is below 0.3? You can't give too many examples of area under the curve. -->
+<!-- Chat with Yuhan. Map functions and list-columns are taught in chapter 5, both the Primer and the tutorial. Take look. Ensure that Chapter 5 covers clearly anything you use. DO THIS NOW! -->
 
 <!-- Fix answering the question section. Key is explaining what objects like ppd_for_p are. How to plot them. How to use them to answer questions. -->
 
@@ -1094,7 +1092,13 @@ The x axis of our posterior is negative because for binomial models, `stan_glm()
 ```{r}
 ppd_for_p <- posterior_epred(fit_1, 
                 newdata = tibble(constant = 1)) %>% 
-  as_tibble()
+  as_tibble() %>%
+  rename(p = `1`)
+  
+# Posterior_epred() will unhelpfully name the column of our tibble to "1". We
+# have two options: either refer to the column name as `1`, or rename the column
+# to make it less confusing. We will rename the column to "p" in this chapter, but you
+# will oftentimes see `1` in later chapters.
 
 ppd_for_p
 ```
@@ -1103,7 +1107,7 @@ Because we do not wish to create our distribution conditional on some covariate,
 
 ```{r}
 ppd_for_p %>% 
-  ggplot(aes(x = `1`)) +
+  ggplot(aes(x = p)) +
     geom_histogram(aes(y = after_stat(count/sum(count))),
                    bins = 50) + 
     labs(title = "Posterior Probability Distribution",
@@ -1142,11 +1146,11 @@ By default, `stan_glm()` will sample from the posterior in 2 sets of 2,000 itera
 
 For example, what if we wanted to know the probability that $\rho$ is between .3 and .4? To answer this using the pure posterior, we would need to calculate the area under the distribution from when $.3 < \rho < .4$. This is more difficult then it seems, as the posterior is a distribution, so it has no individual observations to work with as it's continuous! 
 
-Instead, we can work with draws from the posterior. With enough draws from the posterior distribution we create a close approximation which models the counts of our observations. This is an *approximation*; it is not exactly the posterior, but close enough for our purposes. We can easily convert our posterior distribution into a **posterior probability distribution**, by making the area under the graph sum to 1. The posterior probability distribution is often used as a visual aid, as percentages are more easy to conceptualize than raw numbers. One way to convert a posterior distribution into a probability distribution is to group by each value of $\rho$ and turning the counts into probabilities: 
+Instead, we can work with draws from the posterior. With enough draws we create a close approximation of the posterior which models the counts of our observations. This is an *approximation*; it is not exactly the posterior, but close enough for our purposes. We can easily convert our posterior distribution into a **posterior probability distribution**, by making the area under the graph sum to 1. The posterior probability distribution is often used as a visual aid, as percentages are more easy to conceptualize than raw numbers. One way to convert a posterior distribution into a probability distribution is to group by each value of $\rho$ and turning the counts into probabilities: 
 
 ```{r}
 ppd_for_p %>%
-  group_by(`1`) %>%
+  group_by(p) %>%
   summarize(prob = n()/nrow(ppd_for_p)) %>%
   arrange(desc(prob))
 ```
@@ -1154,7 +1158,7 @@ ppd_for_p %>%
 We can also accomplish this by passing `aes(y = after_stat(count/sum(count))` into `geom_histogram()` when plotting.  Oftentimes, like in answering the probability that $\rho$ is between .3 and .4,  we can work with the posterior distribution to the very end. Just divide the number of draws that meet our condition (are between .3 and .4), by the total number of draws.   
 
 ```{r}
-sum(ppd_for_p$`1` > .3 & ppd_for_p$`1` < .4)/nrow(ppd_for_p)
+sum(ppd_for_p$p > .3 & ppd_for_p$p < .4)/nrow(ppd_for_p)
 ```
 
 There is approximately a 54% chance that $\rho$ is between .3 and .4. Give me draws from the posterior and I can show you the world!
