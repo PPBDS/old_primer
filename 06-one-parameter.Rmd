@@ -119,7 +119,7 @@
 
 <!-- Expand the use of rayshader. For each 3-D graphic, we need to add a movie with five frames. First frame is the current graphic. Second frame is with the conditional distribution set as a different color, probably red. We want to see this slice in the context of the joint distribution. Third frame shows the joint distribution with all non-red points going to zero. Ideally, this would be in motion, with the points just decreasing down. The meaning is that taking a conditional distribution means that everything outside that slice goes to zero. They are impossible. Fourth frame shows us rotate around so that we are looking at the cross-section from the side. -->
 
-<!-- You must understand what the standard error of $\hat{p}$ means. You do not need to understand why. -->
+<!-- You must understand what the standard error of $\hat{\rho}$ means. You do not need to understand why. -->
 
 <!-- In the Functions are your friend! section -->
 
@@ -149,15 +149,15 @@ knitr::include_app("https://www.youtube.com/embed/e3PJ3Du_zDc")
 
 In Chapter \@ref(probability), we learned about probability, the framework for quantifying uncertainty. In this chapter, we will learn about *sampling*, the beginning of our journey toward inference. When we sample, we take some *units* from a *population*, calculate statistics based on those units, and make inferences about unknown *parameters* associated with the population. 
 
-The urn below has a certain number of red and a certain number of white beads all of equal size, mixed well together. What proportion, $p$, of this urn's beads are red? 
+The urn below has a certain number of red and a certain number of white beads all of equal size, mixed well together. What proportion, $\rho$, of this urn's beads are red? 
 
 ```{r, echo = FALSE, fig.cap = "An urn with red and white beads."}
 knitr::include_graphics("06-one-parameter/images/sampling_bowl_1.jpg")
 ```
 
-One way to answer this question would be to perform an exhaustive count: remove each bead individually, count the number of red beads, count the number of white beads, and divide the number of red beads by the total number of beads. Call that ratio $p$, the proportion of red beads in the urn. However, this would be a long and tedious process. Therefore, we will use sampling! Consider two questions:
+One way to answer this question would be to perform an exhaustive count: remove each bead individually, count the number of red beads, count the number of white beads, and divide the number of red beads by the total number of beads. Call that ratio $\rho$, the proportion of red beads in the urn. However, this would be a long and tedious process. Therefore, we will use sampling! Consider two questions:
 
-*If we get 17 red beads in a random sample of size 50 taken from a mixed urn, what proportion $p$ of the beads in the urn are red?*
+*If we get 17 red beads in a random sample of size 50 taken from a mixed urn, what proportion $\rho$ of the beads in the urn are red?*
 
 *What is the probability, using that same urn, that we will draw more than 8 red beads if we use a shovel of size 20?*
 
@@ -189,15 +189,15 @@ knitr::include_graphics("06-one-parameter/images/sampling_bowl_2.jpg")
 knitr::include_graphics("06-one-parameter/images/sampling_bowl_3_cropped.jpg")
 ```
 
-Observe that 17 of the 50 sampled beads are red and thus 17/50 = 0.34 = 34% of the shovel's beads are red. We can view the proportion of beads that are red in this shovel as a guess of the proportion of beads that are red in the entire urn. While not as exact as doing an exhaustive count of all the beads in the urn, our guess of 34% took much less time and energy to make. 
+Observe that 17 of the 50 sampled beads are red and thus $17/50 = 0.34 = 34\%$ of the shovel's beads are red. We can view the proportion of beads that are red in this shovel as a guess of the proportion of beads that are red in the entire urn. While not as exact as doing an exhaustive count of all the beads in the urn, our guess of 34% took much less time and energy to make. 
 
-Recall that $p$ is the true value of the proportion of red beads. There is only one $p$. Our guesses at the proportion of red beads are known as $\hat{p}$ (pronounced p hat), where $\hat{p}$ is the estimated value of $p$ which comes from taking a sample. There are many possible $\hat{p}$'s. You and I will often differ in our estimates. We each have a different $\hat{p}$ even though we agree that there is only one $p$.
+Recall that $\rho$ is the true value of the proportion of red beads. There is only one $\rho$. Our guesses at the proportion of red beads are known as $\hat{\rho}$ (pronounced p hat), where $\hat{\rho}$ is the estimated value of $\rho$ which comes from taking a sample. There are many possible $\hat{\rho}$'s. You and I will often differ in our estimates. We each have a different $\hat{\rho}$ even though we agree that there is only one $\rho$.
 
 Start this activity over from the beginning, placing the 50 beads back into the urn. Would a second sample include exactly 17 red beads? Maybe, but probably not.
 
-What if we repeated this activity *many* times? Would our guess at the proportion of the urn's beads that are red, $\hat{p}$, be exactly 34% every time? Surely not. 
+What if we repeated this activity *many* times? Would our guess at the proportion of the urn's beads that are red, $\hat{\rho}$, be exactly 34% every time? Surely not. 
 
-Let's repeat this exercise with the help of 33 groups of friends to understand how the value of $\hat{p}$ varies across 33 independent trials. 
+Let's repeat this exercise with the help of 33 groups of friends to understand how the value of $\hat{\rho}$ varies across 33 independent trials. 
 
 ### Using the shovel 33 times {#student-shovels}
 
@@ -276,7 +276,7 @@ tactile_sample_urn %>%
   # p-hat. The paste after expression allows us to paste text prior to said
   # expression.
   
-  labs(x = expression(paste("Proportion of 50 beads that were red ", hat(p))),
+  labs(x = expression(paste("Proportion of 50 beads that were red ", hat(rho))),
        y = "Count",
        title = "Proportions Red in 33 Samples") 
 ```
@@ -286,7 +286,7 @@ tactile_sample_urn %>%
 
 What we just demonstrated in this activity is the statistical concept of **sampling**. We want to know the proportion of red beads in the urn, with the urn being our **population**. Performing an exhaustive count of the red and white beads would be too time-consuming. Therefore, it is much more practical to extract a *sample* of 50 beads using the shovel. Using this sample of 50 beads, we estimated the proportion of the urn's beads that are red to be about 34%.
 
-Moreover, because we mixed the beads before each use of the shovel, the samples were random and independent. Because each sample was drawn at random, the samples were different from each other. This is an example of  *sampling variation*. For example, what if instead of selecting 17 beads in our first sample we had selected just 11? Does that mean that the population proportion of the beads is 11/50 or 22%? No! Because we performed 33 trials we can look to our histogram, and see that the peak of the distribution occurs when $.35 < \hat{p} < .4$ , so it is *very likely* that the proportion of red beads in the entire population will also fall in or near this range. 
+Moreover, because we mixed the beads before each use of the shovel, the samples were random and independent. Because each sample was drawn at random, the samples were different from each other. This is an example of  *sampling variation*. For example, what if instead of selecting 17 beads in our first sample we had selected just 11? Does that mean that the population proportion of the beads is 11/50 or 22%? No! Because we performed 33 trials we can look to our histogram, and see that the peak of the distribution occurs when $.35 < \hat{\rho} < .4$ , so it is *very likely* that the proportion of red beads in the entire population will also fall in or near this range. 
 
 ## Virtual sampling {#virtual-sampling}
 
@@ -406,7 +406,7 @@ ggplot(aes(x = prop_red)) +
   # To use mathematical symbols in titles and labels, use the expression()
   # function, as here.
   
-  labs(x = expression(hat(p)),
+  labs(x = expression(hat(rho)),
        y = "Count",
        title = "Distribution of 33 proportions red") +
   
@@ -417,7 +417,7 @@ ggplot(aes(x = prop_red)) +
   scale_y_continuous(breaks = seq(2, 10, 2))
 ```
 
-Since `binwidth = 0.05`, this will create bins with boundaries at 0.30, 0.35, 0.45, and so on. Recall that $\hat{p}$ is equal to the proportion of beads which are red in each sample.
+Since `binwidth = 0.05`, this will create bins with boundaries at 0.30, 0.35, 0.45, and so on. Recall that $\hat{\rho}$ is equal to the proportion of beads which are red in each sample.
 
 Observe that we occasionally obtained proportions red that are less than 30%. On the other hand, we occasionally obtained proportions that are greater than 45%. However, the most frequently occurring proportions were between 35% and 45%. Why do we have these differences in proportions red? Because of *sampling variation*. 
 
@@ -468,7 +468,7 @@ facet_compare <- bind_rows(virtual_samples %>%
   # Add an x axis with p-hat using expression() with paste() for clarification
   # on p-hat's meaning. Add an appropriate title and inspect our creation.
   
-    labs(x = expression(paste("Proportion of 50 beads that were red", hat(p))),
+    labs(x = expression(paste("Proportion of 50 beads that were red", hat(rho))),
          title = "Comparing distributions") 
 
 facet_compare
@@ -504,14 +504,14 @@ ggplot(aes(x = prop_red)) +
   geom_histogram(binwidth = 0.01, 
                  boundary = 0.4, 
                  color = "white") +
-  labs(x = expression(hat(p)),
+  labs(x = expression(hat(rho)),
        y = "Count",
        title = "Distribution of 1,000 proportions red") 
 ```
 
-Why the empty spaces among the bars? Recall that, with only 50 beads, there are only 51 possible values for $\hat{p}$: 0, 0.02, 0.04, ..., 0.98, 1. A value of 0.31 or 0.47 is impossible, hence the gaps.
+Why the empty spaces among the bars? Recall that, with only 50 beads, there are only 51 possible values for $\hat{\rho}$: 0, 0.02, 0.04, ..., 0.98, 1. A value of 0.31 or 0.47 is impossible, hence the gaps.
 
-The most frequently occurring proportions of red beads occur, again, between 35% and 45%. Every now and then we observe proportions much higher or lower. This occurs because as we increase the number of trials, tails develop on our distribution as we are more likely to witness extreme $\hat{p}$ values. The symmetric, bell-shaped distribution shown in the histogram is well approximated by the *normal distribution*.
+The most frequently occurring proportions of red beads occur, again, between 35% and 45%. Every now and then we observe proportions much higher or lower. This occurs because as we increase the number of trials, tails develop on our distribution as we are more likely to witness extreme $\hat{\rho}$ values. The symmetric, bell-shaped distribution shown in the histogram is well approximated by the *normal distribution*.
 
 Now that we have a good understanding of virtual sampling, we can apply our knowledge to examine the effects of changing our virtual shovel size.  
 
@@ -559,7 +559,7 @@ virtual_samples_50  %>%
        title = "50")  
 ```
 
-We choose a bin width of .04 for all histograms to more easily compare different shovel sizes. Using a smaller bin size would result in gaps between the bars, as a shovel of size 50 has more possible $\hat{p}$ values than a shovel of size 25. 
+We choose a bin width of .04 for all histograms to more easily compare different shovel sizes. Using a smaller bin size would result in gaps between the bars, as a shovel of size 50 has more possible $\hat{\rho}$ values than a shovel of size 25. 
 
 Finally, we will perform the same process with 1000 replicates to map the histogram using a shovel size of **100**.
 
@@ -614,7 +614,7 @@ comparing_sampling_distributions
 
 Observe that as the sample size increases, the histogram becomes taller and narrower. This is because the *variation* of the proportion red for each sample decreases. Remember: A large variation means there are a wide range of values that can be achieved, while smaller variations are concentrated around a specific value. 
 
-Why does variation decrease as sample size increases? If we use a large sample size like 100 or 500, our sample is much more representative of the population simply because more of the population is included. As a result, the proportion red in our sample ($\hat{p}$) will be closer to the population proportion ($p$).  On the other hand, smaller samples have much more variation because of our old friend chance. We are much more likely to have extreme samples that are not representative of our population. 
+Why does variation decrease as sample size increases? If we use a large sample size like 100 or 500, our sample is much more representative of the population simply because more of the population is included. As a result, the proportion red in our sample ($\hat{\rho}$) will be closer to the population proportion ($\rho$).  On the other hand, smaller samples have much more variation because of our old friend chance. We are much more likely to have extreme samples that are not representative of our population. 
 
 Let's attempt to visualize the concept of *variation* a different way. For each sample size, let's plot the proportion red for *all* 1,000 samples. With 3 different shovel sizes, we will have 3,000 total points, with each point representing an instance of sampling from the urn with a specific shovel size. 
 
@@ -788,19 +788,19 @@ All of the concepts underlying this terminology, notation, and definitions tie d
 
 First, a **population** is the set of relevant units. The population's size is upper-case $N$.  In our sampling activities, the population is the collection of $N$ = 1,000 identically sized red and white beads in the urn. This is about the simplest possible population. Other examples are all the adult men in the US, all the classrooms in a school, all the wheelbarrows in Massachusetts, all the values of your blood pressure, read at five minute intervals, for your entire life. Often, the population is extends over time, as with your blood pressure readings and is, therefore, more amorphous. Consider all the people who have run for governor of a US state since 1900, or all the people who will run for governor through 2050. Those are also populations.
 
-Second, a **population parameter** is a numerical summary quantity about the population that is unknown, but you wish you knew. For example, when this quantity is the mean, the population parameter of interest is the *population mean*. This is mathematically denoted with the Greek letter $\mu$ pronounced "mu." In our earlier sampling from the urn activity, however, since we were interested in the *proportion* of the urn's beads that were red, the population parameter is the *population proportion*, denoted with $p$. 
+Second, a **population parameter** is a numerical summary quantity about the population that is unknown, but you wish you knew. For example, when this quantity is the mean, the population parameter of interest is the *population mean*. This is mathematically denoted with the Greek letter $\mu$ pronounced "mu." In our earlier sampling from the urn activity, however, since we were interested in the *proportion* of the urn's beads that were red, the population parameter is the *population proportion*, denoted with $\rho$. 
 
-Third, a **census** is an exhaustive enumeration or counting of all $N$ units in the population in order to compute the population parameter's value *exactly*. In our sampling activity, this would correspond to counting the number of beads out of $N = 1000$ that are red and computing the *population proportion* $p$ that are red *exactly*. When the number $N$ of individuals or observations in our population is large as was the case with our urn, a census can be quite expensive in terms of time, energy, and money. A census is impossible for any populations which includes the future, like our blood pressure next year or candidates for governor in 2040. There is a *truth* but we could not, even in theory, calculate it.
+Third, a **census** is an exhaustive enumeration or counting of all $N$ units in the population in order to compute the population parameter's value *exactly*. In our sampling activity, this would correspond to counting the number of beads out of $N = 1000$ that are red and computing the *population proportion* $\rho$ that are red *exactly*. When the number $N$ of individuals or observations in our population is large as was the case with our urn, a census can be quite expensive in terms of time, energy, and money. A census is impossible for any populations which includes the future, like our blood pressure next year or candidates for governor in 2040. There is a *truth* but we could not, even in theory, calculate it.
 
 Fourth, **sampling** is the act of collecting a sample from the population when we can not, or do not want to, perform a census. The sample size is lower case $n$, as opposed to upper case $N$ for the population's size. Typically the sample size $n$ is much smaller than the population size $N$. In our sampling activities, we used shovels with varying slots to extract samples of size $n$ = 1 through $n$ = 100. 
 
-Fifth, a **point estimate**, also known as a **sample statistic**, is a measure computed from a sample that *estimates* an unknown population parameter. In our sampling activities, recall that the unknown population parameter was the proportion of red beads and that this is mathematically denoted with $p$. Our point estimate is the *sample proportion*: the proportion of the shovel's beads that are red. In other words, it is our guess at the proportion of the urn's beads that are red. The point estimate of the parameter $p$ is $\hat{p}$. The "hat" on top of the $p$ indicates that it is an estimate of the unknown population proportion $p$. 
+Fifth, a **point estimate**, also known as a **sample statistic**, is a measure computed from a sample that *estimates* an unknown population parameter. In our sampling activities, recall that the unknown population parameter was the proportion of red beads and that this is mathematically denoted with $\rho$. Our point estimate is the *sample proportion*: the proportion of the shovel's beads that are red. In other words, it is our guess at the proportion of the urn's beads that are red. The point estimate of the parameter $\rho$ is $\hat{\rho}$. The "hat" on top of the $\rho$ indicates that it is an estimate of the unknown population proportion $\rho$. 
 
 <!-- RS: consider moving last 4 definitions to end discussion about sampling mechanisms, and first 4 definitions to the very start of the chapter. This vocab (with exception of point statistics) doesn't really have a purpose here, and should be used in a section where the words are actually used.  -->
 
 Sixth, a sample is said to be **representative** if it roughly *looks like* the population. In other words, are the sample's characteristics a good representation of the population's characteristics? In our sampling activity, are the samples of $n$ beads extracted using our shovels representative of the urn's $N$ = 1000 beads?
 
-Seventh, a sample is **generalizable** if any results based on the sample can generalize to the population. In our sampling activity, can we generalize the sample proportion from our shovels to the entire urn? Using our mathematical notation, this is akin to asking if $\hat{p}$ is a "good guess" of $p$?
+Seventh, a sample is **generalizable** if any results based on the sample can generalize to the population. In our sampling activity, can we generalize the sample proportion from our shovels to the entire urn? Using our mathematical notation, this is akin to asking if $\hat{\rho}$ is a "good guess" of $\rho$?
 
 Eighth, **biased sampling** occurs if certain individuals or observations in a population have a higher chance of being included in a sample than others. We say a sampling procedure is **unbiased** if every observation in a population had an equal chance of being sampled. Had the red beads been much smaller than the white beads, and therefore more prone to falling out of the shovel, our sample would have been **biased**. In our sampling activities, since we mixed all $N = 1000$ beads prior to each group's sampling and since each of the equally sized beads had an equal chance of being sampled, our samples were unbiased.
 
@@ -824,7 +824,7 @@ knitr::include_graphics("06-one-parameter/images/cant_breathe_sponge.png")
 * If we extract a sample of $n=50$ beads at **random**, in other words, we mix all of the equally sized beads before using the shovel, then
 * the contents of the shovel are an **unbiased representation** of the contents of the urn's 1000 beads, thus
 * any result based on the shovel's beads can **generalize** to the urn, thus
-* the sample proportion $\hat{p}$ of the $n=50$ beads in the shovel that are red is a **"good guess"** of the population proportion $p$ of the $N=1000$ beads that are red, thus
+* the sample proportion $\hat{\rho}$ of the $n=50$ beads in the shovel that are red is a **"good guess"** of the population proportion $\rho$ of the $N=1000$ beads that are red, thus
 * instead of manually going over all 1,000 beads in the urn, we can make **inferences** about the urn by using the results from the shovel. 
 
 
@@ -832,11 +832,11 @@ knitr::include_graphics("06-one-parameter/images/cant_breathe_sponge.png")
 
 Now, for some important statistical definitions related to sampling. As a refresher of our 1,000 repeated/replicated virtual samples of size $n$ = 25, $n$ = 50, and $n$ = 100 in Section \@ref(virtual-sampling), let's display our figure showing the difference in proportions red according to different shovel sizes.  
 
-```{r, echo = FALSE, fig.cap = "Previously seen three distributions of the sample proportion $\\hat{p}$."}
+```{r, echo = FALSE, fig.cap = "Previously seen three distributions of the sample proportion $\\hat{\rho}$."}
 comparing_sampling_distributions
 ```
 
-These types of distributions have a special name: **sampling distributions**; their visualization displays the effect of sampling variation on the distribution of a point estimate; in this case, the sample proportion $\hat{p}$. Using these sampling distributions, for a given sample size $n$, we can make statements about what values we typically expect. 
+These types of distributions have a special name: **sampling distributions**; their visualization displays the effect of sampling variation on the distribution of a point estimate; in this case, the sample proportion $\hat{\rho}$. Using these sampling distributions, for a given sample size $n$, we can make statements about what values we typically expect. 
 
 For example, observe the centers of all three sampling distributions: they are all roughly centered around $0.4 = 40\%$. Furthermore, observe that while we are somewhat likely to observe sample proportions of red beads of $0.2 = 20\%$ when using the shovel with 25 slots, we will almost never observe a proportion of 20% when using the shovel with 100 slots. Observe also the effect of sample size on the sampling variation. As the sample size $n$ increases from 25 to 50 to 100, the variation of the sampling distribution decreases and thus the values cluster more and more tightly around the same center of around 40%. We quantified this variation using the standard deviation of our sample proportions, seeing that the standard deviation decreases with the square root of the sample size:
 
@@ -864,7 +864,7 @@ The more data points involved in the calculations of the mean, the smaller the s
 
 To help reinforce these concepts, let's re-display our previous figure but using our new sampling terminology, notation, and definitions:
 
-```{r, echo = FALSE, fig.cap = "Three sampling distributions of the sample proportion $\\hat{p}$. Note the increased concentration on the bins around .4 as our sample size increases."}
+```{r, echo = FALSE, fig.cap = "Three sampling distributions of the sample proportion $\\hat{\rho}$. Note the increased concentration on the bins around .4 as our sample size increases."}
 p_hat_compare <- virtual_prop %>% 
   mutate(
     n = str_c("n = ", n),
@@ -872,8 +872,8 @@ p_hat_compare <- virtual_prop %>%
     ) %>% 
   ggplot( aes(x = prop_red)) +
   geom_histogram(binwidth = 0.05, boundary = 0.4, color = "white") +
-  labs(x = expression(paste("Sample proportion ", hat(p))), 
-       title = expression(paste("Sampling distributions of ", hat(p), " based on n = 25, 50, 100.")) ) +
+  labs(x = expression(paste("Sample proportion ", hat(rho))), 
+       title = expression(paste("Sampling distributions of ", hat(rho), " based on n = 25, 50, 100.")) ) +
   facet_wrap(~ n)
 if(knitr::is_latex_output()){
   p_hat_compare  +
@@ -893,7 +893,7 @@ shovels_100 %>%
   ggplot(aes(x = shovel_size, y = st_dev_p_hat)) +
   geom_point() +
   labs(x = "Sample size (n)",
-       y = expression(Standard~error~of~hat(italic(p))))
+       y = expression(Standard~error~of~hat(italic(rho))))
 ```
 
 Remember the key message of this last table: that as the sample size $n$ goes up, the "typical" error of your point estimate will go down, as quantified by the *standard error*.
@@ -920,7 +920,7 @@ If I know your estimate plus or minus *two* standard errors, I know your 95% con
 
 <!-- RS: Explain what confidence interval is.  -->
 
-Recall that $\hat{p}$ is the estimated value of p which comes from taking a sample. There can be billions and billions of $\hat{p}$'s. We look at a large group of $\hat{p}$'s, create a distribution of results to represent the possible values of p based on our findings, and then we compute a standard error to account for our own uncertainty about our predictions. Our 95% confidence interval for our prediction == our estimate plus or minus **two** standard errors. 
+Recall that $\hat{\rho}$ is the estimated value of p which comes from taking a sample. There can be billions and billions of $\hat{\rho}$'s. We look at a large group of $\hat{\rho}$'s, create a distribution of results to represent the possible values of p based on our findings, and then we compute a standard error to account for our own uncertainty about our predictions. Our 95% confidence interval for our prediction == our estimate plus or minus **two** standard errors. 
 
 In regards to the fifth layer of the hierarchy, we may wonder: 
 
@@ -929,17 +929,17 @@ In regards to the fifth layer of the hierarchy, we may wonder:
 MADs and standard deviations are, more or less, the same thing. They are both measures of the **variability** of a distribution. In most cases, they have very similar values. A *standard error* is also a standard deviation. Specifically, it is the standard deviation of the distribution of the estimates, and that distribution of estimates is, more or less, your posterior. Therefore, we can use MAD, like standard error, to describe that distribution and the variability of that distribution. 
 
 
-## Answering the questions
+## Urn paradigm
 
 <!-- Re-organize this around the Cardinal Virtues, just like Chapter 7. -->
 
 Recall the questions we asked at the beginning of our chapter: 
 
-*If we get 17 red beads in a random sample of size 50 taken from a mixed urn, what proportion $p$ of the beads in the urn are red?*
+*If we get 17 red beads in a random sample of size 50 taken from a mixed urn, what proportion $\rho$ of the beads in the urn are red?*
 
 *What is the probability, using the same urn, that we will draw more than 8 red beads if we use a shovel of size 20?*
 
-These are *real* questions which we can use to test what we have learned. For any question, we use the Cardinal Virtues to guide our thinking. While this may seem trivial at first, as our problems become more complex it will become useful to have a systematic approach to break each problem into its parts. Let's get to it.
+The urn paradigm provides us a simple problem for which we can learn new data science techniques before we tackle more complicated problems in later chapters. For any question, we use the Cardinal Virtues to guide our thinking. While this may seem trivial at first, as our problems become more complex it will become useful to have a systematic approach to break each problem into its parts. Let's get to it.
 
 ### Wisdom
 
@@ -947,7 +947,7 @@ These are *real* questions which we can use to test what we have learned. For an
 knitr::include_graphics("other/images/Wisdom.jpg")
 ```
 
-This essence of Wisdom is determining whether or not it is solvable, as it is futile to attempt to solve an impossible problem. First, let's break down our question into its key parts. Then we can construct a Preceptor Table to determine whether or not our data is viable to answer our question. 
+This essence of Wisdom is determining whether or not a problem is even solvable. First, let's break down our question into its key parts. Then we can construct a Preceptor Table to determine whether or not our data is viable to answer our question. 
 
 <!-- Change "centered at" to reference p. Use rho instead of p -->
 
@@ -956,9 +956,9 @@ This essence of Wisdom is determining whether or not it is solvable, as it is fu
 
 #### Getting started
 
-Virtually every problem boils down to attempting to answer a **question** about a **population** using **data** and **prior knowledge**. We should explicitly state all 4 before we proceed, to make sure we understand the task at hand. For example, drawing conclusions about the contents of one urn is extremely different than drawing conclusions about all urns. The concept of the population is critical.   
+Virtually every problem boils down to attempting to answer a **question** about a **population** using **data** and **prior knowledge**. We should explicitly state all 4 before we proceed, to make sure we understand the task at hand. 
 
-Let's revisit our first question: *If we get 17 red beads in a random sample of size 50 taken from a mixed urn, what proportion $p$ of the beads in the urn are red?*. We have a *question*: what proportion of the beads in the urn are red? Our question is asking us to solve for one population parameter, $p$.  The subject of the question is the *population*; in this case, the population is *a mixed urn*. "A mixed urn" is very ambiguous, and we do not even know its size, but that is what the question provides us. There is an urn out there, somewhere, for which we want to know the proportion of red beads. 
+Let's revisit our first question: *If we get 17 red beads in a random sample of size 50 taken from a mixed urn, what proportion $\rho$ of the beads in the urn are red?* We have a *question*: what proportion of the beads in the urn are red? Our question is asking us to solve for one population parameter, $\rho$.  The subject of the question is the *population*; in this case, the population is *a mixed urn*. "A mixed urn" is very ambiguous, and we do not even know its size, but that is what the question provides us. There is an urn out there, somewhere, for which we want to know the proportion of red beads. 
 
 To answer our question, we have some *data*: in a random sample of size 50, $17/50 = 34\%$ of beads are red. The data we have is not to be confused with the *prior*, which is information that we know about our scenario **before** we collect our data that can come from our own general knowledge or other research. Let's consider an example to differentiate the prior and data. If we flip a balanced coin, we know that there is a 50% chance of it landing on heads. This is the prior! If we then construct an experiment and flip a coin 10 times and record 4 heads, this is data that we can use as evidence for our prior.    
 
@@ -1015,8 +1015,6 @@ tibble(bead_ID = c("1", "2", "...", "...", "200", "201", "...", "...", "999", "1
              color = "Color") %>%
   tab_style(cell_borders(sides = "right"),
             location = cells_body(columns = c(bead_ID))) %>%
-  tab_style(cell_text(weight = "bold"),
-            location = cells_body(columns = c(bead_ID))) %>%
   cols_align(align = "center", columns = everything())
 ```
 
@@ -1042,15 +1040,15 @@ knitr::include_graphics("other/images/Justice.jpg")
 
 Now that we've determined that our data *could* be used, Justice asks if it *should* be used by analyzing the sampling mechanism. If we want to draw conclusions about an entire population using a small subset of its individuals, then we want to consider the representativeness and the validity of our data. Skipping Justice puts us at risk of creating models with "bad data", which would lead us to incorrect or misleading conclusions.  
 
-**Representativeness** involves our rows. More specifically, are the rows that we do have data for representative of the rows for which we do not have data? In our urn, our prior data is representative of the population if the proportion of red beads in our sample is close enough to the actual proportion of red beads in the whole urn. For the sample proportion to be similar to the actual population proportion, we ideally want the data we have to be a random, unbiased selection from our population, using a considerable sample size. This rarely occurs in real life! But in the context of our problem, the sampling mechanism of using a shovel of size 50 to sample beads from a **mixed** urn should be enough to consider our sample representative of the population, and we can move on. 
+**Representativeness** involves our rows. More specifically, are the rows that we do have data for representative of the rows for which we do not have data? In our urn, our  data is representative of the population if the proportion of red beads in our sample is close enough to the actual proportion of red beads in the whole urn. For the sample proportion to be similar to the actual population proportion, we ideally want the data we have to be a random, unbiased selection from our population, using a considerable sample size. This rarely occurs in real life! But in the context of our problem, the sampling mechanism of using a shovel of size 50 to sample beads from a **mixed** urn should be enough to consider our sample representative of the population, and we can move on. 
 
-**Validity** involves the columns of our data set. Is the meaning of our columns consistent across our prior dataset(s) and ideal Preceptor Table? In our urn scenario, does bead color in our sampled data and bead color in our Preceptor Table mean the same thing? The answer is yes, and validity can be assumed very easily. In Section \@href(two-parameters) analyzing representativeness and validity will become considerably more challenging.  
+**Validity** involves the columns of our data set. Is the meaning of our columns consistent across our dataset(s) and ideal Preceptor Table? In our urn scenario, does bead color in our sampled data and bead color in our Preceptor Table mean the same thing? The answer is yes, and validity can be assumed very easily. In Section \@ref(two-parameters) analyzing representativeness and validity will become considerably more challenging.  
 
 #### The DGM
 
 The final aspect of Justice is producing a mathematical formula that can model our situation. Our models are only as good as the equations we use to make them, so choose with care. 
 
-One of the most important terms in statistics and data science is the **Data Generating Mechanism**, or DGM. The DGM simply is how each individual outcome, $y_i$, comes into existence. In general, the DGM is often denoted as follows: 
+One of the most important terms in statistics and data science is the **Data Generating Mechanism**, or DGM. The DGM is simply how each individual outcome, $y_i$, comes into existence. In general, the DGM is often denoted as follows: 
 
 $$ y_i  \sim p(y_i | \theta) $$
 
@@ -1072,13 +1070,13 @@ We've evaluated our data and questions and chosen a mathematical formula. Now it
 
 #### Bayesian framework
 
-We are Bayesian data scientists that make Bayesian models. This means that we make specific assumptions and consider different things to be either fixed or variable compared to other data science frameworks. One of the most important distinctions is that in Bayesian data science, **we don't know the values of our parameters**. As such, Bayesians create a probability distribution for our parameters in addition to our outcomes. Consider the DGM created in Justice: 
+We are Bayesian data scientists that make Bayesian models. This means that we make specific assumptions and consider different things to be either fixed or variable compared to other data science frameworks. One of the most important distinctions is that in Bayesian data science, **we don't know the values of our parameters**. Consider the DGM created in Justice: 
 
 $$ T_i  \sim B(\rho_r, n = 50) $$
 
-Some non-Bayesian frameworks are concerned with the probability distribution of our prior observed data, but do not care much about the probability distribution for $\rho_r$ and assume it to be fixed. If $\rho_r$ is fixed, the equation above becomes one simple binomial distribution. Think of this as a standard 2 dimensional plot. 
+Some non-Bayesian frameworks are concerned with the probability distribution of our observed data, but do not care much about the probability distribution for $\rho_r$ and assume it to be fixed. If $\rho_r$ is fixed, the equation above becomes one simple binomial distribution. Think of this as a standard 2 dimensional plot. 
 
-Us Bayesians consider our observed data to be fixed. We don't consider alternate realities where our observed data is different due to sampling variation. Instead, we are concerned with the probability distribution of our parameter. In our urn scenario, $\rho_r$ is variable, so we have to create a separate binomial distribution for each possible value of $\rho_r$. Think of this as a 3 dimensional plot similar to what we created in Section \@href(n-models).
+Us Bayesians consider our observed data to be fixed. We don't consider alternate realities where our observed data is different due to sampling variation. Instead, we are concerned with the probability distribution of our parameter. In our urn scenario, $\rho_r$ is variable, so we have to create a separate binomial distribution for each possible value of $\rho_r$. Think of this as a 3 dimensional plot similar to what we created in Section \@ref(n-models).
 
 One of the foundations of Bayesian data science is Bayes' theorem, created by Thomas Bayes:
 
@@ -1086,9 +1084,9 @@ $$  p(\theta | y) = \frac{p(y|\theta)p(\theta)}{p(y)} $$
 
 We do not care enough to try and understand how this equations works! The equation itself is not helpful to us, but understanding the different terms within it will help our modeling endeavors.  
 
-- **The likelihood**, $p(y|\theta)$, represents the joint probability distribution for each value of our parameter(s) $\theta$. This is the exact same concept we addressed while discussing the distinctions of Bayesian science: because our parameters are variable, we have to create distributions for each potential value. Combining all these distributions together creates a joint distribution that is 3 dimensional when plotted. 
+- **The joint distribution**, $p(y|\theta)$, represents the exact same concept we addressed while discussing the distinctions of Bayesian science: because our parameters are variable, we have to create distributions for each potential value. Combining all these distributions together creates a joint distribution that is 3 dimensional when plotted. 
 
-Careful readers may note that the equation for the likelihood, $p(y|\theta)$, appears to be very similar to the equation for the DGM, $p(y_i|\theta)$. They are indeed similar, but know that the likelihood is a distribution of all outcomes, while the DGM models selecting one individual outcome, $y_i$.  
+Careful readers may note that the equation for the joint distribution, $p(y|\theta)$, appears to be very similar to the equation for the DGM, $p(y_i|\theta)$. They are indeed similar, but know that the joint distribution models all outcomes, while the DGM models selecting one individual outcome, $y_i$. Also know that many data scientists refer to the joint distribution as "the likelihood".  
 
 - **The prior**, $p(\theta)$, is the probability distribution that describes our uncertainty surrounding our parameter(s) $\theta$. We create the prior from any information we have **before** we collect data. The more descriptive the information we have, the more descriptive the prior, and the less error we have in our model as we know that some values are far more likely to occur than others. 
 
@@ -1096,32 +1094,21 @@ In Wisdom, we stated that we do not have any prior information. Some of us might
 
 - **The posterior**, $p(\theta|y)$, is the result of Bayes' theorem and is our coveted end goal. The posterior is the probability distribution of our parameters, created using data that updates our prior beliefs. We have referenced the posterior many times before, and this definition does not change its meaning. 
 
-In our urn scenario, obtaining the posterior involves first creating many binomial distributions for each possible population proportion. This is the likelihood, and it is a 3 dimensional model. We then select the distribution that corresponds with our data: the estimated population proportion is 34%. This is equivalent to taking a 2 dimensional slice of the 3 dimensional model. We are left with a probability distribution for our parameter, $\rho$. 
+In our urn scenario, obtaining the posterior involves first creating many binomial distributions for each possible population proportion. This is the joint distribution, and it is a 3 dimensional model. We then select the distribution that corresponds with our data: the estimated population proportion is 34%. We can represent the posterior with the following:
 
-#### 4 steps for success
+$$\text{Prob}(\text{models} | \text{data} = 17)$$
 
-In Chapter \@ref(probability), we created our probability distributions "by hand". We first started our tibble with a range of possible values for our parameter $\rho$. We then took samples using each possible value to create the 3 dimensional joint distribution. Finally, we took a slice of the joint distribution based on the data we collected, to create the posterior probability distribution. This is not how professionals work. Many data scientists use the **rstanarm** package, which provides an easy interface to work with the statistical language Stan. 
-
-**rstanarm** and Stan are appealing because they are powerful. As such, creating models using them may seem considerably more complex than our methodology before, and as we progress we will see more numbers and math. Do not fret, as our understanding of the likelihood, prior, and posterior can help us!  In this chapter we will explain our models in terms of high level Bayesian concepts, so we can understand what is going on before diving into the math in later chapters.
-
-We will use four key steps to assist in our modeling, provided by @bayestut
-
-> Step 1: **Specify the data model and prior**. The model is a collection of probability distributions conditional on different values for the parameters. The prior provides the priori plausibility of the different parameter values. The product of the prior and the likelihood is proportional to the posterior distribution of the parameters.
-
-> Step 2: **Estimate the model parameters**. Bayes’ theorem is used to update beliefs about
-the parameters based on knowledge obtained from observing the data. Estimating regression models in the Bayesian framework typically involves using a numerical algorithm to draw a representative sample from the posterior distribution.
-
-> Step 3: **Check sampling quality and model fit**. Graphical and numerical checks are necessary to confirm that the sample obtained in the previous step adequately describes the posterior and that the observed data is plausible underthe model. If not, the model needs to be revised, and we might want to explore alternative model formulations.
-
-> Step 4: **Summarize and interpret results.** We assess estimates, interpret results, and make posterior predictions.
-
-As we create our model we will revisit these steps to ensure we understand the underlying purpose of the functions we use and objects we create, without having to understand the specific details. 
+This is equivalent to taking a 2 dimensional slice of the 3 dimensional model. We are left with a probability distribution for our parameter, $\rho$. 
 
 #### stan_glm()
 
-Instead of building the joint and conditional probability distributions "by hand" as we did in Chapter \@ref(probability), we can just use `stan_glm()` from the **rstanarm** package. For now our goal is to learn how to interpret the results of `stan_glm()`. Chapter \@ref(two-parameters) will provide a more detailed explanation for the seemingly complex objects we will make. **To be clear, you do not need to fully understand this section or how this code works. This is an introduction, not a formal lesson.**
+In Chapter \@ref(probability), we first started our tibble with a range of possible values for our parameter $\rho$. We then took samples using each possible value to create the 3 dimensional joint distribution. Finally, we took a slice of the joint distribution based on the data we collected, to create the posterior probability distribution. This is not how professionals work. Many data scientists use the **rstanarm** package, which provides a user friendly interface to work with the statistical language Stan. 
 
-Assume that, as before, a shovel of size 50 drawn from the urn has returned 17 red beads and 33 white. 
+**rstanarm** and Stan are appealing because they are powerful. Functions such as `stan_glm()` can do everything we did by hand in Chapter 5 in a few lines of code. Because we will use a professional statistical library, the objects we make will become more complex. In this chapter we will explain our models in terms of high level Bayesian concepts, and Chapter \@ref(two-parameters) will provide a more detailed explanation of the objects we will make. **To be clear, you do not need to fully understand this section or how this code works. This is an introduction, not a formal lesson.**
+
+Again, we are attempting to answer this question: *If we get 17 red beads in a random sample of size 50 taken from a mixed urn, what proportion $\rho$ of the beads in the urn are red?*
+
+We want to estimate the value of $\rho$, but because us Bayesians consider $\rho$ to be variable, we need to create a posterior distribution that addresses our uncertainty regarding its true value. We can easily create the posterior by using `stan_glm()`. Let's go ahead and create our model, and then view the results in a tibble. 
 
 ```{r, message = FALSE}
 library(rstanarm)
@@ -1131,12 +1118,52 @@ fit_1 <- stan_glm(formula = red ~ 1,
                                         rep(0, 33))),
                   family = binomial,
                   refresh = 0,
-                  seed = 10)
+                  seed = 10) 
+
+fit_1 %>%
+  as_tibble()
 ```
 
-This single function call has done all the work which we did by hand previously: created the joint distribution and then estimated the posterior probability distribution, conditional on the data which was passed in to the `data` argument. Once we have the `fit_1` object, it is easy to answer two sorts of questions: the posterior probability distribution for $p$ and predictions for new draws from the urn. The key new functions are `posterior_epred()` for the former and `posterior_predict()` for the latter.
+This tibble shows us 4,000 draws from the posterior distribution.`stan_glm()` simplifies all the work which we did by hand previously into one single function. We can also visualize our 4,000 draws from the posterior in a histogram:
 
-For the posterior probability distribution of $p$:
+```{r}
+fit_1 %>%
+  as_tibble() %>%
+   ggplot(aes(x = `(Intercept)`)) +
+    geom_histogram(aes(y = after_stat(count/sum(count))),
+                   bins = 50) +
+    labs(title = "4,000 draws from the Posterior Distribution",
+         subtitle = "Why is the x axis negative? We will address this soon.",
+         x = expression(rho),
+         y = "Probability") + 
+    scale_x_continuous(labels = scales::number_format()) +
+    scale_y_continuous(labels = scales::percent_format()) +
+    theme_classic()
+```
+
+Let's examine the purpose of the arguments used within `stan_glm()` in terms of high level Bayesian concepts. 
+
+- **The prior**: Recall that we do not have a prior for our urn, so we add nothing to our model. With problems that contain covariates like in Chapter \@ref(two-parameters), `stan_glm()` will create weakly informative priors based on our predictor variables by auto-rescaling the posterior for us. **The problems in this Primer do not require us to create our own priors, and as such we will not worry about them.**
+
+- **The joint distribution**: The `family` and `formula` arguments relate to the joint distribution, also known as the likelihood by some. In Justice, we created the following model for our sampling mechanism:
+
+$$ T_i  \sim B(\rho_r, n = 50) $$
+
+This is a binomial distribution. In `stan_glm()` we denote this with `family = binomial`. In addition to the type of the distribution, we also need to analyze the outcome and predictor variables involved. The outcome is the quantity we are measuring, in this case the total number of red beads in our sample, $T_i$.  Covariates are continuous predictor variables that help forecast our outcome. For example, age is a covariate that effects the outcome of someone's blood pressure. Because we only measure how many red beads are in the sample (the outcome), we have no covariates which we can use to make our model more accurate. Because we have no predictors, we use the argument `formula = red ~ 1`, which means that we only model the outcome without the consideration of any covariates. 
+
+- **The data**: We are required to pass data into the `data` argument in order for `stan_glm()` to "take a slice" of the joint distribution and estimate the posterior. Because we are measuring the total number of red beads in a sample, $T_i$, we pass in data in a binomial format: the 1's represent the number of successes (red beads drawn), and the 0's represent the number of failures (white beads drawn). As such, we pass a tibble with 17 red beads and 33 white beads into `data`. 
+
+- Other arguments: we use `refresh = 0` to suppress the behavior of printing to the console, and `seed = 10` to make produce the same output every time we run the code. 
+
+ Once we have the `fit_1` object, it is easy to answer two sorts of questions: the posterior probability distribution for $\rho$ and predictions for new draws from the urn. The key new functions are `posterior_epred()` for the former and `posterior_predict()` for the latter.
+ 
+#### Answering the questions
+ 
+There are some questions left to be answered. Let's attempt to answer them here. 
+
+> Why is the x axis of the posterior distribution negative? Shouldn't all values be between 0 and 1?
+
+The x axis of our posterior is negative because for binomial models, `stan_glm()` chooses to use the "logit" function to convert our probabilities. We can use `posterior_epred()` to find the *ex*pected *prediction* of our posterior without the logit function. Know that we do not just use `posterior_epred()` to undo transformations. We will use it many more times throughout this *Primer* to create the expected distribution based off some covariate.  Let's recreate our posterior using `posterior_epred()`:
 
 ```{r}
 ppd_for_p <- posterior_epred(fit_1, 
@@ -1146,8 +1173,7 @@ ppd_for_p <- posterior_epred(fit_1,
 ppd_for_p
 ```
 
-<!-- DK: Explain this object. This is a posterior, which means it is a distrubution. But I can't ever show you a distribution. But I can give you 4,000 draws from a distribution. rnorm(4000). Answer questions like: sum(rnorm(4000) > 1.5)/4000.  -->
-
+Because we do not wish to create our distribution conditional on some covariate, we want to pass in a tibble with 1 row into the `newdata` argument. An empty tibble has 0 rows, so we instead pass in a tibble with some junk data. `constant = 'draws'` is completely meaningless. We can verify that the posterior is the same by plotting it. Hopefully it should have a similar shape, but all values should be between 0 and 1. 
 
 ```{r}
 ppd_for_p %>% 
@@ -1155,7 +1181,7 @@ ppd_for_p %>%
     geom_histogram(aes(y = after_stat(count/sum(count))),
                    bins = 50) + 
     labs(title = "Posterior Probability Distribution",
-         subtitle = "Proportion of red beads in urn is centered around 0.34",
+         subtitle = "Distribution shape is the same as earlier, but the proportion red is centered at .34",
          x = "Proportion p of Red Beads in Urn",
          y = "Probability") + 
   
@@ -1164,20 +1190,53 @@ ppd_for_p %>%
     theme_classic()
 ```
 
-When we look at our question -- we are asking for the posterior probability of a certain case. This case is where we find that, using the 50 slot shovel, we get a result of 17 red beads. What does that make our posterior probability? We want:
+Now that our posterior probability distribution is correctly centered, we have successfully created the posterior distribution and can finally answer the question we started the chapter with: *If we get 17 red beads in a random sample of size 50 taken from a mixed urn, what proportion $\rho$ of the beads in the urn are red?*
 
-$$\text{Prob}(\text{models} | \text{data} = 17)$$
+Look to the distribution we have created! We can see that the bulk of the area under the posterior occurs when $\rho$ is between .28 and about .42, so the answer to our question is that it is likely that 28 to 42 percent of the beads in the urn in the red. Although the most likely probability (the highest bar on the histogram) occurs when $\rho$ is around .32, The answer is not a single number. Our posterior distribution is just that: a distribution. From our sample, we have many different results for the proportion of red beads in the entire urn. Certain proportions, like the extremes close to 0% or 100%, are essentially impossible due to our sample value being 34%. On the other hand, we could have just as easily sampled 16 or 18 beads from the urn, and sample proportions such as 32% and 36% are very plausible.
 
-The answer is not a single number. Our posterior distribution is just that: a distribution. From our sample, we have many different results for the proportion of red beads in the entire urn. Certain proportions, like the extremes close to 0% or 100%, are essentially impossible due to our sample value being 32%. Some sample proportions, like 40%, occur far more frequently than other sample proportions. 
+This means that, while we can provide a range of possibilities (and we can estimate which of those possibilities occur most frequently), we can never say that we know the total number of red beads with certainty.  We know that there is the most chance that $\rho$ is between .28 and about .42, some chance that $\rho$ is between .15 and .24 or between .42 and .56, and almost no chance that $\rho$ is below .15 or above .56. With the posterior we can answer all these questions at once. 
 
-This means that, while we can provide a range of possibilities (and we can estimate which of those possibilities occur most frequently), we can never say that we know the total number of red beads with certainty. 
+The key issue with the urn paradigm is that, unlike real world data science, we *can* technically find the true proportion. We just have to perform that exhaustive count that we've been so desperately avoiding. In the real world, the "true" solution can never be known. This is why we require inference, and why tools like sampling are so helpful for drawing conclusions about the world around us.   
 
-The key issue with the urn paradigm is that, unlike real world data science, we *can* technically find the true proportion. We just have to perform that exhaustive count that we've been so desperately avoiding. In the real world, the "true" solution can never be known. This is why we require inference, and why tools like sampling are so helpful for drawing conclusions about the world around us. 
+If we had decided to, we could have answered this question using pure statistics. First calculate the standard error given 34% of the beads in the sample are red out of a sample size of 50:
 
+$$  SE = \sqrt\frac{.34(1-.34)}{50} \approx .067$$
 
-Now that we have our posterior distribution for the proportion $p$ of red beads in the urn, we can use that object to forecast other outcomes, outcomes which we have not yet observed. Recall, from the start of the Chapter: 
+We can then create a 95% confidence interval:
+
+$$  CI = \bar{x} \hspace{.1cm} \pm 2SE = .34 \hspace{.1cm} \pm .134$$
+
+With 95% confidence, the proportion of red beads in the urn is between 21% and 47%. This is correct, but quite difficult to conceptualize. As data scientists we create the posterior distribution to answer all our questions. A single confidence interval does very little good. 
+
+Here is a second question that some of us may want answered: 
+
+> Why are there 4,000 rows in the stan_glm() tibble?
+
+By default, `stan_glm()` will sample from the posterior in 2 sets of 2,000 iterations. If needed we can change the default number of iterations using the `iter` argument, but there are few reasons to do so. Some of us may still want to know why we sample from the posterior in the first place. The posterior is a theoretical beast, which makes it difficult to work with. 
+
+For example, what if we wanted to know the probability that $\rho$ is above .4? To answer this, we would simply divide the number of draws that are above .4 by the total number of draws. However, the posterior is a distribution, so it has no indivisual observations because it's infinite! Instead, we can work with draws from the posterior. The more draws, the more our distribution looks like the posterior. We can easily answer our question: 
+
+```{r}
+sum(ppd_for_p$`1` > .4)/nrow(ppd_for_p)
+```
+
+There is approximately a 20% chance that $\rho$ is above .4. Give me draws from the posterior and I can show you the world!
+
+```{r, echo = FALSE, fig.cap = "Let's take a quick musical interlude. We've earned it."}
+knitr::include_app("https://www.youtube.com/watch?v=sVxUUotm1P4")
+```
+
+### Temperance
+
+```{r echo = FALSE}
+knitr::include_graphics("other/images/Temperance.jpg")
+```
+
+Now that we have our posterior distribution for the proportion $\rho$ of red beads in the urn, we can use that object to forecast other outcomes, outcomes which we have not yet observed. Recall, from the start of the Chapter: 
 
 *What is the probability, using the same urn, that we will draw more than 8 red beads if we use a shovel of size 20?*
+
+#### Using the posterior
 
 Whenever someone asks you a question, you need to decide what posterior probability distribution would make it easy for you to answer that question. In this case, if we know the posterior probability distribution for the number of red beads in a shovel of size 20, then a question about the likelihood of drawing more than 8 (or any other value) is easy to answer.
 
@@ -1307,12 +1366,12 @@ First, who is the **(Study) Population** of $N$ individuals or observations of i
 
 Second, what is the **population parameter**? 
 
-* Urn: The population proportion $p$ of *all* the beads in the urn that are red.
-* Obama poll: The population proportion $p$ of *all* young Americans who approve of Obama's job performance.
+* Urn: The population proportion $\rho$ of *all* the beads in the urn that are red.
+* Obama poll: The population proportion $\rho$ of *all* young Americans who approve of Obama's job performance.
 
 Third, what would a **census** look like?
 
-* Urn: Manually going over all $N$ = 1000 beads and exactly computing the population proportion $p$ of the beads that are red.
+* Urn: Manually going over all $N$ = 1000 beads and exactly computing the population proportion $\rho$ of the beads that are red.
 * Obama poll: Locating all $N$ young Americans and asking them all if they approve of Obama's job performance. In this case, we don't even know what the population size $N$ is!
 
 Fourth, how do you perform **sampling** to obtain a sample of size $n$?
@@ -1322,8 +1381,8 @@ Fourth, how do you perform **sampling** to obtain a sample of size $n$?
 
 Fifth, what is your **point estimate (AKA sample statistic)** of the unknown population parameter?
 
-* Urn: The sample proportion $\hat{p}$ of the beads in the shovel that were red. 
-* Obama poll: The sample proportion $\hat{p}$ of young Americans in the sample that approve of Obama's job performance. In this poll's case, $\hat{p} = 0.41 = 41\%$, the quoted percentage in the second paragraph of the article. 
+* Urn: The sample proportion $\hat{\rho}$ of the beads in the shovel that were red. 
+* Obama poll: The sample proportion $\hat{\rho}$ of young Americans in the sample that approve of Obama's job performance. In this poll's case, $\hat{\rho} = 0.41 = 41\%$, the quoted percentage in the second paragraph of the article. 
 
 Sixth, is the sampling procedure **representative**?
 
@@ -1334,8 +1393,8 @@ Sixth, is the sampling procedure **representative**?
 
 Seventh, are the samples **generalizable** to the greater population?
 
-* Urn: Is the sample proportion $\hat{p}$ of the shovel's beads that are red a "good guess" of the population proportion $p$ of the urn's beads that are red? Given that the sample was representative, the answer is yes.
-* Obama poll: Is the sample proportion $\hat{p} = 0.41$ of the sample of young Americans who supported Obama a "good guess" of the population proportion $p$ of all young Americans who supported Obama at this time in 2013? In other words, can we confidently say that roughly 41% of *all* young Americans approved of Obama at the time of the poll? Again, this depends on whether the sampling was random.
+* Urn: Is the sample proportion $\hat{\rho}$ of the shovel's beads that are red a "good guess" of the population proportion $\rho$ of the urn's beads that are red? Given that the sample was representative, the answer is yes.
+* Obama poll: Is the sample proportion $\hat{\rho} = 0.41$ of the sample of young Americans who supported Obama a "good guess" of the population proportion $\rho$ of all young Americans who supported Obama at this time in 2013? In other words, can we confidently say that roughly 41% of *all* young Americans approved of Obama at the time of the poll? Again, this depends on whether the sampling was random.
 
 Eighth, is the sampling procedure **unbiased**? In other words, do all observations have an equal chance of being included in the sample?
 
@@ -1364,7 +1423,7 @@ Let's now revisit the sampling paradigm from Subsection \@ref(terminology-and-no
 * If we extract a sample of $n = 50$ beads at **random**, in other words, we mix all of the equally sized beads before using the shovel, then
 * the contents of the shovel are an **unbiased representation** of the contents of the urn's 1000 beads, thus
 * any result based on the shovel's beads can **generalize** to the urn, thus
-* the sample proportion $\hat{p}$ of the $n = 50$ beads in the shovel that are red is a **"good guess"** of the population proportion $p$ of the $N = 1000$ beads that are red, thus
+* the sample proportion $\hat{\rho}$ of the $n = 50$ beads in the shovel that are red is a **"good guess"** of the population proportion $\rho$ of the $N = 1000$ beads that are red, thus
 * instead of manually going over all 1000 beads in the urn, we can **infer** about the urn using the shovel. 
 
 **Specific to the Obama poll:**
@@ -1390,7 +1449,7 @@ What you have visualized in this chapter was a demonstration of a famous theorem
 
 ### Precision versus accuracy (or bias versus variance)
 
-We saw in a previous section that as our sample size $n$ increases, our point estimates will vary less and less and be more and more concentrated around the true population parameter. This variation is quantified by the decreasing *standard error*. In other words, the typical error of your point estimates will decrease. In our sampling exercise, as the sample size increased, the variation of our sample proportions $\hat{p}$ decreased. This is also known as having a *precise* estimate. 
+We saw in a previous section that as our sample size $n$ increases, our point estimates will vary less and less and be more and more concentrated around the true population parameter. This variation is quantified by the decreasing *standard error*. In other words, the typical error of your point estimates will decrease. In our sampling exercise, as the sample size increased, the variation of our sample proportions $\hat{\rho}$ decreased. This is also known as having a *precise* estimate. 
 
 So random sampling ensures our point estimates are *accurate*, while on the other hand having a large sample size ensures our point estimates are *precise*. While the terms "accuracy" and "precision" may sound like they mean the same thing, there is a subtle difference. Accuracy describes how "on target" our estimates are, whereas precision describes how "consistent" our estimates are. The image below illustrates the difference.
 
@@ -1407,15 +1466,15 @@ What if we had the option to use a shovel with **200** slots, but it had a minor
 
 Key lesson:
 
-There is a truth! There is a true value for $p$ which we do not know! We want to create a posterior probability distribution which summarizes our knowledge. We care about the posterior probability distribution of p. The center of that distribution is around the mean or median of the proportion in your sample. The sd (or mad) of that posterior is the standard deviation divided by the square root of our sample size! Note that this is the same thing as the standard deviation of the repeated samples.
+There is a truth! There is a true value for $\rho$ which we do not know! We want to create a posterior probability distribution which summarizes our knowledge. We care about the posterior probability distribution of p. The center of that distribution is around the mean or median of the proportion in your sample. The sd (or mad) of that posterior is the standard deviation divided by the square root of our sample size! Note that this is the same thing as the standard deviation of the repeated samples.
 
 Key lesson: 
 
 We have a journey from reality, to our predictions, to the standard error of our predictions, to the posterior probability distribution for p. This is our sequence:
 
-**p (the truth) $\Rightarrow$ $\hat{p}$ (my estimate) $\Rightarrow$ the standard error of $\hat{p}$ (black box of math mumbo jumbo and computer simulation magic) $\Rightarrow$ our posterior probability distribution for p (our beliefs about the truth).**
+**p (the truth) $\Rightarrow$ $\hat{\rho}$ (my estimate) $\Rightarrow$ the standard error of $\hat{\rho}$ (black box of math mumbo jumbo and computer simulation magic) $\Rightarrow$ our posterior probability distribution for p (our beliefs about the truth).**
 
-This journey shows how our beliefs about the truth develop through our work. We begin with p; p is the truth, the true but unknown value we are estimating. $\hat{p}$ is our estimate for p. There can be millions and millions of $\hat{p}$'s. Next, we must take the standard error of our estimates (our $\hat{p}$'s) to account for our uncertainty with our predictions. Finally -- the thing we need most -- we create a posterior probability distribution for p. This distribution is used to answer key questions about p. 
+This journey shows how our beliefs about the truth develop through our work. We begin with p; p is the truth, the true but unknown value we are estimating. $\hat{\rho}$ is our estimate for p. There can be millions and millions of $\hat{\rho}$'s. Next, we must take the standard error of our estimates (our $\hat{\rho}$'s) to account for our uncertainty with our predictions. Finally -- the thing we need most -- we create a posterior probability distribution for p. This distribution is used to answer key questions about p. 
 
 
 
@@ -1452,7 +1511,7 @@ Other highlights:
 - Random sampling ensures that our point estimates are **accurate**, while having a large sample size ensures that our estimates are **precise**. The difference between precision and accuracy is important if we are to make informed estimates. 
 - Real life sampling is *extremely* prone to error. This cannot be emphasized enough. We are often forced to choose between precision and accuracy during real-life sampling. 
 
-In this chapter, we performed both tactile and virtual sampling exercises to infer about an unknown parameter We also presented a case study of sampling in real life with polls. In each case, we used the sample proportion $\hat{p}$ to estimate the population proportion $p$. However, we are not just limited to scenarios related to proportions. In other words, we can use sampling to estimate other population parameters using other point estimates as well.
+In this chapter, we performed both tactile and virtual sampling exercises to infer about an unknown parameter We also presented a case study of sampling in real life with polls. In each case, we used the sample proportion $\hat{\rho}$ to estimate the population proportion $\rho$. However, we are not just limited to scenarios related to proportions. In other words, we can use sampling to estimate other population parameters using other point estimates as well.
 
 As we continue our journey, recall the case of Primrose Everdeen and what she represents: no matter how realistic is our model is, our predictions are **never certain**.  
 
