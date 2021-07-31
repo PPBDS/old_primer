@@ -896,7 +896,7 @@ Let's revisit our first question: *If we get 17 red beads in a random sample of 
 
 To answer our question, we have some *data*: in a random sample of size 50, $17/50 = 34\%$ of beads are red. Initially, we bring no information into the problem. There is an urn out there with mixed red and white beads, and the proportion of red beads could be any value between 0 and 1. The world is dark. We are then blessed with data, and there is some light. With our sample, we know that the proportion of red beads in the whole population is much more likely to be similar to our sample proportion, 34%, than some extreme value like 2% or 80%.   
 
-Occasionally, we will bring some information into the problem before we collect our data. For example, if we flip a fair coin, we know that in the long run there is a 50% chance of it landing on heads. Even without any data, we know *something* about the situation. Some data scientists will define one's initial beliefs going into a problem as the prior. **This Primer is not concerned with the prior**. Instead, we look to the posterior to acknowledge both our initial beliefs, as well as the data we obtain that can update those beliefs. Using the coin example again, we could flip a coin, and $11/20 = 55\%$ of flips could be red. Here our data supports our initial beliefs, and the final posterior we hope to construct will consider extreme values even less probable. 
+Occasionally, we will bring some information into the problem before we collect our data. For example, if we flip a fair coin, we know that in the long run there is a 50% chance of it landing on heads. Even without any data, we know *something* about the situation. Some data scientists will define one's initial beliefs going into a problem as the prior. Instead, we look to the posterior to acknowledge both our initial beliefs, as well as the data we obtain that can update those beliefs. Using the coin example again, we could flip a coin, and $11/20 = 55\%$ of flips could be red. Here our data supports our initial beliefs, and the final posterior we hope to construct will consider extreme values even less probable. 
 
 Now let's break down our second question in a similar fashion to the first. Our *question* is: *what is the probability, using the same urn, that we will draw more than 8 red beads if we use a shovel of size 20?*. The question specifies using the "same urn", so the *population* for both questions is the same. However, do we have any *data* or *prior knowledge* to answer the second question? The reality is that we need to know the probability of selecting a red bead from the urn before we can determine the probability of selecting more than 8 red beads, and thus our second question is contingent on extracting a posterior probability distribution from the first question. As such, if we successfully pass through Wisdom and Justice, we can use the models we create in Courage to answer this question in Temperance. While that may be a mouthful at the moment, you will receive plenty of practice with the Cardinal Virtues throughout this *Primer*. 
 
@@ -1087,7 +1087,7 @@ There are some questions left to be answered. Let's attempt to answer them here.
 
 > Why is the x axis of the posterior distribution negative? Shouldn't all values be between 0 and 1?
 
-The x axis of our posterior is negative because for binomial models, `stan_glm()` chooses to use the "logit" function to convert our probabilities. We can use `posterior_epred()` to find the *ex*pected *prediction* of our posterior without the logit function. Know that we do not just use `posterior_epred()` to undo transformations. We will use it many more times throughout this *Primer* to create the expected distribution based off some covariate.  Let's recreate our posterior using `posterior_epred()`:
+The x axis of our posterior is negative because for binomial models, `stan_glm()` chooses to use the "logit" function to convert our probabilities. We can use `posterior_epred()` to find the **e**xpected **pred**iction of our posterior without the logit function. Know that we do not just use `posterior_epred()` to undo transformations. We will use it many more times throughout this *Primer* to create the expected distribution based off some covariate.  Let's recreate our posterior using `posterior_epred()`:
 
 ```{r}
 ppd_for_p <- posterior_epred(fit_1, 
@@ -1095,7 +1095,7 @@ ppd_for_p <- posterior_epred(fit_1,
   as_tibble() %>%
   rename(p = `1`)
   
-# Posterior_epred() will unhelpfully name the column of our tibble to "1". We
+# posterior_epred() will unhelpfully name the column of our tibble to "1". We
 # have two options: either refer to the column name as `1`, or rename the column
 # to make it less confusing. We will rename the column to "p" in this chapter, but you
 # will oftentimes see `1` in later chapters.
@@ -1128,6 +1128,8 @@ This means that, while we can provide a range of possibilities (and we can estim
 
 The key issue with the urn paradigm is that, unlike real world data science, we *can* technically find the true proportion. We just have to perform that exhaustive count that we've been so desperately avoiding. In the real world, the "true" solution can never be known. This is why we require inference, and why tools like sampling are so helpful for drawing conclusions about the world around us.   
 
+<!-- RS: In some paragraphs we say that it is impossible to conduct a cencus because we don't have access to the urn, in others like this we do have access and can complete the cencus. Which is it? -->
+
 If we had decided to, we could have answered this question using pure statistics. First calculate the standard error given 34% of the beads in the sample are red out of a sample size of 50:
 
 $$  SE = \sqrt\frac{.34(1-.34)}{50} \approx .067$$
@@ -1155,7 +1157,7 @@ ppd_for_p %>%
   arrange(desc(prob))
 ```
 
-We can also accomplish this by passing `aes(y = after_stat(count/sum(count))` into `geom_histogram()` when plotting.  Oftentimes, like in answering the probability that $\rho$ is between .3 and .4,  we can work with the posterior distribution to the very end. Just divide the number of draws that meet our condition (are between .3 and .4), by the total number of draws.   
+We can also accomplish a similar effect by passing `aes(y = after_stat(count/sum(count))` into `geom_histogram()` when plotting.  Oftentimes, like in answering the probability that $\rho$ is between .3 and .4,  we can work with the posterior distribution to the very end. Just divide the number of draws that meet our condition (are between .3 and .4), by the total number of draws.   
 
 ```{r}
 sum(ppd_for_p$p > .3 & ppd_for_p$p < .4)/nrow(ppd_for_p)
