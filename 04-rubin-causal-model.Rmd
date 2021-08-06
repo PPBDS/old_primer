@@ -8,26 +8,23 @@ library(gtsummary)
 
 *This chapter is being re-drafted.*
 
+<!-- Maybe there are three key assumptions in a data science problem. Validity allows us to collapse the columns of the infinite Preceptor Table. Stability allows us to estimate a model for time X and apply it in time Y. (The Population Table, by definition, has a column for time.) Representativeness allows us to assume that the model we estimate at time X applies to all units in time X. (Least sure of that last one.) MF: Done. -->
+
+<!-- No two people ever get the same version of the treatment. The issue of "validity" is whether or not we can ignore that fact. This works well! 
+We want to make Representativeness have the same nice/clean connection to the infinite Preceptor Table which Validity has. Wouldn't that be nice! Can't do it! In fact, Validity is also connected to the rows. Or maybe it is Stability. 
+Stability has two connotations. First, is Yao changing even if the world is not changing, i.e., he is 80 now and he used to be 20. Second, the world is changing, so Yao's outcome might be different a year from now even if he (in some sense) is the same guy. MF: Done. -->
 
 <!-- Get rid of infinite rows in infinite Preceptor Table. Just keep all the columns. It is a mental tool for thinking about the assumption of Validity. And that is all that it is. -->
 
 <!-- Take a look at the new version of Cardinal Virtues in Chapter 5. It is not perfect! But it is not. -->
 
-<!-- Reserve the term "population" for the statistical definition: the imaginary urn from which we draw data, or could have drawn data. -->
+<!-- Maybe there are really three key assumptions in every Data Science Problem: Validity, Stability and Representativeness. Maybe? MF: Done. -->
 
-<!-- MF: Focusing on organization now. After removing the "Complications" section, relevant topics were added to other parts of the chapter. Main issue is finding where to include our new validity/stability/representativeness concepts. Perhaps this discussion should replace the newly created "validity" section? Or added separately? -->
+<!-- Reserve the term "population" for the statistical definition: the imaginary urn from which we draw data, or could have drawn data. MF: Done. -->
 
 <!-- The Population Table always has a column for Time, by definition. Even in the case, like Chapter 6, with a single urn, we have the urn at 11:00 (when we drew our sample) and the urn at 11:05, when we will draw our second sample. The Population Table has that urn, at 5 minute intervals, from 9:00 to 5:00, or whatever. And so, every row in the Population Table is specified by an ID and Time combination.  MF: How do we show this with Height example? Data = Yale in 2018, Preceptor Table = Harvard in 2021, Population = Ivy League students from 2015-2020?  -->
 
 <!-- First discussion of what is a population --- in Preceptor Tables section --- has no notion of time. -->
-
-<!-- Maybe there are three key assumptions in a data science problem. Validity allows us to collapse the columns of the infinite Preceptor Table. Stability allows us to estimate a model for time X and apply it in time Y. (The Population Table, by definition, has a column for time.) Representativeness allows us to assume that the model we estimate at time X applies to all units in time X. (Least sure of that last one.) -->
-
-<!-- No two people ever get the same version of the treatment. The issue of "validity" is whether or not we can ignore that fact. This works well! 
-We want to make Representativeness have the same nice/clean connection to the infinite Preceptor Table which Validity has. Wouldn't that be nice! Can't do it! In fact, Validity is also connected to the rows. Or maybe it is Stability. 
-Stability has two connotations. First, is Yao changing even if the world is not changing, i.e., he is 80 now and he used to be 20. Second, the world is changing, so Yao's outcome might be different a year from now even if he (in some sense) is the same guy. -->
-
-<!-- Maybe there are really three key assumptions in every Data Science Problem: Validity, Stability and Representativeness. Maybe? -->
 
 <!-- https://stats.stackexchange.com/questions/3520/can-someone-explain-the-concept-of-exchangeability -->
 
@@ -926,6 +923,8 @@ Let's start by looking at what kinds of missing data make up the infinite Precep
 
 So our full Preceptor Table includes people we know (Yao) and people we don't (for example, Eliot), both now and in the future:
 
+<!-- MF: To make these sections on validity more sensible, should there be columns for time rather than rows for units at different times? -->
+
 ```{r, echo = FALSE}
 # First, we create a tibble with the values we want for the table
 
@@ -960,77 +959,14 @@ In fact, because time is continuous, there is a row for Yao now, Yao one second 
 knitr::include_graphics("04-rubin-causal-model/images/wonderfullifememe1.jpg")
 ```
 
-### Stability
 
-One way to colapse columns from the table is to assume the causal effect for Yao now is the same as all the ones for Yao in the future. Is that plausible? Sort of. Yao now and Yao in one second are pretty similar! Yao now and Yao in 30 years are less so. Unfortunately, there's no magic way to get a good estimate of every missing value in the infinite Preceptor Table! But through some assumptions, we can reduce the true problem to the problem we were dealing with before. 
+### Validity 
 
-Not only can we extend the Preceptor Table by adding people not in our sample to the rows, but we can also add additional treatments to the columns.  Let's go back to the original five people in our sample. What if we also wanted to test the causal effect of another language being spoken on the platform?  We'll call the original treatment $t$ and the new treatment $t'$.
+To understand validity in regards to the infinite Preceptor Table, we must first recognize an inherent flaw in any experiment design: *no two units receive exactly the same treatment*. 
 
-```{r, echo = FALSE}
-# First, we create a tibble with the values we want for the table
+If this doesn't ring true, consider our Spanish speaking train experiment. The units on the Spanish-speaking platform received the same treatment, right? No, actually!
 
-tibble(subject = c("Yao", "Emma", "Cassidy", "Tahmid", "Diego"),
-       ytreat = c("13", "11", "?", "?", "6"),
-       ytreat2 = c("?", "?", "?", "?", "?"),
-       ycontrol = c("?", "?", "10", "12", "?")) %>%
-  
-  # Then, we use the gt function to make it pretty
-  
-  gt() %>%
-  cols_label(subject = md("ID"),
-             ytreat = md("$$Y_t(u)$$"),
-             ytreat2 = md("$$Y_{t'}(u)$$"),
-             ycontrol = md("$$Y_c(u)$$")) %>%
-  tab_style(cell_borders(sides = "right"),
-            location = cells_body(columns = c(subject))) %>%
-  tab_style(style = cell_text(align = "left", v_align = "middle", size = "large"), 
-            locations = cells_column_labels(columns = c(subject))) %>%
-  cols_align(align = "center", columns = everything()) %>%
-  cols_align(align = "left", columns = c(subject)) %>%
-  tab_spanner(label = "$$\\text{Outcomes}$$", c(ytreat, ytreat2, ycontrol)) %>%
-  fmt_markdown(columns = everything())
-```
-
-&nbsp;
-
-Note that for Yao, we now have three causal effects we can estimate: the difference between the original treatment and the new treatment, the difference between the original treatment and control, and the difference between the new treatment and control. 
-
-Even if you have just one language you are testing, there still could be multiple treatments.  For example, the amount of time the commuter is on the platform with the Spanish-speakers might vary across commuters. In that case, each might receive a different treatment.
-
-```{r, echo = FALSE}
-# First, we create a tibble with the values we want for the table
-
-tibble(subject = c("Yao", "Emma", "Cassidy", "Tahmid", "Diego"),
-       ytreat = c("13", "11", "?", "?", "6"),
-       ytreat2 = c("?", "?", "?", "?", "?"),
-       ytreat3 = c("?", "?", "?", "?", "?"),
-       ytreat4 = c("?", "?", "?", "?", "?"),
-       ytreat5 = c("?", "?", "?", "?", "?"),
-       ycontrol = c("?", "?", "10", "12", "?")) %>%
-  
-  # Then, we use the gt function to make it pretty
-  
-  gt() %>%
-  cols_label(subject = md("ID"),
-             ytreat = md("$$Y_{\\text{1 min}}(u)$$"),
-             ytreat2 = md("$$Y_{\\text{5 mins}}(u)$$"),
-             ytreat3 = md("$$Y_{\\text{10 mins}}(u)$$"),
-             ytreat4 = md("$$Y_{\\text{15 mins}}(u)$$"),
-             ytreat5 = md("$$Y_{\\text{20 mins}}(u)$$"),
-             ycontrol = md("$$Y_c(u)$$")) %>%
-  tab_style(cell_borders(sides = "right"),
-            location = cells_body(columns = c(subject))) %>%
-  tab_style(style = cell_text(align = "left", v_align = "middle", size = "large"), 
-            locations = cells_column_labels(columns = c(subject))) %>%
-  cols_align(align = "center", columns = everything()) %>%
-  cols_align(align = "left", columns = c(subject)) %>%
-  tab_spanner(label = "$$\\text{Outcomes}$$", c(ytreat, ytreat2, ytreat3, ytreat4, ytreat5, ycontrol)) %>%
-  fmt_markdown(columns = everything())
-```
-
-&nbsp;
-
-Instead of considering the treatment in terms of duration, we could also consider different volume levels, measured in decibels (dB), at which Spanish is being spoken. 
+Consider different volume levels, measured in decibels (dB), at which Spanish is being spoken. 
 
 
 ```{r, echo = FALSE}
@@ -1064,14 +1000,36 @@ tibble(subject = c("Yao", "Emma", "Cassidy", "Tahmid", "Diego"),
 
 &nbsp;
 
-Indeed, there are an infinite number of possible treatments. The Preceptor Table extends to the right forever. Again, assumptions come to our rescue. Or rather, we just throw up our hands and only try to estimate a few things. This is why it is crucial to define one's estimand precisely: if we are interested in the difference in potential outcomes between Spanish being spoken for 10 minutes at a 60 dB versus control, we can ignore all the other possible columns in the infinite Preceptor Table.
+As we can see, certain units heard the Spanish-speakers at higher volumes than other units. And it is entirely possible that the volume of the speaking affects the outcome. There is also the issue of the time spent on the platform. Maybe Yao tends to run late, and only hears the Spanish-speakers for thirty seconds. Emma, on the other hand, plans ahead. She hears the Spanish-speakers for fifteen minutes before the train arrives!  Thus, despite the fact that Emma and Yao are in the same treatment --- that is, hearing Spanish on the platform --- they had very different versions of that treatment. 
 
-Thus, whenever you are considering a causal question, the best way to think about it is to start with the infinite Preceptor Table.  First we throw out the rows we think are duplicates (such as all the observations for Yao one second from now, two seconds from now, etc.) or that are outside the scope of what we are interested in for now (maybe we don't care about outcomes 30 years in the future for this study).  Second, we throw out the columns that we don't care about, which are all the possible treatments we aren't considering.  Finally, we define precisely---in terms of potential outcomes---our estimand.  It may be something simple, such as the average treatment effect, or something more complex.  Once we have done these steps, we can start thinking about how to fill in the question marks.  But remember that the infinite Preceptor Table is always there, and you should be conscious of which rows and columns you are throwing out!
+Indeed, there are an infinite number of possible treatments. The Preceptor Table extends to the right forever. This is why it is crucial to define one's estimand precisely: if we are interested in the difference in potential outcomes between Spanish being spoken for 10 minutes at a 60 dB versus control, we can ignore all the other possible columns in the infinite Preceptor Table. 
 
-### Validity
 ### Stability
+
+<!-- MF: This is messy --> 
+
+Stability means that the relationship between the columns is stable. What does this mean? In short: can we say that this column means the same thing as another column?
+
+For instance, can we say that Yao *now* is the same as all the future observations for Yao? Is that plausible? Sort of. Yao now and Yao in one second are pretty similar! Yao now and Yao in 30 years are less similar. 
+
+Yao himself is likely to change over time, which means that Yao in 30 years may have a drastically different treatment effect than Yao today. The world also changes overtime, which causes opinions to shift. 
+
+To simplify the infinite Preceptor Table, then, we have to define how far in the future we are willing to predict. There is never a perfect answer. Perhaps five years into the future *sounds* good. Or, maybe two years from now, something drastically changes in the world and we no longer believe people will respond to the treatment in the same way. 
+
+When forming our future models, we will ask ourselves:
+
+* Are the units from X years ago likely to have similar outcomes in future year Y?
+* Has the world changed drastically from year Z, when the data was collected? 
+
+When we decide that Yao from today and Yao from a week in the future are *stable*, we can collapse the two units into one unit. This further simplifies our infinite Preceptor Table.
+
 ### Representativeness
 
+The external validity of a study is often directly related to the representativeness of our sample. Representativeness has to do with how well our sample represents the larger population we are interested in generalizing to. 
+
+Does the train experiment allow us to calculate a causal effect for people who commute by cars? Can we calculate the causal effect for people in New York City? Before we generalize to broader populations we have to consider if our experimental estimates are applicable beyond our experiment. Maybe we think that commuters in Boston and New York are similar enough to generalize our findings. We could also conclude that people who commute by car are fundamentally different than people who commute by train. If that was true, then we could not say our estimate is true for all commuters because our sample does not accurately represent the broader group we want to generalize to.
+
+*Thus, whenever you are considering a causal question, we throw out the rows we think are duplicates (such as all the observations for Yao one second from now, two seconds from now, etc.) or that are outside the scope of what we are interested in for now (maybe we don't care about outcomes 30 years in the future for this study). Finally, we define precisely---in terms of potential outcomes---our estimand.  It may be something simple, such as the average treatment effect, or something more complex.  Once we have done these steps, we can start thinking about how to fill in the question marks.  But remember that the infinite Preceptor Table is always there, and you should be conscious of which rows and columns you are throwing out!*
 
 ## Bias 
 
