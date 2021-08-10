@@ -283,11 +283,9 @@ tibble(trial_ID = 1) %>%
   str()
 ```
 
-There are two levels. There is one row in the tibble for each sample. So far, we have only drawn one sample. Within each row, there is a second level, the tibble which is the sample. That tibble has two variables: `trial_ID` and `color`. This is the advantage to using `slice_sample()`, because it selects all columns of our urn, whereas `sample()` can only sample from a single column. While identifying each individual bead could be irrelevant in our urn scenario, with other problems it could be very useful to have additional data about each individual.
+There are two levels. There is one row in the tibble for each sample. So far, we have only drawn one sample. Within each row, there is a second level, the tibble which is the sample. That tibble has two variables: `trial_ID` and `color`. This is the advantage to using `slice_sample()`, because it selects all columns of our urn, whereas `sample()` can only sample from a single column. While identifying each individual bead may be irrelevant in our urn scenario, with other problems it could be very useful to have additional data about each individual.
 
-However, it is important to note that the extra data provided by `slice_sample()` comes at a cost: *efficiency*. Because most of us run R Studio on our local machines, each R variable is stored using memory on our computers. As we add more columns or more complex objects to our tibbles, they will take up more memory and become less efficient. For example, `slice_sample()` will store a tibble for each sample, while `sample()` will store a list. And the difference is not negligible!  We can use the handy utility function `object.size()` to know an empty tibble  takes up `r object.size(tibble())` bytes of memory, while an empty list takes up no memory. While our urn simulation takes up a relatively small amount of storage and we are not overly concerned with optimizing tibble size, it never hurts to practice making our tibbles more efficient. Before working with large data sets that may take several minutes to load, it may be helpful to read this [article about memory in R](http://adv-r.had.co.nz/memory.html) to make sure we understand the implications of using complex datatypes within tibbles, so we can make the most out of our future list-column mapping endeavors. 
-
-Now that we've evaluated the implications of `slice_sample()` for our tibble, let's add a column which indicates the number of red beads in the sample taken from the shovel.
+Now let's add a column which indicates the number of red beads in the sample taken from the shovel.
 
 <!-- DK: Is code like .$color understandable? -->
 <!-- RS: I think the dollar sign operator should be understood at this point, but was thinking about asking Yuhan to include a way better explanation about the "this" operator in Chapter 5.  -->
@@ -986,14 +984,14 @@ The next step up from the Preceptor Table is the **Population Table**, a structu
 tibble(source = c("Preceptor Table", "Preceptor Table", "...",
                   "Actual Data", "Actual Data", "Actual Data", "...",
                   "Population", "Population", "Population"),
-       location = c(NA, NA, "...",
-                  NA, NA, NA, "...",
-                  "?", "?", "?"),
-       time = c("2021", "2021", "...",
-                "2009", "2011", "2010", "...",
+       location = c("Known, specific urn", "Known, specific urn", "...",
+                  "Known, specific urn", "Known, specific urn", "Known, specific urn", "...",
+                  "Known, specific urn", "Known, specific urn", "Known, specific urn"),
+       time = c("Now", "Now", "...",
+                "Time of sample", "Time of sample", "Time of sample", "...",
                 "?", "?", "?"),
        color = c("?", "?", "...",
-                 "180", "160", "168", "...",
+                 "white", "red", "white", "...",
                  "?", "?", "?")) %>%
 
   # Then, we use the gt function to make it pretty
@@ -1003,9 +1001,6 @@ tibble(source = c("Preceptor Table", "Preceptor Table", "...",
              location = md("Location"),
              time = md("Time"),
              color = md("Color")) %>%
-  text_transform(
-    locations = cells_body(columns = 2, rows = c(1:2, 4:6)), 
-    fn = function(x) local_image(filename = "06-one-parameter/images/sampling_bowl_1.jpg", height = 50)) %>%
   tab_style(cell_borders(sides = "right"),
             location = cells_body(columns = c(source))) %>%
   tab_style(style = cell_text(align = "left", v_align = "middle", size = "large"),
