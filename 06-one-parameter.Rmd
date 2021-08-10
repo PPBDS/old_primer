@@ -980,40 +980,50 @@ Now that we've determined that our data *could* be used, Justice asks if it *sho
 
 #### Creating the Population Table
 
-The next step up from the Preceptor Table is the **Population Table**, a structure which includes three categories: the data for units we want to have (the Preceptor Table), the data for units which we actually have (our actual data), and the data for units we do not care about (the rest of the population, not included in the data or the Preceptor Table).
+The next step up from the Preceptor Table is the **Population Table**, a structure which includes three categories: the data for units we want to have (**the Preceptor Table**), the data for units which we actually have (**our actual data**), and the data for the rest of the population, not included in the data or the Preceptor Table (**the Population**). Let's construct our Population Table first, and we'll explain it's significance later. 
 
+```{r, echo = FALSE}
+tibble(source = c("Preceptor Table", "Preceptor Table", "...",
+                  "Actual Data", "Actual Data", "Actual Data", "...",
+                  "Population", "Population", "Population"),
+       location = c(NA, NA, "...",
+                  NA, NA, NA, "...",
+                  "?", "?", "?"),
+       time = c("2021", "2021", "...",
+                "2009", "2011", "2010", "...",
+                "?", "?", "?"),
+       color = c("?", "?", "...",
+                 "180", "160", "168", "...",
+                 "?", "?", "?")) %>%
+
+  # Then, we use the gt function to make it pretty
+
+  gt() %>%
+  cols_label(source = md("Source"),
+             location = md("Location"),
+             time = md("Time"),
+             color = md("Color")) %>%
+  text_transform(
+    locations = cells_body(columns = 2, rows = c(1:2, 4:6)), 
+    fn = function(x) local_image(filename = "06-one-parameter/images/sampling_bowl_1.jpg", height = 50)) %>%
+  tab_style(cell_borders(sides = "right"),
+            location = cells_body(columns = c(source))) %>%
+  tab_style(style = cell_text(align = "left", v_align = "middle", size = "large"),
+            locations = cells_column_labels(columns = c(source))) %>%
+  cols_align(align = "center", columns = everything()) %>%
+  cols_align(align = "left", columns = c(source)) %>%
+  fmt_markdown(columns = everything())
+```
+
+Overall, the Population Table bridges the gap between the information we need to easily answer our question (The Preceptor Table), and the data we have. The subjects of the Preceptor Table and the subjects in our data often vary in 2 main ways: 
+
+**Time**: Life changes over time. The mean life expectancy today is different than 100 years ago. The Population Table takes this into consideration by adding a time column. 
+
+**Demographics**: Everything has demographics. The beads in our urn have a color. People have an age, race, height, weight, location where they live ... you get the point. When we construct a Preceptor Table to answer our question, we must select several demographics that we **want** all of our subjects to have. To answer our questions, we in theory should collect data from subjects with our desired demographics. However, life is tough, and the data we get is not always ideal. Let's use the hunger games as an example. 
+
+If you are unfamiliar with the Hunger Games, 12 districts each select tributes to compete in a brutal fight to the death. Tributes are selected by drawing 
 
 <!-- RS: Kind of confused about the Population Table. a.)  How is the unknown Population different than the Preceptor Table? b.) should we include bead ID? -->
-
-<!-- ```{r, echo = FALSE} -->
-<!-- tibble(source = c("Preceptor Table", "Preceptor Table", "...", -->
-<!--                   "Actual Data", "Actual Data", "Actual Data", "...",  -->
-<!--                   "Population", "Population", "Population"), -->
-<!--        gender = c("Male", "Male", "...", -->
-<!--                   "Male", "Male", "Male", "...", -->
-<!--                   "?", "?", "?"), -->
-<!--        year = c("2021", "2021", "...", -->
-<!--                 "2009", "2011", "2010", "...", -->
-<!--                 "?", "?", "?"), -->
-<!--        height = c("?", "?", "...", -->
-<!--                  "180", "160", "168", "...", -->
-<!--                  "?", "?", "?")) %>% -->
-
-<!--   # Then, we use the gt function to make it pretty -->
-
-<!--   gt() %>% -->
-<!--   cols_label(source = md("Source"), -->
-<!--              gender = md("Sex"), -->
-<!--              year = md("Year"), -->
-<!--              height = md("Height")) %>% -->
-<!--   tab_style(cell_borders(sides = "right"), -->
-<!--             location = cells_body(columns = c(source))) %>% -->
-<!--   tab_style(style = cell_text(align = "left", v_align = "middle", size = "large"),  -->
-<!--             locations = cells_column_labels(columns = c(source))) %>% -->
-<!--   cols_align(align = "center", columns = everything()) %>% -->
-<!--   cols_align(align = "left", columns = c(source)) %>% -->
-<!--   fmt_markdown(columns = everything())   -->
-<!-- ``` -->
 
 #### Stability, representativeness, validity
 
@@ -1454,7 +1464,7 @@ I would create 2 posteriors and calculate the overlapping area, and then finally
 
 See Chapter \@ref(two-parameters) for a thorough discussion of the use of **rstanarm**. This package will be our main tool for the rest of the *Primer*.
 
-### Malpractice
+### Bad practices
 
 Although the process was long, we have successfully gone through the cardinal virtues and answered our questions like real data scientists. In this section we will address several pitfalls to avoid. 
 
