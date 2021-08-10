@@ -294,9 +294,9 @@ You can often find CSV files on websites like [kaggle](https://kaggle.com) as we
 
 Excel is a spreadsheet program that use tables to analyze, store, or manipulate data. The tables are composed of cells which include text, numbers, or formulas. Excel files have the filename extensions .xls or .xlsx, and they're capable of storing additional things that you cannot store in a .csv file such as fonts, text formatting, graphics, etc.
 
-In order to write excel files you have to install complex packages, and they are hard to create. Writing excel files is beyond the scope of Primer.
+In order to write excel files you have to install complex packages, and they are hard to create. Writing excel files is beyond the scope of this Primer.
 
-This makes Excel files valuable because they're commonly accepted and usable (Microsoft Excel is a very common program), but they're also hard to use because you can't write new data into them. This makes Excel files more common for data that was originally in Excel, like accounting data or other spreadsheet applications.
+This makes Excel files valuable because they're commonly accepted and usable (Microsoft Excel is a very common program), but they're also hard to use because you can't write new data into them. As such, Excel files are common for data that was originally in Excel, like accounting data or other spreadsheet applications.
 
 Reading Excel files is easy. To do so, we use the `read_excel()` function from the **readxl** package.
 
@@ -329,10 +329,117 @@ read_excel(path = "example_excel.xlsx")
 file.remove("example_excel.xlsx")
 ```
 
-<!-- AG: Going to figure out a way to meld these two things together so I can have one "arguments and important functions" section for both CSV and Excel files. That's probably a lot smoother and improves understanding more than the current structure. Don't have time right now to fix it. -->
-
 If the .xlsx file has multiple sheets, you have to use the `sheet` argument to specify the sheet number or name. 
 The `read_excel()` function also has arguments similar to the `read_csv()` function such as `col_names`, `col_types`, and `na`.
+
+<!-- ### Google Sheets -->
+
+<!-- AG: This is a preliminary Primer section based on the googlesheets4 documentation. Shyamsai can change this as she sees fit, but I just wanted something there while the tutorials are created. Plus I started work on this way back when and I needed to push my PUMS changes, so I just commented it out. It's basically just a reword of the documentation though so please change it. -->
+
+<!-- [Google Sheets](https://www.google.com/sheets/about/) is a cloud spreadsheet service that allows you to create and host data on the web in a spreadsheet without needing to use Excel. It's commonly used to store data from [Google Forms](https://www.google.com/forms/about/) and surveys, making it extremely useful for people who are inexperienced with spreadsheet and storage systems. -->
+
+<!-- AG: I think it would be cool to have a communal spreadsheet where people would write in new data about themselves like their name and age. May cause some people to just delete everything though, so I'd like some feedback on this. -->
+
+<!-- When it comes to R, we can both read Google Sheets data and write data into it by using the **googlesheets4** library. -->
+
+<!-- ```{r} -->
+<!-- library(googlesheets4) -->
+<!-- ``` -->
+
+<!-- This library works by using your Google account to access the sheet, then doing its operations like that. Just run the function `gs4_auth()` in order to load your Google Account information like your email into R. **You do need to cache the account information, as it won't run otherwise.** -->
+
+<!-- If you don't want to interact with the sheet and just want to read from it, you can use `gs4_deauth()` to do things noninteractively. This is useful for websites as they're only compiled once: when you compile it. -->
+
+<!-- ```{r, include=FALSE} -->
+<!-- gs4_deauth() -->
+<!-- ``` -->
+
+<!-- #### Reading Google Sheets -->
+
+<!-- We can access a sheet in two ways: by using the URL or by using the ID of the sheet. Using the URL is pretty simple: you just use `read_sheet()` -->
+
+<!-- ```{r} -->
+<!-- # We're reading an example sheet from the gapminder package located here: -->
+<!-- # https://docs.google.com/spreadsheets/d/1U6Cf_qEOhiR9AZqTqS3mbMF3zt2db48ZP5v3rkrAEJY/edit#gid=780868077 -->
+
+<!-- read_sheet("https://docs.google.com/spreadsheets/d/1U6Cf_qEOhiR9AZqTqS3mbMF3zt2db48ZP5v3rkrAEJY/edit#gid=780868077") -->
+<!-- ``` -->
+
+<!-- The ID of the sheet is the part of the URL between the "/d" and "/edit", and is often used in the Google Sheets API. You can get the ID and some other basic information about the sheet by running the `gs4_get()` function. -->
+
+<!-- ```{r} -->
+<!-- gs4_get("https://docs.google.com/spreadsheets/d/1U6Cf_qEOhiR9AZqTqS3mbMF3zt2db48ZP5v3rkrAEJY/edit#gid=780868077") -->
+
+<!-- id <- "1U6Cf_qEOhiR9AZqTqS3mbMF3zt2db48ZP5v3rkrAEJY" -->
+
+<!-- read_sheet(id) -->
+<!-- ``` -->
+
+<!-- And much like Excel files, you can specify a `sheet` argument to set the sheet that you want to pull from. -->
+
+<!-- ```{r} -->
+<!-- read_sheet(id, sheet = 2) -->
+<!-- ``` -->
+
+<!-- If you just want to access a certain range within a cell, you need to use the `range` argument. -->
+
+<!-- ```{r} -->
+<!-- read_sheet(id, range = "Americas!A38:F49") -->
+<!-- ``` -->
+
+<!-- Named ranges work as well, but they need to [already be set within your Google Sheet](https://support.google.com/docs/answer/63175?co=GENIE.Platform%3DDesktop&hl=en). -->
+
+<!-- ```{r} -->
+<!-- read_sheet(id, range = "canada") -->
+<!-- ``` -->
+
+<!-- Additionally, you can skip and limit reading the sheet by utilizing the `skip` and `n_max()` arguments. -->
+
+<!-- ```{r} -->
+<!-- read_sheet(id, sheet = "Americas", skip = 37, n_max = 11) -->
+<!-- ``` -->
+
+<!-- And if you want to read specific formatting for every cell, just run `sheet_read_cells()`. This creates a row for every single cell and its formatting, allowing you to conduct operations like only reading the highlighted cells. -->
+
+<!-- ```{r} -->
+<!-- (df <- range_read_cells(id, range = "canada")) -->
+
+<!-- df$cell[[2]] -->
+<!-- ``` -->
+
+<!-- Overall, there's a lot of utility with reading Google Sheets into R, but the utility of Google Sheets truly shines when you write data into them. -->
+
+<!-- #### Writing Google Sheets -->
+
+<!-- You can create new Google Sheets as well with the `gs4_create()` function. This allows you to create new Google Sheets, then share them with another person so that you can work together on the same data set. -->
+
+<!-- ```{r} -->
+<!-- ss1 <- gs4_create("sheets-create-demo-1") -->
+<!-- ss1 -->
+<!-- ``` -->
+
+<!-- You can also add R data frames into Google Sheets. Just list multiple data frames and use it in the `sheets` argument. Of course, you could also just use a vector with the sheet names if you want to have multiple sheets. -->
+
+<!-- ```{r} -->
+<!-- ss2 <- gs4_create("sheets-create-demo-2",  -->
+<!--                   sheets = list(iris = iris, chickwts = chickwts)) -->
+<!-- ss2 -->
+<!-- ``` -->
+
+<!-- You can also delete created sheets by using the `googledrive::drive_trash()` function in conjunction with the `gs4_find()` function. -->
+
+<!-- ```{r} -->
+<!-- gs4_find("sheets-create-demo") %>% -->
+<!--   googledrive::drive_trash() -->
+<!-- ``` -->
+
+<!-- AG: Going to continue with writing section later. It's based on the documentation listed here: https://googlesheets4.tidyverse.org/articles/articles/write-sheets.html -->
+
+<!-- But what if we actually wanted to create a Google Sheet? -->
+
+<!-- ```{r} -->
+
+<!-- ``` -->
 
 ### RDS files
 
