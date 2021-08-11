@@ -54,9 +54,6 @@ library(gtsummary)
 
 <!-- Previous items: -->
 
-
-<!-- Learn about captions in R Markdown. Maybe useful: https://bookdown.org/yihui/bookdown/figures.html. One option fig.cap in the code chunk options. I think (!) that fig.cap work with gt(). Not sure. -->
-
 <!-- Old stuff: -->
 
 <!-- Stick in the formula for estimating ATE. See DK comment in text. -->
@@ -68,7 +65,6 @@ library(gtsummary)
 <!-- The entire Complications sections is filled with good stuff. But it all needs to be re-organized and rewritten. Key idea: What are the 3 or 4 key items that we want students to get out of this? What are the key lessons/concerns? What themes do we expect to revisit in the Temperance sections of later chapters? These key points should also go in the Summary. -->
 
 <!-- Does RCM connect to concepts like regression to the mean and the garden of forking paths? If so, we should add sections to those appendices. -->
-
 
 <!-- Lots of useful material here: https://chabefer.github.io/STCI/. Raises the possibility of using $Y^{t}_i to indicate potential outcome under treatment for unit i. -->
 
@@ -300,21 +296,47 @@ The only difference is that we no longer know the exact number of students in th
 
 ## Population Table
 
-<!-- Maybe start with the infinite Preceptor Table. Explain how the assumption of Validity allows us to collapse the columns. But we keep the extra rows! Time is inescapable! But, we can generally pick a sensible unit of time, consistent with how old our data is and how far in future the Preceptor Table is.  -->
+The Population Table is distinct from the Preceptor Table. The aim of the Population Table is to illustrate the broader population we are interested in, while including the data from our Preceptor Table and dataset. This table has three sources of data: the data for units we want to have (the Preceptor Table), the data for units which we actually have (our actual data), and the data for units we do not care about (the rest of the population, not included in the data or the Preceptor Table). It represents the pieces of data that *we actually have*. 
 
-<!-- Implicit in the notion of a Preceptor Table is a moment in time. (That is a bit hazy, of course! Preceptor Table often extends over quite some time in itself. I get the postcard today and vote in two weeks. Both are part of the Preceptor Table.) -->
+Our Preceptor Table rows contain the information that we would want to know in order to answer our questions. These rows contain entries for our covariates (sex and year) but they do not contain any outcome results (height). We are trying to answer questions about the height of Harvard students in 2021, so our sex entries for these rows will read “Male” or "Female" and our year entries of these rows will read “2021”.
 
-<!-- As long as you add a time column, it is easy (?) to build a Population Table. Common sense guides us as to a reasonable unit of time to deal with.  -->
+Our actual data rows contain the information that we do know. These rows contain entries for both our covariates and the outcomes. In this case, the actual data comes from data on Harvard students in 2015, so our sex entries for these rows will read “Male” or "Female" and our year entries of these rows will either read “2015”.
 
-<!-- Key step: The assumption of "Stability" between the different dates allows us to assume that inference using data from one time period applies to another time period. Recall the different urns on the table. -->
+Our population rows contain no data. These are subjects which fall under our desired population, but for which we have no data. As such, all rows are missing.
 
-<!-- Representativeness is a concept which applies only within a given time period. Ensures that the model we estimate in time X works in time X. -->
+```{r, echo = FALSE}
+tibble(source = c("Preceptor Table", "Preceptor Table", "...",
+                  "Actual Data", "Actual Data", "Actual Data", "...", 
+                  "Population", "Population", "Population"),
+       gender = c("Male", "Female", "...",
+                  "Female", "Female", "Male", "...",
+                  "?", "?", "?"),
+       year = c("2021", "2021", "...",
+                "2015", "2015", "2015", "...",
+                "?", "?", "?"),
+       height = c("?", "?", "...",
+                 "180", "160", "168", "...",
+                 "?", "?", "?")) %>%
+  
+  # Then, we use the gt function to make it pretty
+  
+  gt() %>%
+  cols_label(source = md("Source"),
+             gender = md("Sex"),
+             year = md("Year"),
+             height = md("Height")) %>%
+  tab_style(cell_borders(sides = "right"),
+            location = cells_body(columns = c(source))) %>%
+  tab_style(style = cell_text(align = "left", v_align = "middle", size = "large"), 
+            locations = cells_column_labels(columns = c(source))) %>%
+  cols_align(align = "center", columns = everything()) %>%
+  cols_align(align = "left", columns = c(source)) %>%
+  fmt_markdown(columns = everything())  
+```
 
-We use Preceptor Tables both for predictive problems, like forecasting height on the basis of age/gender, and for causal problems, like estimating the effect of Spanish-speakers on immigration attitudes. So, our previous discussion of the *population* applies here as well. In general, we can divide units of the population in three broad categories: no missing data, all missing data and outcome missing. Consider:
+Implicit in the Preceptor Table is a notion of time. Now that we can see our actual data compared with our greater population and our desired data, we must expand our observations. That is to say that, given our data is sourced from 2015 and our desired data is from 2021, we must include a greater time span in our predictions. To assume that the data from the past functions well to predict the future, we also assume that data from a wider time-frame (say, data from 2010 to 2030) is stable --- or, that the outcomes are the same despite the disparity in date. The assumption of "stability" between the different dates allows us to assume that inference using data from one time period applies to another time period. 
 
-<!-- DK: Need a table here. -->
-
-So far, we have only asked predictive questions. This chapter, however, primarily focuses on causal inference. 
+We use Preceptor Tables both for predictive problems, like forecasting height on the basis of age/gender, and for causal problems, like estimating the effect of Spanish-speakers on immigration attitudes. So far, we have only asked predictive questions. This chapter, however, primarily focuses on causal inference. 
 
 ## Causal effect
 
