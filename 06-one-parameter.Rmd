@@ -10,6 +10,8 @@
 
 <!-- RS: Agree with all edits (I kind of got caried away sometimes, especially with explaining posteiror_erpred()) but there are 3 exceptions: First minor change, I added back elipses at bottom of the Preceptor Tables, because I am trying to make it uniform across the chapter that there is alot we don't know about the urn because we can never access it physically. Another minor change is that I think the Now + 10 stuff is kind of confusing, so I did not write it just yet. Finally,  a more major change is I kept my Bayesian framework section! When reading Ch.6 and 7 I wish I had something similar to what I wrote, so I protest deleting it! -->
 
+<!-- RS: I also don't understand the prejudice against subheaders.  -->
+
 <!-- Older comments: -->
 
 <!-- 6.3 Sample size (What happens when we change sample size?) -->
@@ -1063,7 +1065,7 @@ We've evaluated our data and questions and chosen a mathematical formula. Now it
 
 We are Bayesian data scientists that make Bayesian models. This means that we make specific assumptions and consider different things to be either fixed or variable compared to other data science frameworks. One of the most important distinctions is that in Bayesian data science, **we don't know the values of our parameters**. Consider the DGM created in Justice: 
 
-$$ T_i  \sim B(\rho_r, n = 50) $$
+$$ T_i  \sim B(\rho, n = 50) $$
 
 Some non-Bayesian frameworks are concerned with the probability distribution of our observed data, but do not care much about the probability distribution for $\rho_r$ and assume it to be fixed. If $\rho_r$ is fixed, the equation above becomes one simple binomial distribution. Think of this as a standard 2 dimensional plot. 
 
@@ -1199,6 +1201,8 @@ Recall the second question:
 
 *What is the probability, using the same urn, that we will draw more than 8 red beads if we use a shovel of size 20?*
 
+#### Using the posterior
+
 Whenever someone asks you a question, you need to decide what posterior probability distribution would make it easy for you to answer that question. In this case, if we know the posterior probability distribution for the number of red beads in a shovel of size 20, then a question about the likelihood of drawing more than 8 (or any other value) is easy to answer.
 
 The posterior probability distribution for a probability is a tricky thing. It is much easier just to estimate the posterior probability distribution for the outcome --- number of red beads out of 20 --- and then work with that distribution in order to answer probability-type questions.
@@ -1300,7 +1304,7 @@ ppd_reds_in_20 <- posterior_predict(fit_1,
 sum(ppd_reds_in_20$total > 8)/length(ppd_reds_in_20$total)
 ```
 
-**There is approximately a `r round(100 *sum(ppd_reds_in_20$total > 8)/length(ppd_reds_in_20$total))`% chance that we will draw more than 8 red beads.**
+**There is approximately a `r round(100 *sum(ppd_reds_in_20$total > 8)/length(ppd_reds_in_20$total))`% chance that we will draw more than 8 red beads out of a sample size of 20. .**
 
 To visualize this probability graphically, we will reuse our posterior, and add a new column called `above_eight` that is `TRUE` if `total > 8`. 
 
@@ -1345,12 +1349,47 @@ ppd_reds_in_20   %>%
 
 The red bars illustrate the area under a specific section of the curve, as compared to the *entire* area under the curve. *Each question requires looking at a new area under the curve.* When someones asks you a question, they are doing two things. First, they are providing instructions as to the posterior your should create. Here, the results with a shovel of 20 slots. Second, they are asking a question about the area under the curve in a specific region. Here, the region where the number of red beads is greater than 8 is highlighted in red. Therefore, the area below the curve that **is red** is how we get our estimate. 
 
-
 See Chapter \@ref(two-parameters) for a thorough discussion of the use of **rstanarm**. This package will be our main tool for the rest of the *Primer*.
+
+#### Assesing uncertainty
+
+<!-- RS: This kind of acts as a short summary + going over limitations of Temperance.  -->
+
+The process Cardinal Virtues process may seem tedious, but we use them for good reason. In Wisdom we determined what data we need to answer our question, and in Justice we analyzed whether or not the data we have can answer our question. If we had skipped these steps, we would be at risk of creating models with "bad data" in Courage and Temperance, and draw misleading conclusions. 
+
+We have successfully answered our questions using the Cardinal Virtues, but we must also realize that there are limitations to our models. Earlier we claimed there is a `r round(100 *sum(ppd_reds_in_20$total > 8)/length(ppd_reds_in_20$total))`% chance that we will draw more than 8 red beads out of a sample size of 20. However, we must be modest about our claims. Is this question about *this* particular urn, or all urns? Clearly, as our predictions are based upon the posterior from our specific urn, our conclusions can only be applied to *this particular urn*; our conclusions are not generalizable to all urns.
+
+Furthermore, how certain are we in our prediction from Temperance that `r round(100 *sum(ppd_reds_in_20$total > 8)/length(ppd_reds_in_20$total))`% of samples out of a shovel size of 20 using our urn would produce more than 8 red beads? 
+
+First let's model our situation: 
+
+$$ T_i  \sim B(\rho, n = 20) $$
+
+The total number of red beads selected in a sample of 20 beads, $T_i$, is modeled by a binomial distribution with $n = 20$ observations and an unknown probability $\rho$ of the proportion of red beads in the urn.
+
+We must realize that our `r round(100 *sum(ppd_reds_in_20$total > 8)/length(ppd_reds_in_20$total))`% estimate is based on an entire posterior. We are uncertain about the exact value of $\rho$, so `posterior_predict()` takes our uncertainty into account when creating the model. However, there is in fact some actual value for $\rho$, even if we don't know it. 
+
+If the actual value of $\rho$ was 30%, we can calculate the **correct** answer to our question using the binomial probability distribution function:  
+
+```{r}
+pbinom(q = 8, size = 20, prob = .3, lower.tail = FALSE)
+```
+
+Or maybe the actual value of $\rho$ is 40%: 
+
+```{r}
+pbinom(q = 8, size = 20, prob = .4, lower.tail = FALSE)
+```
+
+Sadly, the answer to our question could be 11%, 40%, a value in between, or even a more extreme value. We will never know the correct answer, and must settle with our best estimate of `r round(100 *sum(ppd_reds_in_20$total > 8)/length(ppd_reds_in_20$total))`% that factors in our uncertainty regarding the true value of $\rho$. Long story short, our models are never the truth. 
+
+<!-- RS: Nicely worded but I'm not sure if it fits in. Maybe a future author will find use for it.  -->
+
+<!-- Asserting a posterior distribution is, conceptually, the same as opening a casino and allowing people to place wagers on outcomes, with the odds consistent with your posterior. If your posterior is wrong, they will take all your money. That would be bad! So, what do we do? Rule of thumb: the future is always more variable than our models would suggest. The entire point of the virtue of Temperance to be aware of that fact and take account of it. Courage --- that bold bastard --- comes along and says, "Here is the model! Let's calculate the posterior and open the casino!" Temperance says, "Hold on! Yes, I can calculate the posterior, but we need to be cautious." Temperance is concerned with the tails of our predictions, not the center. What is the best strategy for opening our casino, then? Limit the bets on the first few nights to make sure our posterior is OK. *Temperance is concerned with the sensible management of the casino.* -->
 
 ### Bad practices
 
-Although the process was long, we have successfully gone through the cardinal virtues and answered our questions like real data scientists. In this section we will address several pitfalls to avoid. 
+Although the process was long, we have successfully gone through the cardinal virtues and answered our questions like real data scientists. In this section we will address some pitfalls to avoid. 
 
 #### Confidence intervals
 
@@ -1383,21 +1422,6 @@ $H_a$: There are *not* an equal number of red and white beads in the urn.
 Can we reject that hypothesis? Convention: if the 95% confidence interval excludes the null hypothesis, then we reject it. Here, that would mean if our posterior estimate (plus or minus 2 standard errors) *excluded* the possibility of the red and white beads being equal ($\rho = .5$) we can reject the null hypothesis. In the previous section we determined that the 95% confidence interval is between 21% and 47%. Because 50% is outside of this interval, we could reject the null hypothesis, and conclude that it is unlikely that the proportion of beads in the urn is 50%. 
 
 If we were testing the theory that $\rho = .45$ instead, our null hypothesis would fall within the confidence interval. This does not mean that we accept the null hypothesis, we just don't reject it.  When we can’t reject the null hypothesis our test is essentially useless, as we have no idea whether or not our theory is true. In our scenario we only know that there is some possibility that $\rho = .45$. We're just back where we started! This is why we never test — unless your boss demands a test. **Use your judgment, make your models, summarize your knowledge of the world, and use that summary to make decisions.** 
-
-#### Use the Cardinal Virtues!
-
-<!-- RS: Going to use this section to address how we should not conclude that our models are the truth. Also, explain the purpose of the cardinal virtues, because it would suck to do all this work and realize we made incorrect assumptions and it is all useless! -->
-
-The process of the cardinal virtues may seem tedious, but we use them for good reason. 
-Recall the virtue of Wisdom. We want to know if there is a decent connection between the problem we face and the data we have. Our problem is answering the following question: *Conditional on our answer to Question 1, what is the probability, using the same urn, that we will draw more than 8 red beads if we use a shovel of size 20?* The way in which we have approached answering this question is to, from our posterior distribution from our urn, create a joint distribution to estimate the probability of drawing more than 8 red beads with a shovel of size 20. Is this question about *this* particular urn, or all urns? Clearly, as it is conditional upon a result from our specific urn, our conclusions can only be applied to *this particular urn*; our conclusions are not generalizable to all urns.
-
-Justice encompasses two main topics that apply to our urn: predictive versus causal model and mathematical formulas. Are we are modeling (just) for prediction or are we (also) modeling for causation? Predictive models care nothing about causation. With prediction, all we care about is forecasting Y given X on some as-yet-unseen data. There is no notion of “manipulation” in such models. As we can see, then, our model is **predictive**; we are not manipulating anything. The math of our model can be: 
-$$ T_i  \sim B(p_H, n = 20) $$
-The total number $T$ of red beads in experiment $i$ with 20 sampled beads, $T_i$, is distributed as a binomial with $n = 20$ and an unknown probability $\rho_h$ of the proportion red exceeding 8 out of 20 beads.
-
-Courage focuses on code -- the structure of our model. Code allows us to “fit” a model by estimating the values of the unknown parameters. Though we can never know the true values of these parameters, we can express our uncertain knowledge in the form of posterior probability distributions. With those distributions, we can compare the actual values of the outcome variable with the “fitted” or “predicted” results of the model. We can examine the “residuals,” the difference between the fitted and actual values. To answer our question, we have taken a slice of our posterior distribution to create a joint distribution. To find our final solution, we looked at the area under the curve that includes all values of 8 red beads or above. 
-
-When we think of Temperance, we should think of uncertainty. Asserting a posterior distribution is, conceptually, the same as opening a casino and allowing people to place wagers on outcomes, with the odds consistent with your posterior. If your posterior is wrong, they will take all your money. That would be bad! So, what do we do? Rule of thumb: the future is always more variable than our models would suggest. The entire point of the virtue of Temperance to be aware of that fact and take account of it. Courage --- that bold bastard --- comes along and says, "Here is the model! Let's calculate the posterior and open the casino!" Temperance says, "Hold on! Yes, I can calculate the posterior, but we need to be cautious." Temperance is concerned with the tails of our predictions, not the center. What is the best strategy for opening our casino, then? Limit the bets on the first few nights to make sure our posterior is OK. *Temperance is concerned with the sensible management of the casino.*
 
 ## Discussion
 
