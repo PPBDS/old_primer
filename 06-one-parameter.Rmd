@@ -906,7 +906,7 @@ tibble(bead_ID = c("1", "2",
 
 &nbsp;
 
-Note that the beads do not have ID numbers printed on them. The numbering is arbitrary. Having an ID just reminds us that there are actual units under consideration, even if we can not tell them apart, other than by color. We also include the ID to help visualize that we don't know the total number of beads in the urn, because our question never tells us! There could be 1,000 beads like our physical urn from earlier, or there could be a million beads. The ellipse at the bottom of the Preceptor Table denotes our uncertainty regarding urn size. 
+Note that the beads do not have ID numbers printed on them. The numbering is arbitrary. Having an ID just reminds us that there are actual units under consideration, even if we can not tell them apart, other than by color. We also include the ID to help visualize the fact that we don't know the total number of beads in the urn, because our question never tells us! There could be 1,000 beads like our physical urn from earlier, or there could be a million beads. The ellipse at the bottom of the Preceptor Table denotes our uncertainty regarding urn size. 
 
 There is only one outcome column, "Color," because this is not a causal model, for which we need to have (at least) two potential outcomes. Predictive models require only one outcome.
 
@@ -940,13 +940,13 @@ Again, there are no ID numbers. But keeping track of which beads were in the sam
 
 The last step of Wisdom is to consider whether or not we can consider the units from the Preceptor Table and the units from the data to have been drawn from the same *population*. In this case, as with many sampling scenarios, it is trivial that we may make this assumption. If all the rows from the data are also rows in the Preceptor Table, we may assume that they are drawn from the same distribution.
 
+<!-- DK: Could expand on this point. -->
+
+We also consider why some beads do get sampled, while others do not. This is a consequence of the *sampling mechanism*. We hope that our sampling mechanism has near equal access to all members of the population, or else our samples would be biased. Almost all samples have some bias, but we must make a judgement call to see if the data we have is close enough to the data we want (i.e., the Preceptor Table) that we can consider both as coming from the same population. Our sample of 50 beads is taken from a *mixed* urn, so hopefully there is a near equal chance of selecting each bead, and our samples are representative of the population. 
+
 <!-- Could get into more details here, e.g., Sometimes, the Preceptor Table and the Population Table have the same number of rows. This happens when all the data arfe rows from the Preceptor Table. Example would be the simple case of an urn, the beads in which you know do not change color, and from which you have drawn a sample. But, what if beads can change color? Then the data from the sample 10 minutes ago has a less than certain relationship with the Preceptor Table. The same includes the color for bead 96 ten minites ago. The Preceptor Table has one row for bead 96 now, at this moment. So, in this case, the Population Table has a row for every bead at each moment in time that we care about. At the very least, it as 1,000 rows for 10 minutes ago (when we took the sample) and 1,000 rows for now. -->
 
 <!-- RS: Expanded on above comment alot in Pop. Table section (definetly too much detail), would appreciate suggestions on how to reformat to be concise. I pride my explanation for being best in the primer, so I feel like we need to keep a detailed explanation either here or move to Ch. 4 or 5.   -->
-
-<!-- DK: Could expand on this point. -->
-
-Consider why some beads do get sampled, while others do not. This is a consequence of the *sampling mechanism*. 
 
 ### Justice
 
@@ -960,9 +960,7 @@ Justice starts with the construction of a Population Table. We use this table to
 
 The *Population Table* includes rows from three sources: the data for units we want to have (the Preceptor Table), the data for units which we have (our actual data), and the data for units we do not care about (the rest of the population, not included in the data or the Preceptor Table).
 
-<!-- RS: I capitalized "Data" a bunch of times to emphasize the specific category, but there is not really an underlying pattern of capitalization which needs to be fixed (but I'm too lazy to do now).  -->
-
-The next step up from the Preceptor Table is the **Population Table**, a structure which includes three categories: the data for units we want to have (**the Preceptor Table**), the data for units which we actually have (**our actual data**), and the data for the rest of the population, not included in the data or the Preceptor Table (**the Population**). Let's construct our Population Table first, and we'll explain it's significance later. 
+<!-- RS: I choose to capitalize Data to emphasize that it is one of the categories, but let me know if this is incorrect.  -->
 
 <!-- DK: Make this table correctly. Add a "Time" column. Only four columns: Source, Time, ID and Color. First rows from Population, then Data, than Population, then Preceptor Table, then Population. Time goes in 10 minute increments. Time Preceptor Table is "Now". Time for Population at end is "Now + 10". Time for Data is "Now - 10". -->
 
@@ -993,6 +991,7 @@ tibble(source = c("Preceptor Table", "Preceptor Table", "...",
   cols_label(source = md("Source"),
              location = md("Location"),
              time = md("Time"),
+             id = md("ID"),
              color = md("Color")) %>%
   tab_style(cell_borders(sides = "right"),
             location = cells_body(columns = c(source))) %>%
@@ -1005,29 +1004,29 @@ tibble(source = c("Preceptor Table", "Preceptor Table", "...",
 
 &nbsp;
 
-Each specific row represents one subject, which are individual beads in our urn scenario. Because there could be thousands or even millions of beads, we provide 2-3 examples for each category, and use ... to denote that there are many more subjects that we have yet to record. 
+Each specific row represents one subject, which are individual beads in our urn scenario. Because there could be thousands or even millions of beads, we provide 2-3 examples for each category, and use an elipse to denote that there are many more subjects that we have yet to record. 
 
-Each Population Table will have a minimum of 3 types of columns: Covariates, Time, and Outcome. We will explain these columns for each type of category (Preceptor Table, Data, and Population). 
+Each Population Table will have a minimum of 3 types of columns: covariates, time, and outcome(s). We will explain these columns for each type of category (Preceptor Table, Data, and Population). 
 
 **Covariates** can be thought of as demographics. People have an age, race, height, weight, location where they live ... you get the point. When we construct a Preceptor Table to answer our question, we must select some covariates that we **want** all of our subjects to have. To answer our questions, we in theory should collect data from subjects with our desired covariates. However, life is tough, and the data we get is not always ideal. Our urn scenario only has one covariate: location. Rather intuitively, urns can have drastically different contents, so to easily answer our question it's important to identify the location of one specific urn for which to find the proportion red. Let's break down the location column in the Preceptor Table, Data, and Population categories. 
 
-- Preceptor Table: Subjects in our Preceptor Table all have a location of "Known, specific urn." This is because we want to find the proportion red of one specific urn, so ideally all of our data should come from this urn. Duh. 
+- Preceptor Table: Subjects in our Preceptor Table all have a location of "Known, specific urn." This is because we want to find the proportion red of one specific urn, so ideally all of our data should come from this urn.
 
-- Data: Ideally, we want our data to have the same covariates as our Preceptor Table. Because we draw our sample from the exact same urn our question asks us about, the data we collect comes directly from the Preceptor Table, so they have the same location ("Known, specific urn"). This is the perfect scenario for us, but this will rarely happen in real life. For example, let's put ourselves inside the Hunger Games, where 12 districts each draw from a separate urn to select their tributes to fight to the death. What if we **want** to know the mean age of tributes selected in District 11 (The Preceptor Table), but instead we are only given data from Districts 9 and 10 (Our Data). In this scenario, the location of the Preceptor Table and the Data differs because the urns are located in two separate districts. And this could be perfectly fine! We just have to make a judgement call for whether or not the data we have is close enough to the data we need. The Population category is included just for this reason: with it, we bridge the gap between the Preceptor Table and our actual data.
+- Data: Ideally, we want our data to have the same covariates as our Preceptor Table. Because we draw our sample from the exact same urn our question asks us about, the data we collect comes directly from the Preceptor Table, so they have the same location ("Known, specific urn"). This is the perfect scenario for us, but this rarely occurs in real life. For example, let's put ourselves inside the *Hunger Games*, where 12 districts each draw from a separate urn to select their tributes to fight to the death. What if we **want** to know the mean age of tributes selected in District 11 (The Preceptor Table), but instead we are only given data from Districts 9 and 10 (Data). In this scenario, the location of subjects in the Preceptor Table and the Data differ because the urns are located in two separate districts. 
 
-- Population: In our urn scenario, the location of the Preceptor Table and data are the same, so the Population will also have the same location. Again, covariates from the Population Table and Data are rarely identical in real life. Returning to our Hunger Games example, we want data from District 11 to fill in our Preceptor Table, but we are only given data from districts 9 and 10. If we wish to draw conclusions about District 11 using Districts 9 and 10, what stops us from using Districts 1 and 2 instead? Or maybe Districts 3 and 7? **We use the Population to acknowledge the wider source we could have collected data from.** Assuming all 12 districts are similar, we really could have used data from any 2, so our location covariate for the Population should be: "All districts". On the other hand, for our urn problem there is only one urn which we could data from, so we know the location of our Population. If this still does not make sense, there will be plenty of more realistic applications of the Population later in this *Primer*. 
+- Population: In our urn scenario, the location of subjects in the Preceptor Table and Data are the same, so the Population will also have the same location. Again, covariates from the Preceptor Table and Data are rarely identical in real life. Returning to our *Hunger Games* example, we want data from District 11 to fill in our Preceptor Table, but we are only given data from districts 9 and 10. If we wish to draw conclusions about District 11 using Districts 9 and 10, what stops us from using Districts 1 and 2 instead? Or maybe Districts 3 and 7? **We use the Population to acknowledge the wider source we could have collected data from.** Assuming all 12 districts are similar, we really could have used data from any 2, so our location covariate for the Population should be: "All districts". On the other hand, for our urn problem there is only one urn which we could data collect from, so we know the location of our Population. 
 
-Population Tables always have a column for **Time**. When answering a question we must specify the time that it's being asked, because life changes over time. Finding the mean life expectancy today is different than 100 years ago. Let's break down the time column for each category. 
+Population Tables always have a column for **time**. When answering a question we must specify the time that it's being asked, because life changes over time.
 
 - Preceptor Table: Because the question does not specify otherwise, we should assume that we want to find the proportion of red beads at this instant. As such, subjects in our Preceptor Table category have a time of "Now". 
 
-- Data: Unfortunately, we collected our sample (17 out of 50 beads are red) in the past. We ideally want to know the contents of our sample at this very instant to answer our question, but we do not have the resources to whip out an urn for every new question we have. The best we can do is acknowledge that the data we have does not fill in our Preceptor Table perfectly, because it was collected from the time of the sample in the past. Some of us may believe that making this distinction is ridiculous, as an urn does not change over time! However, it is possible that someone could have dumped some extra red beads into the urn after taking our sample. If this is the case, then our data only reflects the contents of the urn in the past, and not the urn now. 
+- Data: Unfortunately, we collected our sample (17 out of 50 beads are red) in the past. We ideally want to know the contents of our sample at this very instant to answer our question, but we do not have the resources to whip out an urn for every new question we have. The best we can do is acknowledge that the data we have does not fill in our Preceptor Table perfectly, because it was collected from a sample in the past. Some of us may believe that making this distinction is ridiculous, as an urn does not change over time! However, it is possible that someone could have dumped some extra red beads into the urn after taking our sample. If this is the case, then our data only reflects the contents of the urn in the past, and not the urn now. 
 
 - Population: Remember, we use the Population to acknowledge the wider source we could have collected data from. Let's say that we took our sample in 2016. What prevents us from using a sample taken in 2014? How about 2018? Because there are in fact an infinite number of times (down to the millisecond) that we could have taken our sample, we mark the time in the Population category with a ?. We hope that the urn hasn't changed much over time, but acknowledge that we could have taken our sample at many different times, amassing to a much larger Population than we may have originally thought.  
 
-Finally, Population Tables have an **Outcome**. Sometimes there will be multiple outcome columns, like in the case of Casual Effect problems where we ideally want data on a subject before and after treatment. In our urn problem, we only two outcomes: bead ID and bead color. 
+Finally, Population Tables have an **outcome**. Sometimes there will be multiple outcome columns, like in the case of casual models where we ideally want data on a subject before and after treatment. In our urn problem, we only two outcomes: bead ID and bead color. 
 
-- Preceptor Table: To find the exact proportion red in our urn, we simply divide the number of red beads in the urn by the total number of beads. However, we do not the colors (or IDs) of each individual bead in our urn, so we mark this information with a ?. Because our data has all the same covariates as our Preceptor Table (which is very unrealistic) we actually do know the colors and IDs of 50 beads in our Preceptor Table, but we list 2 beads that were not sampled for simplicity's sake. 
+- Preceptor Table: To find the exact proportion red in our urn, we simply divide the number of red beads in the urn by the total number of beads. However, we do not know the colors (or IDs) of each individual bead in our urn, so we mark this information with a ?. Because our data has all the same covariates as our Preceptor Table (which is very unrealistic) we actually do know the colors and IDs of 50 beads in our Preceptor Table, but we list 2 beads that were not sampled in our Population Table for simplicity's sake. 
 
 - Data: We sampled 50 beads from the urn and recorded their colors. As such, we know the outcomes of our data, and can fill in the column. 
 
@@ -1102,7 +1101,7 @@ fit_1 <- stan_glm(formula = red ~ 1,
 ```
 
 
-Recall that we assumed a binomial model for the data generating mechanism.  In `stan_glm()` we denote this with `family = binomial`. In addition to the type of the distribution, we also need to analyze the outcome and predictor variables involved. The outcome is the quantity we are measuring, in this case the total number of red beads in our sample, $T_i$.  Because we have no predictors, we use the argument `formula = red ~ 1`, which means that we only model the outcome based on the unknown proportion of red beads in the urn, $\rho$. 
+Recall that we assumed a binomial model for the data generating mechanism.  In `stan_glm()` we denote this with `family = binomial`. In addition to the type of the distribution, we also need to analyze the outcome and predictor variables involved. The outcome is the quantity we are measuring, in this case the total number of red beads in our sample.  Because we have no predictors, we use the argument `formula = red ~ 1`, which means that we only model the outcome based on the unknown proportion of red beads in the urn, $\rho$. 
 
 We pass in data in a binomial format: the 1's represent the number of successes (red beads drawn), and the 0's represent the number of failures (white beads drawn). As such, we pass a tibble with 17 red beads and 33 white beads into `data`. 
 
@@ -1191,13 +1190,9 @@ knitr::include_app("https://www.youtube.com/embed/sVxUUotm1P4")
 knitr::include_graphics("other/images/Temperance.jpg")
 ```
 
-With the fitted model object `fit_1`, we can now answer the questions with which we began the project.
+With the fitted model object `fit_1`, we can now make predictions into the future and answer our questions.
 
-Recall the first question:
-
-*If we get 17 red beads in a random sample of size 50 taken from a mixed urn, what proportion $\rho$ of the beads in the urn are red?*
-
-Recall the second question:
+Recall the second question we started with:
 
 *What is the probability, using the same urn, that we will draw more than 8 red beads if we use a shovel of size 20?*
 
@@ -1381,7 +1376,7 @@ Or maybe the actual value of $\rho$ is 40%:
 pbinom(q = 8, size = 20, prob = .4, lower.tail = FALSE)
 ```
 
-Sadly, the answer to our question could be 11%, 40%, a value in between, or even a more extreme value. We will never know the correct answer, and must settle with our best estimate of `r round(100 *sum(ppd_reds_in_20$total > 8)/length(ppd_reds_in_20$total))`% that factors in our uncertainty regarding the true value of $\rho$. Long story short, our models are never the truth. 
+Sadly, the answer to our question could be `r round(pbinom(q = 8, size = 20, prob = .3, lower.tail = FALSE)*100)`%, `r round(pbinom(q = 8, size = 20, prob = .4, lower.tail = FALSE)*100)`%, a value in between, or even a more extreme value. We will never know the correct answer, and must settle with our best estimate of `r round(100 *sum(ppd_reds_in_20$total > 8)/length(ppd_reds_in_20$total))`% that factors in our uncertainty regarding the true value of $\rho$. Long story short, our models are never the truth. 
 
 <!-- RS: Nicely worded but I'm not sure if it fits in. Maybe a future author will find use for it.  -->
 
