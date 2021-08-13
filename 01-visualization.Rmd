@@ -158,7 +158,7 @@ Messages are similar. In both cases, you should fix the underlying issue until t
 
 ## Getting Started with Visualizing Data
 
-This chapter focuses on **ggplot2**, one of the core packages in the **tidyverse**. To access the datasets, help pages, and functions that we will use in this chapter, load the tidyverse:
+This chapter focuses on **ggplot2**, one of the core packages in the **tidyverse**. The **tidyverse** is a package that contains 8 individual packages, most importantly **ggplot2**, but also other packages that help us view data within R. To access the datasets, help pages, and functions that we will use in this chapter, load the tidyverse:
 
 ```{r} 
 library(tidyverse)
@@ -221,9 +221,7 @@ There are many ways to get a feel for the data contained in a tibble like `train
 
 Run `view(trains)` in the Console in RStudio. Explore this tibble in the resulting pop up viewer. 
 
-`view()` allows us to explore the different variables listed in the columns. Observe that there are many different types of variables.  Some of the variables are *quantitative*. These variables are numerical in nature.  Other variables here, including `gender` and  `treatment`, are *categorical*.
-
-<!-- Explain the difference between categorical and quantitative variables.  -->
+`view()` allows us to explore the different variables listed in the columns. Observe that there are many different types of variables.  Some of the variables are *quantitative*. These variables are numerical in nature.  Other variables here, including `gender` and  `treatment`, are *categorical*. Categorical variables can only take on one of a limited possibility, like educational level can only be one of limited possibilities like high school, elementary school, university, etc.
 
 #### `glimpse()`
 
@@ -255,8 +253,6 @@ The `$` operator allows us to extract a single variable from a tibble and return
 ```{r}
 trains$age
 ```
-
-
 
 ## Basic Plots
 
@@ -357,6 +353,7 @@ ggplot(data = trains,
        caption = "Data source: Enos (2014)")
 ```
 
+
 The problem with this display is "overplotting." Because attitudes are measured as integers, we do not know if a given point represents just one person or a dozen. There are two methods we can use to address overplotting: transparency and jitter.
 
 **Method 1: Changing the transparency**
@@ -437,9 +434,6 @@ A histogram is a plot that visualizes the *distribution* of a numerical value.
 1. For each bin, we count the number of observations that fall in the range corresponding to that bin.
 1. We draw a bar whose height indicates the corresponding count.
 
-
-<!-- HL: I feel like this stuff below about you not needing to specify the arguments is sort of randomly dropped in the middle here, maybe this could be added to an "additional info" section at the bottom? isn't really crucial to the lesson after all. Agreed. -->
-
 Let's consider the `income` variable from the the `trains` tibble. Pay attention to how we have changed the two arguments to `ggplot()`. We have removed `data = ` and `mapping = `. The code still works because R functions allow for passing in arguments by *position*. The first argument to `ggplot()` is the `data`. We don't need to tell R that `trains` is the value for `data`. R assumes that it is because we passed it in as the first argument. Similarly, the second argument to `ggplot()` is `mapping`, so R assumes that `aes(x = income)` is the value we want for `mapping` because it is the second item passed in.
 
 ```{r}
@@ -507,17 +501,6 @@ ggplot(data = trains,
   geom_bar()
 ```
 
-
-`geom_col()` is very similar to `geom_bar()`, except that `geom_col()` requires you to calculate the number of observations in each category ahead of time. `geom_bar()` does the calculation for you.
-
-<!-- HL: could we elaborate on geom_col() more? give it its own mini section bc I think it's distinct enough and people might not understand why you need to use geom_col if it's so similar to geom_bar. Add a code chunk with does group_by and summarize and then pipes to geom_col. See new section in tutorials. Agreed. -->
-
-
-#### No pie charts!
-
-One of the most common plots used to visualize the distribution of categorical data is the pie chart. While they may seem harmless enough, pie charts actually present a problem in that humans are unable to judge angles well. @robbins2013 argues that we overestimate angles greater than 90 degrees and we underestimate angles less than 90 degrees. In other words, it is difficult for us to determine the relative size of one piece of the pie compared to another. *Do not use pie charts.*
-
-
 #### Two categorical variables
 
 Another use of barplots is to visualize the *joint* distribution of two categorical variables. (See Chapter \@ref(probability) for the definition of a joint distribution.) Let's look at `race`, as well as `treatment`, in the `trains` data by using the `fill` argument inside the `aes()` aesthetic mapping. Recall the `fill` aesthetic corresponds to the color used to fill the bars.
@@ -541,6 +524,26 @@ ggplot(trains,
 ```
 
 Whites are over-represented in the Control group even though the `treatment` was assigned at random.
+
+### `geom_col()`
+
+`geom_col()` is similar to `geom_bar()`, except that `geom_col()` requires you to calculate the number of observations in each category ahead of time. `geom_bar()` does the calculation for you. See an example below.
+
+```{r}
+trains %>% 
+  group_by(race,treatment) %>%
+  summarize(count = sum(n())) %>% 
+  ggplot(mapping = aes(x = race,
+                       y = count,
+                       fill = treatment)) +
+   geom_col(position = "dodge")
+```
+
+You will learn to filter the data later in this chapter. However, what is key here is there was a y-variable supplied in `geom_col()` but there was not in `geom_bar()`. `geom_col()` gives you more control over the data that is being presented compared to `geom_bar()`, which may come in useful in some circumstances.
+
+#### No pie charts!
+
+One of the most common plots used to visualize the distribution of categorical data is the pie chart. While they may seem harmless enough, pie charts actually present a problem in that humans are unable to judge angles well. @robbins2013 argues that we overestimate angles greater than 90 degrees and we underestimate angles less than 90 degrees. In other words, it is difficult for us to determine the relative size of one piece of the pie compared to another. *Do not use pie charts.*
 
 ### `geom_smooth()`
 
@@ -1036,30 +1039,23 @@ ggsave(filename = "enos_trains.jpg",
 
 `ggsave()` uses the suffix of the provided `filename` to determine the type of image to save. Because we use "enos_trains.jpg", the file is saved in JPEG format. If we had used "enos_trains.png", the file would have been saved as a PNG. We can display a saved file by using `knitr::include_graphics()`. For example:
 
-
-````markdown
-`r ''````{r}
+```{r, eval = FALSE}
 knitr::include_graphics("enos_trains.jpg")
 ```
-````
 
 This code displays the image in an Rmd, assuming that the file "enos_trains.jpg" is located in the current working directory. A common scenario is that we create an image and store it in a directory named `figures/` and then use that figure in more than one Rmd. 
-
-
 
 ### Faceting
 
 Faceting splits a visualization into parts, one for each value of another variable.. This will create multiple copies of the same type of plot with matching x and y axes, but whose contents will differ. 
 
-
-Before we proceed, let's create a subset of the tibble `gapminder`, from the **gapminder**, package to use. (You may need to install the **gapminder** package for this code to work.)
+Before we proceed, let's create a subset of the tibble `gapminder`, from the **gapminder**, package to use. (You may need to install the **gapminder** package for this code to work. Refer back to the introduction if you need a refresher on how to do so.)
 
 ```{r}
 library(gapminder)
 gapminder_filt <- gapminder %>% 
       filter(year == 2007, continent != "Oceania")
 ```
-
 
 Let's plot our filtered data using `geom_point()`
 
@@ -1071,9 +1067,7 @@ ggplot(data = gapminder_filt,
   geom_point()
 ```
 
-It is difficult to compare the continents despite the colors. It would be much easier if we could "split" this scatterplot by the 4 continents. In other words, we would create plots of `gdpPercap` and `lifeExp` for each `continent` separately. We do this by using the function `facet_wrap()` with the argument `~ continent`.
-
-<!-- HL: I feel like we should highlight the fact you need a squiggly thing (what is that called) in front of the name bc I forgot it several times while I was trying to use facet_wrap -->
+It is difficult to compare the continents despite the colors. It would be much easier if we could "split" this scatterplot by the 4 continents. In other words, we would create plots of `gdpPercap` and `lifeExp` for each `continent` separately. We do this by using the function `facet_wrap()` with the argument `~ continent`. In `facet_wrap`, you must always put the tilde (~) in front of the variable you wish to wrap it by.
 
 ```{r}
 ggplot(data = gapminder_filt, 
@@ -1270,8 +1264,6 @@ gapminder %>%
 
 This looks pretty good. However, notice the legend the top of our graph.  It crowds our graph and takes away from the most important part: the data. We can use `theme()` to customize the non-data parts of our plots such as background, gridlines, and legends. Let's de-clutter the graph by removing our legend. We can do this by using the `legend.position` argument and setting it to "none".
 
-<!-- DK: Make this new code consistent with the above. -->
-
 ```{r}
 gapminder %>%
   filter(continent != "Oceania") %>%
@@ -1290,11 +1282,55 @@ gapminder %>%
                   labels = scales::dollar_format(accuracy = 1)) + 
     theme_economist() +
     theme(legend.position = "none")
-  
 ```
 
-Great. Now our graph is easier to visualize. In addition, note that the `theme()` function also offers a wide [selection](https://ggplot2.tidyverse.org/reference/theme.html) of functions for manually changing individual elements.
+Great. Now our graph is easier to visualize. 
 
+#### theme()
+
+The `theme()` function also offers a wide [selection](https://ggplot2.tidyverse.org/reference/theme.html) of functions for manually changing individual elements. We will cover the most widely used ones here, but the vast majority will be listed in that link.
+
+There are two key elements in the `theme()` function.
+
+* **Theme elements**: these specify the non-data elements you can control. For example, `panel.border` is the element that controls the border of the grid area.
+
+* **Element function**: this describes the visual properties of the element. There are four main element functions, `element_blank()`, `element_rect()`, `element_line()`, `element_text()`. 
+  * **element_blank()**: this hides the element from the theme.
+  * **element_line()**: this modifies elements that are plot lines, grid lines, axes, etc.
+  * **element_text()**: this changes the text elements of the plot, like titles, captions, etc.
+  * **element_rect()**: rectangle elements control the background of plots, legends, etc.
+
+Let's look at an example of how we might want to modify a graph. Take this graph below.
+
+```{r}
+ggplot(data = economics,
+       mapping = aes(x = date,
+                     y = unemploy)) +
+  geom_line() +
+  labs(title = "Unemployed Population in the United States: 1965 - 2015",
+       subtitle = "Dramatic spike during the Great Recesssion",
+       x = "Year",
+       y = "Number of Unemployed (in thousands)",
+       caption = "Source: FRED Economic Data")
+```
+
+You have a couple of problems with this graph. Firstly, you want the title to be bold. You want there to be a light blue background. You also don't particularly care for there to be so many grid lines from the x-axis. Let's change this!
+
+```{r}
+ggplot(data = economics,
+       mapping = aes(x = date,
+                     y = unemploy)) +
+  geom_line() +
+  labs(title = "Unemployed Population in the United States: 1965 - 2015",
+       subtitle = "Dramatic spike during the Great Recesssion",
+       x = "Year",
+       y = "Number of Unemployed (in thousands)",
+       caption = "Source: FRED Economic Data") +
+  theme(plot.title = element_text(face = "bold"),
+        panel.background = element_rect(fill = "lightblue"),
+        panel.grid.minor.x = element_blank())
+```
+There! Within the `theme()` function, we can change the plot title to bold, the background to blue, and get rid of the "minor" grid lines. `theme()` is a very versatile function. See the full list of elements [here](https://ggplot2-book.org/polishing.html#polishing).
 
 ## Summary
 
