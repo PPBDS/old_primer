@@ -2,32 +2,17 @@
 
 Everyone loves visualizations. 
 
-<!-- Sample change. Another change. Another.-->
+<!-- Discuss `group` aesthetic, especially for line plots. Don't use the unemployment data anymore. Use two or three of the temperature series from primer.data::temperature. -->
 
-<!-- Re-read the chapter and add a bunch of comments with your initials. KX: -->
-
-<!-- Read Chapter 5 and 6 and 7. -->
-
-<!-- Fix opening graph so that it looks nicer.  Or maybe change it completely? e.g,,-->
-
-<!-- Learn about tutorials. Do the same create_from_github. Read instructions.Rmd. Start Visualization-D, which is like Visualization-C, except better. This is harder then it looks. -->
-
-
-<!-- Would be nice if the plot featured a statistical measure of some kind (maybe a 95% confidence interval) so that we have a motivation for learning about distributions. Probably need a very different plot. Maybe something political? Election 2020? -->
-
-<!-- Plot should be much cooler, perhaps even using bigger data. And an associated map. Precinct level voting changes 2012 -> 2016 -> 2020, perhaps. But still needs to be something which we can easily use with plotly. Necessary for it to be animateable? -->
-
-<!-- Old stuff: -->
-
-<!-- New section on cool packages. gghighlights, ggsides, -->
-
-<!-- Add section which explains plotly. -->
-
-<!-- Switch all ifelse to if_else -->
-
-<!-- Should discuss `group` aesthetic, especially for line plots. -->
+<!-- Add the formula for median, like this one: https://math.stackexchange.com/questions/1097546/what-is-the-general-formula-for-calculating-the-median -->
 
 <!-- Better explain Tidyverse. -->
+
+<!-- Fix opening graph so that it looks nicer? Used to use economist_theme(), which was slick but the subtitle overlapping with the title wasn't great aesthetically and also probably wasn't the best "hey look pretty graphs" appeal. Even with the new clean_theme(), the last 50,000 axis label is cropped. Or maybe change the graph completely? -->
+
+<!-- Might be nice if the plot featured a statistical measure of some kind (maybe a 95% confidence interval) so that we have a motivation for learning about distributions. Probably need a very different plot. Maybe something political? Election 2020? -->
+
+<!-- Plot should be much cooler, perhaps even using bigger data. And an associated map. Precinct level voting changes 2012 -> 2016 -> 2020, perhaps. But still needs to be something which we can easily use with plotly. Necessary for it to be animateable? -->
 
 ```{r, message = FALSE, echo = FALSE}
 library(tidyverse)
@@ -50,7 +35,7 @@ gap_p <- gapminder %>%
          y = "Life Expectancy") +
     scale_x_log10(breaks = c(500, 5000, 50000),
                   labels = scales::dollar_format(accuracy = 1)) + 
-    theme_clean() + #KX: theme_economist() did some uniquely weird stuff
+    theme_clean() + 
     theme(legend.position = "none")
 
 gap_p
@@ -60,30 +45,24 @@ Once you have read this chapter, and completed the associated tutorials, you wil
 
 **Remember:** *You need to practice every day.* Learning to code/program is like learning a foreign language. Daily practice is the *sine qua non* for progress.
 
-<!-- KX: Moved reminder from later in the text to where it's more relevant. -->
-
-<!-- Fix the graph. The subtitle overlapping with the title isn't great aesthetically and also probably isn't the best "hey look pretty graphs" appeal -->
 
 ## Basics of R & RStudio
 
 R is an [interpreted language](https://www.geeksforgeeks.org/difference-between-compiled-and-interpreted-language/#:~:text=An%20interpreted%20language%20is%20a,executed%20by%20some%20other%20program.). This means you have to type in commands written in *R code*. In other words, you have to code/program in R. We use the terms "coding" and "programming" interchangeably.
-<!-- KX: Replaced Wikipedia link with a more helpful definition -->
-
-<!-- DK: This is awkward. When are we teaching about R Markdown? -->
 
 If you want a slower introduction than we are providing here, check out the short book, [*Getting Used to R, RStudio, and R Markdown*](https://rbasics.netlify.com/). @usedtor2016 include screencast recordings that you can follow along and pause as you learn. They include an introduction to R Markdown, a tool used for reproducible research in R.
 
 With the rest of this primer, we will use a different font to distinguish regular text from `computer_code`.
-<!-- KX: Moved from later in the text to where it's more relevant. -->
+
 ### Fundamentals of the RStudio Application
-<!-- DK: Should have an entire tutorial devoted to this section, hitting every single section. -->
 
 When opening RStudio (Version 1.4.1106), you should be greeted by a window that resembles the image below:
+
 ```{r, echo = FALSE, fig.cap = "Analogy of difference between R and RStudio."}
 knitr::include_graphics("01-visualization/images/rstudio-screenshot.png")
 ```
 
-* *Console pane*: where you enter in commands in RStudio.
+* *Console pane*: where you enter in commands to R.
 
 <!-- 
 KX: Panes to be discussed:
@@ -240,7 +219,7 @@ There are many ways to get a feel for the data contained in a tibble like `train
 
 #### `view()`
 
-Run `view(trains)` in the Console in RStudio, either by typing it or cutting-and-pasting it into the Console pane. Explore this tibble in the resulting pop up viewer. 
+Run `view(trains)` in the Console in RStudio. Explore this tibble in the resulting pop up viewer. 
 
 `view()` allows us to explore the different variables listed in the columns. Observe that there are many different types of variables.  Some of the variables are *quantitative*. These variables are numerical in nature.  Other variables here, including `gender` and  `treatment`, are *categorical*.
 
@@ -259,6 +238,14 @@ We see the first few values for each variable in a row after the variable name. 
 `dbl` refers to "double", which is computer terminology for quantitative/numerical variables. `int` is for  "integer." `fct` is refers to a "factor," a variable that is "nominal," meaning a member of a smallish number of categories. `chr` is for character data.
 
 <!-- HL: the definitions for these terms feel sort of all over the place, maybe the terms + the abbreviations R uses should just all be in the glossary so people have one place to reference when they're confused -->
+
+#### `summary()`
+
+Use`summary()` to get a sense of the distribution of the variables in the tibble. 
+
+```{r}
+summary(trains)
+```
 
 
 #### `$` operator
@@ -872,12 +859,11 @@ Imagine that we want to create a new variable `old`, which is TRUE when `age > 5
 ```{r}
 trains %>% 
   select(age) %>% 
-  mutate(old = ifelse(age > 50, TRUE, FALSE))
+  mutate(old = if_else(age > 50, TRUE, FALSE))
 ```
 
 Another function similar to `if_else()`, is `dplyr::case_when()`. `case_when()` is particularly useful inside mutate when you want to create a new variable that relies on a complex combination of existing variables. Note that there is a different version of `ifelse()` in **dplyr**: `if_else()`. This works exactly the same as the standard version but is somewhat more robust. 
 
-<!-- HL: what does somewhat more robust mean, also why do we teach ifelse() first if if_else() is the "robust" version and presumably if it's stronger it's the one people should use? -->
 
 <!-- DK: More details? -->
 
@@ -904,17 +890,6 @@ trains %>%
 
 The `mean()` and `sd()` summary functions go inside the `summarize()`  function. The `summarize()` function takes in a tibble and returns a tibbles with only one row corresponding to the summary statistics. Remember: Tibbles go in and tibble come out.
 
-<!-- HL: can we specify why we're assigned mean(age) to mn_age? just to clarify that it gives them proper column headings -->
-
-### Statistics for distributions
-
-<!-- HL: should we include this at the beginning? up with terminology and such. We use means and summarize before we actually introduce what they mean, so it feels a little out of place to be introducing them after we've used them already -->
-
-A variable in a tibble is a column, a vector of values. We sometimes refer to this vector as a "distribution." This is somewhat sloppy in that a distribution can be many things, most commonly a mathematical formula. But, strictly speaking, a "frequency distribution" or an "empirical distribution" is a list of values, so this usage is not unreasonable.
-
-*There are two distinct concepts: a distribution and a set values drawn from that distribution.*  But, in everyday use, we use "distribution" to both. When given a distribution (meaning a vector of numbers), we often use `geom_histogram()` or `geom_density()` to graph it. But, sometimes, we don't want to look at the whole thing. We just want some summary measures which report the key aspects of the distribution. The two most important attributes of a distribution are its *center* and its *variation* around that center.
-
-We use `summarize()` to calculate statistics for a variable, a column, a vector of values or a distribution. Note the language sloppiness. For the purposes of this book, "variable," "column," "vector," and "distribution" all mean the same thing. Popular statistical functions include: `mean()`, `median()`, `min()`, `max()`, `n()` and `sum()`. Functions which may be new to you include three measures of the "spread" of a distribution: `sd()` (the standard deviation), `mad()` (the scaled median absolute deviation) and `quantile()`, which is used to calculate an *interval* which includes a specified proportion of the values. 
 
 **`mean()`**
 
@@ -923,8 +898,6 @@ The mean, or average, is the most commonly reported measure of the center of a d
 $$\bar{x} = \frac{x_1 + x_2 + \cdots + x_N}{N}$$
 
 **`median()`**
-
-<!-- DK: Use math formula, like this one: https://math.stackexchange.com/questions/1097546/what-is-the-general-formula-for-calculating-the-median -->
 
 The median is another commonly reported measure of the center of a distribution, calculated by first sorting the vector of values from smallest to largest. The middle element in the sorted list is the *median*.  If the middle falls between two values, then the median is the mean of those two middle values. The median and the mean are the two most common measures of the *center* of a distribution. The median is more stable, less affected by outliers. There is no widely accepted symbol for the median, although $\tilde{x}$ is not uncommon.
 
@@ -944,11 +917,7 @@ The scaled median absolute deviation (*mad*) is a measure of variation around th
 
 $$\text{mad} = 1.4826 \times \text{median}(abs(x - \tilde{x}))$$
 
-The basic idea for both *sd* and *mad* is that we need a measure of variation around the center of the distribution. *sd* uses the mean, $\bar{x}$, as its estimate of the center while *mad* uses the median, $\tilde{x}$. Because *mad* uses the absolute difference, as opposed to the squared difference, it is more robust to outliers. The 1.4826 multiplier causes the *mad* and the *sd* to be identical in the (important) case of standard normal distributions, a topic we will cover in Chapter \@ref(wrangling).
-
-<!-- DK: Could have more conversation. -->
-
-<!-- DK: These formulas are inconsistent, with one using vectors. Should make these consistent, perhaps even give formula for median. -->
+The basic idea for both *sd* and *mad* is that we need a measure of variation around the center of the distribution of the variable. *sd* uses the mean, $\bar{x}$, as its estimate of the center while *mad* uses the median, $\tilde{x}$. Because *mad* uses the absolute difference, as opposed to the squared difference, it is more robust to outliers. The 1.4826 multiplier causes the *mad* and the *sd* to be identical in the (important) case of standard normal distributions, a topic we will introduce in Chapter \@ref(wrangling).
 
 
 **`quantile()`**
@@ -974,35 +943,8 @@ quantile(kenya$poverty, probs = c(0.025, 0.975))
 
 The interval between these two percentiles includes 95% of all the values in the distribution. Depending on the context, this interval is sometimes called a "confidence interval" or "uncertainty interval" or "compatibility interval." Different percentile ranges create intervals of different widths. 
 
-An interesting fact is that, most of the time, the 95% confidence interval is, roughly, the same as the center of the distribution $\pm$ two times the standard deviation.
+If there is an `NA` value in the variable, any statistical function like `mean()` will return `NA`. You can fix this by using `na.rm = TRUE` within the statistical function.
 
-In distributions without major outliers, the mean/median and sd/mad will be very similar to each other.
-
-```{r}
-kenya %>% 
-  summarise(mean = mean(poverty),
-            median = median(poverty),
-            sd = sd(poverty),
-            mad = mad(poverty))
-```
-
-It follows that intervals defined with them will be similar.
-
-```{r}
-kenya %>% 
-  summarise(interval_1_bottom = mean(poverty) - 2 * sd(poverty),
-            interval_1_top = mean(poverty) + 2 * sd(poverty),
-            interval_2_bottom = median(poverty) - 2 * mad(poverty),
-            interval_2_top = median(poverty) + 2 * mad(poverty))
-```
-
-These intervals are similar to each other and similar to the 95% interval calculated above. The match is only roughly true, but it is good enough for most applied work.
-
-If there is an `NA` value in the variable, any statistical function like `mean()` will return `NA`. You can fix this by using `na.rm = TRUE` with the statistical function.
-
-<!-- HL: can we give an example of using na.rm = TRUE? -->
-
-<!-- DK: Might make a nice looking plot. -->
 
 ### `group_by()`
 
@@ -1010,7 +952,7 @@ We can the use `mean()` with `summarize()` to calculate the average age for all 
 
 ```{r}
 trains %>% 
-  summarize(mean = mean(age))
+  summarize(avg = mean(age))
 ```
 
 What if we want the mean `age` for each `gender`? Consider:
@@ -1026,7 +968,7 @@ The data is the same as before, but note the "Groups" message at the top. R is i
 ```{r}
 trains %>% 
   group_by(gender) %>% 
-  summarize(mean = mean(age))
+  summarize(avg = mean(age))
 ```
 
 Notice the message R sends us. The warning means that the tibble which issues forth from the end of the pipe has been "ungrouped". This means the group attribute we applied with `group_by()` has been removed. This behavior is the (sensible) default.
@@ -1252,7 +1194,6 @@ ggplot(gapminder_filt,
 
 ### Text
 
-<!-- DK: Should learn about ggrepel -->
 
 Recall we use `labs()` to add labels and titles to our plots. 
 We can also change labels inside the plots using `geom_text()`.

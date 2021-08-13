@@ -1579,7 +1579,7 @@ sims <- 10000000
 
 odds <- tibble(sim_ID = 1:sims) %>%
   mutate(heads = map_int(sim_ID, ~ rbinom(n = 1, size = 20, p = .4))) %>% 
-  mutate(above_ten = ifelse(heads >= 10, TRUE, FALSE))
+  mutate(above_ten = if_else(heads >= 10, TRUE, FALSE))
 
 odds
 
@@ -1619,7 +1619,7 @@ p_draws <- tibble(p = rep(seq(0, 1, 0.1), 1000)) %>%
   
 odds_2nd <- tibble(p = sample(p_draws$p, size = sims, replace = TRUE)) %>%
   mutate(heads = map_int(p, ~ rbinom(n = 1, size = 20, p = .))) %>% 
-  mutate(above_ten = ifelse(heads >= 10, TRUE, FALSE)) 
+  mutate(above_ten = if_else(heads >= 10, TRUE, FALSE)) 
 
 odds_2nd
 
@@ -1647,6 +1647,7 @@ odds_2nd %>%
   summarize(success = sum(above_ten)/sims)
 ```
 about 32.8%
+
 
 
 As you may have noticed, if you calculated the value using the first method, you would believe that getting 10 or more heads is less likely than it really is. If you were to run a casino based on these assumptions, you will lose all your money. It is very important to be careful about the assumptions you are making. We tossed a coin 20 times and got 8 heads. However, you would be wrong to assume that $\rho_h$ = 0.4 just based on this result.
