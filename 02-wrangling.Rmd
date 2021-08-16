@@ -1,17 +1,5 @@
 # Wrangling {#wrangling}
 
-<!-- Read the chapter very closely. Look again at the tutorials. Write lots of comments in the chapter.  -->
-
-<!-- Read Instructions on Writing Tutorials.  -->
-
-<!-- https://ppbds.github.io/primer.tutorials/articles/instructions.html -->
-
-<!-- Start adding comments as PRs to the current tutorials.  -->
-
-<!-- Take a look at our Chapter 5. Does our Distributions section help set the stage? -->
-
-
-
 <!-- Replace flights with fec16? airlines are boring. Got rid of 538?  -->
 
 <!-- Add in other join diagrams, like the one used for for inner join. -->
@@ -34,7 +22,9 @@ library(fivethirtyeight)
 ```
 
 <!-- List these as bulleted lists so that they are easier to read. -->
+
 <!-- AM: I don't recall if all 8 Tidyverse sub-packages are used in this chapter, but I'd say here which ones are actually used (such as stringr) -->
+
 <!-- AM: 538's description is too vague - additionally, the actual usage of 538 in this chapter suggests more that it provides data, not that it cleans it up. I may be wrong, though. -->
 
 * The **tidyverse** package will be used in every chapter. Loading it makes the 8 packages from the "Tidyverse" available.
@@ -51,7 +41,6 @@ library(fivethirtyeight)
 
 Tibbles are a kind of data frame, useful for storing data in which we have the same number of observations for each variable. We can use the `tibble()` function to create tibbles. Tibbles are composed of columns, each of which is a variable, and rows, each of which is a "unit" or an "observation." Furthermore, each column (i.e., each variable) can be of a different type: character, integer, factor, double, date and so on.
 
-<!-- Atilla: Tibble description was too long and ambiguous. I've broke it into multiple sentences with a little different wording. -->
 <!-- AM: Probably mention how we've already used tibbles, such as the trains dataset from Chapter 1. -->
 
 ### `tibble()`
@@ -64,15 +53,10 @@ tibble(a = 2.1, b = "Hello", c = TRUE, d = 9L)
 
 In our code, we specify the column names as , `a`, `b`, and `c`. Under each variable, we give a different value. Under each variable name, the data type is specified for the data within that column. A tibble can consist of one or more atomic vectors, the most important types of which are double, character, logical, and integer. The tibble above includes a variable of each type. The "L" in "9L" tells R that we want `d` to be an integer rather than the default, which would be a double. When you print out a tibble, the variable type is shown below the variable name, as indicated by `<dbl>`, `<chr>`, and so on.
 
-<!--Atilla: "The "L" in "9L" tells R that we want `d" part is not necessarily an extra information. I think parentheses is unnecessary in this case. I've edited that.-->
-
-<!-- Atilla: "When you print out a tibble, the variable type is shown below the variable name." sentence was implied in the preceding sentences. Therefore, I deleted that. -->
-
 <!-- Add note about data in the wild. -->
 
 Variables should not begin with a number (like `54abc`) or include spaces (like `my var`). If you insist on using variable names such, you must include backticks around each name when you reference it.
 
-<!-- Atilla: Using such instead of 'like that' would be more appropriate and professional. Edited that way. -->
 
 ```{r}
 tibble(`54abc` = 1, `my var` = 2, c = 3)
@@ -811,7 +795,6 @@ anti_join(superheroes, publishers, by = "publisher")
 
 We keep only Hellboy now.
 
-<!-- Atilla: I've removed the "and do not get `yr_founded` " phrase from the sentence "We keep only Hellboy now (and do not get `yr_founded`). " It is already stated in the past sentences. It was given in the  previous sentence that " keeping just columns from x." -->
 
 Now switch the arguments and compare the result.
 
@@ -924,7 +907,6 @@ knitr::include_graphics("02-wrangling/images/tidy-1.png")
 
 In this book so far, you've only seen data frames that were already in "tidy" format. Furthermore, for the rest of this book, you'll mostly only see data frames that are already tidy as well. This is not always the case, however, with all datasets in the world. If your original data frame is in wide (non-"tidy") format and you would like to use the **ggplot2** or **dplyr** packages, you will first have to convert it to "tidy" format. To do so, we recommend using the `pivot_longer()` function in the **tidyr** package [@R-tidyr]. 
 
-<!-- Atilla: I feel like phrase "tidy" format is repetitively used and is awk. Therefore, I replaced some of the "'tidy' format" phrases with tidy.  -->
 
 Going back to our `drinks_smaller` data frame from earlier:
 
@@ -977,91 +959,29 @@ You can also view examples of both `pivot_longer()` and `pivot_wider()` on the [
 
 
 
-## Distributions {#distributions}
-
-<!-- DK: This could be re-organized. More discussion of discrete versus continuous. -->
-
-*A distribution is a function that shows the possible values of a variable and how often they occur.*
-
-Think of the distribution of a variable as an urn from which we can pull out, at random, values for that variable. Drawing a thousand or so values from that urn, and then looking at a histogram, can show where the values are centered and how they vary. Because people are sloppy, they will use the word distribution to refer to both the (imaginary!) urn from which we are drawing values and to the list of values we have drawn. It is better, however, to keep three distinct ideas separate:
-
-* The *unknown true distribution* which, in reality, generates the data which we see. Outside of stylized examples in which we *assume* that a distribution follows a simple mathematical formula, we will never have access to the unknown true distribution. We can only estimate it. This unknown true distribution is often referred to as the *data generating mechanism*, or DGM. It is a function or black box or urn which produces data. We can see the data. We can't see the urn. Later in the *Primer*, once we have learned about posterior distributions, we will often refer to this as *Preceptor's Posterior*.
-
-* The *estimated distribution* which, we think, generates the data which we see. Again, we can never know the unknown true distribution. But, by making some assumptions and using the data we have, we can *estimate* a distribution. Our estimate may be very close to the true distribution. Or it may be far away. The main task of data science to to create and use these estimated distributions. Almost always, these distributions are instantiated in computer code.
-
-* A *vector of numbers drawn* from the estimated distribution. Both true and estimated distributions can be complex beasties, difficult to describe accurately and in detail. But a vector of numbers drawn from a distribution is easy to understand and use. So, in general, we work with vectors of numbers. When someone --- either a colleague or a piece of R code --- creates a distribution which we want to use to answer a question, we don't really want the distribution itself. Rather, we want a vectors of "draws" from that distribution. Vectors are easy to work with! Complex computer code is not.
-
-Again, people (including us!) will often be sloppy and use the same word, "distribution," without making it clear whether they are talking about the *true distribution*, the *estimated distribution*, or a vector of *draws* from the estimated distribution. Try not to be sloppy.
-
-### Scaling a distribution
-
-Consider the vector which is the result of rolling one die 10 times.
-
-```{r}
-rolls <- c(5, 5, 1, 5, 4, 2, 6, 2, 1, 5)
-```
-
-There are other ways of storing the data in this vector. Instead of recording every draw, we could just record the number of times each value appears.
-
-```{r}
-table(rolls)
-```
 
 
-In this case, with only 10 values, it is actually less efficient to store the data like this. But what happens when we have 10,000 rolls?
-
-```{r}
-more_rolls <- rep(rolls, 1000)
-table(more_rolls)
-```
-
-Instead of keeping around a vector of length 10,000, we can just keep 10 values, without losing any information.
-
-This example also highlights the fact that, graphically, two distributions can be identical even if they are of very different lengths.
-
-```{r, echo = FALSE}
-rolls_p <- tibble(value = rolls) %>% 
-  ggplot(aes(value)) +
-    geom_bar(aes(y = after_stat(count))) +
-    labs(title = "Distribution of 10 Rolls",
-         y = "Count") 
+## Other commands
 
 
-more_rolls_p <- tibble(value = more_rolls) %>% 
-  ggplot(aes(value)) +
-    geom_bar(aes(y = after_stat(count))) +
-    labs(title = "Distribution of 10,000 Rolls",
-         y = NULL)
+<!-- Look at the code used in the Temperance section of chapter 7. Explain all the key parts here, including rowwise, ungroup and matrices. Also, see the Preliminaries parts of the associated tutorials.  -->
+
+<!-- Are these commands worth covering? -->
+
+<!-- tidyr::separate_rows() -->
+<!-- dplyr::coalesce() -->
+<!-- expand(data, ...) -->
+<!-- crossing(...) -->
+<!-- nesting(...) -->
+
+<!-- - dplyr's function (cut?) to turn continuous data into categorical data. expand() to see up data frames for creating all possible combinations? -->
 
 
-rolls_p + more_rolls_p
-```
+Here are some topics which will prove important later in the *Primer*.
 
-The two vectors --- `rolls` and `more_rolls` --- have the exact same shape because even though of different lengths, these values were drawn from the same distribution. *The total count for each value does not matter. What matters is the relative proportions.*
+### Random variables
 
-<!-- Atilla:Phrase "they are the same thing" seems ambiguous. I thought following phrase would be more proper: " since even though of different lengths, these values were drawn from the same distribution. "  Could the preceptor check this revision? -->
-
-Since shape is what matters, we often "normalize" distributions so that the sum of the counts equals one, where y-axis shows the percentages of total. Example:
-
-```{r, echo = FALSE}
-rolls_p <- tibble(value = rolls) %>% 
-  ggplot(aes(x = value)) +
-    geom_bar(aes(y = after_stat(count/sum(count)))) +
-    labs(title = "Distribution of 10 Rolls",
-         y = "Percentage") +
-    scale_y_continuous(labels = scales::percent_format(accuracy = 1))
-
-more_rolls_p <- tibble(value = more_rolls) %>% 
-  ggplot(aes(value)) +
-    geom_bar(aes(y = after_stat(count/sum(count)))) +
-    labs(title = "Distribution of 10,000 Rolls",
-         y = NULL) +
-    scale_y_continuous(labels = scales::percent_format(accuracy = 1))
-
-rolls_p + more_rolls_p
-```
-
-### `sample()`
+#### `sample()`
 
 The most common distributions you will work with are *empirical* or *frequency* distributions, the values of `age` in the `trains` tibble, the values of `poverty` in the `kenya` tibble, and so on. But we can also create our own data by making "draws" from a distribution which we have concocted. 
 
@@ -1120,7 +1040,7 @@ In general, we travel back-and-forth between *distribution as a thing* and *dist
 
 `sample()` is just one of many functions for creating draws --- or, more colloquially, "drawing" --- from a distribution. Three of the most important functions are: `runif()`, `rbinom()`, and `rnorm()`.
 
-### `runif()`
+#### `runif()`
 
 Consider a "uniform" distribution. This is the case in which every outcome in the range of possible outcomes has the same chance of occurring.  The function `runif()` (spoken as "r-unif") enables us to draw from a uniform contribution. `runif()` has three arguments: `n`, `min`, and `max`. `runif()` will produce `n` draws from between `min` and `max`, with each value having an equal chance of occurring.
 
@@ -1134,7 +1054,7 @@ $$y_i \sim U(4, 6)$$,
 
 This means that the each value for $y$ is drawn from a uniform distribution between four and six.
 
-### `rbinom()`
+#### `rbinom()`
 
 Consider binomial distribution, the case in which the probability of some Boolean variable (for instance success or failure) is calculated for repeated, independent trials. One common example would be the probability of flipping a coin and landing on heads. The function `rbinom()` allows us to draw from a binomial distribution. This function takes three arguments, `n`, `size`, and `prob`. 
 
@@ -1202,11 +1122,8 @@ tibble(heads = rbinom(n = 10000, size = 10, prob = 0.5)) %>%
 ```
 
 
-### `rnorm()` {#normal}
+#### `rnorm()` {#normal}
 
-<!-- DK: Given that we have a cool plot at the end, maybe we don't need these earlier plots.  Or maybe we need plots for each kind of distribution. -->
-
-<!-- DK: Need to discuss the fact that we use y_i each time. -->
 
 The most important distribution is the *normal distribution*. Mathematics:
 
@@ -1317,165 +1234,6 @@ ggplot(data = tibble(x = c(-4, 4)), aes(x)) +
 
 
 
-
-```{r, echo = FALSE}
-set.seed(5)
-```
-
-The function `rnorm()` (spoken as "r-norm") returns draws from a normal distribution. `rnorm()` has three arguments: `n`, `mean`, and `sd`. `n` corresponds to the number of draws, `mean` and `sd` are the $\mu$ and $\sigma$ of the distribution from which we want to draw.  Again, imagine an urn filled with beads. Each bead has a number written on it. If the distribution is standard normal, then we can draw 10 beads from the urn by running: 
-
-```{r}
-rnorm(10)
-```
-
-These 10 draws come from a distribution with the default `mean` of 0 and the default `sd` of 1. What if we create a histogram of the values?
-
-```{r}
-tibble(value = rnorm(10)) %>% 
-  ggplot(aes(x = value)) + 
-    geom_histogram(bins = 10)
-```
-
-As you can see, it is not as symmetrical as the one displayed above. This is not surprising! If you just draw 10 beads from the urn, you can not possibly have a very good sense of what all the numbers on all the beads in the urn look like. What if we draw 100 values? What about 100,000?
-
-```{r}
-tibble(value = rnorm(100)) %>% 
-  ggplot(aes(x = value)) +
-    geom_histogram(bins = 10)
-```
-
-```{r}
-tibble(value = rnorm(100000)) %>% 
-  ggplot(aes(x = value)) +
-    geom_histogram(bins = 1000)
-```
-
-Now it's looking a lot more similar to the "truth", although still  imperfect. 
-
-Now, let's compare normal distributions with varying means and standard deviations, which can be set using the mean and sd arguments included with the function. 
-
-```{r}
-tibble(rnorm_5_1 = rnorm(n = 1000, mean = 5, sd = 1), 
-       rnorm_0_3 = rnorm(n = 1000, mean = 0, sd = 3),
-       rnorm_0_1 = rnorm(n = 1000, mean = 0, sd = 1)) %>%
-  pivot_longer(cols = everything(), 
-               names_to = "distribution", 
-               values_to = "value") %>% 
-  ggplot(aes(x = value, fill = distribution)) +
-    geom_density(alpha = 0.5) +
-    labs(title = "Comparison of Normal Distributions with Differing Mean and Standard Deviation Values", 
-         fill = "Distribution",
-         x = "Value",
-         y = "Density")
-```
-
-
-
-
-### Working with draws
-
-<!-- DK: Should I be working with tibbles instead of vectors? -->
-
-Once we have a vector of draws, we can examine various aspects of the distribution. Examples:
-
-```{r}
-draws <- rnorm(100, mean = 2, sd = 1)
-```
-
-This is a case in which there is no distinction between the *true distribution* and the *estimated distribution*. We know, by assumption, what the truth is.
-
-Even though we know, because we wrote the code, that the draws come from a normal distribution with a mean of 2 and a standard deviation of 1, the calculated results will not match those values exactly because the draws themselves are random. 
-
-```{r}
-mean(draws)
-sd(draws)
-```
-
-Note that we are more likely to use the median and the mad to summarize a distribution. In this case, they are very similar to the mean and standard deviation.
-
-```{r}
-median(draws)
-mad(draws)
-```
-
-
-In practice, we will not know the exact distribution which generates our data. (If we did know, then estimation would not be necessary.) The inherent randomness of the world means that calculated statistics will not match the underlying truth perfectly. But the more data that we collect, the closer the match will be.
-
-In addition to the mean and standard deviation of the draws, we will often be interested in various quantiles of the distribution, most commonly because we want to create intervals which cover a specified portion of the draws. Examples:
-
-```{r}
-quantile(draws, probs = c(0.25, 0.75))
-quantile(draws, probs = c(0.05, 0.95))
-quantile(draws, probs = c(0.025, 0.975))
-```
-
-Note that these draws come from a distribution which is centered around 2 rather than 0. There is nothing intrinsically special about any of these ranges. They are mere convention, especially the 95% interval.
-
-<!-- DK: Discuss confidence intervals. -->
-
-Note how cavalier we are in sometimes using the word "distribution" and sometimes the word "draws." These are two different things! The distribution is the underlying reality, which we will only know for certain when we create it ourselves, as in this example. The draws are a vector of numbers which, we assume, are "drawn" from some underlying distribution which, in general, we do not know. 
-
-By assumption, we can analyze the draws to make inferences about the distribution.
-
-Although distributions (and the draws therefrom) are complex, we can often treat them in the same way that we treat simple numbers. For example, we can add two distributions together.
-
-```{r}
-n <- 100000
-tibble(Normal = rnorm(n, mean = 1),
-       Uniform = runif(n, min = 2, max = 3),
-       Combined = Normal + Uniform) %>% 
-  pivot_longer(cols = everything(),
-               names_to = "Distribution",
-               values_to = "draw") %>% 
-  ggplot(aes(x = draw, fill = Distribution)) +
-    geom_histogram(aes(y = after_stat(count/sum(count))),
-                   alpha = 0.5, 
-                   bins = 100, 
-                   position = "identity") +
-    labs(title = "Two Distributions and Their Sum",
-         subtitle = "You can sum distributions just like you sum numbers",
-         x = "Value",
-         y = "Probability")
-```
-
-Drawing from a distribution also allows us to answer questions via *simulation.* For example, imagine that A and B are both flipping fair coins. A flips the coin 3 times. B flips the coin 6 times. What is the probability that A flips more heads than B?
-
-It is obvious that B will win this game more often than A. It is also obvious that A will win some of the  time. But in order to estimate the chances of A winning, we can simply simulate playing the game 1,000 times.
-
-
-```{r}
-set.seed(56)
-games <- 1000 
-
-tibble(A_heads = rbinom(n = games, size = 3, prob = 0.5),
-       B_heads = rbinom(n = games, size = 6, prob = 0.5)) %>% 
-  mutate(A_wins = ifelse(A_heads > B_heads, 1, 0)) %>% 
-  summarize(A_chances = mean(A_wins))
-```
-
-A has about a 9% chance of winning the game.
-
-In data science, the most important kind of distribution is a *probability distribution*, a concept which we will introduce in Chapter \@ref(probability).
-
-<!-- DK: Could do more here, like look at prediction games, betting and so on. -->
-
-## Other Commands
-
-
-<!-- Look at the code used in the Temperance section of chapter 7. Explain all the key parts here, including rowwise, ungroup and matrices. Also, see the Preliminaries parts of the associated tutorials.  -->
-
-<!-- Are these commands worth covering? -->
-
-<!-- tidyr::separate_rows() -->
-<!-- dplyr::coalesce() -->
-<!-- expand(data, ...) -->
-<!-- crossing(...) -->
-<!-- nesting(...) -->
-
-<!-- - dplyr's function (cut?) to turn continuous data into categorical data. expand() to see up data frames for creating all possible combinations? -->
-
-
-Here are some topics which will prove important later in the *Primer*.
 
 ### Combinations
 

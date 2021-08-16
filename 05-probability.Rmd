@@ -1,5 +1,20 @@
 # Probability {#probability}
 
+<!-- Students need to be comfortable manipulating probability distributions.  -->
+
+<!-- If A and B are independent, you can make a draw from the joint distribution of A and B --- p(A, B) --- by first taking a draw from A and combining it with a draw from B. -->
+
+<!-- The way that one does does so, is one draws 4,000 values from them, does some manipulation *row-by_row*, and then, hooray, you have you answer.  -->
+
+<!-- Often, one needs to go backwards. Start with question. How many random variables do you need to know the values of to answer the question? If someone asks you about the tallest of 5 men, then, (obviously?), you need to know the height of the five men. (Would it be useful to connect this to the Preceptor Table?) So, you need to work with 5 random variables and we do that by working with the probability distributions. -- Added>
+
+<!-- You can consider these pdfs to be independent, so you can draw them independently and then --- this is the magic! --- you can treat a row as a draw from their joint distribution. -->
+
+<!-- The joint distribution of a collection of random variables --- which we are working with by considering 4,000 draws from their pdfs --- is  . . . . the same as picking a random value from each member of the collection.  -->
+
+<!-- Also need to talk more about working with distributions, especially calculating areas under the curve.  -->
+
+<!-- There are two kinds of questions. The first asks for the value of a specific "real" number, like the height of the tallest person out of a 100. We answer this type of question with a posterior probability distribution. The second asks for the chances/likelihood/probabiliy/odds of something --- like what are the chances that the tallest person will be above 200 cm. We answer this by first making a probability distribution and then calculating the appropriate error under the curve. -->
 
 <!-- What would be a fun theme/gif/movie clip to start and end the chapter with, like we do in chapters 4 and 6? Something having to do with betting . . . Connected to Kant? -->
 
@@ -18,6 +33,8 @@
 > The usual touchstone of whether what someone asserts is mere persuasion or at least a subjective conviction, i.e., firm belief, is betting. Often someone pronounces his propositions with such confident and inflexible defiance that he seems to have entirely laid aside all concern for error. A bet disconcerts him. Sometimes he reveals that he is persuaded enough for one ducat but not for ten. For he would happily bet one, but at ten he suddenly becomes aware of what he had not previously noticed, namely that it is quite possible that he has erred. -— Immanuel Kant, *Critique of Pure Reason*
 
 The central tension, and opportunity, in data science is the interplay between the *data* and the *science*, between our empirical observations and the models which we use to understand them. Probability is the language we use to explore that interplay; it connects models to data, and data to models.
+
+A random variable is a variable whose value is unknown. A random variable can be either discrete (having specific values, like H or T for the result of a coin flip, or 2, 3, ..., 12 for the sum of two die) or continuous (any value in a continuous range). Probability is a claim about the value of a random variable, i.e., that you have a 50% probability of H when you flip a fair coin.
 
 The only package we need in this chapter is **tidyverse**.
 
@@ -1067,6 +1084,49 @@ Now recalled the question we asked at the start of the session:
 By looking at the posterior graph we just create, we can answer this question easily:
 *With a positive test, you can be almost 70% sure that you have Probophobia, however there is a good chance about 30% that you receive a false positive, so don't worry too much there is still about a third of hope that you get the wrong result*
 
+Now let's consider the manipulation of this posterior, here is another question.
+Question : *10 people walks up to testing center, 5 of them tested negative, 5 of them tested positive, what is the probability of at least 6 people is actually healthy? *
+
+```{r}
+tibble(test = 1:100000) %>%
+mutate(person1 =   map_int(test, ~ rbinom(n = 1, size = 1, p = 0.3))) %>%
+  
+mutate(person2 = map_int(test, ~ rbinom(n = 1, size = 1, p = 0.3))) %>%
+  
+mutate(person3 = map_int(test, ~ rbinom(n = 1, size = 1, p = 0.3))) %>%
+  
+mutate(person4 =  map_int(test, ~ rbinom(n = 1, size = 1, p = 0.3))) %>%
+  
+mutate(person5 = map_int(test, ~ rbinom(n = 1, size = 1, p = 0.3))) %>%
+  
+  
+mutate(person6 = map_int(test, ~ rbinom(n = 1, size = 1, p = 0.7))) %>%
+  
+mutate(person7 = map_int(test, ~ rbinom(n = 1, size = 1, p = 0.7))) %>%
+  
+mutate(person8 = map_int(test, ~ rbinom(n = 1, size = 1, p = 0.7))) %>%
+  
+mutate(person9 = map_int(test, ~ rbinom(n = 1, size = 1, p = 0.7))) %>%
+  
+mutate(person10 =  map_int(test, ~ rbinom(n = 1, size = 1, p = 0.7))) %>%
+  
+select(!test) %>%
+  
+mutate(sum = rowSums(.))%>%
+  
+ggplot(aes(sum)) +
+  geom_histogram(aes(y = after_stat(count/sum(count))),
+                 binwidth = 1,
+                   color = "white") +
+  scale_x_continuous(breaks = c(0:10)) +
+    scale_y_continuous(labels = 
+                         scales::percent_format(accuracy = 1)) +
+    theme_classic()  
+
+
+```
+
+
 <!-- DK: Insert a use of this posterior? How many positive tests before you have at least 10 sick people? -->
 
 
@@ -1263,12 +1323,11 @@ Assume that there is a coin with $\rho_h$. We guarantee that there are only 11 p
 
 We are going to run an experiment in which you flip the coin 20 times and record the number of heads. What does this result tell you about the value of $\rho_h$? Ultimately, we will want to calculate a posterior distribution of $\rho_h$, which is written as p($\rho_h$). 
 
-Question: *What most likely be probability of a certain coin for getting exactly 8 heads out of 20 tosses. ?*
+Question: *What is the probability of getting exactly 8 heads out of 20 tosses?*
 
 To start, it is useful to consider all the things which might happen if, for example, $\rho_h = 0.4$. Fortunately, the R functions for simulating random variables makes this easy.
 
 ```{r, echo = FALSE}
-
 set.seed(9)
 
 sims <- 1000
@@ -1520,7 +1579,7 @@ sims <- 10000000
 
 odds <- tibble(sim_ID = 1:sims) %>%
   mutate(heads = map_int(sim_ID, ~ rbinom(n = 1, size = 20, p = .4))) %>% 
-  mutate(above_ten = ifelse(heads >= 10, TRUE, FALSE))
+  mutate(above_ten = if_else(heads >= 10, TRUE, FALSE))
 
 odds
 
@@ -1560,7 +1619,7 @@ p_draws <- tibble(p = rep(seq(0, 1, 0.1), 1000)) %>%
   
 odds_2nd <- tibble(p = sample(p_draws$p, size = sims, replace = TRUE)) %>%
   mutate(heads = map_int(p, ~ rbinom(n = 1, size = 20, p = .))) %>% 
-  mutate(above_ten = ifelse(heads >= 10, TRUE, FALSE)) 
+  mutate(above_ten = if_else(heads >= 10, TRUE, FALSE)) 
 
 odds_2nd
 
@@ -1572,7 +1631,7 @@ odds_2nd %>%
   ggplot(aes(x = heads,fill = above_ten))+
            geom_histogram(aes(y = after_stat(count/sum(count))),bins = 50)+
   scale_fill_manual(values = c('grey50', 'red'))+
-  labs(title = "Posterior Probability Distribution (Right Way 1st)",
+  labs(title = "Posterior Probability Distribution (Right Way)",
          subtitle = "Number of heads in 20 tosses",
          x = "Number of heads",
          y = "Probability",
@@ -1589,54 +1648,7 @@ odds_2nd %>%
 ```
 about 32.8%
 
-Third way is to sample from the actual distribution, which is a small dataset with just a few rows, but it includes both $\rho_h$ and the probability of each $\rho_h$. This also gives the correct answer.
 
-```{r}
-p_posterior <- jd_coin %>% 
-  filter(heads == 8) %>% 
-  group_by(p) %>% 
-  summarize(total = n(), .groups = "drop") %>%
-  mutate(probs = total/sum(total))
-
-odds_3rd <- tibble(p = sample(p_posterior$p, 
-                          size = sims, 
-                          prob = p_posterior$probs, 
-                          replace = TRUE)) %>%
-  mutate(heads = map_int(p, ~ rbinom(n = 1, 
-                                     size = 20, 
-                                     p = .))) %>% 
-  mutate(above_ten = ifelse(heads >= 10, 
-                         TRUE, 
-                         FALSE)) 
-
-odds_3rd
-
-```
-
-
-```{r}
-odds_3rd %>%
-  ggplot(aes(x = heads,fill = above_ten))+
-           geom_histogram(aes(y = after_stat(count/sum(count))),bins = 50)+
-  scale_fill_manual(values = c('grey50', 'red'))+
-  labs(title = "Posterior Probability Distribution (Right Way 3rd)",
-         subtitle = "Number of heads in 20 tosses",
-         x = "Number of heads",
-         y = "Probability",
-         fill = "Above ten heads") + 
-    scale_x_continuous(labels = scales::number_format(accuracy = 1)) +
-    scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
-    theme_classic()
-```
-
-Using this Posterior distribution derived from the (right way 2nd) simulated data, the probability results in 10 or more head is
-
-```{r}
-odds_3rd %>%
-  summarize(success = sum(above_ten)/sims)
-```
-
-about 32% which is pretty close to the second method.
 
 As you may have noticed, if you calculated the value using the first method, you would believe that getting 10 or more heads is less likely than it really is. If you were to run a casino based on these assumptions, you will lose all your money. It is very important to be careful about the assumptions you are making. We tossed a coin 20 times and got 8 heads. However, you would be wrong to assume that $\rho_h$ = 0.4 just based on this result.
 
@@ -1843,6 +1855,9 @@ Even worse, we must always worry that our estimated posterior, despite all the w
 Throughout this Chapter, we spent time going through examples of conditional distributions. However, it's worth noting that all probability distributions are conditional on something. Even in the most simple examples, when we were flipping a coin multiple times, we were assuming that the probability of getting heads versus tails did not change between tosses.
 
 We also discussed the difference between empirical, mathematical, and posterior probability distributions. Even though we developed these heuristics to better understand distributions, every time we make a claim about the world, it is based on our beliefs - what we think about the world. We could be wrong. Our beliefs can differ. Two reasonable people can have conflicting beliefs about the fairness of a die.
+
+At the start of this chapter we briefly discuss the definition of an random variable, yet we sort of let it go for the rest of the chapter, but it's hiding almost everywhere whenever we create an distribution. 
+For example, in two models we have two random variables, the have disease and the don't have disease, in three models we have three random variables, either to have 0 or 1 or 2 white marbles in bad. Essentially is just like the missing values in the Preceptor table *what random variables do you need to know the values of to answer the question? *
 
 It is useful to understand the three types of distributions and the concept of conditional distributions, but almost every probability distribution is conditional and posterior. We can leave out both words in future discussions, as we generally will in this book. They are implicit.
 
