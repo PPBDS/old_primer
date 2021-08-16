@@ -1067,15 +1067,15 @@ We are Bayesian data scientists that make Bayesian models. This means that we ma
 
 $$ T_i  \sim B(\rho, n = 50) $$
 
-Some non-Bayesian frameworks are concerned with the probability distribution of our observed data, but do not care much about the probability distribution for $\rho_r$ and assume it to be fixed. If $\rho_r$ is fixed, the equation above becomes one simple binomial distribution. Think of this as a standard 2 dimensional plot. 
+Some non-Bayesian frameworks are concerned with the probability distribution of our observed data, but do not care much about the probability distribution for $\rho$ and assume it to be fixed. If $\rho_r$ is fixed, the equation above becomes one simple binomial distribution. Think of this as a standard 2 dimensional plot. 
 
-Us Bayesians consider our observed data to be fixed. We don't consider alternate realities where our observed data is different due to sampling variation. Instead, we are concerned with the probability distribution of our parameter. In our urn scenario, $\rho_r$ is variable, so we have to create a separate binomial distribution for each possible value of $\rho_r$. Think of this as a 3 dimensional joint distribution like what we created in Section \@ref(n-models).
+Us Bayesians consider our observed data to be fixed. We don't consider alternate realities where our observed data is different due to sampling variation. Instead, we are concerned with the probability distribution of our parameter. In our urn scenario, $\rho$ is variable, so we have to create a separate binomial distribution for each possible value of $\rho$. Think of this as a 3 dimensional joint distribution like what we created in Section \@ref(n-models).
 
 It is essential to understand the joint distribution and the posterior, two concepts Bayesians use to solve problems. We will provide quick a quick review here, including statistical notation that may be helpful to some. 
 
 **The joint distribution**, $p(y|\theta)$, models the outcome $y$ given one or more unknown parameter(s), $\theta$. The equation illustrates exact same concept we addressed while discussing the distinctions of Bayesian science: because our parameters are variable, we have to create separate distributions for each potential value. Combining all these distributions together creates a joint distribution that is 3 dimensional when plotted. 
 
-**The posterior**, $p(\theta|y)$, is the result of Bayes' theorem and is our coveted end goal. The posterior is the probability distribution of our parameters, created using data that updates our prior beliefs. We have referenced the posterior many times before, and this definition does not change its meaning. 
+**The posterior**, $p(\theta|y)$, is the probability distribution of our parameter(s) $\theta$, created using data $y$ that updates our beliefs. We have referenced the posterior many times before, and this definition does not change its meaning. 
 
 In our urn scenario, obtaining the posterior involves first creating many binomial distributions for each possible population proportion. This is the joint distribution, and it is a 3 dimensional model. We then select the distribution that corresponds with our data: 17 red beads are sampled. We can represent the posterior with the following:
 
@@ -1278,7 +1278,7 @@ post_epred %>%
                   subtitle = "The two distributions have an identical shape.")
 ```
 
-On the other hand, `posterior_predict()` models the posterior distribution for future **individuals**. In our scenario, we model the binomial distribution is of a discrete random variable. The bars only appear at real numbers between 1 and 16, because we are predicting the probability of individual samples. We cannot draw fractions of beads in our sample. Using `posterior_predict()` essentially replicates the DGM, taking many virtual draws from our urn and summarizing all the results. 
+On the other hand, `posterior_predict()` models the posterior distribution for future **individuals**. In our scenario, we model the binomial distribution of a discrete random variable. The bars only appear at real numbers between 1 and 16, because we are predicting the probability of individual samples. We cannot draw fractions of beads in our sample. Using `posterior_predict()` essentially replicates the DGM, taking many virtual draws from our urn and summarizing all the results. 
 
 In summary, use `posterior_predict()` when to predict the outcome of individual(s) in the future, and use `posterior_epred()` to model the probability across the entire population using the posterior. To answer our question, we want to know the probability of outcomes using a single shovel of size 20. We should use `posterior_predict()` to model taking individual samples many times, and we can then analyze the probabilities. If this is confusing do not fret! We will have plenty of practice with these 2 functions for the remainder of this *Primer*. 
 
@@ -1300,7 +1300,7 @@ ppd_reds_in_20 <- posterior_predict(fit_1,
 sum(ppd_reds_in_20$total > 8)/length(ppd_reds_in_20$total)
 ```
 
-**There is approximately a `r round(100 *sum(ppd_reds_in_20$total > 8)/length(ppd_reds_in_20$total))`% chance that we will draw more than 8 red beads out of a sample size of 20. .**
+**There is approximately a `r round(100 *sum(ppd_reds_in_20$total > 8)/length(ppd_reds_in_20$total))`% chance that we will draw more than 8 red beads out of a sample size of 20.**
 
 To visualize this probability graphically, we will reuse our posterior, and add a new column called `above_eight` that is `TRUE` if `total > 8`. 
 
