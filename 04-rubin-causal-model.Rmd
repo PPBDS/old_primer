@@ -14,8 +14,6 @@ library(gtsummary)
 
 <!-- Begin the Assumptions section by making your first real Population Table: including a Source column and a Time column. Not sure if you should use the height example or the train example. But we need a full example in order to make clear what the assumptions refer to. MF: Done. -->
 
-<!-- In Representativeness section, we need a table which shows all the rows which we might have gotten when we got our data. This includes two kinds of rows: the data we got and the data we did not get (but might have gotten). We can be sure that the data is "representative" if it includes all the data we could have gotten or if it is a random sample from that data. This is *not* the same thing as all the rows in the Population Table. This is a subset of the population table, all the rows with the value for the Time column. -->
-
 <!-- https://stats.stackexchange.com/questions/3520/can-someone-explain-the-concept-of-exchangeability -->
 
 <!-- Key changes to come: -->
@@ -83,7 +81,7 @@ A **Preceptor Table** is a table with rows and columns such that, if none of the
 Assume that there are five adult brothers and you are given four of their heights. What is the average height of all five brothers? Consider a Preceptor Table for this problem:
 
 ```{r, echo = FALSE}
-tibble(ID = c("Robert", "Andy", "Beau", "Ishan", "Nicolas"),
+tibble(ID = c("Robert", "Andy", "Beau", "Ishan", "Nicholas"),
        Heights = c("178", "?", "172", "173", "165")) %>%
   
   # Then, we use the gt function to make it pretty
@@ -163,6 +161,7 @@ tibble(source = c("Population", "Data", "Data", "Population",
   tab_header(title = "Population Table") %>% 
   cols_label(source = md("Source"),
              year = md("Year"),
+             age = md("Age"),
              height = md("Height")) %>%
   tab_style(cell_borders(sides = "right"),
             location = cells_body(columns = c(source))) %>%
@@ -886,7 +885,7 @@ tibble(source = c("Population", "Population", "Data",
   tab_style(cell_borders(sides = "right"),
             location = cells_body(columns = c(source))) %>%
   tab_style(style = cell_text(align = "left", v_align = "middle", size = "large"), 
-            locations = cells_column_labels(columns = c(source)) %>%
+            locations = cells_column_labels(columns = c(source))) %>%
   cols_align(align = "center", columns = everything()) %>%
   cols_align(align = "left", columns = c(source)) %>%
   tab_spanner(label = "$$\\text{Outcomes}$$", c(ytreat, ycontrol)) %>%
@@ -904,7 +903,7 @@ knitr::include_graphics("04-rubin-causal-model/images/wonderfullifememe1.jpg")
 
 ### Validity 
 
-To understand validity in regards to the infinite Preceptor Table, we must first recognize an inherent flaw in any experiment design: *no two units receive exactly the same treatment*. 
+To understand validity in regards to the Population Table, we must first recognize an inherent flaw in any experiment design: *no two units receive exactly the same treatment*.
 
 If this doesn't ring true, consider our Spanish speaking train experiment. The units on the Spanish-speaking platform received the same treatment, right? No, actually!
 
@@ -944,24 +943,28 @@ tibble(subject = c("Yao", "Emma", "Cassidy", "Tahmid", "Diego"),
 
 As we can see, certain units heard the Spanish-speakers at higher volumes than other units. And it is entirely possible that the volume of the speaking affects the outcome. There is also the issue of the time spent on the platform. Maybe Yao tends to run late, and only hears the Spanish-speakers for thirty seconds. Emma, on the other hand, plans ahead. She hears the Spanish-speakers for fifteen minutes before the train arrives!  Thus, despite the fact that Emma and Yao are in the same treatment --- that is, hearing Spanish on the platform --- they had very different versions of that treatment. 
 
-Indeed, there are an infinite number of possible treatments. The Preceptor Table extends to the right forever. This is why it is crucial to define one's estimand precisely: if we are interested in the difference in potential outcomes between Spanish being spoken for 10 minutes at a 60 dB versus control, we can ignore all the other possible columns in the infinite Preceptor Table. 
+Indeed, there are an infinite number of possible treatments. This is why it is crucial to define one's estimand precisely: if we are interested in the difference in potential outcomes between Spanish being spoken for 10 minutes at a 60 dB versus control, we can ignore all the other possible columns in the Population Table,
 
 ### Stability
 
-Stability means that the relationship between the columns is stable. In short: can we say that this column means the same thing as another column?
+Stability means that the relationship between the columns is the same for three categories of rows: the data, the Preceptor table, and the larger population from which both are drawn. 
 
-For instance, can we say that Yao *now* is the same as all the future observations for Yao? Is that plausible? Sort of. Yao now and Yao in one second are pretty similar! Yao now and Yao in 30 years are less similar. 
+In our height example, it is much easier to assume stability over a greater period of time. Changes in global height occur extremely slowly, so height being stable across a span of 20 years is reasonable to assume. Can we say the same for this example, where we are looking at attitudes on immigration? 
 
-Yao himself is likely to change over time, which means that Yao in 30 years may have a drastically different treatment effect than Yao today. The world also changes overtime, which causes opinions to shift. 
+With something like political ideology, it is much harder to make the assertion that data collected in 2010 would be stable to data collected in 2025. Our data, for instance, was collected in 2014. We want to make predictions for 2021. And, frankly, it may be difficult to argue that our results would be stable if we re-conducted the experiment. 
 
-To simplify the infinite Preceptor Table, then, we have to define how far in the future we are willing to predict. There is never a perfect answer. Perhaps five years into the future *sounds* good. Or, maybe two years from now, something drastically changes in the world and we no longer believe people will respond to the treatment in the same way. 
+When we are confronted with this uncertainty, we can consider making our timeframe smaller. However, we would still need to assume stability from 2014 (time of data collection) to today. Stability allows us to ignore the issue of time. 
 
+Alternatively, if we believe that it is unlikely that our columns are stable, we have two choices. First, we abandon the experiment. If we believe our data is useless, so is our experiment. Second, we can choose to provide a sort of warning message with our conclusions: *this is based on data from ten years ago, but that was the most recent data available to us.*
+
+ <!-- More meat here. Some examples, using height and immigration attitudes, from above. When is it OK to assume stability and when is it not? What is a reasonable time frame to use for the population?  MF: Done. -->
+ 
 When forming our future models, we will ask ourselves:
 
 * Are the units from X years ago likely to have similar outcomes in future year Y?
 * Has the world changed drastically from year Z, when the data was collected? 
 
-When we decide that Yao from today and Yao from a week in the future are *stable*, we can collapse the two units into one unit. This further simplifies our infinite Preceptor Table. 
+When we decide that Yao from today and Yao from a week in the future are *stable*, we can collapse the two units into one unit. This is an assumption we make when forming our Population Table. 
 
 ### Representativeness
 
@@ -969,7 +972,8 @@ The external validity of a study is often directly related to the representative
 
 Does the train experiment allow us to calculate a causal effect for people who commute by cars? Can we calculate the causal effect for people in New York City? Before we generalize to broader populations we have to consider if our experimental estimates are applicable beyond our experiment. Maybe we think that commuters in Boston and New York are similar enough to generalize our findings. We could also conclude that people who commute by car are fundamentally different than people who commute by train. If that was true, then we could not say our estimate is true for all commuters because our sample does not accurately represent the broader group we want to generalize to.
 
-*Thus, whenever you are considering a causal question, we throw out the rows we think are duplicates (such as all the observations for Yao one second from now, two seconds from now, etc.) or that are outside the scope of what we are interested in for now (maybe we don't care about outcomes 30 years in the future for this study). Finally, we define precisely---in terms of potential outcomes---our estimand.  It may be something simple, such as the average treatment effect, or something more complex.  Once we have done these steps, we can start thinking about how to fill in the question marks.  But remember that the infinite Preceptor Table is always there, and you should be conscious of which rows and columns you are throwing out!*
+Generally: *if there was no chance that a certain type of person would have been in this experiment, we cannot make an assumption for that person*. 
+
 
 ## Summary
 
