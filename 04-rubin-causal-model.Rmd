@@ -8,15 +8,13 @@ library(gtsummary)
 
 *This chapter is being re-drafted.*
 
-<!-- Re-arrange and add rows to the first Population Table. First population, then data, then population, then Preceptor Table, the population. -->
+<!-- Re-arrange and add rows to the first Population Table. First population, then data, then population, then Preceptor Table, the population. MF: Done. -->
 
-<!-- Add a Covariate column for Gender to Two values for tau. Explain what a covariate is. (One sentence.) This allows us to know which units have causal effect \tau_f and \tau_m. -->
+<!-- Add a Covariate column for Gender to Two values for tau. Explain what a covariate is. (One sentence.) This allows us to know which units have causal effect \tau_f and \tau_m. MF: Done.  -->
 
 <!-- Begin the Assumptions section by making your first real Population Table: including a Source column and a Time column. Not sure if you should use the height example or the train example. But we need a full example in order to make clear what the assumptions refer to. MF: Done. -->
 
 <!-- In Representativeness section, we need a table which shows all the rows which we might have gotten when we got our data. This includes two kinds of rows: the data we got and the data we did not get (but might have gotten). We can be sure that the data is "representative" if it includes all the data we could have gotten or if it is a random sample from that data. This is *not* the same thing as all the rows in the Population Table. This is a subset of the population table, all the rows with the value for the Time column. -->
-
-<!-- First discussion of what is a population --- in Preceptor Tables section --- has no notion of time. Should we have time in the Preceptor Table? Argument for No is that we want to keep things simple. Argument for Yes is that having it highlights why we need it in the Population Table and why we need to discuss Stability.  -->
 
 <!-- https://stats.stackexchange.com/questions/3520/can-someone-explain-the-concept-of-exchangeability -->
 
@@ -139,7 +137,7 @@ tibble(ID = c("Student 1", "Student 2", "...", "Student 473", "Student 474",
 
 Again, are these 100 students randomly sampled? Could we estimate the 90th percentile of height in the student population? These questions are more complicated, and we might be less confident in our best guess. Note, also, that we will sometimes not know exactly how many rows there are in the Precptor Table. In that case, we would use "Student N" as the last ID, where N is the total number of students at Harvard.
 
-##  Population Table
+### Population Table
 
 The Population Table is distinct from the Preceptor Table. The aim of the Population Table is to illustrate the broader population we are interested in, while including the data from our Preceptor Table and dataset. This table has three sources of data: the data for units we want to have (the Preceptor Table), the data for units which we actually have (our actual data), and the data for units we do not care about (the rest of the population, not included in the data or the Preceptor Table). It represents the pieces of data that *we actually have*. 
 
@@ -178,8 +176,6 @@ tibble(source = c("Population", "Data", "Data", "Population",
 Implicit in the Preceptor Table is a notion of time. Now that we can see our actual data compared with our greater population and our desired data, we must expand our observations. That is to say that, given our data is sourced from 2015 and our desired data is from 2021, we must include a greater time span in our predictions. 
 
 As such, we will see that rows from our larger population may include anywhere between 2010 and 2025. This is a ballpark range. Height is relatively stable, so it is simpler to expand the timeframe. The greater sense of time in future problems will depend on that individual circumstance. 
-
-In working with the Population Table, there are three key assumptions to consider: validity, stability and representativeness.
 
 ## Causal effect
 
@@ -645,15 +641,15 @@ tibble(subject = c("Yao", "Emma", "Cassidy", "Tahmid", "Diego"),
 
 A second model might assume that the causal effect is different between levels of a category but the same within those levels. For example, perhaps there is a $\tau_F$ for females and $\tau_M$ for males where $\tau_F != \tau_M$. We are making this assumption to give us a different model with which we can fill in the missing values in our Preceptor Table. We can't make any progress unless we make some assumptions. That is an inescapable result of the *Fundamental Problem of Causal Inference*.
 
-Consider a model in which causal effects differ based on sex:
+Consider a model in which causal effects differ based on sex. When we are looking at a "category" of units --- for instance, gender --- we call this a *covariate*. A covariate is an independent variable that can influence the outcome of a given statistical trial, but which is not of direct interest. Possible covariates include, but are not limited to, sex, age, and political party. 
 
-<!-- SZ: Might just be me, but is there a reason behind using != instead of isn't equal | Factorial  -->
 
 
 ```{r, echo = FALSE}
 # First, we create a tibble with the values we want for the table
 
 tibble(subject = c("Yao", "Emma", "Cassidy", "Tahmid", "Diego"),
+       gender = c("Male", "Female", "Female", "Male", "Male"),
        ytreat = c("13", "14", "$$6 + \\tau_F$$", "$$12 + \\tau_M$$", "3"),
        ycontrol = c("$$13 - \\tau_M$$", "$$14 - \\tau_F$$", "6", "12", "$$3 - \\tau_M$$"),
        ydiff = c("$$\\tau_M$$", "$$\\tau_F$$", "$$\\tau_F$$", "$$\\tau_M$$", "$$\\tau_M$$")) %>%
@@ -674,6 +670,7 @@ tibble(subject = c("Yao", "Emma", "Cassidy", "Tahmid", "Diego"),
   cols_align(align = "left", columns = c(subject)) %>%
   tab_spanner(label = "$$\\text{Outcomes}$$", c(ytreat, ycontrol)) %>%
   tab_spanner(label = "$$\\text{Causal Effect}$$", c(ydiff)) %>%
+  tab_spanner(label = "$$\\text{Covariate}$$", c(gender)) %>%
   fmt_markdown(columns = everything())
 ```
 
@@ -854,20 +851,24 @@ knitr::include_app("https://www.youtube.com/embed/cBYUuD2aVkA")
 
 ## Assumptions
 
-In this section, we will explore three topics: validity, stability, and representativeness. To start, we will look at our infinite Preceptor Table. 
+In this section, we will explore three topics: validity, stability, and representativeness. To start, we will look at a new Population Table. 
 
-### The infinite Preceptor Table
+### The Population Table
 
-In reality, a Preceptor Table has an infinite number of columns, and therefore an infinite amount of missing data. We call this type of Preceptor Table an infinite Preceptor Table. Such a reality is unworkable, so we make assumptions to reduce the true problem to something more manageable.
+Our earlier Population Table familiarized us with the three sources of data for which we are making inferences: our data, the greater population, and the Preceptor Table. 
 
-Let's start by looking at what kinds of missing data make up the infinite Preceptor Table. For example, say we only care about the causal effect of this experiment on Yao. Do we only care about his attitude right after the experiment? No! We also care about Yao's potential outcomes one year from now, two years from now, and so on.
-
-So our full Preceptor Table includes people we know (Yao) and people we don't (for example, Eliot), both now and in the future:
+The rows from our data have all information we desire. The rows from the Preceptor Table include covariates, but not outcomes. The rows from our greater population include no data, as we know nothing about these units. 
 
 ```{r, echo = FALSE}
 # First, we create a tibble with the values we want for the table
 
-tibble(subject = c("Yao this year", "Yao next year", "Yao two years from now", "Eliot this year", "Eliot next year", "Eliot two years from now", "...", "Person n at time t"),
+tibble(source = c("Population", "Population", "Data", 
+                  "Data", "Preceptor Table", "Preceptor Table", 
+                  "Population", "Population"), 
+       year = c("2012", "2012", "2014", "2014", 
+                "2021", "2021", "2023", "2023"),
+       sex = c("?", "?", "Male", "Female", 
+               "Female", "Female", "?", "?"),
        ytreat = c("13", "?", "?", "?", "?", "?", "?", "?"),
        ycontrol = c("?", "?", "?", "?", "?", "?", "?", "?"),
        ydiff = c("?", "?", "?", "?", "?", "?", "?", "?")) %>%
@@ -875,24 +876,26 @@ tibble(subject = c("Yao this year", "Yao next year", "Yao two years from now", "
   # Then, we use the gt function to make it pretty
   
   gt() %>%
-  cols_label(subject = md("ID"),
+  cols_label(source = md("Source"),
+             year = md("Year"),
+             sex = md("Sex"),
                 ytreat = md("$$Y_t(u)$$"),
                 ycontrol = md("$$Y_c(u)$$"),
                 ydiff = md("$$Y_t(u) - Y_c(u)$$")) %>%
-  cols_move(columns = c(ytreat, ycontrol), after = c(subject)) %>%
+  cols_move(columns = c(ytreat, ycontrol), after = c(source)) %>%
   tab_style(cell_borders(sides = "right"),
-            location = cells_body(columns = c(subject))) %>%
+            location = cells_body(columns = c(source))) %>%
   tab_style(style = cell_text(align = "left", v_align = "middle", size = "large"), 
-            locations = cells_column_labels(columns = c(subject))) %>%
+            locations = cells_column_labels(columns = c(source)) %>%
   cols_align(align = "center", columns = everything()) %>%
-  cols_align(align = "left", columns = c(subject)) %>%
+  cols_align(align = "left", columns = c(source)) %>%
   tab_spanner(label = "$$\\text{Outcomes}$$", c(ytreat, ycontrol)) %>%
-  tab_spanner(label = "$$\\text{Causal Effect}$$", c(ydiff))
+  tab_spanner(label = "$$\\text{Causal Effect}$$", c(ydiff)) %>% 
+  tab_spanner(label = "$$\\text{Covariates}$$", c(sex))
 ```
 
 &nbsp;
 
-In fact, because time is continuous, there is a row for Yao now, Yao one second from now, Yao one day from now and so on. The Preceptor Table extends downward forever. Thus, in order to estimate any causal effect, we need *assumptions*, so we aren't dealing with an infinite table. 
 
 ```{r echo = FALSE, out.width=="100%", fig.align='center'}
 knitr::include_graphics("04-rubin-causal-model/images/wonderfullifememe1.jpg")
