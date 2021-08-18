@@ -8,13 +8,13 @@ library(gtsummary)
 
 *This chapter is being re-drafted.*
 
-<!-- Need to think harder, and discuss/explain, the notion of frequency of the Population Table. Is there a row for Mak for every minute, hour, day, year? Answer: There is some moment in time to which the question --- which we have been asked --- applies. Sometimes, we need to clarify that with the person who asked us. Indeed, clarifying what someone want to know --- helping them frame their question --- is a critical part of data science. Once we have clarity about the moment in time, and we know the moment in time --- which might be a multi-year time period, since moments, like love affairs, can last a lifetime. Actually, there is almost never really an instant --- note the difference betweem "moment" and "instant" --- to which the question refers since gathering data is never done instantaneously. So, it makes sense for the frequency of the population table to be congizant of the fact that we can never gather data --- to check our posterior --- instantly. MF: Done. -->
+<!-- Re-arrange and add rows to the first Population Table. First population, then data, then population, then Preceptor Table, the population. -->
 
-<!-- Exchangability allows you to ignore time. MF: Done. -->
+<!-- Add a Covariate column for Gender to Two values for tau. Explain what a covariate is. (One sentence.) This allows us to know which units have causal effect \tau_f and \tau_m. -->
 
-<!-- The Population Table always has a column for Time, by definition. Even in the case, like Chapter 6, with a single urn, we have the urn at 11:00 (when we drew our sample) and the urn at 11:05, when we will draw our second sample. The Population Table has that urn, at 5 minute intervals, from 9:00 to 5:00, or whatever. And so, every row in the Population Table is specified by an ID and Time combination.  MF: How do we show this with Height example? Data = Yale in 2018, Preceptor Table = Harvard in 2021, Population = Ivy League students from 2015-2020?  Answer: People's height changes. And who is in the Population changes. MF: Done. -->
+<!-- Begin the Assumptions section by making your first real Population Table: including a Source column and a Time column. Not sure if you should use the height example or the train example. But we need a full example in order to make clear what the assumptions refer to. -->
 
-<!-- Get rid of infinite rows in infinite Preceptor Table. Just keep all the columns. It is a mental tool for thinking about the assumption of Validity. And that is all that it is. -->
+<!-- In Representativeness section, we need a table which shows all the rows which we might have gotten when we got our data. This includes two kinds of rows: the data we got and the data we did not get (but might have gotten). We can be sure that the data is "representative" if it includes all the data we could have gotten or if it is a random sample from that data. This is *not* the same thing as all the rows in the Population Table. This is a subset of the population table, all the rows with the value for the Time column. -->
 
 <!-- First discussion of what is a population --- in Preceptor Tables section --- has no notion of time. Should we have time in the Preceptor Table? Argument for No is that we want to keep things simple. Argument for Yes is that having it highlights why we need it in the Population Table and why we need to discuss Stability.  -->
 
@@ -22,7 +22,7 @@ library(gtsummary)
 
 <!-- Key changes to come: -->
 
-<!-- Need to emphasize units, variables and (if causal) treatments/outcomes throughout. Everytime you mention creating the Preceptor Table, we should mention these three.  When predictive, an outcome like immigration attitude has a single column, where it is the name of the column. When causal, the column names are the name of the treatment, and the value in the column is the outcome variable. An outcome variable in a causal model does not have one column, it has two or more. -->
+<!-- Need to emphasize units, variables and (if causal) treatments/outcomes throughout. Every time you mention creating the Preceptor Table, we should mention these three.  When predictive, an outcome like immigration attitude has a single column, where it is the name of the column. When causal, the column names are the name of the treatment, and the value in the column is the outcome variable. An outcome variable in a causal model does not have one column, it has two or more. -->
 
 <!-- Take a look at the new version of Cardinal Virtues in Chapter 5. It is not perfect! But it is not. We need to make this chapter the initial introduction for (some of) the key themes of the book: population, representativeness and validity. (Are there others?) -->
 
@@ -79,7 +79,7 @@ George Bailey, a character from the movie "It's a Wonderful Life," believes that
 By showing what the world would have been like without George, we get an idea of the *causal effect* of his life on his town and the people who live there. This chapter explains causation using the framework of *potential outcomes* and the *Rubin Causal Model* (RCM). 
 
 
-## Preceptor Tables
+## Preceptor Table
 
 A **Preceptor Table** is a table with rows and columns such that, if none of the data is missing, the thing we want to know is trivial to calculate. Preceptor Tables vary in the number of their rows and columns. We use question marks to indicate missing data in a Preceptor Table. The rows in the Preceptor Table are the *units* --- people, galaxies, oak trees --- which are the subjects of interest. Even the simplest Preceptor Table will have two columns. The first is an *ID* column which serves to label each unit. The second column is the *outcome* of interest, the variable we are trying to predict/understand/change.
 
@@ -138,164 +138,18 @@ tibble(ID = c("Student 1", "Student 2", "...", "Student 473", "Student 474",
 
 &nbsp;
 
-Again, are these 100 students randomly sampled? Could we estimate the 90th percentile of height in the student population? These questions are more complicated, and we might be less confident in our best guess. Now let's say we are given some characteristics other than height for the 100 sampled students, i.e., sex and age. 
+Again, are these 100 students randomly sampled? Could we estimate the 90th percentile of height in the student population? These questions are more complicated, and we might be less confident in our best guess. Note, also, that we will sometimes not know exactly how many rows there are in the Precptor Table. In that case, we would use "Student N" as the last ID, where N is the total number of students at Harvard.
 
-```{r echo = FALSE}
-
-tibble(ID = c("Student 1", "Student 2", "...", "Student 473", "Student 474", 
-              "...", "Student 3,258", "Student 3,259", "...", "Student 6,700"),
-       Age = c("?", "?", "...", "19", "?", "...", "?", "20", "...", "?"), 
-       Sex = c("?", "?", "...", "M", "?", "...", "?", "F", "...", "?"),
-       Heights = c("?", "?", "...", "172", "?", "...", "?", "162", "...", "?")) %>%
-  
-  # Then, we use the gt function to make it pretty
-  
-  gt() %>%
-  cols_label(ID = md("ID"),
-                Heights = "Heights (cm)") %>%
-  cols_move(columns = c(Heights), after = c(ID)) %>%
-  tab_style(cell_borders(sides = "right"),
-            location = cells_body(columns = c(ID))) %>%
-  tab_style(style = cell_text(align = "left", v_align = "middle"), 
-            locations = cells_column_labels(columns = c(ID))) %>%
-  cols_align(align = "center", columns = everything()) %>%
-  cols_align(align = "left", columns = c(ID)) %>%
-  tab_spanner(label = "Outcome", columns = c(Heights)) %>%
-  tab_spanner(label = "Covariates", columns = c(Age, Sex))
-```
-
-&nbsp;
-
-You'll notice our Preceptor Table has a new type of column: **covariates**. Are we better able to forecast a student's height if we are given their age and sex? 
-
-In many data science problems, we can organize the rows in the Preceptor Table into three different categories: no missing data, only outcome missing, and everything missing. For example:
-
-```{r echo = FALSE}
-
-tibble(ID = c("Student 1", "Student 2", "...", "Student 473", "Student 474", 
-              "...", "Student 3,258", "Student 3,259", "...", "Student 6,700"),
-       Age = c("?", "21", "...", "19", "?", "...", "19", "20", "...", "?"), 
-       Sex = c("?", "M", "...", "M", "?", "...", "F", "F", "...", "?"),
-       Heights = c("?", "?", "...", "172", "?", "...", "?", "162", "...", "?")) %>%
-  
-  # Then, we use the gt function to make it pretty
-  
-  gt() %>%
-  cols_label(ID = md("ID"),
-                Heights = "Heights (cm)") %>%
-  cols_move(columns = c(Heights), after = c(ID)) %>%
-  tab_style(cell_borders(sides = "right"),
-            location = cells_body(columns = c(ID))) %>%
-  tab_style(style = cell_text(align = "left", v_align = "middle"), 
-            locations = cells_column_labels(columns = c(ID))) %>%
-  cols_align(align = "center", columns = everything()) %>%
-  cols_align(align = "left", columns = c(ID)) %>%
-  tab_spanner(label = "Outcome", columns = c(Heights)) %>%
-  tab_spanner(label = "Covariates", columns = c(Age, Sex))
-```
-
-In this case, we know the covariates, gender and age, for students 2 and 3,258. But we do not know their heights, the outcome variable. We want to create a model which uses the covariates to predict the outcome. 
-
-## Population
-
-One of the most important concepts in all of statistics is *population*, the set of all units with which we are concerned. In our first example, the population was the five brothers in one family. In the second, it was the 6,700 students at Harvard. In many cases, the *population* is a well-defined and (mostly) stable set. In other cases, the population is quite unstable, even ill-defined, and, perhaps, unknowable. 
-
-Perhaps more importantly, most real world examples involve the future, meaning that specifying the population is impossible. The future is always cloudy. There are two main sources of issue: the definition of the population and the population's habit of changing. Let's explore what those mean in more depth. 
-
-### Defining population
-
-The act of defining a population may seem simple. After all, once we know who or what we want to study, it should be easy to define, right? Unfortunately, it is often more complicated than we assume! To explore this, we will look at both our Harvard population and the population of New York voters. 
-
-#### Harvard
-
-When defining the population of "current" Harvard students for our calculation of height, what exactly do we need to know? Surely a list of current students would help. Is that all? Not exactly. We may ask ourselves the following:
-
-* Does the population of Harvard students include prospective students, who have been admitted but have not started their first term?
-
-* Does the population of Harvard students include Student X, a student that has been kicked out by the AdBoard, but is appealing the ruling?
-
-* Does the population of Harvard students include those taking a leave of absence?
-
-As we can see, merely defining "current" students can be complicated. When deciding on our models, it is important to consider what our population means --- and whether we may need to modify our definition for exceptions. 
-
-#### New York Voters
-
-Now, we have the population of "New York City voters". But, what does the phrase "New York City voters" even mean? The very language we use is imprecise. There are a number of ways we may define NYC voters, such as:
-
-* All the people who voted in the last election
-* All of the people who are eligible to vote today
-* All of the people who are eligible to vote in the next election
-
-Are you only considered a "voter" if you have voted in the past, or is the term "voter" applied to any citizen who is eligible to vote? Who knows? It is our responsibility as data scientists to be sure that we make clear the definitions we are using.
-
-Once we have defined our population --- and made said population explicit --- we have yet another complication: the population, like the world, changes constantly.
-
-### Changing population 
-
-Even after considering the units which are included or excluded from our population, there is another problem: the world. New units enter our population constantly; existing units exit our population constantly. In other words, there is always going to be data that expires, and there is always going to be new data that we don't have.  What does this mean? 
-
-#### Harvard
-
-To begin, visualize the population of Harvard students for which we would like to estimate height. We are (presumably) predicting average height for **today**. The population of Harvard students today may sound relatively easy to conceptualize, but there are often questions we must ask in regards to a *changing* population. For the purposes of this exercise, assume that we have data for all current students at Harvard. 
-
-With all of the data, we should be able to say, with one-hundred percent certainty, the average height for Harvard students. Right? Not exactly. Consider the following complications:
-
-* A number of students graduate off-cycle, meaning that they are technically no longer a student at the time of our calculation.
-* A student has transferred to another college. This person no longer qualifies as a "Harvard student". 
-* A student has died. This piece of data is no longer useful. 
-* A transfer student has arrived on campus, but isn't included in our data!
-
-These changes in our population are going to cause some error in our calculations. With larger populations, this becomes even more apparent. To cement this concept, we will explore our New York City voters population.
-
-#### New York City voters
-
-For the sake of this exercise, we define NYC voters as any and all citizens who are eligible to vote today. Even will this *precise* population, our population changes drastically. In the course of a day:
-
-* People in NYC have died. 
-* Hundreds of people have just turned 18 and are now eligible to vote, who weren't eligible yesterday!
-* A number of people living in NYC *moved away*.
-* A number of people *moved into* NYC.
-* A number of people were arrested for a felony conviction and can no longer vote. 
-
-The world is an ever changing place, as are our populations. As such, it is virtually impossible to have the Preceptor Tables we wrote about earlier. How can we account for this randomness? 
-
-### Preceptor Table
-
-Given this, a better Preceptor Table for the set of Harvard students would look like this:
-
-```{r echo = FALSE}
-
-tibble(ID = c("Student 1", "Student 2", "...", "Student 473", "Student 474", 
-              "...", "Student 3,258", "Student 3,259", "...", "Student N"),
-       Age = c("?", "21", "...", "19", "?", "...", "19", "20", "...", "?"), 
-       Sex = c("?", "M", "...", "M", "?", "...", "F", "F", "...", "?"),
-       Heights = c("?", "?", "...", "172", "?", "...", "?", "162", "...", "?")) %>%
-  
-  # Then, we use the gt function to make it pretty
-  
-  gt() %>%
-  cols_label(ID = md("ID"),
-                Heights = "Heights (cm)") %>%
-  cols_move(columns = c(Heights), after = c(ID)) %>%
-  tab_style(cell_borders(sides = "right"),
-            location = cells_body(columns = c(ID))) %>%
-  tab_style(style = cell_text(align = "left", v_align = "middle"), 
-            locations = cells_column_labels(columns = c(ID))) %>%
-  cols_align(align = "center", columns = everything()) %>%
-  cols_align(align = "left", columns = c(ID)) %>%
-  tab_spanner(label = "Outcome", columns = c(Heights)) %>%
-  tab_spanner(label = "Covariates", columns = c(Age, Sex))
-```
-
-The only difference is that we no longer know the exact number of students in the population. So, instead of referring to Student 6,700, we use Student $N$. Even though we don't know --- and often can't know --- the number of units in the population, we still want to be able to label those units and to count them up. $N$ is the variable which normally refers to the **n**number of units in the population.
-
-### Population Table
+##  Population Table
 
 The Population Table is distinct from the Preceptor Table. The aim of the Population Table is to illustrate the broader population we are interested in, while including the data from our Preceptor Table and dataset. This table has three sources of data: the data for units we want to have (the Preceptor Table), the data for units which we actually have (our actual data), and the data for units we do not care about (the rest of the population, not included in the data or the Preceptor Table). It represents the pieces of data that *we actually have*. 
 
 Our Preceptor Table rows contain the information that we would want to know in order to answer our questions. These rows contain entries for our covariates (sex and year) but they do not contain any outcome results (height). We are trying to answer questions about the height of Harvard students in 2021, so our sex entries for these rows will read “Male” or "Female" and our year entries of these rows will read “2021”.
 
 Our actual data rows contain the information that we do know. These rows contain entries for both our covariates and the outcomes. In this case, the actual data comes from data on Harvard students in 2015, so our sex entries for these rows will read “Male” or "Female" and our year entries of these rows will either read “2015”.
+
+
+<!-- DK: Things to fix in this table. Remove gender. Add ID. Always include the Year. Only need two rows from each source. Order by year. So, order is population (for 2010 or whatever), data, population (for 2018), preceptor table, and population (for 2025 or whatever).  -->
 
 Our population rows contain no data. These are subjects which fall under our desired population, but for which we have no data. As such, all rows are missing.
 
@@ -316,6 +170,7 @@ tibble(source = c("Preceptor Table", "Preceptor Table", "...",
   # Then, we use the gt function to make it pretty
   
   gt() %>%
+  tab_header(title = "Population Table") %>% 
   cols_label(source = md("Source"),
              gender = md("Sex"),
              year = md("Year"),
@@ -329,9 +184,72 @@ tibble(source = c("Preceptor Table", "Preceptor Table", "...",
   fmt_markdown(columns = everything())  
 ```
 
-Implicit in the Preceptor Table is a notion of time. Now that we can see our actual data compared with our greater population and our desired data, we must expand our observations. That is to say that, given our data is sourced from 2015 and our desired data is from 2021, we must include a greater time span in our predictions. To assume that the data from the past functions well to predict the future, we also assume that data from a wider time-frame (say, data from 2010 to 2030) is stable --- or, that the outcomes are the same despite the disparity in date. The assumption of "stability" between the different dates allows us to assume that inference using data from one time period applies to another time period. 
+Implicit in the Preceptor Table is a notion of time. Now that we can see our actual data compared with our greater population and our desired data, we must expand our observations. That is to say that, given our data is sourced from 2015 and our desired data is from 2021, we must include a greater time span in our predictions. In working with the Population Table, there are three key assumptions to consider: validity, stability and representativeness.
 
-The Preceptor Table is a tool for visualization. It allows us to see the greater implications of our predictions, and to modify our model accordingly. We use Preceptor Tables both for predictive problems, like forecasting height on the basis of age/gender, and for causal problems, like estimating the effect of Spanish-speakers on immigration attitudes. So far, we have only asked predictive questions. This chapter, however, primarily focuses on causal inference. 
+
+### Validity 
+
+To understand validity in regards to the Preceptor Table, we must first recognize an inherent flaw in any experiment design: *no two units receive exactly the same treatment*. 
+
+If this doesn't ring true, consider our Spanish speaking train experiment. The units on the Spanish-speaking platform received the same treatment, right? No, actually!
+
+Consider different volume levels, measured in decibels (dB), at which Spanish is being spoken. 
+
+
+```{r, echo = FALSE}
+# First, we create a tibble with the values we want for the table
+
+tibble(subject = c("Yao", "Emma", "Cassidy", "Tahmid", "Diego"),
+       ytreat = c("13", "11", "?", "?", "6"),
+       ytreat1001 = c("?", "?", "?", "?", "?"),
+       ytreat1002 = c("?", "?", "?", "?", "?"),
+       yellipsis = c("?", "?", "?", "?", "?"),
+       ycontrol = c("?", "?", "10", "12", "?")) %>%
+  
+  # Then, we use the gt function to make it pretty
+  
+  gt() %>%
+  cols_label(subject = md("ID"),
+             ytreat = md("$$Y_{\\text{58 dB}}(u)$$"),
+             ytreat1001 = md("$$Y_{\\text{59 dB}}(u)$$"),
+             ytreat1002 = md("$$Y_{\\text{60 dB}}(u)$$"),
+             yellipsis = md("$$Y_{\\text{61 dB}}(u)$$"),
+             ycontrol = md("$$Y_c(u)$$")) %>%
+  tab_style(cell_borders(sides = "right"),
+            location = cells_body(columns = c(subject))) %>%
+  tab_style(style = cell_text(align = "left", v_align = "middle", size = "large"), 
+            locations = cells_column_labels(columns = c(subject))) %>%
+  cols_align(align = "center", columns = everything()) %>%
+  cols_align(align = "left", columns = c(subject)) %>%
+  tab_spanner(label = "$$\\text{Outcomes}$$", c(ytreat, ytreat1001, ytreat1002, yellipsis, ycontrol)) %>%
+  fmt_markdown(columns = everything())
+```
+
+&nbsp;
+
+As we can see, certain units heard the Spanish-speakers at higher volumes than other units. And it is entirely possible that the volume of the speaking affects the outcome. There is also the issue of the time spent on the platform. Maybe Yao tends to run late, and only hears the Spanish-speakers for thirty seconds. Emma, on the other hand, plans ahead. She hears the Spanish-speakers for fifteen minutes before the train arrives!  Thus, despite the fact that Emma and Yao are in the same treatment --- that is, hearing Spanish on the platform --- they had very different versions of that treatment. 
+
+
+Indeed, there are an infinite number of possible treatments. The Preceptor Table extends to the right forever. The validity assumption allows us to "collapse" all the different treatments into a single column called treatment. 
+
+<!-- DK: Above is too brief and awkward. -->
+
+
+### Stability
+
+Stability means that the relationship between the columns is the same for three categories of rows: the data, the Preceptor table, and the larger population from which both are drawn. 
+
+ <!-- More meat here. Some examples, using height and immigration attitudes, from above. When is it OK to assume stability and when is it not? What is a reasonable time frame to use for the population?  -->
+
+
+### Representativeness
+
+The external validity of a study is often directly related to the representativeness of our sample. Representativeness has to do with how well our sample represents the larger population we are interested in generalizing to. 
+
+Does the train experiment allow us to calculate a causal effect for people who commute by cars? Can we calculate the causal effect for people in New York City? Before we generalize to broader populations we have to consider if our experimental estimates are applicable beyond our experiment. Maybe we think that commuters in Boston and New York are similar enough to generalize our findings. We could also conclude that people who commute by car are fundamentally different than people who commute by train. If that was true, then we could not say our estimate is true for all commuters because our sample does not accurately represent the broader group we want to generalize to.
+
+*Thus, whenever you are considering a causal question, we throw out the rows we think are duplicates (such as all the observations for Yao one second from now, two seconds from now, etc.) or that are outside the scope of what we are interested in for now (maybe we don't care about outcomes 30 years in the future for this study). Finally, we define precisely---in terms of potential outcomes---our estimand.  It may be something simple, such as the average treatment effect, or something more complex.  Once we have done these steps, we can start thinking about how to fill in the question marks.*
+
 
 ## Causal effect
 
@@ -907,6 +825,7 @@ In this example, there is indeed a constant treatment effect for everyone: $+3$.
 knitr::include_app("https://www.youtube.com/embed/cBYUuD2aVkA")
 ```
 
+<<<<<<< HEAD
 ## Validity
 
 In this section, we will explore three topics: validity, stability, and representativeness. To start, we will look at our infinite Preceptor Table. 

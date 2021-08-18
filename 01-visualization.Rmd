@@ -1,33 +1,22 @@
 # Visualization
 
-Everyone loves visualizations. 
+Everyone loves visualizations.
 
-<!-- Sample change. Another change. Another.-->
+<!-- Heather owns this Chapter! Change anything an everything! Change anything you like in Getting Started. -->
 
-<!-- Re-read the chapter and add a bunch of comments with your initials. KX: -->
+<!-- Discuss `group` aesthetic, especially for line plots. Don't use the unemployment data anymore. Use two or three of the temperature series from primer.data::temperature. -->
 
-<!-- Read Chapter 5 and 6 and 7. -->
-
-<!-- Fix opening graph so that it looks nicer.  Or maybe change it completely? e.g,,-->
-
-<!-- Learn about tutorials. Do the same create_from_github. Read instructions.Rmd. Start Visualization-D, which is like Visualization-C, except better. This is harder then it looks. -->
-
-
-<!-- Would be nice if the plot featured a statistical measure of some kind (maybe a 95% confidence interval) so that we have a motivation for learning about distributions. Probably need a very different plot. Maybe something political? Election 2020? -->
-
-<!-- Plot should be much cooler, perhaps even using bigger data. And an associated map. Precinct level voting changes 2012 -> 2016 -> 2020, perhaps. But still needs to be something which we can easily use with plotly. Necessary for it to be animateable? -->
-
-<!-- Old stuff: -->
-
-<!-- New section on cool packages. gghighlights, ggsides, -->
-
-<!-- Add section which explains plotly. -->
-
-<!-- Switch all ifelse to if_else -->
-
-<!-- Should discuss `group` aesthetic, especially for line plots. -->
+<!-- Add the formula for median, like this one: https://math.stackexchange.com/questions/1097546/what-is-the-general-formula-for-calculating-the-median -->
 
 <!-- Better explain Tidyverse. -->
+
+<!-- Fix opening graph so that it looks nicer? Used to use economist_theme(), which was slick but the subtitle overlapping with the title wasn't great aesthetically and also probably wasn't the best "hey look pretty graphs" appeal. Even with the new clean_theme(), the last 50,000 axis label is cropped. Or maybe change the graph completely? -->
+
+<!-- Make graphs at end also use clean_theme(). -->
+
+<!-- Maybe use Biden approval for lead plot. Or presidential approval over last three Presidents? -->
+
+<!-- Plot should be much cooler, perhaps even using bigger data. And an associated map. Precinct level voting changes 2012 -> 2016 -> 2020, perhaps. But still needs to be something which we can easily use with plotly. Necessary for it to be animateable? -->
 
 ```{r, message = FALSE, echo = FALSE}
 library(tidyverse)
@@ -50,7 +39,7 @@ gap_p <- gapminder %>%
          y = "Life Expectancy") +
     scale_x_log10(breaks = c(500, 5000, 50000),
                   labels = scales::dollar_format(accuracy = 1)) + 
-    theme_clean() + #KX: theme_economist() did some uniquely weird stuff
+    theme_clean() + 
     theme(legend.position = "none")
 
 gap_p
@@ -58,51 +47,17 @@ gap_p
 
 Once you have read this chapter, and completed the associated tutorials, you will be able to create graphics like this one with your data. Join us on the journey.
 
-**Remember:** *You need to practice every day.* Learning to code/program is like learning a foreign language. Daily practice is the *sine qua non* for progress.
+## R and RStudio
 
-<!-- KX: Moved reminder from later in the text to where it's more relevant. -->
-
-<!-- Fix the graph. The subtitle overlapping with the title isn't great aesthetically and also probably isn't the best "hey look pretty graphs" appeal -->
-
-## Basics of R & RStudio
-
-R is an [interpreted language](https://www.geeksforgeeks.org/difference-between-compiled-and-interpreted-language/#:~:text=An%20interpreted%20language%20is%20a,executed%20by%20some%20other%20program.). This means you have to type in commands written in *R code*. In other words, you have to code/program in R. We use the terms "coding" and "programming" interchangeably.
-<!-- KX: Replaced Wikipedia link with a more helpful definition -->
-
-<!-- DK: This is awkward. When are we teaching about R Markdown? -->
+We use the terms "coding" and "programming" interchangeably.
 
 If you want a slower introduction than we are providing here, check out the short book, [*Getting Used to R, RStudio, and R Markdown*](https://rbasics.netlify.com/). @usedtor2016 include screencast recordings that you can follow along and pause as you learn. They include an introduction to R Markdown, a tool used for reproducible research in R.
 
 With the rest of this primer, we will use a different font to distinguish regular text from `computer_code`.
-<!-- KX: Moved from later in the text to where it's more relevant. -->
-### Fundamentals of the RStudio Application
-<!-- DK: Should have an entire tutorial devoted to this section, hitting every single section. -->
-
-When opening RStudio (Version 1.4.1106), you should be greeted by a window that resembles the image below:
-```{r, echo = FALSE, fig.cap = "Analogy of difference between R and RStudio."}
-knitr::include_graphics("01-visualization/images/rstudio-screenshot.png")
-```
-
-* *Console pane*: where you enter in commands in RStudio.
-
-<!-- 
-KX: Panes to be discussed:
-Terminal
-Jobs
-Environment
-History
-Connections
-Tutorial
-Files
-Plots
-Packages
-Help
-Viewer
--->
 
 
-### Fundamentals of R
 <!-- KX: can we copy the order from https://www.tutorialspoint.com/r/r_data_types.htm? -->
+
 If you'd like to follow along with this section, you can open open the *Console pane* in RStudio.
 
 * *Running code*: the act of telling R to put our code into action. 
@@ -177,9 +132,9 @@ Removed 2 rows containing missing values (geom_point).
 Messages are similar. In both cases, you should fix the underlying issue until the warning/message goes away.    
 
 
-## Getting Started with Visualizing Data
+## Looking at data
 
-This chapter focuses on **ggplot2**, one of the core packages in the **tidyverse**. To access the datasets, help pages, and functions that we will use in this chapter, load the tidyverse:
+This chapter focuses on **ggplot2**, one of the core packages in the **tidyverse**. The **tidyverse** is a package that contains 8 individual packages, most importantly **ggplot2**, but also other packages that help us view data within R. To access the datasets, help pages, and functions that we will use in this chapter, load the tidyverse:
 
 ```{r} 
 library(tidyverse)
@@ -240,11 +195,9 @@ There are many ways to get a feel for the data contained in a tibble like `train
 
 #### `view()`
 
-Run `view(trains)` in the Console in RStudio, either by typing it or cutting-and-pasting it into the Console pane. Explore this tibble in the resulting pop up viewer. 
+Run `view(trains)` in the Console in RStudio. Explore this tibble in the resulting pop up viewer. 
 
-`view()` allows us to explore the different variables listed in the columns. Observe that there are many different types of variables.  Some of the variables are *quantitative*. These variables are numerical in nature.  Other variables here, including `gender` and  `treatment`, are *categorical*.
-
-<!-- Explain the difference between categorical and quantitative variables.  -->
+`view()` allows us to explore the different variables listed in the columns. Observe that there are many different types of variables.  Some of the variables are *quantitative*. These variables are numerical in nature.  Other variables here, including `gender` and  `treatment`, are *categorical*. Categorical variables can only take on one of a limited possibility, like educational level can only be one of limited possibilities like high school, elementary school, university, etc.
 
 #### `glimpse()`
 
@@ -260,6 +213,14 @@ We see the first few values for each variable in a row after the variable name. 
 
 <!-- HL: the definitions for these terms feel sort of all over the place, maybe the terms + the abbreviations R uses should just all be in the glossary so people have one place to reference when they're confused -->
 
+#### `summary()`
+
+Use`summary()` to get a sense of the distribution of the variables in the tibble. 
+
+```{r}
+summary(trains)
+```
+
 
 #### `$` operator
 
@@ -268,8 +229,6 @@ The `$` operator allows us to extract a single variable from a tibble and return
 ```{r}
 trains$age
 ```
-
-
 
 ## Basic Plots
 
@@ -370,6 +329,7 @@ ggplot(data = trains,
        caption = "Data source: Enos (2014)")
 ```
 
+
 The problem with this display is "overplotting." Because attitudes are measured as integers, we do not know if a given point represents just one person or a dozen. There are two methods we can use to address overplotting: transparency and jitter.
 
 **Method 1: Changing the transparency**
@@ -450,9 +410,6 @@ A histogram is a plot that visualizes the *distribution* of a numerical value.
 1. For each bin, we count the number of observations that fall in the range corresponding to that bin.
 1. We draw a bar whose height indicates the corresponding count.
 
-
-<!-- HL: I feel like this stuff below about you not needing to specify the arguments is sort of randomly dropped in the middle here, maybe this could be added to an "additional info" section at the bottom? isn't really crucial to the lesson after all. Agreed. -->
-
 Let's consider the `income` variable from the the `trains` tibble. Pay attention to how we have changed the two arguments to `ggplot()`. We have removed `data = ` and `mapping = `. The code still works because R functions allow for passing in arguments by *position*. The first argument to `ggplot()` is the `data`. We don't need to tell R that `trains` is the value for `data`. R assumes that it is because we passed it in as the first argument. Similarly, the second argument to `ggplot()` is `mapping`, so R assumes that `aes(x = income)` is the value we want for `mapping` because it is the second item passed in.
 
 ```{r}
@@ -520,17 +477,6 @@ ggplot(data = trains,
   geom_bar()
 ```
 
-
-`geom_col()` is very similar to `geom_bar()`, except that `geom_col()` requires you to calculate the number of observations in each category ahead of time. `geom_bar()` does the calculation for you.
-
-<!-- HL: could we elaborate on geom_col() more? give it its own mini section bc I think it's distinct enough and people might not understand why you need to use geom_col if it's so similar to geom_bar. Add a code chunk with does group_by and summarize and then pipes to geom_col. See new section in tutorials. Agreed. -->
-
-
-#### No pie charts!
-
-One of the most common plots used to visualize the distribution of categorical data is the pie chart. While they may seem harmless enough, pie charts actually present a problem in that humans are unable to judge angles well. @robbins2013 argues that we overestimate angles greater than 90 degrees and we underestimate angles less than 90 degrees. In other words, it is difficult for us to determine the relative size of one piece of the pie compared to another. *Do not use pie charts.*
-
-
 #### Two categorical variables
 
 Another use of barplots is to visualize the *joint* distribution of two categorical variables. (See Chapter \@ref(probability) for the definition of a joint distribution.) Let's look at `race`, as well as `treatment`, in the `trains` data by using the `fill` argument inside the `aes()` aesthetic mapping. Recall the `fill` aesthetic corresponds to the color used to fill the bars.
@@ -554,6 +500,26 @@ ggplot(trains,
 ```
 
 Whites are over-represented in the Control group even though the `treatment` was assigned at random.
+
+### `geom_col()`
+
+`geom_col()` is similar to `geom_bar()`, except that `geom_col()` requires you to calculate the number of observations in each category ahead of time. `geom_bar()` does the calculation for you. See an example below.
+
+```{r}
+trains %>% 
+  group_by(race,treatment) %>%
+  summarize(count = sum(n())) %>% 
+  ggplot(mapping = aes(x = race,
+                       y = count,
+                       fill = treatment)) +
+   geom_col(position = "dodge")
+```
+
+You will learn to filter the data later in this chapter. However, what is key here is there was a y-variable supplied in `geom_col()` but there was not in `geom_bar()`. `geom_col()` gives you more control over the data that is being presented compared to `geom_bar()`, which may come in useful in some circumstances.
+
+#### No pie charts!
+
+One of the most common plots used to visualize the distribution of categorical data is the pie chart. While they may seem harmless enough, pie charts actually present a problem in that humans are unable to judge angles well. @robbins2013 argues that we overestimate angles greater than 90 degrees and we underestimate angles less than 90 degrees. In other words, it is difficult for us to determine the relative size of one piece of the pie compared to another. *Do not use pie charts.*
 
 ### `geom_smooth()`
 
@@ -649,7 +615,7 @@ The values on the y-axis are scaled so that the total area under the curve equal
 <!-- HL: could we just list other uncommonly used geom functions that people have the option of using if they want to and point them to another resource that they can learn from if they want? -->
 
 
-## The Tidyverse
+## Tidyverse
 
 Going forward, most `ggplot()` code will omit the `data = ` and `mapping = ` explicit naming of arguments while relying on the default ordering. Most of the time, we include argument names and, as a rule, you should to. But we create so many plots in *The Primer* that these omissions are unlikely to cause problems.
 
@@ -872,12 +838,11 @@ Imagine that we want to create a new variable `old`, which is TRUE when `age > 5
 ```{r}
 trains %>% 
   select(age) %>% 
-  mutate(old = ifelse(age > 50, TRUE, FALSE))
+  mutate(old = if_else(age > 50, TRUE, FALSE))
 ```
 
 Another function similar to `if_else()`, is `dplyr::case_when()`. `case_when()` is particularly useful inside mutate when you want to create a new variable that relies on a complex combination of existing variables. Note that there is a different version of `ifelse()` in **dplyr**: `if_else()`. This works exactly the same as the standard version but is somewhat more robust. 
 
-<!-- HL: what does somewhat more robust mean, also why do we teach ifelse() first if if_else() is the "robust" version and presumably if it's stronger it's the one people should use? -->
 
 <!-- DK: More details? -->
 
@@ -904,17 +869,6 @@ trains %>%
 
 The `mean()` and `sd()` summary functions go inside the `summarize()`  function. The `summarize()` function takes in a tibble and returns a tibbles with only one row corresponding to the summary statistics. Remember: Tibbles go in and tibble come out.
 
-<!-- HL: can we specify why we're assigned mean(age) to mn_age? just to clarify that it gives them proper column headings -->
-
-### Statistics for distributions
-
-<!-- HL: should we include this at the beginning? up with terminology and such. We use means and summarize before we actually introduce what they mean, so it feels a little out of place to be introducing them after we've used them already -->
-
-A variable in a tibble is a column, a vector of values. We sometimes refer to this vector as a "distribution." This is somewhat sloppy in that a distribution can be many things, most commonly a mathematical formula. But, strictly speaking, a "frequency distribution" or an "empirical distribution" is a list of values, so this usage is not unreasonable.
-
-*There are two distinct concepts: a distribution and a set values drawn from that distribution.*  But, in everyday use, we use "distribution" to both. When given a distribution (meaning a vector of numbers), we often use `geom_histogram()` or `geom_density()` to graph it. But, sometimes, we don't want to look at the whole thing. We just want some summary measures which report the key aspects of the distribution. The two most important attributes of a distribution are its *center* and its *variation* around that center.
-
-We use `summarize()` to calculate statistics for a variable, a column, a vector of values or a distribution. Note the language sloppiness. For the purposes of this book, "variable," "column," "vector," and "distribution" all mean the same thing. Popular statistical functions include: `mean()`, `median()`, `min()`, `max()`, `n()` and `sum()`. Functions which may be new to you include three measures of the "spread" of a distribution: `sd()` (the standard deviation), `mad()` (the scaled median absolute deviation) and `quantile()`, which is used to calculate an *interval* which includes a specified proportion of the values. 
 
 **`mean()`**
 
@@ -923,8 +877,6 @@ The mean, or average, is the most commonly reported measure of the center of a d
 $$\bar{x} = \frac{x_1 + x_2 + \cdots + x_N}{N}$$
 
 **`median()`**
-
-<!-- DK: Use math formula, like this one: https://math.stackexchange.com/questions/1097546/what-is-the-general-formula-for-calculating-the-median -->
 
 The median is another commonly reported measure of the center of a distribution, calculated by first sorting the vector of values from smallest to largest. The middle element in the sorted list is the *median*.  If the middle falls between two values, then the median is the mean of those two middle values. The median and the mean are the two most common measures of the *center* of a distribution. The median is more stable, less affected by outliers. There is no widely accepted symbol for the median, although $\tilde{x}$ is not uncommon.
 
@@ -944,11 +896,7 @@ The scaled median absolute deviation (*mad*) is a measure of variation around th
 
 $$\text{mad} = 1.4826 \times \text{median}(abs(x - \tilde{x}))$$
 
-The basic idea for both *sd* and *mad* is that we need a measure of variation around the center of the distribution. *sd* uses the mean, $\bar{x}$, as its estimate of the center while *mad* uses the median, $\tilde{x}$. Because *mad* uses the absolute difference, as opposed to the squared difference, it is more robust to outliers. The 1.4826 multiplier causes the *mad* and the *sd* to be identical in the (important) case of standard normal distributions, a topic we will cover in Chapter \@ref(wrangling).
-
-<!-- DK: Could have more conversation. -->
-
-<!-- DK: These formulas are inconsistent, with one using vectors. Should make these consistent, perhaps even give formula for median. -->
+The basic idea for both *sd* and *mad* is that we need a measure of variation around the center of the distribution of the variable. *sd* uses the mean, $\bar{x}$, as its estimate of the center while *mad* uses the median, $\tilde{x}$. Because *mad* uses the absolute difference, as opposed to the squared difference, it is more robust to outliers. The 1.4826 multiplier causes the *mad* and the *sd* to be identical in the (important) case of standard normal distributions, a topic we will introduce in Chapter \@ref(wrangling).
 
 
 **`quantile()`**
@@ -974,35 +922,8 @@ quantile(kenya$poverty, probs = c(0.025, 0.975))
 
 The interval between these two percentiles includes 95% of all the values in the distribution. Depending on the context, this interval is sometimes called a "confidence interval" or "uncertainty interval" or "compatibility interval." Different percentile ranges create intervals of different widths. 
 
-An interesting fact is that, most of the time, the 95% confidence interval is, roughly, the same as the center of the distribution $\pm$ two times the standard deviation.
+If there is an `NA` value in the variable, any statistical function like `mean()` will return `NA`. You can fix this by using `na.rm = TRUE` within the statistical function.
 
-In distributions without major outliers, the mean/median and sd/mad will be very similar to each other.
-
-```{r}
-kenya %>% 
-  summarise(mean = mean(poverty),
-            median = median(poverty),
-            sd = sd(poverty),
-            mad = mad(poverty))
-```
-
-It follows that intervals defined with them will be similar.
-
-```{r}
-kenya %>% 
-  summarise(interval_1_bottom = mean(poverty) - 2 * sd(poverty),
-            interval_1_top = mean(poverty) + 2 * sd(poverty),
-            interval_2_bottom = median(poverty) - 2 * mad(poverty),
-            interval_2_top = median(poverty) + 2 * mad(poverty))
-```
-
-These intervals are similar to each other and similar to the 95% interval calculated above. The match is only roughly true, but it is good enough for most applied work.
-
-If there is an `NA` value in the variable, any statistical function like `mean()` will return `NA`. You can fix this by using `na.rm = TRUE` with the statistical function.
-
-<!-- HL: can we give an example of using na.rm = TRUE? -->
-
-<!-- DK: Might make a nice looking plot. -->
 
 ### `group_by()`
 
@@ -1010,7 +931,7 @@ We can the use `mean()` with `summarize()` to calculate the average age for all 
 
 ```{r}
 trains %>% 
-  summarize(mean = mean(age))
+  summarize(avg = mean(age))
 ```
 
 What if we want the mean `age` for each `gender`? Consider:
@@ -1026,7 +947,7 @@ The data is the same as before, but note the "Groups" message at the top. R is i
 ```{r}
 trains %>% 
   group_by(gender) %>% 
-  summarize(mean = mean(age))
+  summarize(avg = mean(age))
 ```
 
 Notice the message R sends us. The warning means that the tibble which issues forth from the end of the pipe has been "ungrouped". This means the group attribute we applied with `group_by()` has been removed. This behavior is the (sensible) default.
@@ -1094,30 +1015,23 @@ ggsave(filename = "enos_trains.jpg",
 
 `ggsave()` uses the suffix of the provided `filename` to determine the type of image to save. Because we use "enos_trains.jpg", the file is saved in JPEG format. If we had used "enos_trains.png", the file would have been saved as a PNG. We can display a saved file by using `knitr::include_graphics()`. For example:
 
-
-````markdown
-`r ''````{r}
+```{r, eval = FALSE}
 knitr::include_graphics("enos_trains.jpg")
 ```
-````
 
 This code displays the image in an Rmd, assuming that the file "enos_trains.jpg" is located in the current working directory. A common scenario is that we create an image and store it in a directory named `figures/` and then use that figure in more than one Rmd. 
-
-
 
 ### Faceting
 
 Faceting splits a visualization into parts, one for each value of another variable.. This will create multiple copies of the same type of plot with matching x and y axes, but whose contents will differ. 
 
-
-Before we proceed, let's create a subset of the tibble `gapminder`, from the **gapminder**, package to use. (You may need to install the **gapminder** package for this code to work.)
+Before we proceed, let's create a subset of the tibble `gapminder`, from the **gapminder**, package to use. (You may need to install the **gapminder** package for this code to work. Refer back to the introduction if you need a refresher on how to do so.)
 
 ```{r}
 library(gapminder)
 gapminder_filt <- gapminder %>% 
       filter(year == 2007, continent != "Oceania")
 ```
-
 
 Let's plot our filtered data using `geom_point()`
 
@@ -1129,9 +1043,7 @@ ggplot(data = gapminder_filt,
   geom_point()
 ```
 
-It is difficult to compare the continents despite the colors. It would be much easier if we could "split" this scatterplot by the 4 continents. In other words, we would create plots of `gdpPercap` and `lifeExp` for each `continent` separately. We do this by using the function `facet_wrap()` with the argument `~ continent`.
-
-<!-- HL: I feel like we should highlight the fact you need a squiggly thing (what is that called) in front of the name bc I forgot it several times while I was trying to use facet_wrap -->
+It is difficult to compare the continents despite the colors. It would be much easier if we could "split" this scatterplot by the 4 continents. In other words, we would create plots of `gdpPercap` and `lifeExp` for each `continent` separately. We do this by using the function `facet_wrap()` with the argument `~ continent`. In `facet_wrap`, you must always put the tilde (~) in front of the variable you wish to wrap it by.
 
 ```{r}
 ggplot(data = gapminder_filt, 
@@ -1252,7 +1164,6 @@ ggplot(gapminder_filt,
 
 ### Text
 
-<!-- DK: Should learn about ggrepel -->
 
 Recall we use `labs()` to add labels and titles to our plots. 
 We can also change labels inside the plots using `geom_text()`.
@@ -1329,8 +1240,6 @@ gapminder %>%
 
 This looks pretty good. However, notice the legend the top of our graph.  It crowds our graph and takes away from the most important part: the data. We can use `theme()` to customize the non-data parts of our plots such as background, gridlines, and legends. Let's de-clutter the graph by removing our legend. We can do this by using the `legend.position` argument and setting it to "none".
 
-<!-- DK: Make this new code consistent with the above. -->
-
 ```{r}
 gapminder %>%
   filter(continent != "Oceania") %>%
@@ -1349,11 +1258,55 @@ gapminder %>%
                   labels = scales::dollar_format(accuracy = 1)) + 
     theme_economist() +
     theme(legend.position = "none")
-  
 ```
 
-Great. Now our graph is easier to visualize. In addition, note that the `theme()` function also offers a wide [selection](https://ggplot2.tidyverse.org/reference/theme.html) of functions for manually changing individual elements.
+Great. Now our graph is easier to visualize. 
 
+#### theme()
+
+The `theme()` function also offers a wide [selection](https://ggplot2.tidyverse.org/reference/theme.html) of functions for manually changing individual elements. We will cover the most widely used ones here, but the vast majority will be listed in that link.
+
+There are two key elements in the `theme()` function.
+
+* **Theme elements**: these specify the non-data elements you can control. For example, `panel.border` is the element that controls the border of the grid area.
+
+* **Element function**: this describes the visual properties of the element. There are four main element functions, `element_blank()`, `element_rect()`, `element_line()`, `element_text()`. 
+  * **element_blank()**: this hides the element from the theme.
+  * **element_line()**: this modifies elements that are plot lines, grid lines, axes, etc.
+  * **element_text()**: this changes the text elements of the plot, like titles, captions, etc.
+  * **element_rect()**: rectangle elements control the background of plots, legends, etc.
+
+Let's look at an example of how we might want to modify a graph. Take this graph below.
+
+```{r}
+ggplot(data = economics,
+       mapping = aes(x = date,
+                     y = unemploy)) +
+  geom_line() +
+  labs(title = "Unemployed Population in the United States: 1965 - 2015",
+       subtitle = "Dramatic spike during the Great Recesssion",
+       x = "Year",
+       y = "Number of Unemployed (in thousands)",
+       caption = "Source: FRED Economic Data")
+```
+
+You have a couple of problems with this graph. Firstly, you want the title to be bold. You want there to be a light blue background. You also don't particularly care for there to be so many grid lines from the x-axis. Let's change this!
+
+```{r}
+ggplot(data = economics,
+       mapping = aes(x = date,
+                     y = unemploy)) +
+  geom_line() +
+  labs(title = "Unemployed Population in the United States: 1965 - 2015",
+       subtitle = "Dramatic spike during the Great Recesssion",
+       x = "Year",
+       y = "Number of Unemployed (in thousands)",
+       caption = "Source: FRED Economic Data") +
+  theme(plot.title = element_text(face = "bold"),
+        panel.background = element_rect(fill = "lightblue"),
+        panel.grid.minor.x = element_blank())
+```
+There! Within the `theme()` function, we can change the plot title to bold, the background to blue, and get rid of the "minor" grid lines. `theme()` is a very versatile function. See the full list of elements [here](https://ggplot2-book.org/polishing.html#polishing).
 
 ## Summary
 

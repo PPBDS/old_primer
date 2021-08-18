@@ -1,18 +1,16 @@
 # One Parameter {#one-parameter}
 
-<!-- Chat with Yuhan. Map functions and list-columns are taught in chapter 5, both the Primer and the tutorial. Take look. Ensure that Chapter 5 covers clearly anything you use. Done -->
 
 <!-- Fix answering the question section. Key is explaining what objects like ppd_for_p are. How to plot them. How to use them to answer questions. -->
 
 <!-- Make the Overview tutorial match the chapter. -->
 
-<!-- Why doesn't the percentage red match between the physical urn and the virtual urn? Please explain this, I'm confused. -->
 
-<!-- RS: I want to add 1-2 more questions to answer in Temperance. I have 2 ideas, but not sure if they have any educational value. You can go to Temperance and uncomment the code chunks to see 2 ideas I have. -->
+<!-- In some paragraphs we say that it is impossible to conduct a census because we don't have access to the urn, in others like this we do have access and can complete the census. Which is it? You pick. -->
 
-<!-- RS: Should we walk through solving the problem without rstanarm very quickly (like one or two code chunks)? Seems kind of rude to make people learn all these joint distributions in Ch.5 and then never use it again.  -->
+<!-- RS: Agree with all edits (I kind of got caried away sometimes, especially with explaining posteiror_erpred()) but there are 3 exceptions: First minor change, I added back elipses at bottom of the Preceptor Tables, because I am trying to make it uniform across the chapter that there is alot we don't know about the urn because we can never access it physically. Another minor change is that I think the Now + 10 stuff is kind of confusing, so I did not write it just yet. Finally,  a more major change is I kept my Bayesian framework section! When reading Ch.6 and 7 I wish I had something similar to what I wrote, so I protest deleting it! -->
 
-<!-- RS: In some paragraphs we say that it is impossible to conduct a census because we don't have access to the urn, in others like this we do have access and can complete the census. Which is it? -->
+<!-- RS: I also don't understand the prejudice against subheaders.  -->
 
 <!-- Older comments: -->
 
@@ -283,11 +281,9 @@ tibble(trial_ID = 1) %>%
   str()
 ```
 
-There are two levels. There is one row in the tibble for each sample. So far, we have only drawn one sample. Within each row, there is a second level, the tibble which is the sample. That tibble has two variables: `trial_ID` and `color`. This is the advantage to using `slice_sample()`, because it selects all columns of our urn, whereas `sample()` can only sample from a single column. While identifying each individual bead could be irrelevant in our urn scenario, with other problems it could be very useful to have additional data about each individual.
+There are two levels. There is one row in the tibble for each sample. So far, we have only drawn one sample. Within each row, there is a second level, the tibble which is the sample. That tibble has two variables: `trial_ID` and `color`. This is the advantage to using `slice_sample()`, because it selects all columns of our urn, whereas `sample()` can only sample from a single column. While identifying each individual bead may be irrelevant in our urn scenario, with other problems it could be very useful to have additional data about each individual.
 
-However, it is important to note that the extra data provided by `slice_sample()` comes at a cost: *efficiency*. Because most of us run R Studio on our local machines, each R variable is stored using memory on our computers. As we add more columns or more complex objects to our tibbles, they will take up more memory and become less efficient. For example, `slice_sample()` will store a tibble for each sample, while `sample()` will store a list. And the difference is not negligible!  We can use the handy utility function `object.size()` to know an empty tibble  takes up `r object.size(tibble())` bytes of memory, while an empty list takes up no memory. While our urn simulation takes up a relatively small amount of storage and we are not overly concerned with optimizing tibble size, it never hurts to practice making our tibbles more efficient. Before working with large data sets that may take several minutes to load, it may be helpful to read this [article about memory in R](http://adv-r.had.co.nz/memory.html) to make sure we understand the implications of using complex datatypes within tibbles, so we can make the most out of our future list-column mapping endeavors. 
-
-Now that we've evaluated the implications of `slice_sample()` for our tibble, let's add a column which indicates the number of red beads in the sample taken from the shovel.
+Now let's add a column which indicates the number of red beads in the sample taken from the shovel.
 
 <!-- DK: Is code like .$color understandable? -->
 <!-- RS: I think the dollar sign operator should be understood at this point, but was thinking about asking Yuhan to include a way better explanation about the "this" operator in Chapter 5.  -->
@@ -870,15 +866,15 @@ In regards to the fifth layer of the hierarchy, we may wonder:
 MADs and standard deviations are, more or less, the same thing. They are both measures of the **variability** of a distribution. In most cases, they have very similar values. A *standard error* is also a standard deviation. Specifically, it is the standard deviation of the distribution of the estimates, and that distribution of estimates is, more or less, your posterior. Therefore, we can use MAD, like standard error, to describe that distribution and the variability of that distribution. 
 
 
-## Urn paradigm
+## Cardinal Virtues
 
-Recall the questions we asked at the beginning of our chapter: 
+Recall the questions we asked at the beginning of this Chapter: 
 
 *If we get 17 red beads in a random sample of size 50 taken from a mixed urn, what proportion $\rho$ of the beads in the urn are red?*
 
 *What is the probability, using the same urn, that we will draw more than 8 red beads if we use a shovel of size 20?*
 
-The urn paradigm provides us a simple problem for which we can learn new data science techniques before we tackle more complicated problems in later chapters. For any question, we use the Cardinal Virtues to guide our thinking. While this may seem trivial at first, as our problems become more complex it will become useful to have a systematic approach to break each problem into its parts. Let's get to it.
+Use the Cardinal Virtues to guide your thinking. 
 
 ### Wisdom
 
@@ -886,89 +882,71 @@ The urn paradigm provides us a simple problem for which we can learn new data sc
 knitr::include_graphics("other/images/Wisdom.jpg")
 ```
 
-This essence of Wisdom is determining whether or not a problem is even solvable. First, let's break down our question into its key parts. Then we can construct a Preceptor Table to determine whether or not our data is viable to answer our question. 
-
-<!-- Change "centered at" to reference p. Use rho instead of p -->
-
-<!-- RS: Is there a specific paragraph you're referencing about changing "centered at" to reference p?   -->
-
-<!-- RS: I changed all p's to rho's but not 100% sure if that's what was desired.-->
-
-#### Getting started
-
-Virtually every problem boils down to attempting to answer a **question** about a **population** using **data**. We should explicitly state all 3 before we proceed, to make sure we understand the task at hand. 
-
-Let's revisit our first question: *If we get 17 red beads in a random sample of size 50 taken from a mixed urn, what proportion $\rho$ of the beads in the urn are red?* We have a *question*: what proportion of the beads in the urn are red? Our question is asking us to solve for one population parameter, $\rho$.  The subject of the question is the *population*; in this case, the population is all the beads in *a mixed urn*. "A mixed urn" is very ambiguous, and we do not even know its size, but that is what the question provides us. There is an urn out there, somewhere, for which we want to know the proportion of red beads. 
-
-To answer our question, we have some *data*: in a random sample of size 50, $17/50 = 34\%$ of beads are red. Initially, we bring no information into the problem. There is an urn out there with mixed red and white beads, and the proportion of red beads could be any value between 0 and 1. The world is dark. We are then blessed with data, and there is some light. With our sample, we know that the proportion of red beads in the whole population is much more likely to be similar to our sample proportion, 34%, than some extreme value like 2% or 80%.   
-
-Occasionally, we will bring some information into the problem before we collect our data. For example, if we flip a fair coin, we know that in the long run there is a 50% chance of it landing on heads. Even without any data, we know *something* about the situation. Some data scientists will define one's initial beliefs going into a problem as the prior. Instead, we look to the posterior to acknowledge both our initial beliefs, as well as the data we obtain that can update those beliefs. Using the coin example again, we could flip a coin, and $11/20 = 55\%$ of flips could be red. Here our data supports our initial beliefs, and the final posterior we hope to construct will consider extreme values even less probable. 
-
-Now let's break down our second question in a similar fashion to the first. Our *question* is: *what is the probability, using the same urn, that we will draw more than 8 red beads if we use a shovel of size 20?*. The question specifies using the "same urn", so the *population* for both questions is the same. However, do we have any *data* or *prior knowledge* to answer the second question? The reality is that we need to know the probability of selecting a red bead from the urn before we can determine the probability of selecting more than 8 red beads, and thus our second question is contingent on extracting a posterior probability distribution from the first question. As such, if we successfully pass through Wisdom and Justice, we can use the models we create in Courage to answer this question in Temperance. While that may be a mouthful at the moment, you will receive plenty of practice with the Cardinal Virtues throughout this *Primer*. 
-
-After successfully breaking down the problem, our next step is to construct a Preceptor Table. 
-
-#### Preceptor Tables
-
-Recall that a Preceptor Table is a table with rows and columns for all the data we would (reasonably) like to have. There are two different types of Preceptor Tables that are applicable to our urn example: actual and ideal.
+Wisdom requires the creation of a Preceptor Table, an examination of our data, and a determination as to whether or not we can (reasonably!) assume that the two come from the same *population*.
 
 ```{r, echo = FALSE, fig.cap = "When you see another Precetor Table section."}
 knitr::include_graphics("06-one-parameter/images/here_we_go.png")
 ```
 
-An actual Preceptor Table shows what we *actually* know. Accordingly, the table is riddled with question marks that the real world saddles us with. The ideal Preceptor Table is the Preceptor Table with no question marks, and a reasonable number of rows and columns. With an ideal Preceptor Table, there is no need for inference; the estimand is a simple matter of arithmetic. 
-
-To see if our data can answer our question, we first construct the ideal Preceptor Table. First, we should determine if we are modeling (just) for prediction or are we (also) modeling for causation? Predictive models care nothing about causation. With prediction, all we care about is forecasting Y given X on some as-yet-unseen data. There is no notion of some unseen casual effect which requires a column for both before and after the treatment. Unlike the Rubin Casual Preceptor Tables in Chapter \@ref(rubin-causal-model), our actual preceptor table is predictive and only requires one column: bead color. We can create the ideal Preceptor Table by performing the exhaustive census of the entire urn. 
-
-<!-- RS: Delete ID column? Not needed to solve the problem, but may be useful in understanding the Preceptor Table.   -->
+A Preceptor Table is a table with rows and columns, such that, if no data is missing, we can easily answer our questions. 
 
 ```{r, echo = FALSE}
-urn %>%
-  slice(1:2, 200, 201, 1000) %>%
-  mutate(bead_ID = as.character(bead_ID),
-         color = as.character(color)) %>%
-  add_row(bead_ID = "...", color = "...", .after  = 2) %>%
-  add_row(bead_ID = "...", color = "...", .after  = 5) %>% 
-  add_row(bead_ID = "...", color = "...", .after  = 7) %>% 
+tibble(bead_ID = c("1", "2", 
+                   "...", "200", "201", "...", "2078", "2079", "..."),
+       color = c("white", "white", 
+                   "...", "red", "white", "...", "red", "white", "...")) %>%
   gt() %>%
-  cols_label(bead_ID = "ID",
-             color = "Color") %>%
-  tab_style(cell_borders(sides = "right"),
-            location = cells_body(columns = c(bead_ID))) %>%
-  cols_align(align = "center", columns = everything()) %>%
-  cols_move_to_start(bead_ID)
+    tab_header(title = "Preceptor Table") %>% 
+    cols_label(bead_ID = "ID",
+               color = "Color") %>%
+    tab_style(cell_borders(sides = "right"),
+              location = cells_body(columns = c(bead_ID))) %>%
+    cols_align(align = "center", columns = everything())
 ```
 
 &nbsp;
 
-With an ideal Preceptor Table, the estimand, the proportion of red beads in the urn, is a simple matter of arithmetic: count the number of red beads and divide by the total number of beads in the urn. Note, however, that counting each bead in the urn would be impossible, as we have no access to the urn. This is denoted by the three dots at the bottom of our Preceptor Table, as our problem never specified whether our urn has a thousand, a million, or even a billion beads. Instead, we use our sample of data. 
+Note that the beads do not have ID numbers printed on them. The numbering is arbitrary. Having an ID just reminds us that there are actual units under consideration, even if we can not tell them apart, other than by color. We also include the ID to help visualize the fact that we don't know the total number of beads in the urn, because our question never tells us! There could be 1,000 beads like our physical urn from earlier, or there could be a million beads. The ellipse at the bottom of the Preceptor Table denotes our uncertainty regarding urn size. 
 
-But can our data even answer our question? Above we determined that we need one column, bead color, in order to answer our question. If we use our sample, we have color identifications for 50 beads in the urn, so our data can technically be used. While determining if our data can be used is very basic in our urn scenario, let's turn to an alternate example: if we had a sample of housing prices in a neighborhood, can we use that data to draw conclusions about the income of individuals in the neighborhood? In this scenario we must consider if our housing data is enough to fill in our ideal preceptor table, and if we believe the data cannot accurately solve our problem, we need to stop and find new data!
+There is only one outcome column, "Color," because this is not a causal model, for which we need to have (at least) two potential outcomes. Predictive models require only one outcome.
 
-We now turn to our sampled data to create an actual Preceptor Table. Our data tells us that 17 out of the 50, or 34% of the *sampled* beads are red. Let's visualize this by looking at the entire urn after we have taken our sample. This is an actual Preceptor Table. We only know the colors of our randomly sampled 50 beads, the remaining bead colors are our missing data!
+If we know the color of every bead, then calculating the proportion of beads which are red, $\rho$, is simple algebra. Once we know $\rho$ we can simulate the answers to other questions.
+
+<!-- DK: That is fairly quick. Answering our second question, even with perfect knowledge of rho is non-trivial. Ignore that complexity for now. -->
+
+<!-- RS: Added back elipses at bottom, because I am trying to make it uniform across the chapter that there is alot we don't know about the urn because we can never access it physically.  -->
+
+The data we have, unfortunately, only provides the color for 50 beads. 
 
 ```{r, echo = FALSE}
 # Actual Preceptor Table to be created by the very helpful Cass!
 
-tibble(bead_ID = c("1", "2", "...", "...", "200", "201", "...", "...", "999", "1000"),
-       color = c("?", "white", "...", "...", "red", "?", "...", "...", "white", "?")) %>%
+tibble(bead_ID = c("2", "...", 
+                   "200", "...", "2079", "..."),
+       color = c("white", "...", "red", 
+                 "...", "white", "...")) %>%
   gt() %>%
-  cols_label(bead_ID = "ID",
-             color = "Color") %>%
-  tab_style(cell_borders(sides = "right"),
-            location = cells_body(columns = c(bead_ID))) %>%
-  cols_align(align = "center", columns = everything())
+    tab_header(title = "Data from Shovel") %>% 
+    cols_label(bead_ID = "ID",
+               color = "Color") %>%
+    tab_style(cell_borders(sides = "right"),
+              location = cells_body(columns = c(bead_ID))) %>%
+    cols_align(align = "center", columns = everything())
 ```
 
 &nbsp;
 
-Where is all of our data? Well, when we take a sample of 50 beads, we only have color identifications for 50 of the unknown number of beads in the urn. The rest of the beads were not sampled and we cannot say for certain whether they are white or red.
+Again, there are no ID numbers. But keeping track of which beads were in the sample and which beads were not is helpful.
 
-Now, what does our actual Preceptor Table tell us, specifically, about Bead 1? Bead 2? We know the proportion of red beads in our sample is 34%. Does this mean that bead 1 has *precisely* a 34% chance of being red? As we learned in Chapter 5, this is not true! There is uncertainty.
+The last step of Wisdom is to consider whether or not we can consider the units from the Preceptor Table and the units from the data to have been drawn from the same *population*. In this case, as with many sampling scenarios, it is trivial that we may make this assumption. If all the rows from the data are also rows in the Preceptor Table, we may assume that they are drawn from the same distribution.
 
-We can only claim *for certain* that, of the 50 beads that we sampled, 34% were red. If we were making a prediction of the probability of one of our **sampled** beads being red, 34% would be the correct probability. If we were making a prediction of the probability that an **unsampled** bead was red, the answer of 34% would be incorrect, but nor is it likely to be extremely incorrect. The sample does tell us something.
+<!-- DK: Could expand on this point. -->
 
-The last step of Wisdom to consider is why some beads **do** get sampled, while others do not. This is a consequence of the sampling mechanism. We need to take any biases into consideration, so we can evaluate the validity and representatives of our data in Justice. Keep in mind that just because our data can answer our question **never** means that we should use it! For example, what if our beads were mixed poorly, and most of the red beads sit at the bottom of the urn. In that case, our sampling mechanism consisting of the shovel with 50 slots after mixing the urn, would produce biased samples that would not be conclusive about the contents of the entire urn. The effects of biases can be determined later in Justice, but we need to know they exist in Wisdom. 
+We also consider why some beads do get sampled, while others do not. This is a consequence of the *sampling mechanism*. We hope that our sampling mechanism has near equal access to all members of the population, or else our samples would be biased. Almost all samples have some bias, but we must make a judgement call to see if the data we have is close enough to the data we want (i.e., the Preceptor Table) that we can consider both as coming from the same population. Our sample of 50 beads is taken from a *mixed* urn, so hopefully there is a near equal chance of selecting each bead, and our samples are representative of the population. 
+
+<!-- Could get into more details here, e.g., Sometimes, the Preceptor Table and the Population Table have the same number of rows. This happens when all the data arfe rows from the Preceptor Table. Example would be the simple case of an urn, the beads in which you know do not change color, and from which you have drawn a sample. But, what if beads can change color? Then the data from the sample 10 minutes ago has a less than certain relationship with the Preceptor Table. The same includes the color for bead 96 ten minites ago. The Preceptor Table has one row for bead 96 now, at this moment. So, in this case, the Population Table has a row for every bead at each moment in time that we care about. At the very least, it as 1,000 rows for 10 minutes ago (when we took the sample) and 1,000 rows for now. -->
+
+<!-- RS: Expanded on above comment alot in Pop. Table section (definetly too much detail), would appreciate suggestions on how to reformat to be concise. I pride my explanation for being best in the primer, so I feel like we need to keep a detailed explanation either here or move to Ch. 4 or 5.   -->
 
 ### Justice
 
@@ -976,69 +954,101 @@ The last step of Wisdom to consider is why some beads **do** get sampled, while 
 knitr::include_graphics("other/images/Justice.jpg")
 ```
 
-Now that we've determined that our data *could* be used, Justice asks if it *should* be used by analyzing the sampling mechanism. If we want to draw conclusions about an entire population using a small subset of its individuals, then we want to consider the stability, representativeness, and validity of our data. Skipping Justice puts us at risk of creating models with "bad data", which would lead us to incorrect or misleading conclusions.  
+Justice starts with the construction of a Population Table. We use this table to explore the issues of validity, stability and representativeness. We then make an assumption about the *form* of the data generating mechanism.
 
-#### Creating the Population Table
+#### Population Table
 
-The next step up from the Preceptor Table is the **Population Table**, a structure which includes three categories: the data for units we want to have (the Preceptor Table), the data for units which we actually have (our actual data), and the data for units we do not care about (the rest of the population, not included in the data or the Preceptor Table).
+The *Population Table* includes rows from three sources: the data for units we want to have (the Preceptor Table), the data for units which we have (our actual data), and the data for units we do not care about (the rest of the population, not included in the data or the Preceptor Table).
 
+<!-- RS: I choose to capitalize Data to emphasize that it is one of the categories, but let me know if this is incorrect.  -->
 
-<!-- RS: Kind of confused about the Population Table. a.)  How is the unknown Population different than the Preceptor Table? b.) should we include bead ID? -->
+<!-- DK: Make this table correctly. Add a "Time" column. Only four columns: Source, Time, ID and Color. First rows from Population, then Data, than Population, then Preceptor Table, then Population. Time goes in 10 minute increments. Time Preceptor Table is "Now". Time for Population at end is "Now + 10". Time for Data is "Now - 10". -->
 
-<!-- ```{r, echo = FALSE} -->
-<!-- tibble(source = c("Preceptor Table", "Preceptor Table", "...", -->
-<!--                   "Actual Data", "Actual Data", "Actual Data", "...",  -->
-<!--                   "Population", "Population", "Population"), -->
-<!--        gender = c("Male", "Male", "...", -->
-<!--                   "Male", "Male", "Male", "...", -->
-<!--                   "?", "?", "?"), -->
-<!--        year = c("2021", "2021", "...", -->
-<!--                 "2009", "2011", "2010", "...", -->
-<!--                 "?", "?", "?"), -->
-<!--        height = c("?", "?", "...", -->
-<!--                  "180", "160", "168", "...", -->
-<!--                  "?", "?", "?")) %>% -->
+<!-- RS: Wouldn't population time be both Now + 10 and Now - 10? I also think ? marks would also be less confusing.  -->
 
-<!--   # Then, we use the gt function to make it pretty -->
+<!-- Use same rows (including same ID and Color) from Data table. Done.-->
 
-<!--   gt() %>% -->
-<!--   cols_label(source = md("Source"), -->
-<!--              gender = md("Sex"), -->
-<!--              year = md("Year"), -->
-<!--              height = md("Height")) %>% -->
-<!--   tab_style(cell_borders(sides = "right"), -->
-<!--             location = cells_body(columns = c(source))) %>% -->
-<!--   tab_style(style = cell_text(align = "left", v_align = "middle", size = "large"),  -->
-<!--             locations = cells_column_labels(columns = c(source))) %>% -->
-<!--   cols_align(align = "center", columns = everything()) %>% -->
-<!--   cols_align(align = "left", columns = c(source)) %>% -->
-<!--   fmt_markdown(columns = everything())   -->
-<!-- ``` -->
+```{r, echo = FALSE}
+tibble(source = c("Preceptor Table", "Preceptor Table", "...",
+                  "Actual Data", "Actual Data", "Actual Data", "...",
+                  "Population", "Population", "Population"),
+       location = c("Known, specific urn", "Known, specific urn", "...",
+                  "Known, specific urn", "Known, specific urn", "Known, specific urn", "...",
+                  "Known, specific urn", "Known, specific urn", "Known, specific urn"),
+       time = c("Now", "Now", "...",
+                "Time of sample", "Time of sample", "Time of sample", "...",
+                "?", "?", "?"),
+       id = c("?", "?", "...",
+                 "2", "200", "2079", "...",
+                 "?", "?", "?"),
+       color = c("?", "?", "...",
+                 "white", "red", "white", "...",
+                 "?", "?", "?")) %>%
 
-#### Stability, representativeness, validity
+  # Then, we use the gt function to make it pretty
 
-**Stability** involves location and time. If we collect our data in a different time period will it vary? Does the data we have from the past provide insight into the population we want to learn about now, or has time changed life too much? Realistically, an urn will always be the same over time, and stability is more useful in situations involving people. However, what if someone dumps some red beads into the urn before we take our sample? Then we cannot assume validity, because the proportion of red beads in the urn the instant before the dump is different than the proportion red in the urn when we collect our data. We will assume no one is tampering with our urn, and assert stabllity across time periods. 
+  gt() %>%
+  cols_label(source = md("Source"),
+             location = md("Location"),
+             time = md("Time"),
+             id = md("ID"),
+             color = md("Color")) %>%
+  tab_style(cell_borders(sides = "right"),
+            location = cells_body(columns = c(source))) %>%
+  tab_style(style = cell_text(align = "left", v_align = "middle", size = "large"),
+            locations = cells_column_labels(columns = c(source))) %>%
+  cols_align(align = "center", columns = everything()) %>%
+  cols_align(align = "left", columns = c(source)) %>%
+  fmt_markdown(columns = everything())
+```
 
-**Representativeness** involves our rows. More specifically, are the rows that we do have data for representative of the rows for which we do not have data? In our urn, our  data is representative of the population if the proportion of red beads in our sample is close enough to the actual proportion of red beads in the whole urn. For the sample proportion to be similar to the actual population proportion, we ideally want the data we have to be a random, unbiased selection from our population, using a considerable sample size. This rarely occurs in real life! But in the context of our problem, the sampling mechanism of using a shovel of size 50 to sample beads from a **mixed** urn should be enough to consider our sample representative of the population, and we can move on. If we didn't know the urn was mixed, there is a higher likelihood of biased sampling, and it would be harder to conclude the sample proportions are representative of the urn's actual proportion. 
+&nbsp;
 
-**Validity** involves the columns of our data set. Is the meaning of our columns consistent across our dataset(s) and ideal Preceptor Table? In our urn scenario, does bead color in our sampled data and bead color in our Preceptor Table mean the same thing? The answer is yes, and validity can be assumed very easily. If some beads in the urn are old and the color has worn off, it may be more difficult to conclude whether the color column always means the same thing. In Chapter \@ref(two-parameters) we will analyze more realistic (and difficult) examples of representatives and validity.
+Each specific row represents one subject, which are individual beads in our urn scenario. Because there could be thousands or even millions of beads, we provide 2-3 examples for each category, and use an elipse to denote that there are many more subjects that we have yet to record. 
 
+Each Population Table will have a minimum of 3 types of columns: covariates, time, and outcome(s). We will explain these columns for each type of category (Preceptor Table, Data, and Population). 
+
+**Covariates** can be thought of as demographics. People have an age, race, height, weight, location where they live ... you get the point. When we construct a Preceptor Table to answer our question, we must select some covariates that we **want** all of our subjects to have. To answer our questions, we in theory should collect data from subjects with our desired covariates. However, life is tough, and the data we get is not always ideal. Our urn scenario only has one covariate: location. Rather intuitively, urns can have drastically different contents, so to easily answer our question it's important to identify the location of one specific urn for which to find the proportion red. Let's break down the location column in the Preceptor Table, Data, and Population categories. 
+
+- Preceptor Table: Subjects in our Preceptor Table all have a location of "Known, specific urn." This is because we want to find the proportion red of one specific urn, so ideally all of our data should come from this urn.
+
+- Data: Ideally, we want our data to have the same covariates as our Preceptor Table. Because we draw our sample from the exact same urn our question asks us about, the data we collect comes directly from the Preceptor Table, so they have the same location ("Known, specific urn"). This is the perfect scenario for us, but this rarely occurs in real life. For example, let's put ourselves inside the *Hunger Games*, where 12 districts each draw from a separate urn to select their tributes to fight to the death. What if we **want** to know the mean age of tributes selected in District 11 (The Preceptor Table), but instead we are only given data from Districts 9 and 10 (Data). In this scenario, the location of subjects in the Preceptor Table and the Data differ because the urns are located in two separate districts. 
+
+- Population: In our urn scenario, the location of subjects in the Preceptor Table and Data are the same, so the Population will also have the same location. Again, covariates from the Preceptor Table and Data are rarely identical in real life. Returning to our *Hunger Games* example, we want data from District 11 to fill in our Preceptor Table, but we are only given data from districts 9 and 10. If we wish to draw conclusions about District 11 using Districts 9 and 10, what stops us from using Districts 1 and 2 instead? Or maybe Districts 3 and 7? **We use the Population to acknowledge the wider source we could have collected data from.** Assuming all 12 districts are similar, we really could have used data from any 2, so our location covariate for the Population should be: "All districts". On the other hand, for our urn problem there is only one urn which we could data collect from, so we know the location of our Population. 
+
+Population Tables always have a column for **time**. When answering a question we must specify the time that it's being asked, because life changes over time.
+
+- Preceptor Table: Because the question does not specify otherwise, we should assume that we want to find the proportion of red beads at this instant. As such, subjects in our Preceptor Table category have a time of "Now". 
+
+- Data: Unfortunately, we collected our sample (17 out of 50 beads are red) in the past. We ideally want to know the contents of our sample at this very instant to answer our question, but we do not have the resources to whip out an urn for every new question we have. The best we can do is acknowledge that the data we have does not fill in our Preceptor Table perfectly, because it was collected from a sample in the past. Some of us may believe that making this distinction is ridiculous, as an urn does not change over time! However, it is possible that someone could have dumped some extra red beads into the urn after taking our sample. If this is the case, then our data only reflects the contents of the urn in the past, and not the urn now. 
+
+- Population: Remember, we use the Population to acknowledge the wider source we could have collected data from. Let's say that we took our sample in 2016. What prevents us from using a sample taken in 2014? How about 2018? Because there are in fact an infinite number of times (down to the millisecond) that we could have taken our sample, we mark the time in the Population category with a ?. We hope that the urn hasn't changed much over time, but acknowledge that we could have taken our sample at many different times, amassing to a much larger Population than we may have originally thought.  
+
+Finally, Population Tables have an **outcome**. Sometimes there will be multiple outcome columns, like in the case of casual models where we ideally want data on a subject before and after treatment. In our urn problem, we only two outcomes: bead ID and bead color. 
+
+- Preceptor Table: To find the exact proportion red in our urn, we simply divide the number of red beads in the urn by the total number of beads. However, we do not know the colors (or IDs) of each individual bead in our urn, so we mark this information with a ?. Because our data has all the same covariates as our Preceptor Table (which is very unrealistic) we actually do know the colors and IDs of 50 beads in our Preceptor Table, but we list 2 beads that were not sampled in our Population Table for simplicity's sake. 
+
+- Data: We sampled 50 beads from the urn and recorded their colors. As such, we know the outcomes of our data, and can fill in the column. 
+
+- Population: The wider population from which we could have collected data from includes all beads in the urn at many times throughout the past (and the future). Because we don't know all bead colors in the urn (especially if the urn has changed over time), we mark the Outcome column of the Population category with ?s. 
+
+#### Validity, stability, and representativeness
+
+Now that we have created our Population Table, we can analyze some key issues: validity, stability, and representativeness.  
+
+*Validity* involves the columns of our data set. Is the meaning of our columns consistent across the different data sources? In our urn scenario, does bead color in our sampled data and bead color in our Preceptor Table mean the same thing? The answer is yes, and validity can be assumed very easily. If some beads in the urn are old and the color has worn off, it may be more difficult to conclude whether the color column always means the same thing. 
+
+*Stability* involves time. Is the model --- meaning both the mathematical formula and the value of the parameters --- stable over time? Realistically, an urn will always be the same over time. However, what if someone dumps some red beads into the urn after we take our sample? Then we cannot assume stability, because the proportion of red beads in the urn, $\rho$, the instant before the dump is different than the proportion red in the urn after. We will assume no one is tampering with our urn, and assert stability across time periods. 
+
+*Representativeness* involves the data rows, specifically the rows for which we have data versus the rows which *might have been*. Are the rows that we do have data for representative of the rows for which we do not have data? For the sample proportion to be similar to the actual population proportion, we ideally want the data we have to be a random, unbiased selection from our population, using a considerable sample size. In the context of our problem, the sampling mechanism of using a shovel of size 50 to sample beads from an urn in which the beads are thoroughly mixed should be enough to consider our sample representative of the population, and we can move on. 
 
 #### The DGM
 
-The final aspect of Justice is producing a mathematical formula that can model our situation. Our models are only as good as the equations we use to make them, so choose with care. 
+The final aspect of Justice is assuming/creating a mathematical formula --- a *data generating mechanism*, or DGM --- which mimics the process by which the data comes to us. The DGM for sampling scenarios with only two possible values is often denoted as follows: 
 
-One of the most important terms in statistics and data science is the **Data Generating Mechanism**, or DGM. The DGM is simply how each individual outcome comes into existence. In general, the DGM is often denoted as follows: 
+$$ T_i  \sim B(\rho, n = 50) $$
 
-$$ y_i  \sim p(y_i | \theta) $$
-
-Don't get caught up by the equation. It just means that our outcome is chosen based on some given parameter, $\theta$. If we change the value of the parameter, our outcome is likely to change as well. 
-
-We can create a DGM for our specific urn scenario. In this *Primer*, we most frequently use either normal (Gausian) distributions or binomial distributions. In our urn we count the number of red beads selected, and do not count the white beads. This success/failure or TRUE/FALSE relationship strongly suggests we should use a binomial distribution to model our situation. We can rework the DGM equation to suit our needs: 
-
-$$ T_i  \sim B(\rho_r, n = 50) $$
-
-The total number of red beads selected in ONE specific experiment with 50 sampled beads, $T_i$, occurs from taking one draw from a binomial distribution with $n = 50$ observations and an unknown probability $\rho_r$ of the proportion of red beads in the urn.
+The total number of red beads selected in a sample of 50 beads, $T_i$, is equal to one draw from a binomial distribution with $n = 50$ observations and an unknown probability $\rho$ of the proportion of red beads in the urn.
 
 ### Courage
 
@@ -1050,21 +1060,21 @@ We've evaluated our data and questions and chosen a mathematical formula. Now it
 
 #### Bayesian framework
 
+<!-- RS: I'm protesting! I really like this section.  -->
+
 We are Bayesian data scientists that make Bayesian models. This means that we make specific assumptions and consider different things to be either fixed or variable compared to other data science frameworks. One of the most important distinctions is that in Bayesian data science, **we don't know the values of our parameters**. Consider the DGM created in Justice: 
 
-$$ T_i  \sim B(\rho_r, n = 50) $$
+$$ T_i  \sim B(\rho, n = 50) $$
 
 Some non-Bayesian frameworks are concerned with the probability distribution of our observed data, but do not care much about the probability distribution for $\rho_r$ and assume it to be fixed. If $\rho_r$ is fixed, the equation above becomes one simple binomial distribution. Think of this as a standard 2 dimensional plot. 
 
 Us Bayesians consider our observed data to be fixed. We don't consider alternate realities where our observed data is different due to sampling variation. Instead, we are concerned with the probability distribution of our parameter. In our urn scenario, $\rho_r$ is variable, so we have to create a separate binomial distribution for each possible value of $\rho_r$. Think of this as a 3 dimensional joint distribution like what we created in Section \@ref(n-models).
 
-It is essential to understand the joint distribution and the posterior, two concepts Bayesians use to solve problems. We will provide quick definitions of them both here, including statistical notation which may be helpful to some. 
+It is essential to understand the joint distribution and the posterior, two concepts Bayesians use to solve problems. We will provide quick a quick review here, including statistical notation that may be helpful to some. 
 
 **The joint distribution**, $p(y|\theta)$, models the outcome $y$ given one or more unknown parameter(s), $\theta$. The equation illustrates exact same concept we addressed while discussing the distinctions of Bayesian science: because our parameters are variable, we have to create separate distributions for each potential value. Combining all these distributions together creates a joint distribution that is 3 dimensional when plotted. 
 
-Careful readers may note that the equation for the joint distribution, $p(y|\theta)$, appears to be very similar to the equation for the DGM, $p(y_i|\theta)$. They are indeed similar, but know that the joint distribution models all outcomes, while the DGM models selecting one individual outcome, $y_i$. Also know that many data scientists refer to the joint distribution as "the likelihood".  
-
-**The posterior**, $p(\theta|y)$, describes the relative plausibility of all parameter values, $\theta$, given some data $y$.  As soon as we incorporate data into our model, we in effect update our beliefs and create the posterior which models our uncertainty regarding a parameter. The posterior is our coveted end goal, which we can use to answer our questions. We have referenced the posterior many times before, and this definition does not change its meaning. 
+**The posterior**, $p(\theta|y)$, is the result of Bayes' theorem and is our coveted end goal. The posterior is the probability distribution of our parameters, created using data that updates our prior beliefs. We have referenced the posterior many times before, and this definition does not change its meaning. 
 
 In our urn scenario, obtaining the posterior involves first creating many binomial distributions for each possible population proportion. This is the joint distribution, and it is a 3 dimensional model. We then select the distribution that corresponds with our data: 17 red beads are sampled. We can represent the posterior with the following:
 
@@ -1074,13 +1084,10 @@ This is equivalent to taking a 2 dimensional slice of the 3 dimensional model. W
 
 #### stan_glm()
 
-In Chapter \@ref(probability), we first started our tibble with a range of possible values for our parameter $\rho$. We then took samples using each possible value to create the 3 dimensional joint distribution. Finally, we took a slice of the joint distribution based on the data we collected, to create the posterior distribution. This is not how professionals work. Many data scientists use the **rstanarm** package, which provides a user friendly interface to work with the statistical language Stan. 
+Given a data set to use and a mathematical formula to work with, the next step is to write some code. We will use the **rstanarm** package, which provides a user friendly interface to work with the statistical language Stan. 
 
-**rstanarm** and Stan are appealing because they are powerful. Functions such as `stan_glm()` can do everything we did by hand in Chapter 5 in a few lines of code. Because we will use a professional statistical library, the objects we make will become more complex. In this chapter we will explain our models in terms of high level Bayesian concepts, and Chapter \@ref(two-parameters) will provide a more detailed explanation of the objects we will make. **To be clear, you do not need to fully understand this section or how this code works. This is an introduction, not a formal lesson.**
+**rstanarm** and Stan are appealing because they are powerful. Functions such as `stan_glm()` can do everything we did by hand in Chapter 5 in a few lines of code. Because we will use a professional statistical library, the objects we make will become more complex. In this Chapter, we provide the steps for answering our questions. Chapter \@ref(two-parameters) will provide a more detailed explanation of the objects we will make. *To be clear, you do not need to fully understand this section or how this code works. This is an introduction, not a formal lesson.*
 
-Again, we are attempting to answer this question: *If we get 17 red beads in a random sample of size 50 taken from a mixed urn, what proportion $\rho$ of the beads in the urn are red?*
-
-We want to estimate the value of $\rho$, but because us Bayesians consider $\rho$ to be variable, we need to create a posterior distribution that addresses our uncertainty regarding its true value. We can easily create the posterior by using `stan_glm()`. Let's go ahead and create our model, and then view the results in a tibble. 
 
 ```{r, message = FALSE}
 library(rstanarm)
@@ -1091,49 +1098,22 @@ fit_1 <- stan_glm(formula = red ~ 1,
                   family = binomial,
                   refresh = 0,
                   seed = 10) 
-
-fit_1 %>%
-  as_tibble()
 ```
 
-This tibble shows us 4,000 draws from the posterior distribution.`stan_glm()` simplifies all the work which we did by hand previously into one single function. We can also visualize our 4,000 draws from the posterior in a histogram:
+
+Recall that we assumed a binomial model for the data generating mechanism.  In `stan_glm()` we denote this with `family = binomial`. In addition to the type of the distribution, we also need to analyze the outcome and predictor variables involved. The outcome is the quantity we are measuring, in this case the total number of red beads in our sample.  Because we have no predictors, we use the argument `formula = red ~ 1`, which means that we only model the outcome based on the unknown proportion of red beads in the urn, $\rho$. 
+
+We pass in data in a binomial format: the 1's represent the number of successes (red beads drawn), and the 0's represent the number of failures (white beads drawn). As such, we pass a tibble with 17 red beads and 33 white beads into `data`. 
+
+We use `refresh = 0` to suppress the behavior of printing to the console, and `seed = 10` so that we get the same output every time we run the code. The resulting model is:
 
 ```{r}
-fit_1 %>%
-  as_tibble() %>%
-   ggplot(aes(x = `(Intercept)`)) +
-    geom_histogram(aes(y = after_stat(count/sum(count))),
-                   bins = 50) +
-    labs(title = "4,000 draws from the Posterior Distribution",
-         subtitle = "Why is the x axis negative? We will address this soon.",
-         x = expression(rho),
-         y = "Probability") + 
-    scale_x_continuous(labels = scales::number_format()) +
-    scale_y_continuous(labels = scales::percent_format()) +
-    theme_classic()
+fit_1
 ```
 
-Let's examine the purpose of the arguments used within `stan_glm()` in terms of high level Bayesian concepts. 
-
-- **The joint distribution**: The `family` and `formula` arguments relate to the joint distribution, also known as the likelihood by some. In Justice, we created the following model for our sampling mechanism:
-
-$$ T_i  \sim B(\rho_r, n = 50) $$
-
-This is a binomial distribution. In `stan_glm()` we denote this with `family = binomial`. In addition to the type of the distribution, we also need to analyze the outcome and predictor variables involved. The outcome is the quantity we are measuring, in this case the total number of red beads in our sample, $T_i$.  Covariates are continuous predictor variables that help forecast our outcome. For example, age is a covariate that effects the outcome of someone's blood pressure. Because we only measure how many red beads are in the sample (the outcome), we have no covariates which we can use to make our model more accurate. Because we have no predictors, we use the argument `formula = red ~ 1`, which means that we only model the outcome without the consideration of any covariates. 
-
-- **The data**: We are required to pass data into the `data` argument in order for `stan_glm()` to "take a slice" of the joint distribution and estimate the posterior. Because we are measuring the total number of red beads in a sample, $T_i$, we pass in data in a binomial format: the 1's represent the number of successes (red beads drawn), and the 0's represent the number of failures (white beads drawn). As such, we pass a tibble with 17 red beads and 33 white beads into `data`. 
-
-- Other arguments: we use `refresh = 0` to suppress the behavior of printing to the console, and `seed = 10` to make produce the same output every time we run the code. 
-
- Once we have the `fit_1` object, it is easy to answer two sorts of questions: the posterior probability distribution for $\rho$ and predictions for new draws from the urn. The key new functions are `posterior_epred()` for the former and `posterior_predict()` for the latter.
+We will learn the meaning of this output in Chapter \@ref(two-parameters). Once we have the `fit_1` object, it is easy to answer two sorts of questions: the posterior probability distribution for $\rho$ and predictions for new draws from the urn. The key new functions are `posterior_epred()` for the former and `posterior_predict()` for the latter.
  
-#### Answering the questions
- 
-There are some questions left to be answered. Let's attempt to answer them here. 
-
-> Why is the x axis of the posterior distribution negative? Shouldn't all values be between 0 and 1?
-
-The x axis of our posterior is negative because for binomial models, `stan_glm()` chooses to use the "logit" function to convert our probabilities. We can use `posterior_epred()` to find the **e**xpected **pred**iction of our posterior without the logit function. Know that we do not just use `posterior_epred()` to undo transformations. We will use it many more times throughout this *Primer* to create the expected distribution based off some covariate.  Let's recreate our posterior using `posterior_epred()`:
+Let's recreate our posterior using `posterior_epred()`:
 
 ```{r}
 ppd_for_p <- posterior_epred(fit_1, 
@@ -1149,7 +1129,7 @@ ppd_for_p <- posterior_epred(fit_1,
 ppd_for_p
 ```
 
-Because we do not wish to create our distribution conditional on some covariate, we want to pass in a tibble with 1 row into the `newdata` argument. An empty tibble has 0 rows, so we instead pass in a tibble with some junk data. `constant = 1` is completely meaningless. We can verify that the posterior is the same by plotting it. Hopefully it should have a similar shape, but all values should be between 0 and 1. 
+Because we do not wish to create our distribution conditional on some covariate, we want to pass in a tibble with 1 row into the `newdata` argument. An empty tibble has 0 rows, so we instead pass in a tibble with some junk data. `constant = 1` is completely meaningless. Now we plot the result:   
 
 ```{r}
 ppd_for_p %>% 
@@ -1157,7 +1137,7 @@ ppd_for_p %>%
     geom_histogram(aes(y = after_stat(count/sum(count))),
                    bins = 50) + 
     labs(title = "Posterior Probability Distribution",
-         subtitle = "Distribution shape is similar to earlier, but the proportion red is centered at .34",
+         subtitle = "Distribution is centered at .34",
          x = "Proportion p of Red Beads in Urn",
          y = "Probability") + 
   
@@ -1166,17 +1146,13 @@ ppd_for_p %>%
     theme_classic()
 ```
 
-Now that our posterior probability distribution is correctly centered, we have successfully created the posterior distribution and can finally answer the question we started the chapter with: *If we get 17 red beads in a random sample of size 50 taken from a mixed urn, what proportion $\rho$ of the beads in the urn are red?*
+We have successfully created the posterior distribution and can finally answer the question we started the chapter with: *If we get 17 red beads in a random sample of size 50 taken from a mixed urn, what proportion $\rho$ of the beads in the urn are red?*
 
 Look to the distribution we have created! We can see that the bulk of the area under the posterior occurs approximately when $\rho$ is between .28 and .42, so the answer to our question is that it is likely that 28% to 42% of the beads in the urn in the red. Another reader may believe that the bulk of the area under the posterior occurs when $\rho$ is between .25 and .45, and may conclude it likely that 25% to 45% of beads are red. They would be perfectly correct! Any range that is large enough to acknowledge the uncertainty we have regarding the exact value of $\rho$ is acceptable. 
 
 Although the most likely probability (the highest bar on the histogram) occurs when $\rho$ is around .32, The answer is not a single number. Our posterior distribution is just that: a distribution. From our sample, we have many different results for the proportion of red beads in the entire urn. Certain proportions, like the extremes close to 0% or 100%, are essentially impossible due to our sample value being 34%. On the other hand, we could have just as easily sampled 16 or 18 beads from the urn, and sample proportions such as 32% and 36% are very plausible.
 
 This means that, while we can provide a range of possibilities (and we can estimate which of those possibilities occur most frequently), we can never say that we know the total number of red beads with certainty.  We know that there is the most chance that $\rho$ is between .28 and about .42, some chance that $\rho$ is between .15 and .24 or between .42 and .56, and almost no chance that $\rho$ is below .15 or above .56. With the posterior we can visualize all of these probabilities at once. 
-
-The key issue with the urn paradigm is that, unlike real world data science, we *can* technically find the true proportion. We just have to perform that exhaustive count that we've been so desperately avoiding. In the real world, the "true" solution can never be known. This is why we require inference, and why tools like sampling are so helpful for drawing conclusions about the world around us.   
-
-<!-- RS: In some paragraphs we say that it is impossible to conduct a cencus because we don't have access to the urn, in others like this we do have access and can complete the cencus. Which is it? -->
 
 Another important question remains: 
 
@@ -1214,7 +1190,9 @@ knitr::include_app("https://www.youtube.com/embed/sVxUUotm1P4")
 knitr::include_graphics("other/images/Temperance.jpg")
 ```
 
-Now that we have our posterior distribution for the proportion $\rho$ of red beads in the urn, we can use that object to forecast other outcomes, outcomes which we have not yet observed. We can now answer the question from the start of the Chapter: 
+With the fitted model object `fit_1`, we can now make predictions into the future and answer our questions.
+
+Recall the second question we started with:
 
 *What is the probability, using the same urn, that we will draw more than 8 red beads if we use a shovel of size 20?*
 
@@ -1303,8 +1281,6 @@ On the other hand, `posterior_predict()` models the posterior distribution for f
 
 In summary, use `posterior_predict()` when to predict the outcome of individual(s) in the future, and use `posterior_epred()` to model the probability across the entire population using the posterior. To answer our question, we want to know the probability of outcomes using a single shovel of size 20. We should use `posterior_predict()` to model taking individual samples many times, and we can then analyze the probabilities. If this is confusing do not fret! We will have plenty of practice with these 2 functions for the remainder of this *Primer*. 
 
-#### Ansewering the questions (again)
-
 Now let's attempt to actually answer our question: 
 
 *What is the probability, using the same urn, that we will draw more than 8 red beads if we use a shovel of size 20?*
@@ -1323,14 +1299,13 @@ ppd_reds_in_20 <- posterior_predict(fit_1,
 sum(ppd_reds_in_20$total > 8)/length(ppd_reds_in_20$total)
 ```
 
-**There is approximately a `r round(100 *sum(ppd_reds_in_20$total > 8)/length(ppd_reds_in_20$total))`% chance that we will draw more than 8 red beads.**
+**There is approximately a `r round(100 *sum(ppd_reds_in_20$total > 8)/length(ppd_reds_in_20$total))`% chance that we will draw more than 8 red beads out of a sample size of 20. .**
 
 To visualize this probability graphically, we will reuse our posterior, and add a new column called `above_eight` that is `TRUE` if `total > 8`. 
 
 ```{r}
 
-ppd_reds_in_20 <- 
-  posterior_predict(fit_1, 
+ppd_reds_in_20 <- posterior_predict(fit_1, 
                     newdata = tibble(constant = rep(1, 20))) %>% 
   as_tibble() %>% 
   mutate(total = rowSums(across(`1`:`20`))) %>%
@@ -1366,97 +1341,49 @@ ppd_reds_in_20   %>%
     theme_classic()
 ```
 
-<!-- DK: Need to add discussion about answering different questions with this object. See the old discussion below. These words are good stuff! -->
-  
-
 The red bars illustrate the area under a specific section of the curve, as compared to the *entire* area under the curve. *Each question requires looking at a new area under the curve.* When someones asks you a question, they are doing two things. First, they are providing instructions as to the posterior your should create. Here, the results with a shovel of 20 slots. Second, they are asking a question about the area under the curve in a specific region. Here, the region where the number of red beads is greater than 8 is highlighted in red. Therefore, the area below the curve that **is red** is how we get our estimate. 
-
-
-<!-- RS: Can we ask a question like: If we draw 22 red beads out of 50 from a new urn, how certain are we that the two urns have the same proportion red? 
-
-I would create 2 posteriors and calculate the overlapping area, and then finally do (1 - overlapping area) to calculate the percent certainty that the two urns have a different proportion red (we cannot answer whether or not they have the same). I am not sure a.) if that is an answerable question b.) if the way I explained above is the correct way to answer the question and c.) even if we can answer the question, should we even answer it? Does knowing the percent even help us?  I saw earlier comment that "we can never have enough finding the area under the curve stuff", so just want to give more practice. Code below illustrates what I'm thinking.  -->
-
-<!-- ```{r} -->
-<!-- fit_3 <- stan_glm(formula = red ~ 1, -->
-<!--                   data = tibble(red = c(rep(1, 22), -->
-<!--                                         rep(0, 28))), -->
-<!--                   family = binomial, -->
-<!--                   refresh = 0, -->
-<!--                   seed = 10) -->
-
-<!-- ppd3<- posterior_epred(fit_3, -->
-<!--                 newdata = tibble(constant = 1)) %>% -->
-<!--   as.vector() -->
-
-
-<!-- ppd1 <- posterior_epred(fit_1, -->
-<!--                 newdata = tibble(constant = 1)) %>% -->
-<!--   as.vector() -->
-
-<!-- #Next 2 lines produce the same result, because the number of overlapping data points are the same for both vectors, and there are 4,000 rows in each vector. -->
-
-<!-- 1 - ((length(ppd3[ppd3 < ppd1]) + length(ppd1[ppd3 < ppd1]))/length(ppd3)) -->
-<!-- 1 - (2*length(ppd1[ppd3 < ppd1])/4000) -->
-
-
-<!-- # We are 71.7% sure that the two urns do not have the same proportion red? -->
-
-<!-- ppd_for_p %>% -->
-<!--   ggplot(aes(x = p)) + -->
-<!--   geom_histogram(data = ppd3 %>% as_tibble() %>% rename(p = value), -->
-<!--                  aes(y = after_stat(count/sum(count))), bins = 50, fill = "blue", alpha = .5) + -->
-<!--     geom_histogram(aes(y = after_stat(count/sum(count)), fill = "blue", alpha = .5), -->
-<!--                    bins = 50) + -->
-<!--     labs(title = "Posterior Probability Distribution", -->
-<!--          subtitle = "Distribution shape is the same as earlier, but the proportion red is centered at .34", -->
-<!--          x = "Proportion p of Red Beads in Urn", -->
-<!--          y = "Probability") + -->
-
-<!--     scale_x_continuous(labels = scales::number_format()) + -->
-<!--     scale_y_continuous(labels = scales::percent_format()) + -->
-<!--     theme_classic() -->
-<!-- ``` -->
-
-<!-- RS: This code below serves to illustrate that the more data we have, the more refined our posterior becomes. Use data from real sampling activity (33 trials). Again, not sure if there is any value to this.  -->
-
-<!-- ```{r} -->
-<!-- newdata <- tactile_sample_urn %>% -->
-<!--   select(red_beads) %>% -->
-<!--   mutate(red = map(red_beads, ~ c(rep(1, .), rep(0, 50-.)))) %>% -->
-<!--   select(red) %>% -->
-<!--   unnest(red) -->
-
-
-<!-- fit_4 <- stan_glm(family = binomial, -->
-<!--                   seed = 10, -->
-<!--                   refresh = 0, -->
-<!--                   formula = red ~ 1, -->
-<!--                   data = newdata) -->
-
-<!-- ppd4 <- posterior_epred(fit_4, newdata = tibble(constant = 1)) %>% -->
-<!--   as_tibble() %>% -->
-<!--   rename(p = `1`) -->
-
-<!-- ppd4 %>% -->
-<!--   ggplot(aes(x = p)) + -->
-<!--     geom_histogram(aes(y = after_stat(count/sum(count))), -->
-<!--                    bins = 50) + -->
-<!--     labs(title = "Posterior Probability Distribution", -->
-<!--          subtitle = "Much smaller range of values on the x axis than before", -->
-<!--          x = "Proportion p of Red Beads in Urn", -->
-<!--          y = "Probability") + -->
-
-<!--     scale_x_continuous(labels = scales::number_format()) + -->
-<!--     scale_y_continuous(labels = scales::percent_format()) + -->
-<!--     theme_classic() -->
-
-<!-- ``` -->
 
 See Chapter \@ref(two-parameters) for a thorough discussion of the use of **rstanarm**. This package will be our main tool for the rest of the *Primer*.
 
-### Malpractice
+#### Assesing uncertainty
 
-Although the process was long, we have successfully gone through the cardinal virtues and answered our questions like real data scientists. In this section we will address several pitfalls to avoid. 
+<!-- RS: This kind of acts as a short summary + going over limitations of Temperance.  -->
+
+The process Cardinal Virtues process may seem tedious, but we use them for good reason. In Wisdom we determined what data we need to answer our question, and in Justice we analyzed whether or not the data we have can answer our question. If we had skipped these steps, we would be at risk of creating models with "bad data" in Courage and Temperance, and draw misleading conclusions. 
+
+We have successfully answered our questions using the Cardinal Virtues, but we must also realize that there are limitations to our models. Earlier we claimed there is a `r round(100 *sum(ppd_reds_in_20$total > 8)/length(ppd_reds_in_20$total))`% chance that we will draw more than 8 red beads out of a sample size of 20. However, we must be modest about our claims. Is this question about *this* particular urn, or all urns? Clearly, as our predictions are based upon the posterior from our specific urn, our conclusions can only be applied to *this particular urn*; our conclusions are not generalizable to all urns.
+
+Furthermore, how certain are we in our prediction from Temperance that `r round(100 *sum(ppd_reds_in_20$total > 8)/length(ppd_reds_in_20$total))`% of samples out of a shovel size of 20 using our urn would produce more than 8 red beads? 
+
+First let's model our situation: 
+
+$$ T_i  \sim B(\rho, n = 20) $$
+
+The total number of red beads selected in a sample of 20 beads, $T_i$, is modeled by a binomial distribution with $n = 20$ observations and an unknown probability $\rho$ of the proportion of red beads in the urn.
+
+We must realize that our `r round(100 *sum(ppd_reds_in_20$total > 8)/length(ppd_reds_in_20$total))`% estimate is based on an entire posterior. We are uncertain about the exact value of $\rho$, so `posterior_predict()` takes our uncertainty into account when creating the model. However, there is in fact some actual value for $\rho$, even if we don't know it. 
+
+If the actual value of $\rho$ was 30%, we can calculate the **correct** answer to our question using the binomial probability distribution function:  
+
+```{r}
+pbinom(q = 8, size = 20, prob = .3, lower.tail = FALSE)
+```
+
+Or maybe the actual value of $\rho$ is 40%: 
+
+```{r}
+pbinom(q = 8, size = 20, prob = .4, lower.tail = FALSE)
+```
+
+Sadly, the answer to our question could be `r round(pbinom(q = 8, size = 20, prob = .3, lower.tail = FALSE)*100)`%, `r round(pbinom(q = 8, size = 20, prob = .4, lower.tail = FALSE)*100)`%, a value in between, or even a more extreme value. We will never know the correct answer, and must settle with our best estimate of `r round(100 *sum(ppd_reds_in_20$total > 8)/length(ppd_reds_in_20$total))`% that factors in our uncertainty regarding the true value of $\rho$. Long story short, our models are never the truth. 
+
+<!-- RS: Nicely worded but I'm not sure if it fits in. Maybe a future author will find use for it.  -->
+
+<!-- Asserting a posterior distribution is, conceptually, the same as opening a casino and allowing people to place wagers on outcomes, with the odds consistent with your posterior. If your posterior is wrong, they will take all your money. That would be bad! So, what do we do? Rule of thumb: the future is always more variable than our models would suggest. The entire point of the virtue of Temperance to be aware of that fact and take account of it. Courage --- that bold bastard --- comes along and says, "Here is the model! Let's calculate the posterior and open the casino!" Temperance says, "Hold on! Yes, I can calculate the posterior, but we need to be cautious." Temperance is concerned with the tails of our predictions, not the center. What is the best strategy for opening our casino, then? Limit the bets on the first few nights to make sure our posterior is OK. *Temperance is concerned with the sensible management of the casino.* -->
+
+### Bad practices
+
+Although the process was long, we have successfully gone through the cardinal virtues and answered our questions like real data scientists. In this section we will address some pitfalls to avoid. 
 
 #### Confidence intervals
 
@@ -1488,26 +1415,9 @@ $H_a$: There are *not* an equal number of red and white beads in the urn.
 
 Can we reject that hypothesis? Convention: if the 95% confidence interval excludes the null hypothesis, then we reject it. Here, that would mean if our posterior estimate (plus or minus 2 standard errors) *excluded* the possibility of the red and white beads being equal ($\rho = .5$) we can reject the null hypothesis. In the previous section we determined that the 95% confidence interval is between 21% and 47%. Because 50% is outside of this interval, we could reject the null hypothesis, and conclude that it is unlikely that the proportion of beads in the urn is 50%. 
 
-If we were testing the theory that $\rho = .45$ instead, our null hypothesis would fall within the confidence interval. This does not mean that we accept it, we just don't reject it.  When we can’t reject the null hypothesis our test is essentially useless, as we have no idea whether or not our theory is true. In our scenario we only know that there is some possibility that $\rho = .45$. We're just back where we started! This is why we never test — unless your boss demands a test. **Use your judgment, make your models, summarize your knowledge of the world, and use that summary to make decisions.** 
+If we were testing the theory that $\rho = .45$ instead, our null hypothesis would fall within the confidence interval. This does not mean that we accept the null hypothesis, we just don't reject it.  When we can’t reject the null hypothesis our test is essentially useless, as we have no idea whether or not our theory is true. In our scenario we only know that there is some possibility that $\rho = .45$. We're just back where we started! This is why we never test — unless your boss demands a test. **Use your judgment, make your models, summarize your knowledge of the world, and use that summary to make decisions.** 
 
-#### Using the Cardinal Virtues
-
-<!-- RS: Going to use this section to address how we should not conclude that our models are the truth. Also, explain the purpose of the cardinal virtues, because it would suck to do all this work and realize we made incorrect assumptions and it is all useless! -->
-
-Recall the virtue of Wisdom. We want to know if there is a decent connection between the problem we face and the data we have. Our problem is answering the following question: *Conditional on our answer to Question 1, what is the probability, using the same urn, that we will draw more than 8 red beads if we use a shovel of size 20?* The way in which we have approached answering this question is to, from our posterior distribution from our urn, create a joint distribution to estimate the probability of drawing more than 8 red beads with a shovel of size 20. Is this question about *this* particular urn, or all urns? Clearly, as it is conditional upon a result from our specific urn, our conclusions can only be applied to *this particular urn*; our conclusions are not generalizable to all urns.
-
-Justice encompasses two main topics that apply to our urn: predictive versus causal model and mathematical formulas. Are we are modeling (just) for prediction or are we (also) modeling for causation? Predictive models care nothing about causation. With prediction, all we care about is forecasting Y given X on some as-yet-unseen data. There is no notion of “manipulation” in such models. As we can see, then, our model is **predictive**; we are not manipulating anything. The math of our model can be: 
-$$ T_i  \sim B(p_H, n = 20) $$
-The total number $T$ of red beads in experiment $i$ with 20 sampled beads, $T_i$, is distributed as a binomial with $n = 20$ and an unknown probability $\rho_h$ of the proportion red exceeding 8 out of 20 beads.
-
-Courage focuses on code -- the structure of our model. Code allows us to “fit” a model by estimating the values of the unknown parameters. Though we can never know the true values of these parameters, we can express our uncertain knowledge in the form of posterior probability distributions. With those distributions, we can compare the actual values of the outcome variable with the “fitted” or “predicted” results of the model. We can examine the “residuals,” the difference between the fitted and actual values. To answer our question, we have taken a slice of our posterior distribution to create a joint distribution. To find our final solution, we looked at the area under the curve that includes all values of 8 red beads or above. 
-
-When we think of Temperance, we should think of uncertainty. Asserting a posterior distribution is, conceptually, the same as opening a casino and allowing people to place wagers on outcomes, with the odds consistent with your posterior. If your posterior is wrong, they will take all your money. That would be bad! So, what do we do? Rule of thumb: the future is always more variable than our models would suggest. The entire point of the virtue of Temperance to be aware of that fact and take account of it. Courage --- that bold bastard --- comes along and says, "Here is the model! Let's calculate the posterior and open the casino!" Temperance says, "Hold on! Yes, I can calculate the posterior, but we need to be cautious." Temperance is concerned with the tails of our predictions, not the center. What is the best strategy for opening our casino, then? Limit the bets on the first few nights to make sure our posterior is OK. *Temperance is concerned with the sensible management of the casino.*
-
-## Discussion
-
-
-### Case study: Polls {#sampling-case-study}
+## Case study: Polls {#sampling-case-study}
 
 Let's now switch gears to a more realistic sampling scenario: a poll. In practice, pollsters do not take 1,000 repeated samples as we did in our previous sampling activities, but rather take only a *single sample* that's as large as possible.
 
@@ -1609,19 +1519,6 @@ What you have visualized in this chapter was a demonstration of a famous theorem
 
 <!-- RS: Consider a brief section about observational study design? I know this isn't a stats class, but might be useful to at least discuss bad sampling methods (volunteer surveys, convienence, and other types of biases. ) -->
 
-### Precision versus accuracy (or bias versus variance)
-
-We saw in a previous section that as our sample size $n$ increases, our point estimates will vary less and less and be more and more concentrated around the true population parameter. This variation is quantified by the decreasing *standard error*. In other words, the typical error of your point estimates will decrease. In our sampling exercise, as the sample size increased, the variation of our sample proportions $\hat{\rho}$ decreased. This is also known as having a *precise* estimate. 
-
-So random sampling ensures our point estimates are *accurate*, while on the other hand having a large sample size ensures our point estimates are *precise*. While the terms "accuracy" and "precision" may sound like they mean the same thing, there is a subtle difference. Accuracy describes how "on target" our estimates are, whereas precision describes how "consistent" our estimates are. The image below illustrates the difference.
-
-```{r, echo = FALSE, fig.cap = "Comparing accuracy and precision."}
-knitr::include_graphics("06-one-parameter/images/accuracy_vs_precision.jpg")
-```
-
-Now, it's obvious that the best case scenario is the most precise and the most accurate option. However, real life sampling isn't so easy!
-
-What if we had the option to use a shovel with **200** slots, but it had a minor magnetic property that caused it to pick up slightly more red beads than the 100 slotted shovel? On one hand, the larger shovel gives us increased precision due to a larger sample size. On the other, its magnetic property gives us decreased accuracy due to a sampling bias. Here, as is often the case in the real world, there is a tradeoff! 
 
 
 ## Summary

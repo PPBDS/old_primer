@@ -30,21 +30,19 @@
 <!-- Third case: What if the sampling mechanism goes a bias among the independent variables? -->
 
 
-Even if the two outcome distributions are the same, then a second problem could be that the parameters of the model are different for different ranges of the independent variable.  (Grumpy people versus  non-grumpy people.)
+<!-- Even if the two outcome distributions are the same, then a second problem could be that the parameters of the model are different for different ranges of the independent variable.  (Grumpy people versus  non-grumpy people.) -->
 
 
 
-Models have parameters. In Chapter \@ref(one-parameter) we created models with a single parameter $p$, the proportion of red beads in an urn. In Chapter \@ref(two-parameters), we used models with two parameters: $\mu$ (the average height in the population, generically known as a model "intercept") and $\sigma$ (the variation in height in the population). Here --- can you guess where this is going? --- we will build models with three parameters: $\sigma$ (which serves the same role throughout the book) and two coefficients. In models which relate a continuous predictor to the outcome, those two parameters will be labeled $\beta_0$ and $\beta_1$. In models which estimate two averages, the parameters will be $\beta_1$ and $\beta_2$. All this notation is confusing, not least because different academic fields use inconsistent schemes. Follow the Cardinal Virtues and tackle your problem step by step.
+Models have parameters. In Chapter \@ref(one-parameter) we created models with a single parameter $p$, the proportion of red beads in an urn. In Chapter \@ref(two-parameters), we used models with two parameters: $\mu$ (the average height in the population, generically known as a model "intercept") and $\sigma$ (the variation in height in the population). Here --- can you guess where this is going? --- we will build models with three parameters: $\sigma$ (which serves the same role throughout the book) and two "coefficients." In models which relate a continuous predictor to the outcome, those two parameters will be labeled $\beta_0$ and $\beta_1$. In models which estimate two averages, the parameters will be $\beta_1$ and $\beta_2$. All this notation is confusing, not least because different academic fields use inconsistent schemes. Follow the Cardinal Virtues and tackle your problem step by step.
 
-<!-- More detail? -->
+
 
 ## Wisdom
 
 ### Preceptor Table
 
-Wisdom begins with considering the questions we desire to answer and the data set we are given. In this chapter, we are going to ask a series of questions involving train commuters' ages, party affiliations, incomes, and political ideology, as well as the causal effect of exposure to Spanish-speakers on their attitude on immigration. These questions will pertain to all train commuters in the US today. Given these types of questions, the Preceptor Table to answer every question would appear as the following:
-
-<!-- Make sample Preceptor Table. Need a column for all 6 (?) of the variables that are used in the four models. But need two columns for att_end, because it is the dependent variable in the only causal model, which means that there are two potential outcomes.  -->
+Wisdom begins with considering the questions we desire to answer and the data set we are given. In this chapter, we are going to ask a series of questions involving train commuters' ages, party affiliations, incomes, and political ideology, as well as the causal effect of exposure to Spanish-speakers on their attitude toward immigration. These questions will pertain to all train commuters in the US today. Given these types of questions, the Preceptor Table would be:
 
 
 ```{r, echo = FALSE, message = FALSE}
@@ -66,6 +64,7 @@ tibble(ID = c("Commuter 1", "Commuter 2", "...", "Commuter 1000", "Commuter 1001
   # Then, we use the gt function to make it pretty
   
   gt() %>%
+  tab_header(title = "Preceptor Table") %>% 
   cols_label(ID = md("ID"),
              age = md("Age"),
              party = md("Party"),
@@ -82,11 +81,11 @@ tibble(ID = c("Commuter 1", "Commuter 2", "...", "Commuter 1000", "Commuter 1001
   fmt_markdown(columns = everything())
 ```
 
-Recall: a Preceptor Table is the smallest possible table such that, if there is no missing data, all questions are easy to answer. So, in our scenario in which we are looking at train commuters in the US now, this table would ideally include all of this information for a random sample from this group of people. 
+Recall: a Preceptor Table is the smallest possible table such that, if there is no missing data, all our questions are easy to answer. To answer questions --- like "What is, today, the average age of train commuters in the US?" --- we need a row for every train commuter.
 
-Additionally, notice that since we are looking at the causal effect of being exposed to Spanish-speakers on immigration attitudes, we have two columns for attitude: one for those who receive the treatment of being exposed to Spanish-speakers and one for the control group. This is because the ending attitude would then be the dependent variable in a causal model so there will be two potential outcomes.
+Notice that one of our questions is about a causal effect: What change in immigration attitudes is caused by being exposed to Spanish-speakers? Answering causal questions requires (at least) two potential outcomes: immigration attitude for those who receive the treatment of being exposed to Spanish-speakers and for those who do not. 
 
-Now that we have determined the data we would ideally have to answer our questions, we have to take a look at the data set we have. To demonstrate modeling with three parameters, we will use the `trains` data set from the **primer.data** package. 
+Having created the Preceptor Table, we now look at the data we have:  the `trains` data set from the **primer.data** package. 
 
 ### EDA for `trains`
 
@@ -103,16 +102,16 @@ library(tidyverse)
 glimpse(trains)
 ```
 
-The data include information about each respondent's gender, political affiliations, age, income and so on. `treatment` indicates whether a subject was in the control or treatment group. The key outcomes are their attitudes toward immigration both before (`att_start`) and after (`att_end`) the experiment. We also have a measure of their ideology before and after the experiment, but there is little change. Type `?trains` to read the help page for more information about each variable. 
+The data include information about each respondent's gender, political affiliations, age, income and so on. `treatment` indicates whether a subject was in the control or treatment group. The key outcomes are their attitudes toward immigration both before (`att_start`) and after (`att_end`) the experiment. Type `?trains` to read the help page for more information about each variable. 
 
-Let's restrict attention to a subset of the variables by recalling the Preceptor Table we made. By that, we can determine that the variables `age`, `party`, `liberal` and `income` are relevant to the questions we seek to answer. This is because `age` is the age of the respondent, `party` is their political party affiliation, `liberal` is whether they are liberal or not, and `income` is the income of the respondent. Additionally, since `treatment` tells us whether the respondent was given the treatment of being exposed to Spanish-speakers in the train station and `att_end` tell us about the respondent's attitude on immigration after the treatment, these are also variables of interest to us since they will be useful in answering some questions. 
+Let's restrict attention to a subset of the variables we need to answer our questions, as specified in the Preceptor Table. `age` is the age of the respondent; `party` is their political party affiliation; `liberal` is whether they are liberal or not; `income` is the income of the respondent; `treatment` specifies whether the respondent was given the treatment of being exposed to Spanish-speakers in the train station; and `att_end` tell us about the respondent's attitude on immigration after the treatment, . 
 
 ```{r}
 ch8 <- trains %>% 
   select(age, att_end, party, income, treatment, liberal)
 ```
 
-It is always smart to look at a some random samples of the data:
+It is always smart to look at a some random slices of the data:
 
 ```{r}
 ch8 %>% 
@@ -135,26 +134,30 @@ ch8 %>%
 
 `skim()` shows us what the different values of `treatment` are because it is a factor. Unfortunately, it does not do the same for character variables like `party`. The ranges for `age` and `att_end` seem reasonable. Recall that participants were asked three questions about immigration issues, each of which allowed for an answer indicated strength of agreement on a scale form 1 to 5, with higher values indicating more agreement with conservative viewpoints. `att_end` is the sum of the responses to the three questions, so the most liberal possible value is 3 and the most conservative is 15.
 
-By taking our first glance at the data in the above manners, we gain greater understanding of the data we have to work with and whether it will be capable of answering our questions. However, we can't make models and use the data for our analysis without also understanding the population that the data is from and whether it can be applied to the population we would like to work with.
 
 ### Population
 
 
 <!-- Combo of old things from different sections and new explanations, need to combine and clarify -->
 
-The data that we have are very limited. There are only 115 observations, all from 2012 and involving train commuters to Boston. What me must ask ourselves is if the data we have and the data in our Preceptor Table are drawn from the same population. We therefore must consider how useful this data will be today, or for other populations around Boston, or for other cities in the US. Only your judgment, along with advice from your colleagues, can guide you.
+<!-- One of the key jobs of a data scientist is to guide people --- our colleagues, bosses and clients --- toward asking precise questions. We must help them to translate English into inference. That translation requires precision. -->
 
-For our current questions, the population we are answering questions for is the general population of train commuters today. However, the data we have involves train commuters in the Boston area in 2012. So, what we must ask ourselves is if this data from Boston in 2012 can be drawn from the same population as all train commuters in the US today. If we believe that the data is representative enough of today's population of train commuters and this can be considered to be true, then we can continue with the process of answering our questions. We will assume that the data is drawn from the larger population of train commuters and that there isn't very much change overtime within this population so we can apply our data to the population of train commuters today.
+The data that we have are very limited. There are only 115 observations, all from 2012 and involving train commuters to Boston. *Can we assume that the the data we have and the data in our Preceptor Table are drawn from the same population?* Only your judgment, along with advice from your colleagues, can guide you.
+
+There is no **truth** here. The data is real enough, but you created the Preceptor Table. Whether or not there is a population from which you can assume both the data and the Preceptor Table might have been drawn is not a TRUE/FALSE question. 
+
+The Preceptor Table is all US train commuters today. However, the data we have involves train commuters in the Boston area in 2012. So, what we must ask ourselves is if this data from Boston in 2012 can be drawn from the same population as all train commuters in the US today. 
+
 
 The key concept is the idea of a "population." From which larger population is the data we have being (conceptually) drawn? If we were only interested in the age of individuals in our data set, we would have no need for inference. *We know everyone's ages already.* We only need tools like `stan_glm()` if we seek to understand individuals not in our data. 
 
 
 
-The issue is always: Do the data we have and the data we want to have come from the same population? If there is no connection between the two, progress is impossible. But, in this case, if we are willing to consider the population to be US residents over the last decade (including today), and if we are willing to assume that there is a single population from which the Preceptor Table and our data set is drawn, then we can use our data to create a model to answer our question.
+The issue is always: Do the data we have and the data we want to have come from the same population? If there is no connection between the two, progress is impossible. But, in this case, if we are willing to consider the population to be US residents over the last decade (including today), and if we are willing to assume that there is a single population from which the Preceptor Table and our data set is drawn, then we can use our data to create a model to answer our questions.
 
 
 
-<!-- One of the key jobs of a data scientist is to guide people --- our colleagues, bosses and clients --- toward asking precise questions. We must help them to translate English into inference. That translation requires precision. In this case, let's assume that the questions reference U.S train commuters in 2021. -->
+
 
 
 
@@ -162,9 +165,9 @@ The issue is always: Do the data we have and the data we want to have come from 
 
 Having determined that the Preceptor Table and the data were drawn from the same population, we can produce a Population Table. 
 
-The Population Table shows rows from three sources: the **Preceptor Table**, the **actual data**, and the **population** (outside of the data).
+The Population Table includes rows from three sources: the **Preceptor Table**, the **actual data**, and the remainder of the **population**.
 
-Our **Preceptor Table** rows contain the information that we would *want* to know in order to answer our questions. These rows contain entries for our covariates (city and year) but they do not contain any outcome results. We are trying to answer questions about the train commuter population in 2021, so our city entries for these rows will vary and our year entries of these rows will read "2021". 
+The rows in the **Preceptor Table** contain the information that we would *want* to know in order to answer our questions. These rows contain entries for our covariates (city and year) but they do not contain any outcome results. We are trying to answer questions about the train commuter population in 2021, so our city entries for these rows will vary and our year entries of these rows will read "2021". 
 
 Our **actual data** rows contain the information that we *do* know. These rows contain entries for both our covariates *and* the outcomes. In this case, the actual data comes from a study conducted on train commuters around Boston, MA in 2012, so our city entries for these rows will read "Boston, MA" and our year entries of these rows will read "2012".
 
@@ -172,7 +175,12 @@ Our **population** rows contain no data. These are subjects which fall under our
 
 The population table includes commuters from our Preceptor Table with the information that we would ideally have to answer the questions and those from the data we have that is specific to Boston, MA. Additionally, the population table also includes the groups of people within the population from which both the data we have and the Preceptor table is drawn from that we don't have. 
 
-```{r}
+```{r, echo = FALSE}
+# Order should be by year and then by source. population rows (starting in
+# 2000), Data, more populations rows, Preceptor Table, more populations rows, up
+# through 2025.
+
+
 tibble(source = c("Preceptor Table", "Preceptor Table", "Preceptor Table",  "...", "Data", "Data", "Data", "...", "Other", "Other", "Other"),
        city = c("Chicago, IL", "Seattle, WA", "Atlanta, GA", "...",
                   "Boston, MA", "Boston, MA", "Boston, MA", "...",
@@ -202,6 +210,7 @@ tibble(source = c("Preceptor Table", "Preceptor Table", "Preceptor Table",  "...
   # Then, we use the gt function to make it pretty
   
   gt() %>%
+  tab_header(title = "Population Table") %>% 
   cols_label(source = md("Source"),
              city = md("City"),
              year = md("Year"),
