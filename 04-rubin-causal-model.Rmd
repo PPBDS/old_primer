@@ -12,7 +12,7 @@ library(gtsummary)
 
 <!-- Add a Covariate column for Gender to Two values for tau. Explain what a covariate is. (One sentence.) This allows us to know which units have causal effect \tau_f and \tau_m. -->
 
-<!-- Begin the Assumptions section by making your first real Population Table: including a Source column and a Time column. Not sure if you should use the height example or the train example. But we need a full example in order to make clear what the assumptions refer to. -->
+<!-- Begin the Assumptions section by making your first real Population Table: including a Source column and a Time column. Not sure if you should use the height example or the train example. But we need a full example in order to make clear what the assumptions refer to. MF: Done. -->
 
 <!-- In Representativeness section, we need a table which shows all the rows which we might have gotten when we got our data. This includes two kinds of rows: the data we got and the data we did not get (but might have gotten). We can be sure that the data is "representative" if it includes all the data we could have gotten or if it is a random sample from that data. This is *not* the same thing as all the rows in the Population Table. This is a subset of the population table, all the rows with the value for the Time column. -->
 
@@ -33,7 +33,6 @@ library(gtsummary)
 <!-- You can use information from your data to fill in the missing rows of the Preceptor Table, or at least to make inferences about summary statistics from the Preceptor Table. You don't really need to know everyone's causal effect, if all you care about is the average causal effect. -->
 
 <!-- Complications discuss: What are the broad categories of what can go wrong? Phrase this in terms of correlations between X and missingness. First, if missingness is correlated with the values of unobserved potential outcomes, you are hosed! Second, missingness might be correlated with values of observed outcomes. Third, missingness might be correlated with the values of righthand side variables. Fourth, missingness might be correlated with the values of other variables.   -->
-
 
 <!-- Put the Glossary at the start the summary. -->
 
@@ -144,9 +143,9 @@ Again, are these 100 students randomly sampled? Could we estimate the 90th perce
 
 The Population Table is distinct from the Preceptor Table. The aim of the Population Table is to illustrate the broader population we are interested in, while including the data from our Preceptor Table and dataset. This table has three sources of data: the data for units we want to have (the Preceptor Table), the data for units which we actually have (our actual data), and the data for units we do not care about (the rest of the population, not included in the data or the Preceptor Table). It represents the pieces of data that *we actually have*. 
 
-Our Preceptor Table rows contain the information that we would want to know in order to answer our questions. These rows contain entries for our covariates (sex and year) but they do not contain any outcome results (height). We are trying to answer questions about the height of Harvard students in 2021, so our sex entries for these rows will read “Male” or "Female" and our year entries of these rows will read “2021”.
+Our Preceptor Table rows contain the information that we would want to know in order to answer our questions. These rows contain entries for our covariates (sex and year) but they do not contain any outcome results (height). We are trying to answer questions about the height of Harvard students in 2021, so our age column will read somewhere between 15 and 27 and our year entries of these rows will read “2021”.
 
-Our actual data rows contain the information that we do know. These rows contain entries for both our covariates and the outcomes. In this case, the actual data comes from data on Harvard students in 2015, so our sex entries for these rows will read “Male” or "Female" and our year entries of these rows will either read “2015”.
+Our actual data rows contain the information that we do know. These rows contain entries for both our covariates and the outcomes. In this case, the actual data comes from data on Harvard students in 2015, so age column will read as the matching age and our year entries of these rows will either read “2015”.
 
 
 <!-- DK: Things to fix in this table. Remove gender. Add ID. Always include the Year. Only need two rows from each source. Order by year. So, order is population (for 2010 or whatever), data, population (for 2018), preceptor table, and population (for 2025 or whatever).  -->
@@ -154,25 +153,17 @@ Our actual data rows contain the information that we do know. These rows contain
 Our population rows contain no data. These are subjects which fall under our desired population, but for which we have no data. As such, all rows are missing.
 
 ```{r, echo = FALSE}
-tibble(source = c("Preceptor Table", "Preceptor Table", "...",
-                  "Actual Data", "Actual Data", "Actual Data", "...", 
-                  "Population", "Population", "Population"),
-       gender = c("Male", "Female", "...",
-                  "Female", "Female", "Male", "...",
-                  "?", "?", "?"),
-       year = c("2021", "2021", "...",
-                "2015", "2015", "2015", "...",
-                "?", "?", "?"),
-       height = c("?", "?", "...",
-                 "180", "160", "168", "...",
-                 "?", "?", "?")) %>%
+tibble(source = c("Population", "Data", "Data", "Population", 
+                  "Preceptor Table", "Population"),
+       year = c("2010", "2015", "2015", "2018", "2021", "2025"),
+       age = c("?", "18", "23", "?", "19", "?"),
+       height = c("?", "180", "163", "?", "?", "?")) %>% 
   
   # Then, we use the gt function to make it pretty
   
   gt() %>%
   tab_header(title = "Population Table") %>% 
   cols_label(source = md("Source"),
-             gender = md("Sex"),
              year = md("Year"),
              height = md("Height")) %>%
   tab_style(cell_borders(sides = "right"),
@@ -184,72 +175,11 @@ tibble(source = c("Preceptor Table", "Preceptor Table", "...",
   fmt_markdown(columns = everything())  
 ```
 
-Implicit in the Preceptor Table is a notion of time. Now that we can see our actual data compared with our greater population and our desired data, we must expand our observations. That is to say that, given our data is sourced from 2015 and our desired data is from 2021, we must include a greater time span in our predictions. In working with the Population Table, there are three key assumptions to consider: validity, stability and representativeness.
+Implicit in the Preceptor Table is a notion of time. Now that we can see our actual data compared with our greater population and our desired data, we must expand our observations. That is to say that, given our data is sourced from 2015 and our desired data is from 2021, we must include a greater time span in our predictions. 
 
+As such, we will see that rows from our larger population may include anywhere between 2010 and 2025. This is a ballpark range. Height is relatively stable, so it is simpler to expand the timeframe. The greater sense of time in future problems will depend on that individual circumstance. 
 
-### Validity 
-
-To understand validity in regards to the Preceptor Table, we must first recognize an inherent flaw in any experiment design: *no two units receive exactly the same treatment*. 
-
-If this doesn't ring true, consider our Spanish speaking train experiment. The units on the Spanish-speaking platform received the same treatment, right? No, actually!
-
-Consider different volume levels, measured in decibels (dB), at which Spanish is being spoken. 
-
-
-```{r, echo = FALSE}
-# First, we create a tibble with the values we want for the table
-
-tibble(subject = c("Yao", "Emma", "Cassidy", "Tahmid", "Diego"),
-       ytreat = c("13", "11", "?", "?", "6"),
-       ytreat1001 = c("?", "?", "?", "?", "?"),
-       ytreat1002 = c("?", "?", "?", "?", "?"),
-       yellipsis = c("?", "?", "?", "?", "?"),
-       ycontrol = c("?", "?", "10", "12", "?")) %>%
-  
-  # Then, we use the gt function to make it pretty
-  
-  gt() %>%
-  cols_label(subject = md("ID"),
-             ytreat = md("$$Y_{\\text{58 dB}}(u)$$"),
-             ytreat1001 = md("$$Y_{\\text{59 dB}}(u)$$"),
-             ytreat1002 = md("$$Y_{\\text{60 dB}}(u)$$"),
-             yellipsis = md("$$Y_{\\text{61 dB}}(u)$$"),
-             ycontrol = md("$$Y_c(u)$$")) %>%
-  tab_style(cell_borders(sides = "right"),
-            location = cells_body(columns = c(subject))) %>%
-  tab_style(style = cell_text(align = "left", v_align = "middle", size = "large"), 
-            locations = cells_column_labels(columns = c(subject))) %>%
-  cols_align(align = "center", columns = everything()) %>%
-  cols_align(align = "left", columns = c(subject)) %>%
-  tab_spanner(label = "$$\\text{Outcomes}$$", c(ytreat, ytreat1001, ytreat1002, yellipsis, ycontrol)) %>%
-  fmt_markdown(columns = everything())
-```
-
-&nbsp;
-
-As we can see, certain units heard the Spanish-speakers at higher volumes than other units. And it is entirely possible that the volume of the speaking affects the outcome. There is also the issue of the time spent on the platform. Maybe Yao tends to run late, and only hears the Spanish-speakers for thirty seconds. Emma, on the other hand, plans ahead. She hears the Spanish-speakers for fifteen minutes before the train arrives!  Thus, despite the fact that Emma and Yao are in the same treatment --- that is, hearing Spanish on the platform --- they had very different versions of that treatment. 
-
-
-Indeed, there are an infinite number of possible treatments. The Preceptor Table extends to the right forever. The validity assumption allows us to "collapse" all the different treatments into a single column called treatment. 
-
-<!-- DK: Above is too brief and awkward. -->
-
-
-### Stability
-
-Stability means that the relationship between the columns is the same for three categories of rows: the data, the Preceptor table, and the larger population from which both are drawn. 
-
- <!-- More meat here. Some examples, using height and immigration attitudes, from above. When is it OK to assume stability and when is it not? What is a reasonable time frame to use for the population?  -->
-
-
-### Representativeness
-
-The external validity of a study is often directly related to the representativeness of our sample. Representativeness has to do with how well our sample represents the larger population we are interested in generalizing to. 
-
-Does the train experiment allow us to calculate a causal effect for people who commute by cars? Can we calculate the causal effect for people in New York City? Before we generalize to broader populations we have to consider if our experimental estimates are applicable beyond our experiment. Maybe we think that commuters in Boston and New York are similar enough to generalize our findings. We could also conclude that people who commute by car are fundamentally different than people who commute by train. If that was true, then we could not say our estimate is true for all commuters because our sample does not accurately represent the broader group we want to generalize to.
-
-*Thus, whenever you are considering a causal question, we throw out the rows we think are duplicates (such as all the observations for Yao one second from now, two seconds from now, etc.) or that are outside the scope of what we are interested in for now (maybe we don't care about outcomes 30 years in the future for this study). Finally, we define precisely---in terms of potential outcomes---our estimand.  It may be something simple, such as the average treatment effect, or something more complex.  Once we have done these steps, we can start thinking about how to fill in the question marks.*
-
+In working with the Population Table, there are three key assumptions to consider: validity, stability and representativeness.
 
 ## Causal effect
 
@@ -471,6 +401,103 @@ Calculating values from this table is no longer a simple math problem. See this 
 knitr::include_app("https://www.youtube.com/embed/gyRZSzCtU_o")
 ```
 
+### The assignment mechanism
+
+The "assignment mechanism" is the process by which some units received the treatment while the other units got the control. 
+
+Consider *sampling*. If we are trying to estimate the average attitude towards immigrants in the US, we usually do so by taking a sample. The process by which people enter our sample is called the *sampling mechanism*. If the process by which people enter our sample is related to their attitude, even indirectly, then estimates from our sample will not be good estimates for the population.
+
+Whenever the assignment mechanism is correlated with the potential outcomes, we say that there is **confounding**. Confounding is a problem, since it means that our simple estimate of the $ATE$ is, potentially, biased.
+
+Assignment mechanisms can also intentionally be biased in order to manufacture desired outcomes. Let's consider a scenario where once again an entire platform is either treated or a control. In this case the assignment mechanism is the choice of the Spanish-speakers; they are allowed to choose which platform they want to stand on. Let's also say that they can *perfectly* predict the attitude of people on each platform. The Spanish-speakers know that a platform with more liberal attitudes towards immigrants will be more friendly, and therefore always choose to stand on those platforms. In this case, the assignment mechanism of platforms is not random. The Spanish-speakers know these values for the platforms in the experiment: 
+
+```{r, echo = FALSE}
+# First, we create a tibble with the values we want for the table
+
+tibble(subject = c("Platform 1", "Platform 2", "Platform 3", "Platform 4", "Platform 5", "Platform 6"),
+       ytreat = c("14", "7", "5", "13", "4", "13"),
+       ycontrol = c("10", "6", "8", "12", "6", "11"),
+       ydiff = c("+4", "+1", "-3", "+1", "-2", "+2")) %>%
+  
+  # Then, we use the gt function to make it pretty
+  
+  gt() %>%
+  cols_label(subject = md("ID"),
+                ytreat = md("$$Y_t(u)$$"),
+                ycontrol = md("$$Y_c(u)$$"),
+                ydiff = md("$$Y_t(u) - Y_c(u)$$")) %>%
+  cols_move(columns = c(ytreat, ycontrol), after = c(subject)) %>%
+  tab_style(cell_borders(sides = "right"),
+            location = cells_body(columns = c(subject))) %>%
+  tab_style(style = cell_text(align = "left", v_align = "middle", size = "large"), 
+            locations = cells_column_labels(columns = c(subject))) %>%
+  cols_align(align = "center", columns = everything()) %>%
+  cols_align(align = "left", columns = c(subject)) %>%
+  tab_spanner(label = "$$\\text{Outcomes}$$", c(ytreat, ycontrol)) %>%
+  tab_spanner(label = "$$\\text{Causal Effect}$$", c(ydiff))
+```
+
+&nbsp;
+
+Based on this knowledge the Spanish-speakers in the experiment would choose the following treatment assignments: 
+
+```{r, echo = FALSE}
+# First, we create a tibble with the values we want for the table
+
+tibble(subject = c("Platform 1", "Platform 2", "Platform 3", "Platform 4", "Platform 5", "Platform 6"),
+       ytreat = c("?", "7", "5", "?", "4", "?"),
+       ycontrol = c("10", "?", "?", "12", "?", "11"),
+       ydiff = c("?", "?", "?", "?", "?", "?")) %>%
+  
+  # Then, we use the gt function to make it pretty
+  
+  gt() %>%
+  cols_label(subject = md("ID"),
+                ytreat = md("$$Y_t(u)$$"),
+                ycontrol = md("$$Y_c(u)$$"),
+                ydiff = md("$$Y_t(u) - Y_c(u)$$")) %>%
+  cols_move(columns = c(ytreat, ycontrol), after = c(subject)) %>%
+  tab_style(cell_borders(sides = "right"),
+            location = cells_body(columns = c(subject))) %>%
+  tab_style(style = cell_text(align = "left", v_align = "middle", size = "large"), 
+            locations = cells_column_labels(columns = c(subject))) %>%
+  cols_align(align = "center", columns = everything()) %>%
+  cols_align(align = "left", columns = c(subject)) %>%
+  tab_spanner(label = "$$\\text{Outcomes}$$", c(ytreat, ycontrol)) %>%
+  tab_spanner(label = "$$\\text{Causal Effect}$$", c(ydiff)) 
+```
+
+&nbsp;
+
+The assignment mechanism used distorts the averages of both $Y_t(u)$ and $Y_c(u)$, which in turn distorts the difference in means. The average of the treated group is shifted lower (more liberal), while the average of the control group is shifted higher (more conservative). 
+
+This is an extreme example of a problem called **selection bias**. Selection bias is when the person who is assigning treatment chooses on the basis of potential outcomes. The Spanish-speakers are not choosing platforms to stand on randomly. Rather, they are making treatment decisions based directly on the potential outcomes of each platform. Remember, whenever the assignment mechanism is correlated with the potential outcomes there is confounding, which is a problem because it means that our estimate is biased. Not all examples of confounding are caused by selection bias, but when there is selection bias there is *always* confounding.
+
+Much like how the best way to avoid making poor inferences from a sample to a population is to take a random sample of the population, the best assignment mechanism for avoiding confounding is **randomization**. For each platform we could flip a coin to determine if it is in the treatment or control group.
+
+Random assignment guarantees that, on average, there is no correlation between treatment assignment and anything else, neither covariates nor potential outcomes. 
+
+In many circumstances, however, randomized trials are not possible due to ethical or practical concerns. In such scenarios there is by necessity a non-random assignment mechanism.
+
+For example, let's say some of the train platforms in the experiment are so loud the Spanish-speakers might not be heard by anyone nearby. Therefore by necessity, only quieter platforms can be assigned to the treatment group. This non-random assignment may introduce confounding. Say there is some systematic difference between the people on quieter platforms compared with the people on the louder platforms. In that case, the assignment mechanism is correlated with potential outcomes, so there is confounding. 
+
+Many statistical methods have been developed for causal inference when there is a non-random assignment mechanism. Those methods, however, are beyond the scope of this book.
+
+### No causation without manipulation
+
+In order for a potential outcome to make sense, it must be possible, at least *a priori*. For example, if there is no way for Yao, under any circumstance, to ever be in the train study, then $Y_{t}(u)$ is impossible for him. It can never happen. And if $Y_{t}(u)$ can never be observed, even in theory, then the causal effect of treatment on Yao's attitude is undefined. 
+
+The causal effect of the train study is well defined because it is the simple difference of two potential outcomes, both of which might happen. In this case, we (or something else) can manipulate the world, at least conceptually, so that it is possible that one thing or a different thing might happen.
+
+This definition of causal effects becomes much more problematic if there is no way for one of the potential outcomes to happen, ever. For example, what is the causal effect of Yao's height on his weight? It might seem we would just need to compare two potential outcomes: what would Yao's weight be under the treatment (where treatment is defined as being 3 inches taller) and what would Yao's weight be under the control (where control is defined as his current height).
+
+A moment's reflection highlights the problem: we can't increase Yao's height. There is no way to observe, even conceptually, what Yao's weight would be if he were taller because there is no way to make him taller. We can't manipulate Yao's height, so it makes no sense to investigate the causal effect of height on weight. Hence the slogan: *No causation without manipulation.*
+
+This then raises the question of what can and cannot be manipulated. If something cannot be manipulated, we should not consider it causal. So can race ever be considered causal? What about sex? A genetic condition like color-blindness? Can we manipulate these characteristics? In the modern world these questions are not simple. 
+
+Take color-blindness for example. Say we are interested in how color-blindness impacts ability to complete a jig-saw puzzle. Because color-blindness is genetic some might argue it cannot be manipulated. But advances in technology like gene-therapy might allow us to actually change someone's genes. Could we then claim the ability to manipulate color-blindness? If yes, we could then measure the causal effect of color-blindness on ability to complete jig-saw puzzles.
+
+The slogan of "No causation without manipulation" may at first seem straight forward, but it is clearly not so simple. Questions about race, sex, gender and genetics are very complex and should be considered with care. 
 
 ## Simple models
 
@@ -825,8 +852,7 @@ In this example, there is indeed a constant treatment effect for everyone: $+3$.
 knitr::include_app("https://www.youtube.com/embed/cBYUuD2aVkA")
 ```
 
-<<<<<<< HEAD
-## Validity
+## Assumptions
 
 In this section, we will explore three topics: validity, stability, and representativeness. To start, we will look at our infinite Preceptor Table. 
 
@@ -941,110 +967,6 @@ The external validity of a study is often directly related to the representative
 Does the train experiment allow us to calculate a causal effect for people who commute by cars? Can we calculate the causal effect for people in New York City? Before we generalize to broader populations we have to consider if our experimental estimates are applicable beyond our experiment. Maybe we think that commuters in Boston and New York are similar enough to generalize our findings. We could also conclude that people who commute by car are fundamentally different than people who commute by train. If that was true, then we could not say our estimate is true for all commuters because our sample does not accurately represent the broader group we want to generalize to.
 
 *Thus, whenever you are considering a causal question, we throw out the rows we think are duplicates (such as all the observations for Yao one second from now, two seconds from now, etc.) or that are outside the scope of what we are interested in for now (maybe we don't care about outcomes 30 years in the future for this study). Finally, we define precisely---in terms of potential outcomes---our estimand.  It may be something simple, such as the average treatment effect, or something more complex.  Once we have done these steps, we can start thinking about how to fill in the question marks.  But remember that the infinite Preceptor Table is always there, and you should be conscious of which rows and columns you are throwing out!*
-
-## Bias 
-
-To close our chapter, we will explore some sources of bias in our models. 
-
-### The assignment mechanism
-
-The "assignment mechanism" is the process by which some units received the treatment while the other units got the control. 
-
-Consider *sampling*. If we are trying to estimate the average attitude towards immigrants in the US, we usually do so by taking a sample. The process by which people enter our sample is called the *sampling mechanism*. If the process by which people enter our sample is related to their attitude, even indirectly, then estimates from our sample will not be good estimates for the population.
-
-Whenever the assignment mechanism is correlated with the potential outcomes, we say that there is **confounding**. Confounding is a problem, since it means that our simple estimate of the $ATE$ is, potentially, biased.
-
-Assignment mechanisms can also intentionally be biased in order to manufacture desired outcomes. Let's consider a scenario where once again an entire platform is either treated or a control. In this case the assignment mechanism is the choice of the Spanish-speakers; they are allowed to choose which platform they want to stand on. Let's also say that they can *perfectly* predict the attitude of people on each platform. The Spanish-speakers know that a platform with more liberal attitudes towards immigrants will be more friendly, and therefore always choose to stand on those platforms. In this case, the assignment mechanism of platforms is not random. The Spanish-speakers know these values for the platforms in the experiment: 
-
-```{r, echo = FALSE}
-# First, we create a tibble with the values we want for the table
-
-tibble(subject = c("Platform 1", "Platform 2", "Platform 3", "Platform 4", "Platform 5", "Platform 6"),
-       ytreat = c("14", "7", "5", "13", "4", "13"),
-       ycontrol = c("10", "6", "8", "12", "6", "11"),
-       ydiff = c("+4", "+1", "-3", "+1", "-2", "+2")) %>%
-  
-  # Then, we use the gt function to make it pretty
-  
-  gt() %>%
-  cols_label(subject = md("ID"),
-                ytreat = md("$$Y_t(u)$$"),
-                ycontrol = md("$$Y_c(u)$$"),
-                ydiff = md("$$Y_t(u) - Y_c(u)$$")) %>%
-  cols_move(columns = c(ytreat, ycontrol), after = c(subject)) %>%
-  tab_style(cell_borders(sides = "right"),
-            location = cells_body(columns = c(subject))) %>%
-  tab_style(style = cell_text(align = "left", v_align = "middle", size = "large"), 
-            locations = cells_column_labels(columns = c(subject))) %>%
-  cols_align(align = "center", columns = everything()) %>%
-  cols_align(align = "left", columns = c(subject)) %>%
-  tab_spanner(label = "$$\\text{Outcomes}$$", c(ytreat, ycontrol)) %>%
-  tab_spanner(label = "$$\\text{Causal Effect}$$", c(ydiff))
-```
-
-&nbsp;
-
-Based on this knowledge the Spanish-speakers in the experiment would choose the following treatment assignments: 
-
-```{r, echo = FALSE}
-# First, we create a tibble with the values we want for the table
-
-tibble(subject = c("Platform 1", "Platform 2", "Platform 3", "Platform 4", "Platform 5", "Platform 6"),
-       ytreat = c("?", "7", "5", "?", "4", "?"),
-       ycontrol = c("10", "?", "?", "12", "?", "11"),
-       ydiff = c("?", "?", "?", "?", "?", "?")) %>%
-  
-  # Then, we use the gt function to make it pretty
-  
-  gt() %>%
-  cols_label(subject = md("ID"),
-                ytreat = md("$$Y_t(u)$$"),
-                ycontrol = md("$$Y_c(u)$$"),
-                ydiff = md("$$Y_t(u) - Y_c(u)$$")) %>%
-  cols_move(columns = c(ytreat, ycontrol), after = c(subject)) %>%
-  tab_style(cell_borders(sides = "right"),
-            location = cells_body(columns = c(subject))) %>%
-  tab_style(style = cell_text(align = "left", v_align = "middle", size = "large"), 
-            locations = cells_column_labels(columns = c(subject))) %>%
-  cols_align(align = "center", columns = everything()) %>%
-  cols_align(align = "left", columns = c(subject)) %>%
-  tab_spanner(label = "$$\\text{Outcomes}$$", c(ytreat, ycontrol)) %>%
-  tab_spanner(label = "$$\\text{Causal Effect}$$", c(ydiff)) 
-```
-
-&nbsp;
-
-The assignment mechanism used distorts the averages of both $Y_t(u)$ and $Y_c(u)$, which in turn distorts the difference in means. The average of the treated group is shifted lower (more liberal), while the average of the control group is shifted higher (more conservative). 
-
-This is an extreme example of a problem called **selection bias**. Selection bias is when the person who is assigning treatment chooses on the basis of potential outcomes. The Spanish-speakers are not choosing platforms to stand on randomly. Rather, they are making treatment decisions based directly on the potential outcomes of each platform. Remember, whenever the assignment mechanism is correlated with the potential outcomes there is confounding, which is a problem because it means that our estimate is biased. Not all examples of confounding are caused by selection bias, but when there is selection bias there is *always* confounding.
-
-Much like how the best way to avoid making poor inferences from a sample to a population is to take a random sample of the population, the best assignment mechanism for avoiding confounding is **randomization**. For each platform we could flip a coin to determine if it is in the treatment or control group.
-
-Random assignment guarantees that, on average, there is no correlation between treatment assignment and anything else, neither covariates nor potential outcomes. 
-
-In many circumstances, however, randomized trials are not possible due to ethical or practical concerns. In such scenarios there is by necessity a non-random assignment mechanism.
-
-For example, let's say some of the train platforms in the experiment are so loud the Spanish-speakers might not be heard by anyone nearby. Therefore by necessity, only quieter platforms can be assigned to the treatment group. This non-random assignment may introduce confounding. Say there is some systematic difference between the people on quieter platforms compared with the people on the louder platforms. In that case, the assignment mechanism is correlated with potential outcomes, so there is confounding. 
-
-Many statistical methods have been developed for causal inference when there is a non-random assignment mechanism. Those methods, however, are beyond the scope of this book.
-
-
-### No causation without manipulation
-
-In order for a potential outcome to make sense, it must be possible, at least *a priori*. For example, if there is no way for Yao, under any circumstance, to ever be in the train study, then $Y_{t}(u)$ is impossible for him. It can never happen. And if $Y_{t}(u)$ can never be observed, even in theory, then the causal effect of treatment on Yao's attitude is undefined. 
-
-The causal effect of the train study is well defined because it is the simple difference of two potential outcomes, both of which might happen. In this case, we (or something else) can manipulate the world, at least conceptually, so that it is possible that one thing or a different thing might happen.
-
-This definition of causal effects becomes much more problematic if there is no way for one of the potential outcomes to happen, ever. For example, what is the causal effect of Yao's height on his weight? It might seem we would just need to compare two potential outcomes: what would Yao's weight be under the treatment (where treatment is defined as being 3 inches taller) and what would Yao's weight be under the control (where control is defined as his current height).
-
-A moment's reflection highlights the problem: we can't increase Yao's height. There is no way to observe, even conceptually, what Yao's weight would be if he were taller because there is no way to make him taller. We can't manipulate Yao's height, so it makes no sense to investigate the causal effect of height on weight. Hence the slogan: *No causation without manipulation.*
-
-This then raises the question of what can and cannot be manipulated. If something cannot be manipulated, we should not consider it causal. So can race ever be considered causal? What about sex? A genetic condition like color-blindness? Can we manipulate these characteristics? In the modern world these questions are not simple. 
-
-Take color-blindness for example. Say we are interested in how color-blindness impacts ability to complete a jig-saw puzzle. Because color-blindness is genetic some might argue it cannot be manipulated. But advances in technology like gene-therapy might allow us to actually change someone's genes. Could we then claim the ability to manipulate color-blindness? If yes, we could then measure the causal effect of color-blindness on ability to complete jig-saw puzzles.
-
-The slogan of "No causation without manipulation" may at first seem straight forward, but it is clearly not so simple. Questions about race, sex, gender and genetics are very complex and should be considered with care. 
-
 
 ## Summary
 
