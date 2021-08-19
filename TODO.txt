@@ -8,6 +8,8 @@ Arghayan 9/3
 Yuan 9/4
 Heather 9/20
 Atilla 9/25
+
+Sophia 1/1
 Ajay 1/1
 Ryan 1/1
 Anmay 1/1
@@ -318,148 +320,14 @@ https://community.rstudio.com/t/native-pipe-with-lm/110956 Pipe bend might be im
 
 https://blogs.bmj.com/bmj/2021/07/05/time-to-assume-that-health-research-is-fraudulent-until-proved-otherwise/ "It may be time to move from assuming that research has been honestly conducted and reported to assuming it to be untrustworthy until there is some evidence to the contrary." -- Richard Smith, editor of the BMJ for 13 years.
 
-
+## Distribution/Probability material cut from the Primer
 
 ### Distribution Talk
 
-A variable in a tibble is a column, a vector of values. We sometimes refer to this vector as a "distribution." This is somewhat sloppy in that a distribution can be many things, most commonly a mathematical formula. But, strictly speaking, a "frequency distribution" or an "empirical distribution" is a list of values, so this usage is not unreasonable.
-
-*There are two distinct concepts: a distribution and a set values drawn from that distribution.*  But, in everyday use, we use "distribution" to both. When given a distribution (meaning a vector of numbers), we often use `geom_histogram()` or `geom_density()` to graph it. But, sometimes, we don't want to look at the whole thing. We just want some summary measures which report the key aspects of the distribution. The two most important attributes of a distribution are its *center* and its *variation* around that center.
-
-We use `summarize()` to calculate statistics for a variable, a column, a vector of values or a distribution. Note the language sloppiness. For the purposes of this book, "variable," "column," "vector," and "distribution" all mean the same thing. Popular statistical functions include: `mean()`, `median()`, `min()`, `max()`, `n()` and `sum()`. Functions which may be new to you include three measures of the "spread" of a distribution: `sd()` (the standard deviation), `mad()` (the scaled median absolute deviation) and `quantile()`, which is used to calculate an *interval* which includes a specified proportion of the values. 
-
-*A distribution is a function that shows the possible values of a variable and how often they occur.*
-
-Think of the distribution of a variable as an urn from which we can pull out, at random, values for that variable. Drawing a thousand or so values from that urn, and then looking at a histogram, can show where the values are centered and how they vary. Because people are sloppy, they will use the word distribution to refer to both the (imaginary!) urn from which we are drawing values and to the list of values we have drawn. It is better, however, to keep three distinct ideas separate:
-
-* The *unknown true distribution* which, in reality, generates the data which we see. Outside of stylized examples in which we *assume* that a distribution follows a simple mathematical formula, we will never have access to the unknown true distribution. We can only estimate it. This unknown true distribution is often referred to as the *data generating mechanism*, or DGM. It is a function or black box or urn which produces data. We can see the data. We can't see the urn. Later in the *Primer*, once we have learned about posterior distributions, we will often refer to this as *Preceptor's Posterior*.
-
-* The *estimated distribution* which, we think, generates the data which we see. Again, we can never know the unknown true distribution. But, by making some assumptions and using the data we have, we can *estimate* a distribution. Our estimate may be very close to the true distribution. Or it may be far away. The main task of data science to to create and use these estimated distributions. Almost always, these distributions are instantiated in computer code.
-
-* A *vector of numbers drawn* from the estimated distribution. Both true and estimated distributions can be complex beasties, difficult to describe accurately and in detail. But a vector of numbers drawn from a distribution is easy to understand and use. So, in general, we work with vectors of numbers. When someone --- either a colleague or a piece of R code --- creates a distribution which we want to use to answer a question, we don't really want the distribution itself. Rather, we want a vectors of "draws" from that distribution. Vectors are easy to work with! Complex computer code is not.
-
-Again, people (including us!) will often be sloppy and use the same word, "distribution," without making it clear whether they are talking about the *true distribution*, the *estimated distribution*, or a vector of *draws* from the estimated distribution. Try not to be sloppy.
-
-### Scaling a distribution
-
-Consider the vector which is the result of rolling one die 10 times.
-
-```{r}
-rolls <- c(5, 5, 1, 5, 4, 2, 6, 2, 1, 5)
-```
-
-There are other ways of storing the data in this vector. Instead of recording every draw, we could just record the number of times each value appears.
-
-```{r}
-table(rolls)
-```
 
 
-In this case, with only 10 values, it is actually less efficient to store the data like this. But what happens when we have 10,000 rolls?
-
-```{r}
-more_rolls <- rep(rolls, 1000)
-table(more_rolls)
-```
-
-Instead of keeping around a vector of length 10,000, we can just keep 10 values, without losing any information.
-
-This example also highlights the fact that, graphically, two distributions can be identical even if they are of very different lengths.
-
-```{r, echo = FALSE}
-rolls_p <- tibble(value = rolls) %>% 
-  ggplot(aes(value)) +
-    geom_bar(aes(y = after_stat(count))) +
-    labs(title = "Distribution of 10 Rolls",
-         y = "Count") 
-
-
-more_rolls_p <- tibble(value = more_rolls) %>% 
-  ggplot(aes(value)) +
-    geom_bar(aes(y = after_stat(count))) +
-    labs(title = "Distribution of 10,000 Rolls",
-         y = NULL)
-
-
-rolls_p + more_rolls_p
-```
-
-The two vectors --- `rolls` and `more_rolls` --- have the exact same shape because even though of different lengths, these values were drawn from the same distribution. *The total count for each value does not matter. What matters is the relative proportions.*
-
-Since shape is what matters, we often "normalize" distributions so that the sum of the counts equals one, where y-axis shows the percentages of total. Example:
-
-```{r, echo = FALSE}
-rolls_p <- tibble(value = rolls) %>% 
-  ggplot(aes(x = value)) +
-    geom_bar(aes(y = after_stat(count/sum(count)))) +
-    labs(title = "Distribution of 10 Rolls",
-         y = "Percentage") +
-    scale_y_continuous(labels = scales::percent_format(accuracy = 1))
-
-more_rolls_p <- tibble(value = more_rolls) %>% 
-  ggplot(aes(value)) +
-    geom_bar(aes(y = after_stat(count/sum(count)))) +
-    labs(title = "Distribution of 10,000 Rolls",
-         y = NULL) +
-    scale_y_continuous(labels = scales::percent_format(accuracy = 1))
-
-rolls_p + more_rolls_p
-```
 
 ### More distribution junk from Wrangling
-
-
-
-```{r, echo = FALSE}
-set.seed(5)
-```
-
-The function `rnorm()` (spoken as "r-norm") returns draws from a normal distribution. `rnorm()` has three arguments: `n`, `mean`, and `sd`. `n` corresponds to the number of draws, `mean` and `sd` are the $\mu$ and $\sigma$ of the distribution from which we want to draw.  Again, imagine an urn filled with beads. Each bead has a number written on it. If the distribution is standard normal, then we can draw 10 beads from the urn by running: 
-
-```{r}
-rnorm(10)
-```
-
-These 10 draws come from a distribution with the default `mean` of 0 and the default `sd` of 1. What if we create a histogram of the values?
-
-```{r}
-tibble(value = rnorm(10)) %>% 
-  ggplot(aes(x = value)) + 
-    geom_histogram(bins = 10)
-```
-
-As you can see, it is not as symmetrical as the one displayed above. This is not surprising! If you just draw 10 beads from the urn, you can not possibly have a very good sense of what all the numbers on all the beads in the urn look like. What if we draw 100 values? What about 100,000?
-
-```{r}
-tibble(value = rnorm(100)) %>% 
-  ggplot(aes(x = value)) +
-    geom_histogram(bins = 10)
-```
-
-```{r}
-tibble(value = rnorm(100000)) %>% 
-  ggplot(aes(x = value)) +
-    geom_histogram(bins = 1000)
-```
-
-Now it's looking a lot more similar to the "truth", although still  imperfect. 
-
-Now, let's compare normal distributions with varying means and standard deviations, which can be set using the mean and sd arguments included with the function. 
-
-```{r}
-tibble(rnorm_5_1 = rnorm(n = 1000, mean = 5, sd = 1), 
-       rnorm_0_3 = rnorm(n = 1000, mean = 0, sd = 3),
-       rnorm_0_1 = rnorm(n = 1000, mean = 0, sd = 1)) %>%
-  pivot_longer(cols = everything(), 
-               names_to = "distribution", 
-               values_to = "value") %>% 
-  ggplot(aes(x = value, fill = distribution)) +
-    geom_density(alpha = 0.5) +
-    labs(title = "Comparison of Normal Distributions with Differing Mean and Standard Deviation Values", 
-         fill = "Distribution",
-         x = "Value",
-         y = "Density")
-```
 
 
 
@@ -552,7 +420,9 @@ In data science, the most important kind of distribution is a *probability distr
 <!-- DK: Could do more here, like look at prediction games, betting and so on. -->
 
 
+This makes the *dual nature of distributions* more clear. A distribution is the "thing" you see in this plot. A mathematical object with several different parts, including a set of possible values (1 through 6, in this case) and a record of the number of times each value appears. A distribution is *also* the simple vector of numbers we used to create this plot.
 
+In general, we travel back-and-forth between *distribution as a thing* and *distribution as a vector of draws* from the thing, depending on what we are trying to accomplish. 
 
 
 
