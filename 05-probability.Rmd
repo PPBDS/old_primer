@@ -1,6 +1,6 @@
 # Probability {#probability}
 
-<!-- Students need to be comfortable manipulating probability distributions.  -->
+<!-- FIX THE NOTATION! The probability distribution for random variable A is P(A), not Prob(A) or p(A) or pd(A) or pdf(A). P is the *probability function* which is a probability mass function in the case of continuous variables and a probability distribution function in the case of discrete variables. The probability of event "a", which is a specific value of A, is P(A = a), which we will often simplify as Prob(a). -->
 
 <!-- If A and B are independent, you can make a draw from the joint distribution of A and B --- p(A, B) --- by first taking a draw from A and combining it with a draw from B. -->
 
@@ -12,15 +12,13 @@
 
 <!-- The joint distribution of a collection of random variables --- which we are working with by considering 4,000 draws from their pdfs --- is  . . . . the same as picking a random value from each member of the collection.  -->
 
-<!-- Also need to talk more about working with distributions, especially calculating areas under the curve.  -->
 
-<!-- There are two kinds of questions. The first asks for the value of a specific "real" number, like the height of the tallest person out of a 100. We answer this type of question with a posterior probability distribution. The second asks for the chances/likelihood/probabiliy/odds of something --- like what are the chances that the tallest person will be above 200 cm. We answer this by first making a probability distribution and then calculating the appropriate error under the curve. -->
+
+<!-- There are two kinds of questions. The first asks for the value of a specific "real" number, like the height of the tallest person out of a 100. We answer this type of question with a posterior probability distribution. The second asks for the chances/likelihood/probability/odds of something --- like what are the chances that the tallest person will be above 200 cm. We answer this by first making a probability distribution and then calculating the appropriate area under the curve. -->
 
 <!-- What would be a fun theme/gif/movie clip to start and end the chapter with, like we do in chapters 4 and 6? Something having to do with betting . . . Connected to Kant? -->
 
-<!-- When discussing a parameter $p$ and a probability distribution p() (or should we call this Prob() for clarity) in the absence of a specific context, then those simple terms are OK. But, whenever you are talking about specific parameters or specific probability distributions, you should have either subscripts (like $p_h$ for the probability of heads) or items in the parentheses, respectively.  Make this clear somewhere? -->
-
-<!-- Maybe add, after N models, a section on Infinity models, meaning a continuous parameter p. Note that we have a continuous distribution section now. Want to set the stage for Chapter 6, in which we are generating a posterior for p which we may think of as taking an infinite number of values. This is a key dimension on which chapter 5 and 6 need to connect. -->
+<!-- Add, after N models, a section on Infinite models, meaning a continuous parameter p. Note that we have a continuous distribution section now. Want to set the stage for Chapter 6, in which we are generating a posterior for p which we may think of as taking an infinite number of values. This is a key dimension on which chapter 5 and 6 need to connect. -->
 
 <!-- Revisit these references and see if there is other stuff we should include. Rethinking marbles would make a nice tutorial. -->
 
@@ -34,7 +32,44 @@
 
 The central tension, and opportunity, in data science is the interplay between the *data* and the *science*, between our empirical observations and the models which we use to understand them. Probability is the language we use to explore that interplay; it connects models to data, and data to models.
 
-A random variable is a variable whose value is unknown. A random variable can be either discrete (having specific values, like H or T for the result of a coin flip, or 2, 3, ..., 12 for the sum of two die) or continuous (any value in a continuous range). Probability is a claim about the value of a random variable, i.e., that you have a 50% probability of H when you flip a fair coin.
+What does it mean that Trump had a *30% chance* of winning re-election in the fall of 2016? That there is a *90% probability* of rain today? That the dice at the casino are *fair*? 
+
+Probability is about quantifying uncertainty. We can think of probability as a proportion. The probability of an event occurring is a number from 0 to 1, where 0 means that the event is impossible and 1 means that the event is 100% certain.
+
+Let's begin with the simplest events: coin flips and dice rolls. If the dice and the coins are fair, we can operate under the assumption that all outcomes are equally likely. 
+
+This allows us to make the following statements:
+
+* The probability of rolling a 1 or a 2 is 2/6, or 1/3.
+* The probability of rolling a 1, 2, 3, 4, 5, or 6 is 1.  
+* The probability of flipping a coin and getting tails is 1/2.
+
+We use the symbol $\text{Prob()}$ to refer to the probability of a specific outcome. For example:
+
+$$
+\text{Prob(rolled die equal 1 or 2 or 3)} = 0.5
+$$
+
+We will rarely write out the full definition of the event with the $\text{Prob()}$ symbol.  Instead, we will define an event A as when a rolled die equals 1, 2 or 3. Then, we write 
+
+$$
+\text{Prob(A)} = 0.5
+$$
+
+A random variable is a function which produces a value from a sample set. A random variable can be either discrete --- where the sample set has a limited number of members, like H or T for the result of a coin flip, or 2, 3, ..., 12 for the sum of two die --- or continuous (any value in a continuous range). Probability is a claim about the value of a random variable, i.e., that you have a 50% probability of getting a 1, 2 or 3 when you roll a fair die. 
+
+We usually use capital letters for random variables. So, $C$ might be our symbol for the random variable which is a coin toss and $D$ might be our symbol for the random variable which is the sum of two dice. When discussing random variables in general, or when we grow tired of coming up with new symbols, we will use $Y$. 
+
+Small letters refer to a single outcome or result from a random variable. $c$ is the outcome from one coin toss. $d$ is the result from one throw of the dice. The value of the outcome must come from the sample space. So, $c$ can only take on two possible values: heads or tails. When discussing random variables in general, we use $y$ to refer to one outcome of the random variable $y$. If there are multiple outcomes --- if we have, for example, flipped the coin multiple times --- then we use subscripts to indicate the separate outcomes: $y_1$, $y_2$, and so on. The symbol for an arbitrary outcome is $y_i$.  
+
+As explained in Section \@ref(random-variables), R provides many functions for *simulating* random variables. We general refer to a (simulated) value of a random variable as a "draw." To create three "draws" from a random distribution, we use:
+
+```{r}
+rnorm(3)
+```
+
+
+<!-- DK: -->
 
 The only package we need in this chapter is **tidyverse**.
 
@@ -42,170 +77,62 @@ The only package we need in this chapter is **tidyverse**.
 library(tidyverse)
 ```
 
+To understand probability more fully, we first need to understand distributions.
+
+
 ```{r, echo = FALSE, message = FALSE}
  # We also load the **rayshader** and **rgl** packages. We use them to create
  # the 3-D plots below. You can read more about **rayshader**
  # [here](https://www.rayshader.com/) but we will not be explaining how to use
  # it in this *Primer*.
+
 options(rgl.useNULL = TRUE)
 library(rayshader)
 library(rgl)
 library(tidyverse)
 library(magick)
 library(primer.data)
-
-```
-
-## List-columns and map functions
-
-Before learning about probability, we need to expand our collection of R tricks by understanding list-columns and `map_*` functions. Recall that a list is different from an atomic vector. In atomic vectors, each element of the vector has one value.  Lists, however, can contain vectors, and even more complex objects, as elements.
-
-```{r}
-x <- list(c(4, 16, 9), c("A", "Z"))
-x
-```
-
-`x` is a list with two elements. The first element is a numeric vector of length 3. The second element is a character vector of length 2. We use `[[]]` to extract specific elements.
-
-```{r}
-x[[1]]
-```
-
-There are a number of built-in R functions that output lists. For example, the ***ggplot*** objects you have been making store all of the plot information in lists. Any function that returns multiple values can be used to create a list output by wrapping that returned object with `list()`.
-
-
-```{r}
-x <- rnorm(10)
-
-# range() returns the min and max of the argument 
-
-tibble(col_1 = list(range(x))) 
-```
-
-Notice this is a 1-by-1 tibble with one observation, which is a list of one element. Voila! You have just created a **list-column**.
-
-*If a function returns multiple values as a vector, like `range()` does, you must use `list()` as a wrapper if you want to create a list-column.*
-
-A list column is a column of your data which is a [list](https://adv-r.hadley.nz/vectors-chap.html#lists) rather than an atomic vector.  As with stand-alone list objects, you can pipe to `str()` to examine the column.
-
-```{r}
-# tibble() is what we use to generate a tibble, it acts sort of like the mutate(), but mutate() needs a data frame to add new column, tibble can survive on itself.
-tibble(col_1 = list(range(x))) %>%
-  str()
 ```
 
 
-We can use `map_*` functions to both create a list-column and then, much more importantly, work with that list-column afterwards. 
-
-```{r}
-# .x is col_1 from tibble and ~ sum(.) is the formula
-tibble(col_1 = list(range(x))) %>%
-  mutate(col_2 = map_dbl(col_1, ~ sum(.))) %>% 
-  str()
-```
-
-`map_*` functions, like `map_dbl()` in this example, take two key arguments, `.x` (the data which will be acted on) and `.f` (the function which will act on this data). Here, `.x` is the data in `col_1`, which is a list-column. `.f` is the function `sum()`. However, we can not simply write `map_dbl(col_1, sum)`. Instead, each use of `map_*` functions requires the use of a tilde --- a `~` --- to indicate the start of the function and the use of a dot --- a `.` --- to specify where the data goes in the function.
-
-`map_*` functions are a family of functions, with the suffix specifying the type of the object to be returned. `map()` itself returns a list. `map_dbl()` returns a double. `map_int()` returns an integer. `map_chr()` returns a character, and so on.
-
-To summarise `map` function and `map_`* functions could both convert an data (vector or list) with the specific denoted functions or formula you set, and always results in list we called the  "list Column". There are two arguments in the `map()` function as well as `map_*()` function the `.x` and `.f`, the `.x` and `.f` placed in the `map()` functions and `map_*()`functions like this `map(.x,.f)`, where `.x` could either be a list or a vector, and `.f` either be a direct function like `.f=mean`, or an formula like `.f= ~mean(.x)`, remember to put the `~` if you are using `.f` an formula, the difference between `map` and `map_*` function is when you know and want the outcome of the data to be specific data vector like (`double`, `logical`,`character`,`integer`) rather than an general `list` in `map()`, you can use `map_*` instead of `map` to organized your list column.
-
-
-```{r}
-tibble(ID = 1) %>% 
-  mutate(col_1 = map(ID, ~range(rnorm(10)))) %>%
-  mutate(col_2 = map_dbl(col_1, ~ sum(.))) %>% 
-  mutate(col_3 = map_int(col_1, ~ length(.))) %>% 
-  mutate(col_4 = map_chr(col_1, ~ sum(.))) %>% 
-  str()
-```
-
-Consider a more detailed example:
-
-
-```{r}
-# This simple example demonstrates the workflow which we will often follow.
-# Start by creating a tibble which will be used to store the results. (Or start
-# with a tibble which already exists and to which you will be adding more
-# columns.) It is often convenient to get all the code working with just a few
-# rows. Once it is working, we increase the number of rows to a thousand or
-# million or whatever we need.
-
-tibble(ID = 1:3) %>% 
-  
-  # The big convenience is being able to store a list in each row of the tibble.
-  # Note that we are not using the value of ID in the call to rnorm(). (That is
-  # why we don't have a "." anywhere.) But we are still using ID as a way of
-  # iterating through each row; ID is keeping count for us, in a sense.
-  
-  mutate(draws = map(ID, ~ rnorm(10))) %>% 
-  
-  # Each succeeding step of the pipe works with columns already in the tibble
-  # while, in general, adding more columns. The next step calculates the max
-  # value in each of the draw vectors. We use map_dbl() because we know that
-  # max() will returns a single number.
-  
-  mutate(max = map_dbl(draws, ~ max(.))) %>% 
-  
-  # We will often need to calculate more than one item from a given column like
-  # draws. For example, in addition to knowing the max value, we would like to
-  # know the range. Because the range is a vector, we need to store the result
-  # in a list column. map() does that for us automatically.
-  
-  mutate(min_max = map(draws, ~ range(.)))
-
-```
-
-This flexibility is only possible via the use of list-columns and  `map_*` functions. This workflow is extremely common. We start with an empty tibble, using ID to specify the number of rows. With that skeleton, each step of the pipe adds a new column, working off a column which already exists. 
-
-## Distributions
+## Distributions {distributions}
 
 A variable in a tibble is a column, a vector of values. We sometimes refer to this vector as a "distribution." This is somewhat sloppy in that a distribution can be many things, most commonly a mathematical formula. But, strictly speaking, a "frequency distribution" or an "empirical distribution" is a list of values, so this usage is not unreasonable.
 
-*There are two distinct concepts: a distribution and a set values drawn from that distribution.*  But, in everyday use, we use "distribution" to both. When given a distribution (meaning a vector of numbers), we often use `geom_histogram()` or `geom_density()` to graph it. But, sometimes, we don't want to look at the whole thing. We just want some summary measures which report the key aspects of the distribution. The two most important attributes of a distribution are its *center* and its *variation* around that center.
 
-We use `summarize()` to calculate statistics for a variable, a column, a vector of values or a distribution. Note the language sloppiness. For the purposes of this book, "variable," "column," "vector," and "distribution" all mean the same thing. Popular statistical functions include: `mean()`, `median()`, `min()`, `max()`, `n()` and `sum()`. Functions which may be new to you include three measures of the "spread" of a distribution: `sd()` (the standard deviation), `mad()` (the scaled median absolute deviation) and `quantile()`, which is used to calculate an *interval* which includes a specified proportion of the values. 
-
-*A distribution is a function that shows the possible values of a variable and how often they occur.*
-
-Think of the distribution of a variable as an urn from which we can pull out, at random, values for that variable. Drawing a thousand or so values from that urn, and then looking at a histogram, can show where the values are centered and how they vary. Because people are sloppy, they will use the word distribution to refer to both the (imaginary!) urn from which we are drawing values and to the list of values we have drawn. It is better, however, to keep three distinct ideas separate:
-
-* The *unknown true distribution* which, in reality, generates the data which we see. Outside of stylized examples in which we *assume* that a distribution follows a simple mathematical formula, we will never have access to the unknown true distribution. We can only estimate it. This unknown true distribution is often referred to as the *data generating mechanism*, or DGM. It is a function or black box or urn which produces data. We can see the data. We can't see the urn. Later in the *Primer*, once we have learned about posterior distributions, we will often refer to this as *Preceptor's Posterior*.
-
-* The *estimated distribution* which, we think, generates the data which we see. Again, we can never know the unknown true distribution. But, by making some assumptions and using the data we have, we can *estimate* a distribution. Our estimate may be very close to the true distribution. Or it may be far away. The main task of data science to to create and use these estimated distributions. Almost always, these distributions are instantiated in computer code.
-
-* A *vector of numbers drawn* from the estimated distribution. Both true and estimated distributions can be complex beasties, difficult to describe accurately and in detail. But a vector of numbers drawn from a distribution is easy to understand and use. So, in general, we work with vectors of numbers. When someone --- either a colleague or a piece of R code --- creates a distribution which we want to use to answer a question, we don't really want the distribution itself. Rather, we want a vectors of "draws" from that distribution. Vectors are easy to work with! Complex computer code is not.
-
-Again, people (including us!) will often be sloppy and use the same word, "distribution," without making it clear whether they are talking about the *true distribution*, the *estimated distribution*, or a vector of *draws* from the estimated distribution. Try not to be sloppy.
-
-### Scaling a distribution
+### Scaling distributions
 
 Consider the vector which is the result of rolling one die 10 times.
 
 ```{r}
-rolls <- c(5, 5, 1, 5, 4, 2, 6, 2, 1, 5)
+ten_rolls <- c(5, 5, 1, 5, 4, 2, 6, 2, 1, 5)
 ```
 
-There are other ways of storing the data in this vector. Instead of recording every draw, we could just record the number of times each value appears.
+There are other ways of storing the data in this vector. Instead of reporting every observation, we could just record the number of times each value appears.
 
 ```{r}
-table(rolls)
+table(ten_rolls)
 ```
 
 
 In this case, with only 10 values, it is actually less efficient to store the data like this. But what happens when we have 10,000 rolls?
 
 ```{r}
-more_rolls <- rep(rolls, 1000)
-table(more_rolls)
+ten_thousand_rolls <- sample(1:6, size = 10000, replace = TRUE)
+table(ten_thousand_rolls)
 ```
 
 Instead of keeping around a vector of length 10,000, we can just keep 10 values, without losing any information.
 
-This example also highlights the fact that, graphically, two distributions can be identical even if they are of very different lengths.
+Two distributions can be identical even if they are of very different lengths. Let's compare our original distribution of 10 rolls of the die with another distribution which just features 1,000 copies of those 10 rolls.
+
+```{r}
+more_rolls <- rep(ten_rolls, 1000)
+```
+
 
 ```{r, echo = FALSE}
-rolls_p <- tibble(value = rolls) %>% 
+rolls_p <- tibble(value = ten_rolls) %>% 
   ggplot(aes(value)) +
     geom_bar(aes(y = after_stat(count))) +
     labs(title = "Distribution of 10 Rolls",
@@ -222,12 +149,14 @@ more_rolls_p <- tibble(value = more_rolls) %>%
 rolls_p + more_rolls_p
 ```
 
-The two vectors --- `rolls` and `more_rolls` --- have the exact same shape because even though of different lengths, these values were drawn from the same distribution. *The total count for each value does not matter. What matters is the relative proportions.*
+The two vectors have the exact same shape because even though of different lengths, these values were drawn from the same distribution. *The total count for each value does not matter. What matters is the relative proportions.*
 
-Since shape is what matters, we often "normalize" distributions so that the sum of the counts equals one, where y-axis shows the percentages of total. Example:
+### Normalizing distributions
+
+If two distributions have the same shape, then they only differ by the labels on the y-axis. There are various ways of "normalizing" distributions to make them all the same scale. The most common scale is one which the area under the distribution adds to 1, e.g.,  100%. For example, we can transform either of the rolls plots above to look like:
 
 ```{r, echo = FALSE}
-rolls_p <- tibble(value = rolls) %>% 
+rolls_p <- tibble(value = ten_rolls) %>% 
   ggplot(aes(x = value)) +
     geom_bar(aes(y = after_stat(count/sum(count)))) +
     labs(title = "Distribution of 10 Rolls",
@@ -244,37 +173,51 @@ more_rolls_p <- tibble(value = more_rolls) %>%
 rolls_p + more_rolls_p
 ```
 
+We sometimes refer to a distribution as "unnormalized" if the area under the curve does not add up to 1. 
+
+### Simulating distributions
+
+*There are two distinct concepts: a distribution and a set values drawn from that distribution.*  But, in everyday use, we use "distribution" for both. When given a distribution (meaning a vector of numbers), we often use `geom_histogram()` or `geom_density()` to graph it. But, sometimes, we don't want to look at the whole thing. We just want some summary measures which report the key aspects of the distribution. The two most important attributes of a distribution are its *center* and its *variation* around that center.
+
+We use `summarize()` to calculate statistics for a variable, a column, a vector of values or a distribution. Note the language sloppiness. For the purposes of this book, "variable," "column," "vector," and "distribution" all mean the same thing. Popular statistical functions include: `mean()`, `median()`, `min()`, `max()`, `n()` and `sum()`. Functions which may be new to you include three measures of the "spread" of a distribution: `sd()` (the standard deviation), `mad()` (the scaled median absolute deviation) and `quantile()`, which is used to calculate an *interval* which includes a specified proportion of the values. 
+
+*A distribution is a function that shows the possible values of a variable and how often they occur.*
+
+Think of the distribution of a variable as an urn from which we can pull out, at random, values for that variable. Drawing a thousand or so values from that urn, and then looking at a histogram, can show where the values are centered and how they vary. Because people are sloppy, they will use the word distribution to refer to both the (imaginary!) urn from which we are drawing values and to the list of values we have drawn. It is better, however, to keep three distinct ideas separate:
+
+* The *unknown true distribution* which, in reality, generates the data which we see. Outside of stylized examples in which we *assume* that a distribution follows a simple mathematical formula, we will never have access to the unknown true distribution. We can only estimate it. This unknown true distribution is often referred to as the *data generating mechanism*, or DGM. It is a function or black box or urn which produces data. We can see the data. We can't see the urn. 
+
+* The *estimated distribution* which, we think, generates the data which we see. Again, we can never know the unknown true distribution. But, by making some assumptions and using the data we have, we can *estimate* a distribution. Our estimate may be very close to the true distribution. Or it may be far away. The main task of data science to to create and use these estimated distributions. Almost always, these distributions are instantiated in computer code.
+
+* A *vector of numbers drawn* from the estimated distribution. Both true and estimated distributions can be complex animals, difficult to describe accurately and in detail. But a vector of numbers drawn from a distribution is easy to understand and use. So, in general, we work with vectors of numbers. When someone --- either a colleague or a piece of R code --- creates a distribution which we want to use to answer a question, we don't really want the distribution itself. Rather, we want a vectors of "draws" from that distribution. Vectors are easy to work with! Complex computer code is not.
+
+Again, people (including us!) will often be sloppy and use the same word, "distribution," without making it clear whether they are talking about the *true distribution*, the *estimated distribution*, or a vector of *draws* from the estimated distribution. Try not to be sloppy.
+
+Much of the rest of the *Primer* involves learning how to work with distributions, which generally means working with the draws from those distributions. Fortunately, the usual rules of arithmetic apply. You can add/subtract/multiply/divide distributions by working with draws from those distributions, just as you can add/subtract/multiply/divide regular numbers.
+
+
+<!-- Also need to talk more about working with distributions, especially calculating areas under the curve. Maybe do this under each example below. -->
+
+
 
 
 ## Probability distributions
 
-```{r, echo = FALSE, fig.cap = "Dice and Probability."}
-knitr::include_graphics("05-probability/images/probability_dice.jpeg")
+```{r, echo = FALSE, out.width="60%", fig.align='center', fig.cap = 'Bruno de Finetti, an Italian statistician who wrote a famous treatise on the theory of probability that began with the statement "PROBABILITY DOES NOT EXIST." This is because probability only exists subjectively in our minds.'}
+knitr::include_graphics("05-probability/images/de_finetti.jpg")
 ```
 
 
-What does it mean that Trump had a *30% chance* of winning re-election in the fall of 2020? That there is a *90% probability* of rain today? That the dice at the casino are *unfair*? 
+For the purposes of this *Primer*, a *probability distribution* is a mathematical object that covers a set of outcomes, where each distinct outcome has a chance of occurring between 0 and 1 inclusive. The chances must sum to 1. The set of possible outcomes --- heads or tails for the coin, 1 through 6 for a single die, 2 through 12 for a pair of dice --- can be either discrete or continuous. Remember, discrete data can only take on certain values. On the other hand, continuous data is data, like height and weight, which can take any values. This set of outcomes is the *domain* of the probability distribution. 
 
-Probability is about quantifying uncertainty. We can think of probability as a proportion. The probability of an event occurring is a number from 0 to 1, where 0 means that the event is impossible and 1 means that the event is 100% certain.
+Assume that a probability distribution is a create by a *probability function*, a set function which maps outcomes to probabilities. The concept of a "probability function" is often split into two categories: probability *mass* functions (for discrete random variables) and probability *density* functions (for continuous random variables). As usual, we will be a bit sloppy, using the term probability distribution for both the mapping itself and for the function which creates the mapping.
 
-Let's begin with the simplest events: coin flips and dice rolls. If the dice and the coins are fair, we can operate under the assumption that all outcomes are equally likely. 
+There are three types of probability distributions: *mathematical*, *empirical*, and *posterior*. 
 
-This allows us to make the following statements:
-
-* The probability of rolling a 1 or a 2 is 2/6, or 1/3.
-* The probability of rolling a 1, 2, 3, 4, 5, or 6 is 1.  
-* The probability of flipping a coin and getting tails is 1/2.
-
-<!-- DK: What is the difference between a distribution and a probability distribution? After all, we can define them both with draws. And the draws can look like anything. And you can turn any distribution into a probability distribution via normalization. -->
-
-For the purposes of this *Primer*, a *probability distribution* is a mathematical object that covers a set of outcomes, where each distinct outcome has a chance of occurring between 0 and 1 inclusive. The chances must sum to 1. The set of possible outcomes --- heads or tails for the coin, 1 through 6 for a single die, 2 through 12 for a pair of dice --- can be either discrete or continuous. Remember, discrete data is information where we can only take certain value. On the other hand, continuous data is data we can take any values, like height and weight they are in a sense "continuous". This set of outcomes is the *domain* of the probability distribution. There are three types of probability distributions: mathematical, empirical, and posterior. 
-
-The key difference between a distribution, as we have explored them Section \@ref(distributions), and a *probability* distribution is the requirement that the sum of the probabilities of the individual outcomes must be exactly 1. There is no such requirement in a distribution. But any distribution can be turned into a probability distribution by "normalizing" it, as we will explore.  In this context, we will often refer to a distribution which is not (yet) a probability distribution as an "unnormalized" distribution.  
+The key difference between a distribution, as we have explored them in Section \@ref(distributions), and a *probability* distribution is the requirement that the sum of the probabilities of the individual outcomes must be exactly 1. There is no such requirement for a distribution. But any distribution can be turned into a probability distribution by "normalizing" it.  In this context, we will often refer to a distribution which is not (yet) a probability distribution as an "unnormalized" distribution.  
 
 Pay attention to notation. Whenever we are talking about a specific probability (represented by a single value), we will use $\rho$ (the Greek letter "rho" but spoken aloud as "p" by us) with a *subscript* which specifies the exact outcome of which it is the probability. For instance, $\rho_h = 0.5$ denotes the probability of getting heads on a coin toss when the coin is fair. $\rho_t$ --- spoken as "PT" or "P sub T" or "P tails" --- denotes the probability of getting tails on a coin toss. However, when we are referring to the entire probability distribution over a set of outcomes, we will use $\text{Prob}()$. For example, the probability distribution of a coin toss is $\text{Prob}(\text{coin})$. That is, $\text{Prob}(\text{coin})$ is composed of the two specific probabilities (50% and 50%) mapped from the two values in the domain (Heads and Tails). Similarly, $\text{Prob}(\text{sum of two dice})$ is the probability distribution over the set of 11 outcomes (2 through 12) which are possible when you take the sum of two dice. $\text{Prob}(\text{sum of two dice})$ is made up of 11 numbers --- $\rho_2$,  $\rho_3$, ..., $\rho_{12}$ --- each representing the unknown probability that the sum will equal their value. That is, $\rho_2$ is the probability of rolling a 2.
 
-
-<!-- DK: Above is not clear. Explain this better by showing that a distribution is just a vector. A probability distribution is a vector in which each element of the vector is mapped to a 0--1 probability, the sum of which is one. Need to connect this more clearly to joint distribution discussion. Update: This isn't quite right either. -->
 
 
 ### Flipping a coin
@@ -334,8 +277,11 @@ ggplot(aes(x = results)) +
 
 ```
 
-The distribution of a single observation is described by this formula. $y_i ~ Bernoulli(p)$. Expected value of $y_i$ is this mathematical probability distribution. If the mathematical assumptions are correct, then as your sample size increases, the empirical probability distribution will look more and more like the mathematical distribution. 
+The distribution of a single observation is described by this formula.  
 
+$$ P(Y = y) = \begin{cases} 1/2 &\text{for }x= \text{Heads}\\ 1/2 &\text{for }x= \text{Tails} \end{cases}$$
+
+We could also use this formula: $y_i \sim Bernoulli(p)$. Expected value of $y_i$ is this mathematical probability distribution. If the mathematical assumptions are correct, then as your sample size increases, the empirical probability distribution will look more and more like the mathematical distribution.
 
 A *posterior distribution* is based on beliefs and expectations. It displays your belief about things you can't see right now. You may have posterior distributions for outcomes in the past, present, or future.
 
@@ -437,7 +383,7 @@ tibble(sum = c(rep(c(2, 12), 1),
     theme_classic()
 ```
 
-$$ p_X(x) = \begin{cases} \dfrac{x-1}{36} &\text{for }x=1,2,3,4,5,6 \\ \dfrac{13-x}{36} &\text{for }x=7,8,9,10,11,12 \\ 0 &\text{otherwise} \end{cases} $$
+$$ P(Y = y) = \begin{cases} \dfrac{y-1}{36} &\text{for }y=1,2,3,4,5,6 \\ \dfrac{13-y}{36} &\text{for }y=7,8,9,10,11,12 \\ 0 &\text{otherwise} \end{cases} $$
 
 
 The *posterior distribution* for rolling two dice a hundred times depends on your beliefs. If you take the dice from your Monopoly set, you have reason to believe that the assumptions underlying the mathematical distribution are true. However, if you walk into a crooked casino and a host asks you to play craps, you might be suspicious, just as in the "flipping a coin example" the word "suspicious" means you no longer trust the "population" where the mathematical and empircal distribution drawn their data from. For example, in craps, a come-out roll of 7 and 11 is a "natural," resulting in a win for the "shooter" and a loss for the casino. You might expect those numbers to occur less often than they would with fair dice. Meanwhile, a come-out roll of 2, 3 or 12 is a loss for the shooter. You might also expect values like 2, 3 and 12 to occur more frequently. Your posterior distribution might look like this:
@@ -527,9 +473,7 @@ ggplot(data = result, aes(total)) +
 
 ```
 
-Recall from chapter 2, the Normal distribution which is an probability distribution that is symmetric about the mean is described by this formula. 
-$$y_i \sim N(\mu, \sigma^2)$$. 
-Each value $y_i$ is drawn from a normal distribution with parameters $\mu$ for the mean and $\sigma$ for the standard deviation. If our assumption for this mathematical distribution is correct (we don't), then the as the sample size increase the empirical distribution should look more and more similar to the our mathematical distribution. 
+If our assumption for this mathematical distribution is correct (we don't), then the as the sample size increase the empirical distribution should look more and more similar to the our mathematical distribution. 
 
 
 We know that campaign platforms, donations, charisma, and many other factors will contribute to a candidate's success. Elections are more complicated than coin tosses. We also know that many presidential elections in history have resulted in much bigger victories or defeats than this distribution seems to allow for.
@@ -664,7 +608,9 @@ tibble(height = rnorm(1000000, mean = 175, sd = 9)) %>%
 ```
 
 Again, the Normal distribution which is an probability distribution that is symmetric about the mean is described by this formula. 
+
 $$y_i \sim N(\mu, \sigma^2)$$. 
+
 Each value $y_i$ is drawn from a normal distribution with parameters $\mu$ for the mean and $\sigma$ for the standard deviation. If the mathematical assumptions are correct in this case the two parameters $\mu$ and $\sigma$, then as our sample size increases, the empirical probability distribution will look more and more like the mathematical distribution. 
 
 
@@ -729,45 +675,6 @@ Don't worry about the distinctions between discrete and continuous outcomes, or 
 
 <!-- DK: This section is no longer necessary because we introduce these concepts above. So, move the important stuff up and then delete this. -->
 
-### Unnormalized distributions
-
-Remember that *probability distributions are mathematical objects that cover a set of outcomes, where each outcome in the domain is mapped to a probability value between 0 and 1 inclusive and the sum of all mappings is 1.* Sometimes, you may see distributions similar to probability distributions, only the y-axis displays raw counts instead of proportions. Unnormalized distributions are not probability distributions, but it is easy to convert between the two. You simply divide all the outcome counts on the y-axis by the sum of all outcome counts to "normalize" the unnormalized distribution. Unnormalized distributions are often an intermediary step; it is sometimes handy to work with counts until the very end.
-
-<!-- DK: Do we really need this?  -->
-
-For instance, we can generate the following unnormalized distribution for the sum of rolling two dice. (This uses the same code as above, but without the normalization step.)
-
-```{r, echo = FALSE}
-
-# mutate(die_1 = map_dbl(ID, ~ sample(c(1:6), size = 1))) shoudl be handy for any dice
-# rolling simulation
-
-set.seed(1)
-
-tibble(ID = 1:100) %>% 
-  mutate(die_1 = map_dbl(ID, ~ sample(c(1:6), size = 1))) %>% 
-  mutate(die_2 = map_dbl(ID, ~ sample(c(1:6), size = 1))) %>% 
-  mutate(sum = die_1 + die_2) %>% 
-  ggplot(aes(x = sum)) +
-    geom_histogram(binwidth = 1, color = "white") +
-    labs(title = "Empirical Unnormalized Distribution",
-         subtitle = "Sum from rolling two dice one hundred times",
-         x = "Outcome\nSum of Two Die",
-         y = "Count") +
-    scale_x_continuous(breaks = seq(0, 12, 1), labels = 0:12) +
-    theme_classic()
-```
-
-Notice that the shape of the distribution is the same as the empirical probability distribution we generated earlier, except that the y-axis is labeled differently.
-
-```{r, echo = FALSE}
-emp_dist_dice
-```
-
-
-The two plots --- unnormalized and normalized --- have the exact same shape. In many ways, they are the same object. Yet normalization is required if we want to work with a probability distribution.
-
-<!-- Should we get into the *scaling* of distributions, and the arbitrariness thereof? For example, trains$age is a distribution. Fine. What about rep(trains$age, 2)? What about rep(trains$age, 100)? Well, if any vector is a distribution, then all three of these are distributions. In fact, they are the same distribution, just scaled differently.  -->
 
 
 ### Joint distributions
@@ -788,9 +695,9 @@ Let's say that you are rolling two six-sided dice simultaneously. Die 1 is weigh
 # Step 1: Create and organize the data.
 
 mydata <- tibble(die.1 = sample(1:6, size = 1000, prob =
-                                  c(0.1,0.1,0.1,0.1,0.1,0.5), replace = TRUE),
+                                  c(0.1, 0.1, 0.1, 0.1, 0.1, 0.5), replace = TRUE),
                  die.2 = sample(1:6, size = 1000, prob =
-                                  c(0.1,0.1,0.1,0.1,0.5,0.1), replace = TRUE)) %>%
+                                  c(0.1, 0.1, 0.1, 0.1, 0.5, 0.1), replace = TRUE)) %>%
           group_by(die.1, die.2) %>%
           summarize(total = n(),
                     .groups = "drop")
@@ -832,130 +739,8 @@ rglwidget()
 rgl.close()
 ```
 
-### Working with probability distributions
 
-
-<!-- DK: Does this really belong here? Maybe at the end? -->
-
-```{r, echo = FALSE, out.width="60%", fig.align='center', fig.cap = 'Bruno de Finetti, an Italian statistician who wrote a famous treatise on the theory of probability that began with the statement "PROBABILITY DOES NOT EXIST." This is because probability only exists subjectively in our minds.'}
-
-knitr::include_graphics("05-probability/images/de_finetti.jpg")
-
-```
-
-A probability distribution is not always easy to work with. It is a complex object. And, in many contexts, we don't really care about all that complexity. So, instead of providing the full probability distribution, we often just use a summary measure, a number or two or three which captures those aspects of the entire distribution which are relevant to the matter at hand. Let's explore these issues using the 538 posterior probability distribution, as of August 13, 2020, for the number of electoral votes which will be won by Joe Biden. Here is a tibble with 1,000,000 draws from that distribution:
-
-
-```{r, echo = FALSE}
-# DK: This code is a mess! Please fix!
-
-# Have to include otherwise shows up coloumns specification.
-
-z <- read_csv("https://raw.githubusercontent.com/PPBDS/primer/master/05-probability/data/election-forecasts-2020/prez_1.csv", 
-              col_types = cols(cycle = col_double(),
-                               branch = col_character(),
-                               model = col_character(),
-                               modeldate = col_character(),
-                               candidate_inc = col_character(),
-                               candidate_chal = col_character(),
-                               candidate_3rd = col_logical(),
-                               evprob_inc = col_double(),
-                               evprob_chal = col_double(),
-                               evprob_3rd = col_logical(),
-                               total_ev = col_double(),
-                               timestamp = col_character(),
-                               simulations = col_double()
-                               )) %>%
-       select(evprob_chal, total_ev)  %>% 
-       rename(prob = evprob_chal, electoral_votes = total_ev) %>% 
-       mutate(obs = round(prob * 1000000))  %>% 
-       select(-prob) %>% 
-       uncount(weights = obs) %>% 
-       pull(electoral_votes)
-
-
-
-draws <- tibble(ID = 1:1000000,
-                electoral_votes = as.integer(sample(z)))                     
-                          
-```
-
-```{r}
-draws
-```
-
-*A distribution and a sample of draws from that distribution are different things.* But, if you squint, they are sort of the same thing, at least for our purposes. For example, if you want to know the mean of the distribution, then the mean of the draws will be a fairly good estimate, especially if the number of draws is large enough.
-
-<!-- DK: Need more here. Connect to the discussion in Section 2.9 -->
-
-Recall from Chapter \@ref(wrangling) how we can draw randomly from specified probability distributions:
-
-```{r}
-rnorm(10)
-```
-
-```{r}
-runif(10)
-```
-
-The elements of these vectors are all "draws" from the specified probability distributions. In most applied situations, our tools will produce draws rather than summary objects. Fortunately, a vector of draws is very easy to work with. Start with summary statistics:
-
-
-```{r}
-# recall mean, media, standard deviation and mad functions.
-
-key_stats <- draws %>% 
-  summarize(mn = mean(electoral_votes),
-            md = median(electoral_votes),
-            sd = sd(electoral_votes),
-            mad = mad(electoral_votes))
-
-key_stats
-```
-
-
-Calculate a 95% interval directly:
-
-```{r}
-quantile(draws$electoral_votes, probs = c(0.025, 0.975))
-```
-
-Approximate the 95% interval in two ways:
-
-```{r}
-c(key_stats$mn - 2 * key_stats$sd, 
-  key_stats$mn + 2 * key_stats$sd)
-c(key_stats$md - 2 * key_stats$mad, 
-  key_stats$md + 2 * key_stats$mad)
-```
-
-In this case, using the mean and standard deviation produces a 95%  interval which is closer to the true interval. In other cases, the median and scaled median absolute deviation will do better. Either approximation is generally "good enough" for most work. But, if you need to know the exact 95% interval, you must use `quantile()`.
-
-
-
-## Tree diagrams
-
-<!-- DK: Worth rewriting? Yes! Tie it better to above and below. Not sure we even need tree diagrams. What are we trying to teach here? -->
-
-### Independence
-
-So far, you have learned how to explore $\text{Prob}(A)$, which is the fancy, statistical way of saying the probability distribution for event A. Keep in mind the distinction between an individual outcome from the set $A$, like the probability of heads (which is $\rho_h$) and the entire distribution $\text{Prob}(\text{coin})$, which includes the probability of each possible outcomes.  $\text{Prob}(A)$ is like $\text{Prob}(\text{coin})$ or $\text{Prob}(\text{sum of two dice})$.
-
-What if you flipped two coins in a row, one after the other? You know that the probability of getting heads on the first coin is 1/2. But what are the odds of getting heads two times in a row? Let's take a look at this tree diagram. We read this diagram from left to right. On the left, the probability of getting heads is 0.5 on the first toss. Then, the tree branches out.
-
-* *If* we got heads the first time, then we go up the top branch. The probability of getting heads again is 0.5.
-* *If* we got tails the first time, then we go down the bottom branch. The probability of getting heads is 0.5.
-
-
-Notice how regardless of what we get the first time we flip the coin, the probability of getting heads is 0.5 throughout. Coin flips, in this scenario, are **independent**. The result of one coin flip does not impact the next coin flip. 
-
-<!-- DK: Should we create these decision trees on the fly, perhaps using https://github.com/malcolmbarrett/ggdag  or maybe straight dagitty? For now, what we have is fine. -->
-
-```{r, echo = FALSE}
-knitr::include_graphics("05-probability/images/tree-1.png")
-```
-
-### Conditional probability
+### Conditional distrubutions
 
 Imagine that 60% of people in a community have a disease. A doctor develops a test to determine if a random person has the disease. However, this test isn't 100% accurate. There is an 80% probability of correctly returning positive **if the person has the disease** and 90% probability of correctly returning negative **if the person does not have the disease**.
 
@@ -965,18 +750,118 @@ The probability of a random person having the disease is 0.6. Since each person 
 knitr::include_graphics("05-probability/images/tree-2.png")
 ```
 
-Now the tree branches out.
-
 * *If* the random person has the disease, then we go up the top branch. The probability of an infected person testing positive is 0.8 because the test is 80% sure of correctly returning positive when the person has the disease.
+
 * By the same logic, *if* the random person does not have the disease, we go down the bottom branch. The probability of the person incorrectly testing positive is 0.1.
 
 We decide to go down the top branch *if* our random person has the disease. We go down the bottom branch *if* they do not. This is called **conditional probability**. The probability of testing positive is **dependent** on whether the person has the disease.
 
 How would you express this in statistical notation? $\text{Prob}(A|B)$ is the same thing as the probability of A *given* B. $\text{Prob}(A|B)$ essentially means the probability of A *if* we know for sure the value of B. Note that $\text{Prob}(A|B)$ is not the same thing as $\text{Prob}(B|A)$.
 
+In summary, we work with three main categories of probability distributions. First, p(A) is the probability distribution for event A. This is sometimes refered to as a *univariate* probability distribution because there is only one random variable. Second, p(A, B) is the joint probability distribution of A and B. Third, p(A | B) is the conditional probability distribution of A given that B has taken on a specific value. This is often written as p(A | B = b).
 
-<!-- DK: The above write up is not impressive. What are we trying to accomplish? Also, we might add some simple coding/simulation examples to illustrate these points.  -->
 
+## List-columns and map functions
+
+Before working with probability models, we need to expand our collection of R tricks by understanding list-columns and `map_*` functions. Recall that a list is different from an atomic vector. In atomic vectors, each element of the vector has one value.  Lists, however, can contain vectors, and even more complex objects, as elements.
+
+```{r}
+x <- list(c(4, 16, 9), c("A", "Z"))
+x
+```
+
+`x` is a list with two elements. The first element is a numeric vector of length 3. The second element is a character vector of length 2. We use `[[]]` to extract specific elements.
+
+```{r}
+x[[1]]
+```
+
+There are a number of built-in R functions that output lists. For example, the ***ggplot*** objects you have been making store all of the plot information in lists. Any function that returns multiple values can be used to create a list output by wrapping that returned object with `list()`.
+
+
+```{r}
+x <- rnorm(10)
+
+# range() returns the min and max of the argument 
+
+tibble(col_1 = list(range(x))) 
+```
+
+Notice this is a 1-by-1 tibble with one observation, which is a list of one element. Voila! You have just created a **list-column**.
+
+*If a function returns multiple values as a vector, like `range()` does, you must use `list()` as a wrapper if you want to create a list-column.*
+
+A list column is a column of your data which is a [list](https://adv-r.hadley.nz/vectors-chap.html#lists) rather than an atomic vector.  As with stand-alone list objects, you can pipe to `str()` to examine the column.
+
+```{r}
+# tibble() is what we use to generate a tibble, it acts sort of like the mutate(), but mutate() needs a data frame to add new column, tibble can survive on itself.
+tibble(col_1 = list(range(x))) %>%
+  str()
+```
+
+
+We can use `map_*` functions to both create a list-column and then, much more importantly, work with that list-column afterwards. 
+
+```{r}
+# .x is col_1 from tibble and ~ sum(.) is the formula
+tibble(col_1 = list(range(x))) %>%
+  mutate(col_2 = map_dbl(col_1, ~ sum(.))) %>% 
+  str()
+```
+
+`map_*` functions, like `map_dbl()` in this example, take two key arguments, `.x` (the data which will be acted on) and `.f` (the function which will act on this data). Here, `.x` is the data in `col_1`, which is a list-column. `.f` is the function `sum()`. However, we can not simply write `map_dbl(col_1, sum)`. Instead, each use of `map_*` functions requires the use of a tilde --- a `~` --- to indicate the start of the function and the use of a dot --- a `.` --- to specify where the data goes in the function.
+
+`map_*` functions are a family of functions, with the suffix specifying the type of the object to be returned. `map()` itself returns a list. `map_dbl()` returns a double. `map_int()` returns an integer. `map_chr()` returns a character, and so on.
+
+To summarise `map` function and `map_`* functions could both convert an data (vector or list) with the specific denoted functions or formula you set, and always results in list we called the  "list Column". There are two arguments in the `map()` function as well as `map_*()` function the `.x` and `.f`, the `.x` and `.f` placed in the `map()` functions and `map_*()`functions like this `map(.x,.f)`, where `.x` could either be a list or a vector, and `.f` either be a direct function like `.f=mean`, or an formula like `.f= ~mean(.x)`, remember to put the `~` if you are using `.f` an formula, the difference between `map` and `map_*` function is when you know and want the outcome of the data to be specific data vector like (`double`, `logical`,`character`,`integer`) rather than an general `list` in `map()`, you can use `map_*` instead of `map` to organized your list column.
+
+
+```{r}
+tibble(ID = 1) %>% 
+  mutate(col_1 = map(ID, ~range(rnorm(10)))) %>%
+  mutate(col_2 = map_dbl(col_1, ~ sum(.))) %>% 
+  mutate(col_3 = map_int(col_1, ~ length(.))) %>% 
+  mutate(col_4 = map_chr(col_1, ~ sum(.))) %>% 
+  str()
+```
+
+Consider a more detailed example:
+
+
+```{r}
+# This simple example demonstrates the workflow which we will often follow.
+# Start by creating a tibble which will be used to store the results. (Or start
+# with a tibble which already exists and to which you will be adding more
+# columns.) It is often convenient to get all the code working with just a few
+# rows. Once it is working, we increase the number of rows to a thousand or
+# million or whatever we need.
+
+tibble(ID = 1:3) %>% 
+  
+  # The big convenience is being able to store a list in each row of the tibble.
+  # Note that we are not using the value of ID in the call to rnorm(). (That is
+  # why we don't have a "." anywhere.) But we are still using ID as a way of
+  # iterating through each row; ID is keeping count for us, in a sense.
+  
+  mutate(draws = map(ID, ~ rnorm(10))) %>% 
+  
+  # Each succeeding step of the pipe works with columns already in the tibble
+  # while, in general, adding more columns. The next step calculates the max
+  # value in each of the draw vectors. We use map_dbl() because we know that
+  # max() will returns a single number.
+  
+  mutate(max = map_dbl(draws, ~ max(.))) %>% 
+  
+  # We will often need to calculate more than one item from a given column like
+  # draws. For example, in addition to knowing the max value, we would like to
+  # know the range. Because the range is a vector, we need to store the result
+  # in a list column. map() does that for us automatically.
+  
+  mutate(min_max = map(draws, ~ range(.)))
+
+```
+
+This flexibility is only possible via the use of list-columns and  `map_*` functions. This workflow is extremely common. We start with an empty tibble, using ID to specify the number of rows. With that skeleton, each step of the pipe adds a new column, working off a column which already exists. 
 
 ## Two models
 
@@ -1751,6 +1636,103 @@ As you may have noticed, if you calculated the value using the first method, you
 <!-- Difference between 0.04 and 0.06 is rarely significant. And is hardly ever a good reason to decide X over Y. -->
 
 <!-- Infinite models might be an infinite urn. What is the proportion p of red beads in the urn? Assume you are sampling 25 beads from the urn. What is posterior for p if your draw out 5 reds? Inifite models just means setting 100,000 (or some large number) possible values for p when creating the joint distribution.  -->
+
+## Working with probability distributions
+
+
+<!-- DK: Does this really belong here? Maybe at the end? -->
+
+
+
+A probability distribution is not always easy to work with. It is a complex object. And, in many contexts, we don't really care about all that complexity. So, instead of providing the full probability distribution, we often just use a summary measure, a number or two or three which captures those aspects of the entire distribution which are relevant to the matter at hand. Let's explore these issues using the 538 posterior probability distribution, as of August 13, 2020, for the number of electoral votes which will be won by Joe Biden. Here is a tibble with 1,000,000 draws from that distribution:
+
+
+```{r, echo = FALSE}
+# DK: This code is a mess! Please fix!
+
+# Have to include otherwise shows up coloumns specification.
+
+z <- read_csv("https://raw.githubusercontent.com/PPBDS/primer/master/05-probability/data/election-forecasts-2020/prez_1.csv", 
+              col_types = cols(cycle = col_double(),
+                               branch = col_character(),
+                               model = col_character(),
+                               modeldate = col_character(),
+                               candidate_inc = col_character(),
+                               candidate_chal = col_character(),
+                               candidate_3rd = col_logical(),
+                               evprob_inc = col_double(),
+                               evprob_chal = col_double(),
+                               evprob_3rd = col_logical(),
+                               total_ev = col_double(),
+                               timestamp = col_character(),
+                               simulations = col_double()
+                               )) %>%
+       select(evprob_chal, total_ev)  %>% 
+       rename(prob = evprob_chal, electoral_votes = total_ev) %>% 
+       mutate(obs = round(prob * 1000000))  %>% 
+       select(-prob) %>% 
+       uncount(weights = obs) %>% 
+       pull(electoral_votes)
+
+
+
+draws <- tibble(ID = 1:1000000,
+                electoral_votes = as.integer(sample(z)))                     
+                          
+```
+
+```{r}
+draws
+```
+
+*A distribution and a sample of draws from that distribution are different things.* But, if you squint, they are sort of the same thing, at least for our purposes. For example, if you want to know the mean of the distribution, then the mean of the draws will be a fairly good estimate, especially if the number of draws is large enough.
+
+<!-- DK: Need more here. Connect to the discussion in Section 2.9 -->
+
+Recall from Chapter \@ref(wrangling) how we can draw randomly from specified probability distributions:
+
+```{r}
+rnorm(10)
+```
+
+```{r}
+runif(10)
+```
+
+The elements of these vectors are all "draws" from the specified probability distributions. In most applied situations, our tools will produce draws rather than summary objects. Fortunately, a vector of draws is very easy to work with. Start with summary statistics:
+
+
+```{r}
+# recall mean, media, standard deviation and mad functions.
+
+key_stats <- draws %>% 
+  summarize(mn = mean(electoral_votes),
+            md = median(electoral_votes),
+            sd = sd(electoral_votes),
+            mad = mad(electoral_votes))
+
+key_stats
+```
+
+
+Calculate a 95% interval directly:
+
+```{r}
+quantile(draws$electoral_votes, probs = c(0.025, 0.975))
+```
+
+Approximate the 95% interval in two ways:
+
+```{r}
+c(key_stats$mn - 2 * key_stats$sd, 
+  key_stats$mn + 2 * key_stats$sd)
+c(key_stats$md - 2 * key_stats$mad, 
+  key_stats$md + 2 * key_stats$mad)
+```
+
+In this case, using the mean and standard deviation produces a 95%  interval which is closer to the true interval. In other cases, the median and scaled median absolute deviation will do better. Either approximation is generally "good enough" for most work. But, if you need to know the exact 95% interval, you must use `quantile()`.
+
+
 
 ## Cardinal Virtues
 

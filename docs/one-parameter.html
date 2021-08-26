@@ -9,9 +9,7 @@
 <!-- JS --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.2"></script><script src="https://kit.fontawesome.com/6ecbd6c532.js" crossorigin="anonymous"></script><script src="libs/header-attrs-2.8/header-attrs.js"></script><script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="libs/bootstrap-4.6.0/bootstrap.min.css" rel="stylesheet">
 <script src="libs/bootstrap-4.6.0/bootstrap.bundle.min.js"></script><script src="libs/bs3compat-0.2.5.1/tabs.js"></script><script src="libs/bs3compat-0.2.5.1/bs3compat.js"></script><link href="libs/bs4_book-1.0.0/bs4_book.css" rel="stylesheet">
-<script src="libs/bs4_book-1.0.0/bs4_book.js"></script><script src="libs/htmlwidgets-1.5.3/htmlwidgets.js"></script><script src="libs/plotly-binding-4.9.3/plotly.js"></script><script src="libs/typedarray-0.1/typedarray.min.js"></script><link href="libs/crosstalk-1.1.1/css/crosstalk.css" rel="stylesheet">
-<script src="libs/crosstalk-1.1.1/js/crosstalk.min.js"></script><link href="libs/plotly-htmlwidgets-css-1.57.1/plotly-htmlwidgets.css" rel="stylesheet">
-<script src="libs/plotly-main-1.57.1/plotly-latest.min.js"></script><script src="libs/rglWebGL-binding-0.106.8/rglWebGL.js"></script><link href="libs/rglwidgetClass-0.106.8/rgl.css" rel="stylesheet">
+<script src="libs/bs4_book-1.0.0/bs4_book.js"></script><script src="libs/htmlwidgets-1.5.3/htmlwidgets.js"></script><script src="libs/rglWebGL-binding-0.106.8/rglWebGL.js"></script><link href="libs/rglwidgetClass-0.106.8/rgl.css" rel="stylesheet">
 <script src="libs/rglwidgetClass-0.106.8/rglClass.min.js"></script><script src="libs/CanvasMatrix4-0.106.8/CanvasMatrix.min.js"></script><script src="https://cdn.jsdelivr.net/autocomplete.js/0/autocomplete.jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/mark.js@8.11.1/dist/mark.min.js"></script><!-- CSS -->
 </head>
 <body data-spy="scroll" data-target="#toc">
@@ -68,6 +66,7 @@
 </h1>
 <!-- Fix answering the question section. Key is explaining what objects like ppd_for_p are. How to plot them. How to use them to answer questions. -->
 <!-- Make the Overview tutorial match the chapter. -->
+<!-- RS: Maybe calculate SE of ppd? -->
 <!-- In some paragraphs we say that it is impossible to conduct a census because we don't have access to the urn, in others like this we do have access and can complete the census. Which is it? You pick. -->
 <!-- RS: Agree with all edits (I kind of got caried away sometimes, especially with explaining posteiror_erpred()) but there are 3 exceptions: First minor change, I added back elipses at bottom of the Preceptor Tables, because I am trying to make it uniform across the chapter that there is alot we don't know about the urn because we can never access it physically. Another minor change is that I think the Now + 10 stuff is kind of confusing, so I did not write it just yet. Finally,  a more major change is I kept my Bayesian framework section! When reading Ch.6 and 7 I wish I had something similar to what I wrote, so I protest deleting it! -->
 <!-- RS: I also don't understand the prejudice against subheaders.  -->
@@ -114,7 +113,7 @@
 <p>In Chapter <a href="probability.html#probability">5</a>, we learned about probability, the framework for quantifying uncertainty. In this chapter, we will learn about <em>sampling</em>, the beginning of our journey toward inference. When we sample, we take some <em>units</em> from a <em>population</em>, calculate statistics based on those units, and make inferences about unknown <em>parameters</em> associated with the population.</p>
 <p>The urn below has a certain number of red and a certain number of white beads all of equal size, mixed well together. What proportion, <span class="math inline">\(\rho\)</span>, of this urn’s beads are red?</p>
 <div class="figure">
-<span id="fig:unnamed-chunk-435"></span>
+<span id="fig:unnamed-chunk-438"></span>
 <img src="06-one-parameter/images/sampling_bowl_1.jpg" alt="An urn with red and white beads." width="100%"><p class="caption">
 FIGURE 6.1: An urn with red and white beads.
 </p>
@@ -124,14 +123,14 @@ FIGURE 6.1: An urn with red and white beads.
 <p><em>What is the probability, using that same urn, that we will draw more than 8 red beads if we use a shovel of size 20?</em></p>
 <p>To begin this chapter, we will look at a real sampling activity: the urn. Then, we will simulate the urn example using R code. This will help us to understand the <em>standard error</em> and the ways in which uncertainty factors into our predictions. We then attempt to estimate a single parameter, the proportion of red beads in the urn.</p>
 <p>Use the <strong>tidyverse</strong> package.</p>
-<div class="sourceCode" id="cb618"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb625"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyverse.tidyverse.org">tidyverse</a></span><span class="op">)</span></code></pre></div>
 <div id="sampling-activity" class="section level2" number="6.1">
 <h2>
 <span class="header-section-number">6.1</span> Real sampling activity<a class="anchor" aria-label="anchor" href="#sampling-activity"><i class="fas fa-link"></i></a>
 </h2>
 <div class="figure">
-<span id="fig:unnamed-chunk-437"></span>
+<span id="fig:unnamed-chunk-440"></span>
 <img src="06-one-parameter/images/sampling_bowl_1.jpg" alt="An urn with red and white beads." width="100%"><p class="caption">
 FIGURE 6.2: An urn with red and white beads.
 </p>
@@ -142,13 +141,13 @@ FIGURE 6.2: An urn with red and white beads.
 </h3>
 <p>Instead of performing an exhaustive count, let’s insert a shovel into the urn and remove <span class="math inline">\(5 \cdot 10 = 50\)</span> beads. We are taking a <em>sample</em> of the total population of beads.</p>
 <div class="figure">
-<span id="fig:unnamed-chunk-438"></span>
+<span id="fig:unnamed-chunk-441"></span>
 <img src="06-one-parameter/images/sampling_bowl_2.jpg" alt="Inserting a shovel into the urn." width="100%"><p class="caption">
 FIGURE 6.3: Inserting a shovel into the urn.
 </p>
 </div>
 <div class="figure">
-<span id="fig:unnamed-chunk-439"></span>
+<span id="fig:unnamed-chunk-442"></span>
 <img src="06-one-parameter/images/sampling_bowl_3_cropped.jpg" alt="Removing 50 beads from the urn." width="100%"><p class="caption">
 FIGURE 6.4: Removing 50 beads from the urn.
 </p>
@@ -172,14 +171,14 @@ FIGURE 6.4: Removing 50 beads from the urn.
 </ul>
 <p>Each of our 33 groups of friends make note of their proportion of red beads from their sample collected. Each group then marks their proportion of their 50 beads that were red in the appropriate bin in a hand-drawn histogram as seen below.</p>
 <div class="figure">
-<span id="fig:unnamed-chunk-440"></span>
+<span id="fig:unnamed-chunk-443"></span>
 <img src="06-one-parameter/images/tactile_3_a.jpg" alt="Constructing a histogram of proportions." width="100%"><p class="caption">
 FIGURE 6.5: Constructing a histogram of proportions.
 </p>
 </div>
 <p>Histograms allow us to visualize the <em>distribution</em> of a numerical variable. In particular, where the center of the values falls and how the values vary. A partially completed histogram of the first 10 out of 33 groups of friends’ results can be seen in the figure below.</p>
 <div class="figure">
-<span id="fig:unnamed-chunk-441"></span>
+<span id="fig:unnamed-chunk-444"></span>
 <img src="06-one-parameter/images/tactile_3_c.jpg" alt="Hand-drawn histogram of first 10 out of 33 proportions." width="100%"><p class="caption">
 FIGURE 6.6: Hand-drawn histogram of first 10 out of 33 proportions.
 </p>
@@ -195,20 +194,20 @@ FIGURE 6.6: Hand-drawn histogram of first 10 out of 33 proportions.
 <pre><code>## # A tibble: 33 x 4
 ##    group          red_beads prop_red group_ID
 ##    &lt;chr&gt;              &lt;dbl&gt;    &lt;dbl&gt;    &lt;int&gt;
-##  1 Ace, Chris            18     0.36        1
-##  2 Vignesh, Eliot        16     0.32        2
-##  3 Dohyun, Estel         18     0.36        3
-##  4 Mal, Francis          17     0.34        4
-##  5 Nam, Joshua           19     0.38        5
-##  6 Aaron, Mike           11     0.22        6
-##  7 Aayush, Karen         15     0.3         7
+##  1 Yuki, Harry           21     0.42        1
+##  2 Esther, Henry         17     0.34        2
+##  3 Katie, Anthony        20     0.4         3
+##  4 Ian, Iman             18     0.36        4
+##  5 Maddie, Brent         19     0.38        5
+##  6 Mark, Ramses          21     0.42        6
+##  7 Mal, Francis          17     0.34        7
 ##  8 Conrad, Vlad          16     0.32        8
-##  9 Sanjana, Yuko         19     0.38        9
-## 10 Mak, Sophie           17     0.34       10
+##  9 Maeve, Josh           18     0.36        9
+## 10 Claire, Cloud         16     0.32       10
 ## # … with 23 more rows</code></pre>
 <p>For each <code>group</code>, we are given their names, the number of <code>red_beads</code> they obtained, and the corresponding proportion out of 50 beads that were red, called <code>prop_red</code>. We also have an <code>group_ID</code> variable which gives each of the 33 groups a unique identifier. Each row can be viewed as one instance of a replicated activity: using the shovel to remove 50 beads and computing the proportion of those beads that are red.</p>
 <p>Let’s visualize the distribution of these 33 proportions using <code>geom_histogram()</code> with <code>binwidth = 0.05</code>. This is a computerized and complete version of the partially completed hand-drawn histogram you saw earlier. Setting <code>boundary = 0.4</code> indicates that we want a binning scheme such that one of the bins’ boundary is at 0.4. <code>color = "white"</code> modifies the color of the boundary for visual clarity.</p>
-<div class="sourceCode" id="cb620"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb627"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">tactile_sample_urn</span> <span class="op">%&gt;%</span>
   <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">prop_red</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">geom_histogram</span><span class="op">(</span>binwidth <span class="op">=</span> <span class="fl">0.05</span>, 
@@ -228,7 +227,7 @@ FIGURE 6.6: Hand-drawn histogram of first 10 out of 33 proportions.
   <span class="fu">labs</span><span class="op">(</span>x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/expression.html">expression</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste</a></span><span class="op">(</span><span class="st">"Proportion of 50 beads that were red "</span>, <span class="fu"><a href="https://rdrr.io/r/grDevices/plotmath.html">hat</a></span><span class="op">(</span><span class="va">rho</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>,
        y <span class="op">=</span> <span class="st">"Count"</span>,
        title <span class="op">=</span> <span class="st">"Proportions Red in 33 Samples"</span><span class="op">)</span> </code></pre></div>
-<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-443-1.png" width="100%"></div>
+<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-446-1.png" width="100%"></div>
 </div>
 <div id="what-did-we-just-do" class="section level3" number="6.1.3">
 <h3>
@@ -248,7 +247,7 @@ FIGURE 6.6: Hand-drawn histogram of first 10 out of 33 proportions.
 <span class="header-section-number">6.2.1</span> Using the virtual shovel once<a class="anchor" aria-label="anchor" href="#shovel-one-time"><i class="fas fa-link"></i></a>
 </h3>
 <p>Virtual sampling requires a virtual urn and a virtual shovel. Create a tibble named <code>urn</code>. The rows of <code>urn</code> correspond exactly to the contents of the actual urn.</p>
-<div class="sourceCode" id="cb621"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb628"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># set.seed() ensures that the beads in our virtual urn are always in the same</span>
 <span class="co"># order. This ensures that the figures in the book match their written</span>
 <span class="co"># descriptions. We want 40% of the beads to be red.</span>
@@ -263,7 +262,7 @@ FIGURE 6.6: Hand-drawn histogram of first 10 out of 33 proportions.
   <span class="co"># beads. But we find it aesthetically pleasing to mix them up.</span>
   
   <span class="fu">sample_frac</span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span> 
-  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>bead_ID <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">1000</span><span class="op">)</span> 
+  <span class="fu">mutate</span><span class="op">(</span>bead_ID <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">1000</span><span class="op">)</span> 
 
 <span class="va">urn</span>  </code></pre></div>
 <pre><code>## # A tibble: 1,000 x 2
@@ -283,22 +282,22 @@ FIGURE 6.6: Hand-drawn histogram of first 10 out of 33 proportions.
 <p>Observe that <code>urn</code> has 1,000 rows, meaning that the urn contains
 1,000 beads. The first variable <code>bead_ID</code> is used as an <em>identification variable</em>. None of the beads in the actual urn are marked with numbers. The second variable <code>color</code> indicates whether a particular virtual bead is red or white.</p>
 <p>Note that in this section, we used the variable <code>bead_ID</code> to keep track of each bead in our urn, while in the last section we used <code>group_ID</code> to keep track of the samples drawn by the 33 individual teams. This is a better strategy than naming both variables <code>ID</code>, as it would be much more likely for us to get them confused later on.</p>
-<p>Our virtual urn needs a virtual shovel. We use <code>slice_sample()</code> and list-column mapping wizardry learned in Section <a href="probability.html#list-columns-and-map-functions">5.1</a> to take a sample of 50 beads from our virtual urn.</p>
-<div class="sourceCode" id="cb623"><pre class="downlit sourceCode r">
+<p>Our virtual urn needs a virtual shovel. We use <code>slice_sample()</code> and list-column mapping wizardry learned in Section <a href="probability.html#list-columns-and-map-functions">5.3</a> to take a sample of 50 beads from our virtual urn.</p>
+<div class="sourceCode" id="cb630"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># Define trial_ID as one instance of us sampling 50 beads from the urn. When</span>
 <span class="co"># trial_ID is called within map(), we are performing slice_sample() upon our urn</span>
 <span class="co"># once, and taking a sample of 50 beads. </span>
 
 <span class="fu">tibble</span><span class="op">(</span>trial_ID <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">%&gt;%</span> 
-  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>shovel <span class="op">=</span> <span class="fu">map</span><span class="op">(</span><span class="va">trial_ID</span>, <span class="op">~</span> <span class="fu">slice_sample</span><span class="op">(</span><span class="va">urn</span>, n <span class="op">=</span> <span class="fl">50</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+  <span class="fu">mutate</span><span class="op">(</span>shovel <span class="op">=</span> <span class="fu">map</span><span class="op">(</span><span class="va">trial_ID</span>, <span class="op">~</span> <span class="fu">slice_sample</span><span class="op">(</span><span class="va">urn</span>, n <span class="op">=</span> <span class="fl">50</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <pre><code>## # A tibble: 1 x 2
 ##   trial_ID shovel           
 ##      &lt;dbl&gt; &lt;list&gt;           
 ## 1        1 &lt;tibble [50 × 2]&gt;</code></pre>
 <p>As usual, map functions and list-columns are powerful but confusing. The <code><a href="https://rdrr.io/r/utils/str.html">str()</a></code> function is a good way to explore a tibble with a list-column.</p>
-<div class="sourceCode" id="cb625"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb632"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">tibble</span><span class="op">(</span>trial_ID <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">%&gt;%</span> 
-  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>shovel <span class="op">=</span> <span class="fu">map</span><span class="op">(</span><span class="va">trial_ID</span>, <span class="op">~</span> <span class="fu">slice_sample</span><span class="op">(</span><span class="va">urn</span>, n <span class="op">=</span> <span class="fl">50</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+  <span class="fu">mutate</span><span class="op">(</span>shovel <span class="op">=</span> <span class="fu">map</span><span class="op">(</span><span class="va">trial_ID</span>, <span class="op">~</span> <span class="fu">slice_sample</span><span class="op">(</span><span class="va">urn</span>, n <span class="op">=</span> <span class="fl">50</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
   <span class="fu"><a href="https://rdrr.io/r/utils/str.html">str</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <pre><code>## tibble [1 × 2] (S3: tbl_df/tbl/data.frame)
 ##  $ trial_ID: num 1
@@ -310,9 +309,9 @@ FIGURE 6.6: Hand-drawn histogram of first 10 out of 33 proportions.
 <p>Now let’s add a column which indicates the number of red beads in the sample taken from the shovel.</p>
 <!-- DK: Is code like .$color understandable? -->
 <!-- RS: I think the dollar sign operator should be understood at this point, but was thinking about asking Yuhan to include a way better explanation about the "this" operator in Chapter 5.  -->
-<div class="sourceCode" id="cb627"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb634"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">tibble</span><span class="op">(</span>trial_ID <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">%&gt;%</span> 
-  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>shovel <span class="op">=</span> <span class="fu">map</span><span class="op">(</span><span class="va">trial_ID</span>, <span class="op">~</span> <span class="fu">slice_sample</span><span class="op">(</span><span class="va">urn</span>, n <span class="op">=</span> <span class="fl">50</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+  <span class="fu">mutate</span><span class="op">(</span>shovel <span class="op">=</span> <span class="fu">map</span><span class="op">(</span><span class="va">trial_ID</span>, <span class="op">~</span> <span class="fu">slice_sample</span><span class="op">(</span><span class="va">urn</span>, n <span class="op">=</span> <span class="fl">50</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
   
 <span class="co"># To count the number of red beads in each shovel, we can use a lesser </span>
 <span class="co"># known property of the sum() function: By passing in a comparison </span>
@@ -320,18 +319,18 @@ FIGURE 6.6: Hand-drawn histogram of first 10 out of 33 proportions.
 <span class="co"># In this case, we count the total number occurrences of the word red</span>
 <span class="co"># in the color column of shovel.</span>
 
-  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>numb_red <span class="op">=</span> <span class="fu">map_int</span><span class="op">(</span><span class="va">shovel</span>, <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">.</span><span class="op">$</span><span class="va">color</span> <span class="op">==</span> <span class="st">"red"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+  <span class="fu">mutate</span><span class="op">(</span>numb_red <span class="op">=</span> <span class="fu">map_int</span><span class="op">(</span><span class="va">shovel</span>, <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">.</span><span class="op">$</span><span class="va">color</span> <span class="op">==</span> <span class="st">"red"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <pre><code>## # A tibble: 1 x 3
 ##   trial_ID shovel            numb_red
 ##      &lt;dbl&gt; &lt;list&gt;               &lt;int&gt;
 ## 1        1 &lt;tibble [50 × 2]&gt;       20</code></pre>
 <p>How does this work? R evaluates if <code>color == red</code>, and treats <code>TRUE</code> values like the number <code>1</code> and <code>FALSE</code> values like the number <code>0</code>. So summing the number of <code>TRUE</code>s and <code>FALSE</code>s is equivalent to summing <code>1</code>’s and <code>0</code>’s. In the end, this operation counts the number of beads where <code>color</code> equals “red.”</p>
 <p>Finally, calculate the proportion red by dividing <code>numb_red</code> (The number of red beads observed in the shovel), by the shovel size (We are using a shovel of size 50).</p>
-<div class="sourceCode" id="cb629"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb636"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">tibble</span><span class="op">(</span>trial_ID <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">%&gt;%</span> 
-  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>shovel <span class="op">=</span> <span class="fu">map</span><span class="op">(</span><span class="va">trial_ID</span>, <span class="op">~</span> <span class="fu">slice_sample</span><span class="op">(</span><span class="va">urn</span>, n <span class="op">=</span> <span class="fl">50</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
-  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>numb_red <span class="op">=</span> <span class="fu">map_int</span><span class="op">(</span><span class="va">shovel</span>, <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">.</span><span class="op">$</span><span class="va">color</span> <span class="op">==</span> <span class="st">"red"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
-  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>prop_red <span class="op">=</span> <span class="va">numb_red</span> <span class="op">/</span> <span class="fl">50</span><span class="op">)</span></code></pre></div>
+  <span class="fu">mutate</span><span class="op">(</span>shovel <span class="op">=</span> <span class="fu">map</span><span class="op">(</span><span class="va">trial_ID</span>, <span class="op">~</span> <span class="fu">slice_sample</span><span class="op">(</span><span class="va">urn</span>, n <span class="op">=</span> <span class="fl">50</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+  <span class="fu">mutate</span><span class="op">(</span>numb_red <span class="op">=</span> <span class="fu">map_int</span><span class="op">(</span><span class="va">shovel</span>, <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">.</span><span class="op">$</span><span class="va">color</span> <span class="op">==</span> <span class="st">"red"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+  <span class="fu">mutate</span><span class="op">(</span>prop_red <span class="op">=</span> <span class="va">numb_red</span> <span class="op">/</span> <span class="fl">50</span><span class="op">)</span></code></pre></div>
 <pre><code>## # A tibble: 1 x 4
 ##   trial_ID shovel            numb_red prop_red
 ##      &lt;dbl&gt; &lt;list&gt;               &lt;int&gt;    &lt;dbl&gt;
@@ -345,13 +344,13 @@ FIGURE 6.6: Hand-drawn histogram of first 10 out of 33 proportions.
 </h3>
 <p>In our tactile sampling exercise in Section <a href="one-parameter.html#sampling-activity">6.1</a>, we had 33 groups of students use the shovel, yielding 33 samples of size 50 beads. We then used these 33 samples to compute 33 proportions.</p>
 <p>Let’s use our virtual sampling to replicate the tactile sampling activity in a virtual format. We’ll save these results in a data frame called <code>virtual_samples</code>.</p>
-<div class="sourceCode" id="cb631"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb638"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">9</span><span class="op">)</span>
 
  <span class="va">virtual_samples</span> <span class="op">&lt;-</span> <span class="fu">tibble</span><span class="op">(</span>trial_ID <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">33</span><span class="op">)</span> <span class="op">%&gt;%</span>
-    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>shovel <span class="op">=</span> <span class="fu">map</span><span class="op">(</span><span class="va">trial_ID</span>, <span class="op">~</span> <span class="fu">slice_sample</span><span class="op">(</span><span class="va">urn</span>, n <span class="op">=</span> <span class="fl">50</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
-    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>numb_red <span class="op">=</span> <span class="fu">map_int</span><span class="op">(</span><span class="va">shovel</span>, <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">.</span><span class="op">$</span><span class="va">color</span> <span class="op">==</span> <span class="st">"red"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span>
-    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>prop_red <span class="op">=</span> <span class="va">numb_red</span> <span class="op">/</span> <span class="fl">50</span><span class="op">)</span> 
+    <span class="fu">mutate</span><span class="op">(</span>shovel <span class="op">=</span> <span class="fu">map</span><span class="op">(</span><span class="va">trial_ID</span>, <span class="op">~</span> <span class="fu">slice_sample</span><span class="op">(</span><span class="va">urn</span>, n <span class="op">=</span> <span class="fl">50</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+    <span class="fu">mutate</span><span class="op">(</span>numb_red <span class="op">=</span> <span class="fu">map_int</span><span class="op">(</span><span class="va">shovel</span>, <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">.</span><span class="op">$</span><span class="va">color</span> <span class="op">==</span> <span class="st">"red"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span>
+    <span class="fu">mutate</span><span class="op">(</span>prop_red <span class="op">=</span> <span class="va">numb_red</span> <span class="op">/</span> <span class="fl">50</span><span class="op">)</span> 
 
 <span class="va">virtual_samples</span></code></pre></div>
 <pre><code>## # A tibble: 33 x 4
@@ -369,7 +368,7 @@ FIGURE 6.6: Hand-drawn histogram of first 10 out of 33 proportions.
 ## 10       10 &lt;tibble [50 × 2]&gt;       20     0.4 
 ## # … with 23 more rows</code></pre>
 <p>Let’s visualize this variation in a histogram:</p>
-<div class="sourceCode" id="cb633"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb640"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">virtual_samples</span> <span class="op">%&gt;%</span> 
 <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">prop_red</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">geom_histogram</span><span class="op">(</span>binwidth <span class="op">=</span> <span class="fl">0.05</span>, 
@@ -388,13 +387,13 @@ FIGURE 6.6: Hand-drawn histogram of first 10 out of 33 proportions.
   <span class="co"># integers.</span>
   
   <span class="fu">scale_y_continuous</span><span class="op">(</span>breaks <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">10</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span></code></pre></div>
-<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-450-1.png" width="100%"></div>
+<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-453-1.png" width="100%"></div>
 <p>Since <code>binwidth = 0.05</code>, this will create bins with boundaries at 0.30, 0.35, 0.45, and so on. Recall that <span class="math inline">\(\hat{\rho}\)</span> is equal to the proportion of beads which are red in each sample.</p>
 <p>Observe that we occasionally obtained proportions red that are less than 30%. On the other hand, we occasionally obtained proportions that are greater than 45%. However, the most frequently occurring proportions were between 35% and 45%. Why do we have these differences in proportions red? Because of <em>sampling variation</em>.</p>
 <p>Now we will compare our virtual results with our tactile results from the previous section. Observe that both histograms are somewhat similar in their center and variation, although not identical. These slight differences are again due to random sampling variation. Furthermore, observe that both distributions are somewhat bell-shaped.</p>
 <div class="figure">
-<span id="fig:unnamed-chunk-451"></span>
-<img src="book_temp_files/figure-html/unnamed-chunk-451-1.png" alt="Comparing 33 virtual and 33 tactile proportions red. Note that, though the figures differ slightly, both are centered around .35 to .45. This shows that, in both sampling distributions, the most frequently occuring proportion red is between 35% and 45%." width="100%"><p class="caption">
+<span id="fig:unnamed-chunk-454"></span>
+<img src="book_temp_files/figure-html/unnamed-chunk-454-1.png" alt="Comparing 33 virtual and 33 tactile proportions red. Note that, though the figures differ slightly, both are centered around .35 to .45. This shows that, in both sampling distributions, the most frequently occuring proportion red is between 35% and 45%." width="100%"><p class="caption">
 FIGURE 6.7: Comparing 33 virtual and 33 tactile proportions red. Note that, though the figures differ slightly, both are centered around .35 to .45. This shows that, in both sampling distributions, the most frequently occuring proportion red is between 35% and 45%.
 </p>
 </div>
@@ -405,23 +404,23 @@ FIGURE 6.7: Comparing 33 virtual and 33 tactile proportions red. Note that, thou
 <span class="header-section-number">6.2.3</span> Using the virtual shovel 1,000 times<a class="anchor" aria-label="anchor" href="#shovel-1000-times"><i class="fas fa-link"></i></a>
 </h3>
 <div class="figure">
-<span id="fig:unnamed-chunk-452"></span>
+<span id="fig:unnamed-chunk-455"></span>
 <img src="06-one-parameter/images/sample_bernie.png" alt="So much sampling, so little time." width="100%"><p class="caption">
 FIGURE 6.8: So much sampling, so little time.
 </p>
 </div>
 <p>Although we took 33 samples from the urn in the previous section, we should never do that again! The advantage of modern technology is that we can use virtual simulation as many times as we choose, so we have no restrictions on resources. No longer are the days where we have to recruit our friends to tirelessly sample from the physical urn. We are now data scientists! 33 samples are useless to us. Instead, we use our simulations hundreds or thousands of times to create mathematical models that we can combine with our knowledge to answer our questions. In this section we’ll examine the effects of sampling from the urn 1,000 times.</p>
 <p>We can reuse our code from above, making sure to replace 33 trials with 1,000.</p>
-<div class="sourceCode" id="cb634"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb641"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">9</span><span class="op">)</span>
 
  <span class="va">virtual_samples</span> <span class="op">&lt;-</span> <span class="fu">tibble</span><span class="op">(</span>trial_ID <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">1000</span><span class="op">)</span> <span class="op">%&gt;%</span>
-    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>shovel <span class="op">=</span> <span class="fu">map</span><span class="op">(</span><span class="va">trial_ID</span>, <span class="op">~</span> <span class="fu">slice_sample</span><span class="op">(</span><span class="va">urn</span>, n <span class="op">=</span> <span class="fl">50</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
-    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>numb_red <span class="op">=</span> <span class="fu">map_int</span><span class="op">(</span><span class="va">shovel</span>, <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">.</span><span class="op">$</span><span class="va">color</span> <span class="op">==</span> <span class="st">"red"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span>
-    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>numb_beads <span class="op">=</span> <span class="fu">map_int</span><span class="op">(</span><span class="va">shovel</span>, <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span><span class="op">(</span><span class="va">.</span><span class="op">$</span><span class="va">color</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
-    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>prop_red <span class="op">=</span> <span class="va">numb_red</span> <span class="op">/</span> <span class="va">numb_beads</span><span class="op">)</span> </code></pre></div>
+    <span class="fu">mutate</span><span class="op">(</span>shovel <span class="op">=</span> <span class="fu">map</span><span class="op">(</span><span class="va">trial_ID</span>, <span class="op">~</span> <span class="fu">slice_sample</span><span class="op">(</span><span class="va">urn</span>, n <span class="op">=</span> <span class="fl">50</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+    <span class="fu">mutate</span><span class="op">(</span>numb_red <span class="op">=</span> <span class="fu">map_int</span><span class="op">(</span><span class="va">shovel</span>, <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">.</span><span class="op">$</span><span class="va">color</span> <span class="op">==</span> <span class="st">"red"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span>
+    <span class="fu">mutate</span><span class="op">(</span>numb_beads <span class="op">=</span> <span class="fu">map_int</span><span class="op">(</span><span class="va">shovel</span>, <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span><span class="op">(</span><span class="va">.</span><span class="op">$</span><span class="va">color</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+    <span class="fu">mutate</span><span class="op">(</span>prop_red <span class="op">=</span> <span class="va">numb_red</span> <span class="op">/</span> <span class="va">numb_beads</span><span class="op">)</span> </code></pre></div>
 <p>Now we have 1,000 values for <code>prop_red</code>, each representing the proportion of 50 beads that are red in a sample. Using the same code as earlier, let’s visualize the distribution of these 1,000 replicates of <code>prop_red</code> in a histogram:</p>
-<div class="sourceCode" id="cb635"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb642"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">virtual_samples</span> <span class="op">%&gt;%</span> 
 <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">prop_red</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">geom_histogram</span><span class="op">(</span>binwidth <span class="op">=</span> <span class="fl">0.01</span>, 
@@ -430,7 +429,7 @@ FIGURE 6.8: So much sampling, so little time.
   <span class="fu">labs</span><span class="op">(</span>x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/expression.html">expression</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/grDevices/plotmath.html">hat</a></span><span class="op">(</span><span class="va">rho</span><span class="op">)</span><span class="op">)</span>,
        y <span class="op">=</span> <span class="st">"Count"</span>,
        title <span class="op">=</span> <span class="st">"Distribution of 1,000 proportions red"</span><span class="op">)</span> </code></pre></div>
-<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-454-1.png" width="100%"></div>
+<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-457-1.png" width="100%"></div>
 <p>Why the empty spaces among the bars? Recall that, with only 50 beads, there are only 51 possible values for <span class="math inline">\(\hat{\rho}\)</span>: 0, 0.02, 0.04, …, 0.98, 1. A value of 0.31 or 0.47 is impossible, hence the gaps.</p>
 <p>The most frequently occurring proportions of red beads occur, again, between 35% and 45%. Every now and then we observe proportions much higher or lower. This occurs because as we increase the number of trials, tails develop on our distribution as we are more likely to witness extreme <span class="math inline">\(\hat{\rho}\)</span> values. The symmetric, bell-shaped distribution shown in the histogram is well approximated by the <em>normal distribution</em>.</p>
 <p>Now that we have a good understanding of virtual sampling, we can apply our knowledge to examine the effects of changing our virtual shovel size.</p>
@@ -440,20 +439,20 @@ FIGURE 6.8: So much sampling, so little time.
 <span class="header-section-number">6.2.4</span> The effect of different shovel sizes<a class="anchor" aria-label="anchor" href="#different-shovels"><i class="fas fa-link"></i></a>
 </h3>
 <div class="figure">
-<span id="fig:unnamed-chunk-455"></span>
+<span id="fig:unnamed-chunk-458"></span>
 <img src="06-one-parameter/images/three_shovels.png" alt="What happens if we use different sized shovels to sample?" width="100%"><p class="caption">
 FIGURE 6.9: What happens if we use different sized shovels to sample?
 </p>
 </div>
 <p>Instead of just one shovel, imagine we have three choices of shovels to extract a sample of beads with: shovels of size 25, 50, and 100. Using our newly developed tools for virtual sampling, let’s unpack the effect of having different sample sizes. Start by creating a tibble with 1,000 rows, each row representing an instance of us sampling from the urn with our chosen shovel size. Then, compute the resulting 1,000 replicates of proportion red. Finally, plot the distribution using a histogram.</p>
-<div class="sourceCode" id="cb636"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb643"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># Within slice_sample(), n = 25 represents our shovel of size 25. We also divide</span>
 <span class="co"># by 25 to compute the proportion red.</span>
 
 <span class="va">virtual_samples_25</span> <span class="op">&lt;-</span> <span class="fu">tibble</span><span class="op">(</span>trial_ID <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">1000</span><span class="op">)</span> <span class="op">%&gt;%</span> 
-  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>shovel <span class="op">=</span> <span class="fu">map</span><span class="op">(</span><span class="va">trial_ID</span>, <span class="op">~</span> <span class="fu">slice_sample</span><span class="op">(</span><span class="va">urn</span>, n <span class="op">=</span> <span class="fl">25</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
-  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>numb_red <span class="op">=</span> <span class="fu">map_int</span><span class="op">(</span><span class="va">shovel</span>, <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">.</span><span class="op">$</span><span class="va">color</span> <span class="op">==</span> <span class="st">"red"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
-  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>prop_red <span class="op">=</span> <span class="va">numb_red</span> <span class="op">/</span> <span class="fl">25</span><span class="op">)</span>
+  <span class="fu">mutate</span><span class="op">(</span>shovel <span class="op">=</span> <span class="fu">map</span><span class="op">(</span><span class="va">trial_ID</span>, <span class="op">~</span> <span class="fu">slice_sample</span><span class="op">(</span><span class="va">urn</span>, n <span class="op">=</span> <span class="fl">25</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+  <span class="fu">mutate</span><span class="op">(</span>numb_red <span class="op">=</span> <span class="fu">map_int</span><span class="op">(</span><span class="va">shovel</span>, <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">.</span><span class="op">$</span><span class="va">color</span> <span class="op">==</span> <span class="st">"red"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+  <span class="fu">mutate</span><span class="op">(</span>prop_red <span class="op">=</span> <span class="va">numb_red</span> <span class="op">/</span> <span class="fl">25</span><span class="op">)</span>
 
 <span class="va">virtual_samples_25</span> <span class="op">%&gt;%</span>
   <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">prop_red</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
@@ -462,13 +461,13 @@ FIGURE 6.9: What happens if we use different sized shovels to sample?
                  color <span class="op">=</span> <span class="st">"white"</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">labs</span><span class="op">(</span>x <span class="op">=</span> <span class="st">"Proportion of 25 beads that were red"</span>, 
        title <span class="op">=</span> <span class="st">"25"</span><span class="op">)</span> </code></pre></div>
-<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-456-1.png" width="100%"></div>
+<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-459-1.png" width="100%"></div>
 <p>We will repeat this process with a shovel size of <strong>50</strong>.</p>
-<div class="sourceCode" id="cb637"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb644"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">virtual_samples_50</span> <span class="op">&lt;-</span> <span class="fu">tibble</span><span class="op">(</span>trial_ID <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">1000</span><span class="op">)</span> <span class="op">%&gt;%</span> 
-  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>shovel <span class="op">=</span> <span class="fu">map</span><span class="op">(</span><span class="va">trial_ID</span>, <span class="op">~</span> <span class="fu">slice_sample</span><span class="op">(</span><span class="va">urn</span>, n <span class="op">=</span> <span class="fl">50</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
-  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>numb_red <span class="op">=</span> <span class="fu">map_int</span><span class="op">(</span><span class="va">shovel</span>, <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">.</span><span class="op">$</span><span class="va">color</span> <span class="op">==</span> <span class="st">"red"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
-  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>prop_red <span class="op">=</span> <span class="va">numb_red</span> <span class="op">/</span> <span class="fl">50</span><span class="op">)</span>
+  <span class="fu">mutate</span><span class="op">(</span>shovel <span class="op">=</span> <span class="fu">map</span><span class="op">(</span><span class="va">trial_ID</span>, <span class="op">~</span> <span class="fu">slice_sample</span><span class="op">(</span><span class="va">urn</span>, n <span class="op">=</span> <span class="fl">50</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+  <span class="fu">mutate</span><span class="op">(</span>numb_red <span class="op">=</span> <span class="fu">map_int</span><span class="op">(</span><span class="va">shovel</span>, <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">.</span><span class="op">$</span><span class="va">color</span> <span class="op">==</span> <span class="st">"red"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+  <span class="fu">mutate</span><span class="op">(</span>prop_red <span class="op">=</span> <span class="va">numb_red</span> <span class="op">/</span> <span class="fl">50</span><span class="op">)</span>
 
 
 <span class="va">virtual_samples_50</span>  <span class="op">%&gt;%</span>
@@ -478,14 +477,14 @@ FIGURE 6.9: What happens if we use different sized shovels to sample?
                  color <span class="op">=</span> <span class="st">"white"</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">labs</span><span class="op">(</span>x <span class="op">=</span> <span class="st">"Proportion of 50 beads that were red"</span>, 
        title <span class="op">=</span> <span class="st">"50"</span><span class="op">)</span>  </code></pre></div>
-<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-457-1.png" width="100%"></div>
+<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-460-1.png" width="100%"></div>
 <p>We choose a bin width of .04 for all histograms to more easily compare different shovel sizes. Using a smaller bin size would result in gaps between the bars, as a shovel of size 50 has more possible <span class="math inline">\(\hat{\rho}\)</span> values than a shovel of size 25.</p>
 <p>Finally, we will perform the same process with 1000 replicates to map the histogram using a shovel size of <strong>100</strong>.</p>
-<div class="sourceCode" id="cb638"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb645"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">virtual_samples_100</span> <span class="op">&lt;-</span> <span class="fu">tibble</span><span class="op">(</span>trial_ID <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">1000</span><span class="op">)</span> <span class="op">%&gt;%</span> 
-  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>shovel <span class="op">=</span> <span class="fu">map</span><span class="op">(</span><span class="va">trial_ID</span>, <span class="op">~</span> <span class="fu">slice_sample</span><span class="op">(</span><span class="va">urn</span>, n <span class="op">=</span> <span class="fl">100</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
-  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>numb_red <span class="op">=</span> <span class="fu">map_int</span><span class="op">(</span><span class="va">shovel</span>, <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">.</span><span class="op">$</span><span class="va">color</span> <span class="op">==</span> <span class="st">"red"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
-  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>prop_red <span class="op">=</span> <span class="va">numb_red</span> <span class="op">/</span> <span class="fl">100</span><span class="op">)</span>
+  <span class="fu">mutate</span><span class="op">(</span>shovel <span class="op">=</span> <span class="fu">map</span><span class="op">(</span><span class="va">trial_ID</span>, <span class="op">~</span> <span class="fu">slice_sample</span><span class="op">(</span><span class="va">urn</span>, n <span class="op">=</span> <span class="fl">100</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+  <span class="fu">mutate</span><span class="op">(</span>numb_red <span class="op">=</span> <span class="fu">map_int</span><span class="op">(</span><span class="va">shovel</span>, <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">.</span><span class="op">$</span><span class="va">color</span> <span class="op">==</span> <span class="st">"red"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+  <span class="fu">mutate</span><span class="op">(</span>prop_red <span class="op">=</span> <span class="va">numb_red</span> <span class="op">/</span> <span class="fl">100</span><span class="op">)</span>
 
 
 <span class="va">virtual_samples_100</span> <span class="op">%&gt;%</span>
@@ -495,20 +494,20 @@ FIGURE 6.9: What happens if we use different sized shovels to sample?
                  color <span class="op">=</span> <span class="st">"white"</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">labs</span><span class="op">(</span>x <span class="op">=</span> <span class="st">"Proportion of 100 beads that were red"</span>, 
        title <span class="op">=</span> <span class="st">"100"</span><span class="op">)</span> </code></pre></div>
-<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-458-1.png" width="100%"></div>
+<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-461-1.png" width="100%"></div>
 <p>For easy comparison, we present the three resulting histograms in a single row with matching x and y axes:</p>
-<div class="sourceCode" id="cb639"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb646"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># Use bind_rows to combine the data from our three saved virtual sampling</span>
 <span class="co"># objects. Use mutate() in each to clarify the n as the necessary number</span>
 <span class="co"># of samples taken. This makes our data easier to interpret and prevents</span>
 <span class="co"># duplicate elements.</span>
 
 <span class="va">virtual_prop</span> <span class="op">&lt;-</span> <span class="fu">bind_rows</span><span class="op">(</span><span class="va">virtual_samples_25</span> <span class="op">%&gt;%</span> 
-                            <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fl">25</span><span class="op">)</span>, 
+                            <span class="fu">mutate</span><span class="op">(</span>n <span class="op">=</span> <span class="fl">25</span><span class="op">)</span>, 
                           <span class="va">virtual_samples_50</span> <span class="op">%&gt;%</span> 
-                            <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fl">50</span><span class="op">)</span>, 
+                            <span class="fu">mutate</span><span class="op">(</span>n <span class="op">=</span> <span class="fl">50</span><span class="op">)</span>, 
                           <span class="va">virtual_samples_100</span> <span class="op">%&gt;%</span> 
-                            <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fl">100</span><span class="op">)</span><span class="op">)</span>
+                            <span class="fu">mutate</span><span class="op">(</span>n <span class="op">=</span> <span class="fl">100</span><span class="op">)</span><span class="op">)</span>
 
 <span class="co"># Plot our new object with the x-axis showing prop_red. Add elements binwidth,</span>
 <span class="co"># boundary, and color for stylistic clarity. Use labs() to add an x-axis label</span>
@@ -525,15 +524,15 @@ FIGURE 6.9: What happens if we use different sized shovels to sample?
 
 <span class="va">comparing_sampling_distributions</span></code></pre></div>
 <div class="figure">
-<span id="fig:unnamed-chunk-459"></span>
-<img src="book_temp_files/figure-html/unnamed-chunk-459-1.png" alt="Comparing the distributions of proportion red for different sample sizes (25, 50, 100). The important takeaway is that our center becomes more concentrated as our sample size increases, indicating a smaller standard deviation between our guesses." width="100%"><p class="caption">
+<span id="fig:unnamed-chunk-462"></span>
+<img src="book_temp_files/figure-html/unnamed-chunk-462-1.png" alt="Comparing the distributions of proportion red for different sample sizes (25, 50, 100). The important takeaway is that our center becomes more concentrated as our sample size increases, indicating a smaller standard deviation between our guesses." width="100%"><p class="caption">
 FIGURE 6.10: Comparing the distributions of proportion red for different sample sizes (25, 50, 100). The important takeaway is that our center becomes more concentrated as our sample size increases, indicating a smaller standard deviation between our guesses.
 </p>
 </div>
 <p>Observe that as the sample size increases, the histogram becomes taller and narrower. This is because the <em>variation</em> of the proportion red for each sample decreases. Remember: A large variation means there are a wide range of values that can be achieved, while smaller variations are concentrated around a specific value.</p>
 <p>Why does variation decrease as sample size increases? If we use a large sample size like 100 or 500, our sample is much more representative of the population simply because more of the population is included. As a result, the proportion red in our sample (<span class="math inline">\(\hat{\rho}\)</span>) will be closer to the population proportion (<span class="math inline">\(\rho\)</span>). On the other hand, smaller samples have much more variation because of our old friend chance. We are much more likely to have extreme samples that are not representative of our population.</p>
 <p>Let’s attempt to visualize the concept of <em>variation</em> a different way. For each sample size, let’s plot the proportion red for <em>all</em> 1,000 samples. With 3 different shovel sizes, we will have 3,000 total points, with each point representing an instance of sampling from the urn with a specific shovel size.</p>
-<div class="sourceCode" id="cb640"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb647"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">virtual_prop</span> <span class="op">%&gt;%</span>
   <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">n</span>, y <span class="op">=</span> <span class="va">prop_red</span>, color <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">as.factor</a></span><span class="op">(</span><span class="va">n</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">geom_jitter</span><span class="op">(</span>alpha <span class="op">=</span> <span class="fl">.15</span><span class="op">)</span> <span class="op">+</span> 
@@ -545,7 +544,7 @@ FIGURE 6.10: Comparing the distributions of proportion red for different sample 
    <span class="fu">theme</span><span class="op">(</span>axis.title.x <span class="op">=</span> <span class="fu">element_blank</span><span class="op">(</span><span class="op">)</span>,
         axis.text.x <span class="op">=</span> <span class="fu">element_blank</span><span class="op">(</span><span class="op">)</span>,
         axis.ticks.x <span class="op">=</span> <span class="fu">element_blank</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></code></pre></div>
-<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-460-1.png" width="100%"></div>
+<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-463-1.png" width="100%"></div>
 <p>This graph illustrates the exact same concept as the histogram. With the smallest shovel size there is significant variance from sample to sample, as samples take on a wide variety of sample proportions! However, as we increase the sample size, the points become more concentrated, or less variance.</p>
 <p>There is also a third way to understand variation! We can be numerically explicit about the amount of variation in our three sets of 1,000 values of <code>prop_red</code> by using the <em>standard deviation</em>. A standard deviation is a summary statistic that measures the amount of variation within a numerical variable. For all three sample sizes, let’s compute the standard deviation of the 1,000 proportions red.</p>
 <div id="ygwszswkvq" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
@@ -913,19 +912,19 @@ FIGURE 6.10: Comparing the distributions of proportion red for different sample 
 <p> </p>
 <p>As the sample size increases, the sample to sample variation decreases, and our guesses at the true proportion of the urn’s beads that are red get more precise. The larger the shovel, the more precise the result.</p>
 <div class="figure">
-<span id="fig:unnamed-chunk-462"></span>
+<span id="fig:unnamed-chunk-465"></span>
 <img src="06-one-parameter/images/variance_everywhere_meme.jpeg" alt="Variance appears everywhere in data science." width="100%"><p class="caption">
 FIGURE 6.11: Variance appears everywhere in data science.
 </p>
 </div>
 <p>Let’s take a step back from all the variance. The reality is that our code needs to be <em>re-factored</em>, as it is bad practice to make a separate tibble for each sample size. To make comparisons easier, let’s attempt to put all 3 shovel sizes in the same tibble using mapping.</p>
-<div class="sourceCode" id="cb641"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb648"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">tibble</span><span class="op">(</span>trial_ID <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">1000</span><span class="op">)</span> <span class="op">%&gt;%</span>
-  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>shovel_ID <span class="op">=</span> <span class="fu">map</span><span class="op">(</span><span class="va">trial_ID</span>, <span class="op">~</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">25</span>, <span class="fl">50</span>, <span class="fl">100</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span>
+  <span class="fu">mutate</span><span class="op">(</span>shovel_ID <span class="op">=</span> <span class="fu">map</span><span class="op">(</span><span class="va">trial_ID</span>, <span class="op">~</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">25</span>, <span class="fl">50</span>, <span class="fl">100</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span>
   <span class="fu">unnest</span><span class="op">(</span><span class="va">shovel_ID</span><span class="op">)</span> <span class="op">%&gt;%</span>
-  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>samples <span class="op">=</span> <span class="fu">map</span><span class="op">(</span><span class="va">shovel_ID</span>, <span class="op">~</span><span class="fu">slice_sample</span><span class="op">(</span><span class="va">urn</span>, n <span class="op">=</span> <span class="va">.</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span>
-  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>num_red <span class="op">=</span> <span class="fu">map_int</span><span class="op">(</span><span class="va">samples</span>, <span class="op">~</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">.</span><span class="op">$</span><span class="va">color</span> <span class="op">==</span> <span class="st">"red"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span>
-  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>prop_red <span class="op">=</span> <span class="va">num_red</span><span class="op">/</span><span class="va">shovel_ID</span><span class="op">)</span></code></pre></div>
+  <span class="fu">mutate</span><span class="op">(</span>samples <span class="op">=</span> <span class="fu">map</span><span class="op">(</span><span class="va">shovel_ID</span>, <span class="op">~</span><span class="fu">slice_sample</span><span class="op">(</span><span class="va">urn</span>, n <span class="op">=</span> <span class="va">.</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span>
+  <span class="fu">mutate</span><span class="op">(</span>num_red <span class="op">=</span> <span class="fu">map_int</span><span class="op">(</span><span class="va">samples</span>, <span class="op">~</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">.</span><span class="op">$</span><span class="va">color</span> <span class="op">==</span> <span class="st">"red"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span>
+  <span class="fu">mutate</span><span class="op">(</span>prop_red <span class="op">=</span> <span class="va">num_red</span><span class="op">/</span><span class="va">shovel_ID</span><span class="op">)</span></code></pre></div>
 <pre><code>## # A tibble: 3,000 x 5
 ##    trial_ID shovel_ID samples            num_red prop_red
 ##       &lt;int&gt;     &lt;dbl&gt; &lt;list&gt;               &lt;int&gt;    &lt;dbl&gt;
@@ -941,7 +940,7 @@ FIGURE 6.11: Variance appears everywhere in data science.
 ## 10        4        25 &lt;tibble [25 × 2]&gt;        9     0.36
 ## # … with 2,990 more rows</code></pre>
 <p>To those of us who do not completely understand mapping, do not fret! The <strong>tidyr</strong> package provides the <code>expand_grid()</code> function as a neat alternative. We can use <code>expand_grid()</code> and a new variable, <code>shovel_size</code>, to create a tibble which will organize our results. Instead of using 1,000 trials, let’s use 3 to get a feel for the function.</p>
-<div class="sourceCode" id="cb643"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb650"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">expand_grid</span><span class="op">(</span>trial_ID <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">)</span>, shovel_size <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">25</span>, <span class="fl">50</span>, <span class="fl">100</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <pre><code>## # A tibble: 9 x 2
 ##   trial_ID shovel_size
@@ -956,11 +955,11 @@ FIGURE 6.11: Variance appears everywhere in data science.
 ## 8        3          50
 ## 9        3         100</code></pre>
 <p>The above sets the stage for simulating three samples for each of three different shovel sizes. Similar code as above can be used.</p>
-<div class="sourceCode" id="cb645"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb652"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">expand_grid</span><span class="op">(</span>trial_ID <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">)</span>, shovel_size <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">25</span>, <span class="fl">50</span>, <span class="fl">100</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
-  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>shovel <span class="op">=</span> <span class="fu">map</span><span class="op">(</span><span class="va">shovel_size</span>, <span class="op">~</span> <span class="fu">slice_sample</span><span class="op">(</span><span class="va">urn</span>, n <span class="op">=</span> <span class="va">.</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
-  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>numb_red <span class="op">=</span> <span class="fu">map_int</span><span class="op">(</span><span class="va">shovel</span>, <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">.</span><span class="op">$</span><span class="va">color</span> <span class="op">==</span> <span class="st">"red"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
-  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>prop_red <span class="op">=</span> <span class="va">numb_red</span><span class="op">/</span><span class="va">shovel_size</span><span class="op">)</span> </code></pre></div>
+  <span class="fu">mutate</span><span class="op">(</span>shovel <span class="op">=</span> <span class="fu">map</span><span class="op">(</span><span class="va">shovel_size</span>, <span class="op">~</span> <span class="fu">slice_sample</span><span class="op">(</span><span class="va">urn</span>, n <span class="op">=</span> <span class="va">.</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+  <span class="fu">mutate</span><span class="op">(</span>numb_red <span class="op">=</span> <span class="fu">map_int</span><span class="op">(</span><span class="va">shovel</span>, <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">.</span><span class="op">$</span><span class="va">color</span> <span class="op">==</span> <span class="st">"red"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+  <span class="fu">mutate</span><span class="op">(</span>prop_red <span class="op">=</span> <span class="va">numb_red</span><span class="op">/</span><span class="va">shovel_size</span><span class="op">)</span> </code></pre></div>
 <pre><code>## # A tibble: 9 x 5
 ##   trial_ID shovel_size shovel             numb_red prop_red
 ##      &lt;int&gt;       &lt;dbl&gt; &lt;list&gt;                &lt;int&gt;    &lt;dbl&gt;
@@ -974,12 +973,12 @@ FIGURE 6.11: Variance appears everywhere in data science.
 ## 8        3          50 &lt;tibble [50 × 2]&gt;        18     0.36
 ## 9        3         100 &lt;tibble [100 × 2]&gt;       53     0.53</code></pre>
 <p>Again, we changed the second line to use <code>shovel_size</code> rather than <code>trial_ID</code> as the mapping variable since we can no longer hard code the shovel size into the call to <code>slice_sample()</code>. Expand to 1,000 simulations for each value of <code>shovel_size</code> and finish with a calculation of standard deviation.</p>
-<div class="sourceCode" id="cb647"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb654"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">expand_grid</span><span class="op">(</span>trial_ID <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">1000</span><span class="op">)</span>, shovel_size <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">25</span>, <span class="fl">50</span>, <span class="fl">100</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
-  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>shovel <span class="op">=</span> <span class="fu">map</span><span class="op">(</span><span class="va">shovel_size</span>, <span class="op">~</span> <span class="fu">slice_sample</span><span class="op">(</span><span class="va">urn</span>, n <span class="op">=</span> <span class="va">.</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
-  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>numb_red <span class="op">=</span> <span class="fu">map_int</span><span class="op">(</span><span class="va">shovel</span>, <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">.</span><span class="op">$</span><span class="va">color</span> <span class="op">==</span> <span class="st">"red"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
-  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>prop_red <span class="op">=</span> <span class="va">numb_red</span><span class="op">/</span><span class="va">shovel_size</span><span class="op">)</span> <span class="op">%&gt;%</span>
-  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html">group_by</a></span><span class="op">(</span><span class="va">shovel_size</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+  <span class="fu">mutate</span><span class="op">(</span>shovel <span class="op">=</span> <span class="fu">map</span><span class="op">(</span><span class="va">shovel_size</span>, <span class="op">~</span> <span class="fu">slice_sample</span><span class="op">(</span><span class="va">urn</span>, n <span class="op">=</span> <span class="va">.</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+  <span class="fu">mutate</span><span class="op">(</span>numb_red <span class="op">=</span> <span class="fu">map_int</span><span class="op">(</span><span class="va">shovel</span>, <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">.</span><span class="op">$</span><span class="va">color</span> <span class="op">==</span> <span class="st">"red"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+  <span class="fu">mutate</span><span class="op">(</span>prop_red <span class="op">=</span> <span class="va">numb_red</span><span class="op">/</span><span class="va">shovel_size</span><span class="op">)</span> <span class="op">%&gt;%</span>
+  <span class="fu">group_by</span><span class="op">(</span><span class="va">shovel_size</span><span class="op">)</span> <span class="op">%&gt;%</span> 
   <span class="fu">summarize</span><span class="op">(</span>st_dev_p_hat <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/sd.html">sd</a></span><span class="op">(</span><span class="va">prop_red</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <pre><code>## # A tibble: 3 x 2
 ##   shovel_size st_dev_p_hat
@@ -989,12 +988,12 @@ FIGURE 6.11: Variance appears everywhere in data science.
 ## 3         100       0.0452</code></pre>
 <p>This is, approximately, the same result as we saw above, but with 1 re-factored tibble instead of 3 separate ones. We can also functions like <code>expand_grid()</code> in the future to make our code more concise.</p>
 <p>Now that we have this framework, there’s no need to limit ourselves to the sizes 25, 50, and 100. Why not try all integers from 1 to 100? We can use the same code, except we’ll now set <code>shovel_size = 1:100</code>.</p>
-<div class="sourceCode" id="cb649"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb656"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">shovels_100</span> <span class="op">&lt;-</span> <span class="fu">expand_grid</span><span class="op">(</span>trial_ID <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">1000</span><span class="op">)</span>, shovel_size <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">100</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
-  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>shovel <span class="op">=</span> <span class="fu">map</span><span class="op">(</span><span class="va">shovel_size</span>, <span class="op">~</span> <span class="fu">slice_sample</span><span class="op">(</span><span class="va">urn</span>, n <span class="op">=</span> <span class="va">.</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
-  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>numb_red <span class="op">=</span> <span class="fu">map_int</span><span class="op">(</span><span class="va">shovel</span>, <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">.</span><span class="op">$</span><span class="va">color</span> <span class="op">==</span> <span class="st">"red"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
-  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>prop_red <span class="op">=</span> <span class="va">numb_red</span> <span class="op">/</span> <span class="va">shovel_size</span><span class="op">)</span> <span class="op">%&gt;%</span> 
-  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html">group_by</a></span><span class="op">(</span><span class="va">shovel_size</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+  <span class="fu">mutate</span><span class="op">(</span>shovel <span class="op">=</span> <span class="fu">map</span><span class="op">(</span><span class="va">shovel_size</span>, <span class="op">~</span> <span class="fu">slice_sample</span><span class="op">(</span><span class="va">urn</span>, n <span class="op">=</span> <span class="va">.</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+  <span class="fu">mutate</span><span class="op">(</span>numb_red <span class="op">=</span> <span class="fu">map_int</span><span class="op">(</span><span class="va">shovel</span>, <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">.</span><span class="op">$</span><span class="va">color</span> <span class="op">==</span> <span class="st">"red"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+  <span class="fu">mutate</span><span class="op">(</span>prop_red <span class="op">=</span> <span class="va">numb_red</span> <span class="op">/</span> <span class="va">shovel_size</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+  <span class="fu">group_by</span><span class="op">(</span><span class="va">shovel_size</span><span class="op">)</span> <span class="op">%&gt;%</span> 
   <span class="fu">summarize</span><span class="op">(</span>st_dev_p_hat <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/sd.html">sd</a></span><span class="op">(</span><span class="va">prop_red</span><span class="op">)</span><span class="op">)</span>
 
 <span class="fu">glimpse</span><span class="op">(</span><span class="va">shovels_100</span><span class="op">)</span></code></pre></div>
@@ -1004,14 +1003,14 @@ FIGURE 6.11: Variance appears everywhere in data science.
 ## $ st_dev_p_hat &lt;dbl&gt; 0.490, 0.338, 0.289, 0.248, 0.210, 0.208, 0.182, 0.171, 0…</code></pre>
 <p>Now, we have the standard deviation of <code>prop_red</code> for all shovel sizes from 1 to 100. Let’s plot that value to see how it changes as the shovel gets larger:</p>
 <div class="figure">
-<span id="fig:unnamed-chunk-469"></span>
-<img src="book_temp_files/figure-html/unnamed-chunk-469-1.png" alt="Comparing standard deviations of proportions red for 100 different shovels. The standard deviation decreases at the same rate as the square root of shovel size. The red line shows the standard error." width="100%"><p class="caption">
+<span id="fig:unnamed-chunk-472"></span>
+<img src="book_temp_files/figure-html/unnamed-chunk-472-1.png" alt="Comparing standard deviations of proportions red for 100 different shovels. The standard deviation decreases at the same rate as the square root of shovel size. The red line shows the standard error." width="100%"><p class="caption">
 FIGURE 6.12: Comparing standard deviations of proportions red for 100 different shovels. The standard deviation decreases at the same rate as the square root of shovel size. The red line shows the standard error.
 </p>
 </div>
 <p>The red line here represents an important statistical concept: standard error (SE). As the shovel size increases, and thus our sample size increases, we find that the standard error decreases. If this is confusing right now, fear not! We will delve into the explanation of standard error in our next section.</p>
 <div class="figure">
-<span id="fig:unnamed-chunk-470"></span>
+<span id="fig:unnamed-chunk-473"></span>
 <img src="06-one-parameter/images/meme_math.png" alt="To any poets and philosophers confused about this: don't worry! It won't be on a problem set." width="100%"><p class="caption">
 FIGURE 6.13: To any poets and philosophers confused about this: don’t worry! It won’t be on a problem set.
 </p>
@@ -1024,7 +1023,7 @@ FIGURE 6.13: To any poets and philosophers confused about this: don’t worry! I
 <span class="header-section-number">6.3</span> Standard error<a class="anchor" aria-label="anchor" href="#standard-errors"><i class="fas fa-link"></i></a>
 </h2>
 <div class="figure" style="text-align: center">
-<span id="fig:unnamed-chunk-471"></span>
+<span id="fig:unnamed-chunk-474"></span>
 <img src="06-one-parameter/images/old_man_SE.png" alt="Standard errors are just the way old people talk about confidence intervals." width="100%"><p class="caption">
 FIGURE 6.14: Standard errors are just the way old people talk about confidence intervals.
 </p>
@@ -1038,7 +1037,7 @@ FIGURE 6.14: Standard errors are just the way old people talk about confidence i
 <span class="header-section-number">6.3.1</span> Terminology and notation<a class="anchor" aria-label="anchor" href="#terminology-and-notation"><i class="fas fa-link"></i></a>
 </h3>
 <div class="figure">
-<span id="fig:unnamed-chunk-472"></span>
+<span id="fig:unnamed-chunk-475"></span>
 <img src="06-one-parameter/images/yoda.png" alt="Let Yoda's wisdom dull the pain of this terminology section." width="100%"><p class="caption">
 FIGURE 6.15: Let Yoda’s wisdom dull the pain of this terminology section.
 </p>
@@ -1055,7 +1054,7 @@ FIGURE 6.15: Let Yoda’s wisdom dull the pain of this terminology section.
 <p>Eighth, <strong>biased sampling</strong> occurs if certain individuals or observations in a population have a higher chance of being included in a sample than others. We say a sampling procedure is <strong>unbiased</strong> if every observation in a population had an equal chance of being sampled. Had the red beads been much smaller than the white beads, and therefore more prone to falling out of the shovel, our sample would have been <strong>biased</strong>. In our sampling activities, since we mixed all <span class="math inline">\(N = 1000\)</span> beads prior to each group’s sampling and since each of the equally sized beads had an equal chance of being sampled, our samples were unbiased.</p>
 <p>Ninth, a sampling procedure is <em>random</em> if we sample randomly from the population in an unbiased fashion. In our sampling activities, this would correspond to sufficiently mixing the urn before each use of the shovel.</p>
 <div class="figure" style="text-align: center">
-<span id="fig:unnamed-chunk-473"></span>
+<span id="fig:unnamed-chunk-476"></span>
 <img src="06-one-parameter/images/cant_breathe_sponge.png" alt="Fear not if you look like Spongebob after reading this section. We will re-cap right now!" width="100%"><p class="caption">
 FIGURE 6.16: Fear not if you look like Spongebob after reading this section. We will re-cap right now!
 </p>
@@ -1083,8 +1082,8 @@ FIGURE 6.16: Fear not if you look like Spongebob after reading this section. We 
 </h3>
 <p>Now, for some important statistical definitions related to sampling. As a refresher of our 1,000 repeated/replicated virtual samples of size <span class="math inline">\(n\)</span> = 25, <span class="math inline">\(n\)</span> = 50, and <span class="math inline">\(n\)</span> = 100 in Section <a href="one-parameter.html#virtual-sampling">6.2</a>, let’s display our figure showing the difference in proportions red according to different shovel sizes.</p>
 <div class="figure">
-<span id="fig:unnamed-chunk-474"></span>
-<img src="book_temp_files/figure-html/unnamed-chunk-474-1.png" alt="Previously seen three distributions of the sample proportion $\hat{
+<span id="fig:unnamed-chunk-477"></span>
+<img src="book_temp_files/figure-html/unnamed-chunk-477-1.png" alt="Previously seen three distributions of the sample proportion $\hat{
 ho}$." width="100%"><p class="caption">
 FIGURE 6.17: Previously seen three distributions of the sample proportion <span class="math inline">\(\hat{ ho}\)</span>.
 </p>
@@ -1092,8 +1091,8 @@ FIGURE 6.17: Previously seen three distributions of the sample proportion <span 
 <p>These types of distributions have a special name: <strong>sampling distributions</strong>; their visualization displays the effect of sampling variation on the distribution of a point estimate; in this case, the sample proportion <span class="math inline">\(\hat{\rho}\)</span>. Using these sampling distributions, for a given sample size <span class="math inline">\(n\)</span>, we can make statements about what values we typically expect.</p>
 <p>For example, observe the centers of all three sampling distributions: they are all roughly centered around <span class="math inline">\(0.4 = 40\%\)</span>. Furthermore, observe that while we are somewhat likely to observe sample proportions of red beads of <span class="math inline">\(0.2 = 20\%\)</span> when using the shovel with 25 slots, we will almost never observe a proportion of 20% when using the shovel with 100 slots. Observe also the effect of sample size on the sampling variation. As the sample size <span class="math inline">\(n\)</span> increases from 25 to 50 to 100, the variation of the sampling distribution decreases and thus the values cluster more and more tightly around the same center of around 40%. We quantified this variation using the standard deviation of our sample proportions, seeing that the standard deviation decreases with the square root of the sample size:</p>
 <div class="figure">
-<span id="fig:unnamed-chunk-475"></span>
-<img src="book_temp_files/figure-html/unnamed-chunk-475-1.png" alt="Previously seen comparing standard deviations of proportions red for 100 different shovels" width="100%"><p class="caption">
+<span id="fig:unnamed-chunk-478"></span>
+<img src="book_temp_files/figure-html/unnamed-chunk-478-1.png" alt="Previously seen comparing standard deviations of proportions red for 100 different shovels" width="100%"><p class="caption">
 FIGURE 6.18: Previously seen comparing standard deviations of proportions red for 100 different shovels
 </p>
 </div>
@@ -1112,16 +1111,16 @@ FIGURE 6.18: Previously seen comparing standard deviations of proportions red fo
 <p>The more data points involved in the calculations of the mean, the smaller the standard error tends to be. When the standard error is small, the data is said to be more representative of the true mean. In cases where the standard error is large, the data may have some notable irregularities. Thus, larger sample size = smaller standard error = more representative of the truth.</p>
 <p>To help reinforce these concepts, let’s re-display our previous figure but using our new sampling terminology, notation, and definitions:</p>
 <div class="figure">
-<span id="fig:unnamed-chunk-476"></span>
-<img src="book_temp_files/figure-html/unnamed-chunk-476-1.png" alt="Three sampling distributions of the sample proportion $\hat{
+<span id="fig:unnamed-chunk-479"></span>
+<img src="book_temp_files/figure-html/unnamed-chunk-479-1.png" alt="Three sampling distributions of the sample proportion $\hat{
 ho}$. Note the increased concentration on the bins around .4 as our sample size increases." width="100%"><p class="caption">
 FIGURE 6.19: Three sampling distributions of the sample proportion <span class="math inline">\(\hat{ ho}\)</span>. Note the increased concentration on the bins around .4 as our sample size increases.
 </p>
 </div>
 <p>Furthermore, let’s display the graph of standard errors for <span class="math inline">\(n = 1\)</span> to <span class="math inline">\(n = 100\)</span> using our new terminology, notation, and definitions relating to sampling.</p>
 <div class="figure">
-<span id="fig:unnamed-chunk-477"></span>
-<img src="book_temp_files/figure-html/unnamed-chunk-477-1.png" alt="Standard errors of the sample proportion based on sample sizes of 1 to 100" width="100%"><p class="caption">
+<span id="fig:unnamed-chunk-480"></span>
+<img src="book_temp_files/figure-html/unnamed-chunk-480-1.png" alt="Standard errors of the sample proportion based on sample sizes of 1 to 100" width="100%"><p class="caption">
 FIGURE 6.20: Standard errors of the sample proportion based on sample sizes of 1 to 100
 </p>
 </div>
@@ -1138,7 +1137,7 @@ FIGURE 6.20: Standard errors of the sample proportion based on sample sizes of 1
 <p>The standard error measures the accuracy of a sample distribution as compared to the population by using the standard deviation. Specifically, the standard deviation of our data points divided by the square root of the sample size. As such, we find that larger sample sizes = lower standard errors = more accurate and representative guesses.</p>
 <p>To really drive home our point: standard error is just a fancy term for your uncertainty about something you don’t know. Standard error == our (uncertain) beliefs.</p>
 <div class="figure" style="text-align: center">
-<span id="fig:unnamed-chunk-478"></span>
+<span id="fig:unnamed-chunk-481"></span>
 <img src="06-one-parameter/images/final_preceptor.png" alt="If you are wondering how much you need to know, follow this helpful guide of the information we have learned this chapter!" width="100%"><p class="caption">
 FIGURE 6.21: If you are wondering how much you need to know, follow this helpful guide of the information we have learned this chapter!
 </p>
@@ -1160,8 +1159,12 @@ FIGURE 6.21: If you are wondering how much you need to know, follow this helpful
 <span class="header-section-number">6.4</span> Cardinal Virtues<a class="anchor" aria-label="anchor" href="#cardinal-virtues-1"><i class="fas fa-link"></i></a>
 </h2>
 <p>Recall the questions we asked at the beginning of this Chapter:</p>
-<p><em>If we get 17 red beads in a random sample of size 50 taken from a mixed urn, what proportion <span class="math inline">\(\rho\)</span> of the beads in the urn are red?</em></p>
-<p><em>What is the probability, using the same urn, that we will draw more than 8 red beads if we use a shovel of size 20?</em></p>
+<blockquote>
+<p>If we get 17 red beads in a random sample of size 50 taken from a mixed urn, what proportion <span class="math inline">\(\rho\)</span> of the beads in the urn are red?</p>
+</blockquote>
+<blockquote>
+<p>What is the probability, using the same urn, that we will draw more than 8 red beads if we use a shovel of size 20?</p>
+</blockquote>
 <p>Use the Cardinal Virtues to guide your thinking.</p>
 <div id="wisdom-1" class="section level3" number="6.4.1">
 <h3>
@@ -1170,7 +1173,7 @@ FIGURE 6.21: If you are wondering how much you need to know, follow this helpful
 <div class="inline-figure"><img src="other/images/Wisdom.jpg" width="100%"></div>
 <p>Wisdom requires the creation of a Preceptor Table, an examination of our data, and a determination as to whether or not we can (reasonably!) assume that the two come from the same <em>population</em>.</p>
 <div class="figure">
-<span id="fig:unnamed-chunk-480"></span>
+<span id="fig:unnamed-chunk-483"></span>
 <img src="06-one-parameter/images/here_we_go.png" alt="When you see another Precetor Table section." width="100%"><p class="caption">
 FIGURE 6.22: When you see another Precetor Table section.
 </p>
@@ -2539,11 +2542,11 @@ FIGURE 6.22: When you see another Precetor Table section.
 <!-- RS: I'm protesting! I really like this section.  -->
 <p>We are Bayesian data scientists that make Bayesian models. This means that we make specific assumptions and consider different things to be either fixed or variable compared to other data science frameworks. One of the most important distinctions is that in Bayesian data science, <strong>we don’t know the values of our parameters</strong>. Consider the DGM created in Justice:</p>
 <p><span class="math display">\[ T_i  \sim B(\rho, n = 50) \]</span></p>
-<p>Some non-Bayesian frameworks are concerned with the probability distribution of our observed data, but do not care much about the probability distribution for <span class="math inline">\(\rho_r\)</span> and assume it to be fixed. If <span class="math inline">\(\rho_r\)</span> is fixed, the equation above becomes one simple binomial distribution. Think of this as a standard 2 dimensional plot.</p>
-<p>Us Bayesians consider our observed data to be fixed. We don’t consider alternate realities where our observed data is different due to sampling variation. Instead, we are concerned with the probability distribution of our parameter. In our urn scenario, <span class="math inline">\(\rho_r\)</span> is variable, so we have to create a separate binomial distribution for each possible value of <span class="math inline">\(\rho_r\)</span>. Think of this as a 3 dimensional joint distribution like what we created in Section <a href="probability.html#n-models">5.6</a>.</p>
+<p>Some non-Bayesian frameworks are concerned with the probability distribution of our observed data, but do not care much about the probability distribution for <span class="math inline">\(\rho\)</span> and assume it to be fixed. If <span class="math inline">\(\rho\)</span> is fixed, the equation above becomes one simple binomial distribution. Think of this as a standard 2 dimensional plot.</p>
+<p>Us Bayesians consider our observed data to be fixed. We don’t consider alternate realities where our observed data is different due to sampling variation. Instead, we are concerned with the probability distribution of our parameter. In our urn scenario, <span class="math inline">\(\rho\)</span> is variable, so we have to create a separate binomial distribution for each possible value of <span class="math inline">\(\rho\)</span>. Think of this as a 3 dimensional joint distribution like what we created in Section <a href="probability.html#n-models">5.6</a>.</p>
 <p>It is essential to understand the joint distribution and the posterior, two concepts Bayesians use to solve problems. We will provide quick a quick review here, including statistical notation that may be helpful to some.</p>
 <p><strong>The joint distribution</strong>, <span class="math inline">\(p(y|\theta)\)</span>, models the outcome <span class="math inline">\(y\)</span> given one or more unknown parameter(s), <span class="math inline">\(\theta\)</span>. The equation illustrates exact same concept we addressed while discussing the distinctions of Bayesian science: because our parameters are variable, we have to create separate distributions for each potential value. Combining all these distributions together creates a joint distribution that is 3 dimensional when plotted.</p>
-<p><strong>The posterior</strong>, <span class="math inline">\(p(\theta|y)\)</span>, is the result of Bayes’ theorem and is our coveted end goal. The posterior is the probability distribution of our parameters, created using data that updates our prior beliefs. We have referenced the posterior many times before, and this definition does not change its meaning.</p>
+<p><strong>The posterior</strong>, <span class="math inline">\(p(\theta|y)\)</span>, is the probability distribution of our parameter(s) <span class="math inline">\(\theta\)</span>, created using data <span class="math inline">\(y\)</span> that updates our beliefs. We have referenced the posterior many times before, and this definition does not change its meaning.</p>
 <p>In our urn scenario, obtaining the posterior involves first creating many binomial distributions for each possible population proportion. This is the joint distribution, and it is a 3 dimensional model. We then select the distribution that corresponds with our data: 17 red beads are sampled. We can represent the posterior with the following:</p>
 <p><span class="math display">\[\text{Prob}(\text{models} | \text{data} = 17)\]</span></p>
 <p>This is equivalent to taking a 2 dimensional slice of the 3 dimensional model. We are left with a probability distribution for our parameter, <span class="math inline">\(\rho\)</span>.</p>
@@ -2554,7 +2557,7 @@ FIGURE 6.22: When you see another Precetor Table section.
 </h4>
 <p>Given a data set to use and a mathematical formula to work with, the next step is to write some code. We will use the <strong>rstanarm</strong> package, which provides a user friendly interface to work with the statistical language Stan.</p>
 <p><strong>rstanarm</strong> and Stan are appealing because they are powerful. Functions such as <code><a href="https://mc-stan.org/rstanarm/reference/stan_glm.html">stan_glm()</a></code> can do everything we did by hand in Chapter 5 in a few lines of code. Because we will use a professional statistical library, the objects we make will become more complex. In this Chapter, we provide the steps for answering our questions. Chapter <a href="two-parameters.html#two-parameters">7</a> will provide a more detailed explanation of the objects we will make. <em>To be clear, you do not need to fully understand this section or how this code works. This is an introduction, not a formal lesson.</em></p>
-<div class="sourceCode" id="cb651"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb658"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://mc-stan.org/rstanarm/">rstanarm</a></span><span class="op">)</span>
 
 <span class="va">fit_1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://mc-stan.org/rstanarm/reference/stan_glm.html">stan_glm</a></span><span class="op">(</span>formula <span class="op">=</span> <span class="va">red</span> <span class="op">~</span> <span class="fl">1</span>, 
@@ -2566,7 +2569,7 @@ FIGURE 6.22: When you see another Precetor Table section.
 <p>Recall that we assumed a binomial model for the data generating mechanism. In <code><a href="https://mc-stan.org/rstanarm/reference/stan_glm.html">stan_glm()</a></code> we denote this with <code>family = binomial</code>. In addition to the type of the distribution, we also need to analyze the outcome and predictor variables involved. The outcome is the quantity we are measuring, in this case the total number of red beads in our sample. Because we have no predictors, we use the argument <code>formula = red ~ 1</code>, which means that we only model the outcome based on the unknown proportion of red beads in the urn, <span class="math inline">\(\rho\)</span>.</p>
 <p>We pass in data in a binomial format: the 1’s represent the number of successes (red beads drawn), and the 0’s represent the number of failures (white beads drawn). As such, we pass a tibble with 17 red beads and 33 white beads into <code>data</code>.</p>
 <p>We use <code>refresh = 0</code> to suppress the behavior of printing to the console, and <code>seed = 10</code> so that we get the same output every time we run the code. The resulting model is:</p>
-<div class="sourceCode" id="cb652"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb659"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">fit_1</span></code></pre></div>
 <pre><code>## stan_glm
 ##  family:       binomial [logit]
@@ -2582,11 +2585,11 @@ FIGURE 6.22: When you see another Precetor Table section.
 ## * For info on the priors used see ?prior_summary.stanreg</code></pre>
 <p>We will learn the meaning of this output in Chapter <a href="two-parameters.html#two-parameters">7</a>. Once we have the <code>fit_1</code> object, it is easy to answer two sorts of questions: the posterior probability distribution for <span class="math inline">\(\rho\)</span> and predictions for new draws from the urn. The key new functions are <code><a href="https://mc-stan.org/rstanarm/reference/posterior_linpred.stanreg.html">posterior_epred()</a></code> for the former and <code><a href="https://mc-stan.org/rstanarm/reference/posterior_predict.stanreg.html">posterior_predict()</a></code> for the latter.</p>
 <p>Let’s recreate our posterior using <code><a href="https://mc-stan.org/rstanarm/reference/posterior_linpred.stanreg.html">posterior_epred()</a></code>:</p>
-<div class="sourceCode" id="cb654"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb661"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">ppd_for_p</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://mc-stan.org/rstanarm/reference/posterior_linpred.stanreg.html">posterior_epred</a></span><span class="op">(</span><span class="va">fit_1</span>, 
                 newdata <span class="op">=</span> <span class="fu">tibble</span><span class="op">(</span>constant <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
   <span class="fu">as_tibble</span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span>
-  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/rename.html">rename</a></span><span class="op">(</span>p <span class="op">=</span> <span class="va">`1`</span><span class="op">)</span>
+  <span class="fu">rename</span><span class="op">(</span>p <span class="op">=</span> <span class="va">`1`</span><span class="op">)</span>
   
 <span class="co"># posterior_epred() will unhelpfully name the column of our tibble to "1". We</span>
 <span class="co"># have two options: either refer to the column name as `1`, or rename the column</span>
@@ -2609,7 +2612,7 @@ FIGURE 6.22: When you see another Precetor Table section.
 ## 10 0.300
 ## # … with 3,990 more rows</code></pre>
 <p>Because we do not wish to create our distribution conditional on some covariate, we want to pass in a tibble with 1 row into the <code>newdata</code> argument. An empty tibble has 0 rows, so we instead pass in a tibble with some junk data. <code>constant = 1</code> is completely meaningless. Now we plot the result:</p>
-<div class="sourceCode" id="cb656"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb663"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">ppd_for_p</span> <span class="op">%&gt;%</span> 
   <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">p</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
     <span class="fu">geom_histogram</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>y <span class="op">=</span> <span class="fu">after_stat</span><span class="op">(</span><span class="va">count</span><span class="op">/</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">count</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>,
@@ -2622,8 +2625,11 @@ FIGURE 6.22: When you see another Precetor Table section.
     <span class="fu">scale_x_continuous</span><span class="op">(</span>labels <span class="op">=</span> <span class="fu">scales</span><span class="fu">::</span><span class="fu"><a href="https://scales.r-lib.org/reference/label_number.html">number_format</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
     <span class="fu">scale_y_continuous</span><span class="op">(</span>labels <span class="op">=</span> <span class="fu">scales</span><span class="fu">::</span><span class="fu"><a href="https://scales.r-lib.org/reference/label_percent.html">percent_format</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
     <span class="fu">theme_classic</span><span class="op">(</span><span class="op">)</span></code></pre></div>
-<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-489-1.png" width="100%"></div>
-<p>We have successfully created the posterior distribution and can finally answer the question we started the chapter with: <em>If we get 17 red beads in a random sample of size 50 taken from a mixed urn, what proportion <span class="math inline">\(\rho\)</span> of the beads in the urn are red?</em></p>
+<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-492-1.png" width="100%"></div>
+<p>We have successfully created the posterior distribution and can finally answer the question we started the chapter with:</p>
+<blockquote>
+<p>If we get 17 red beads in a random sample of size 50 taken from a mixed urn, what proportion <span class="math inline">\(\rho\)</span> of the beads in the urn are red?</p>
+</blockquote>
 <p>Look to the distribution we have created! We can see that the bulk of the area under the posterior occurs approximately when <span class="math inline">\(\rho\)</span> is between .28 and .42, so the answer to our question is that it is likely that 28% to 42% of the beads in the urn in the red. Another reader may believe that the bulk of the area under the posterior occurs when <span class="math inline">\(\rho\)</span> is between .25 and .45, and may conclude it likely that 25% to 45% of beads are red. They would be perfectly correct! Any range that is large enough to acknowledge the uncertainty we have regarding the exact value of <span class="math inline">\(\rho\)</span> is acceptable.</p>
 <p>Although the most likely probability (the highest bar on the histogram) occurs when <span class="math inline">\(\rho\)</span> is around .32, The answer is not a single number. Our posterior distribution is just that: a distribution. From our sample, we have many different results for the proportion of red beads in the entire urn. Certain proportions, like the extremes close to 0% or 100%, are essentially impossible due to our sample value being 34%. On the other hand, we could have just as easily sampled 16 or 18 beads from the urn, and sample proportions such as 32% and 36% are very plausible.</p>
 <p>This means that, while we can provide a range of possibilities (and we can estimate which of those possibilities occur most frequently), we can never say that we know the total number of red beads with certainty. We know that there is the most chance that <span class="math inline">\(\rho\)</span> is between .28 and about .42, some chance that <span class="math inline">\(\rho\)</span> is between .15 and .24 or between .42 and .56, and almost no chance that <span class="math inline">\(\rho\)</span> is below .15 or above .56. With the posterior we can visualize all of these probabilities at once.</p>
@@ -2634,12 +2640,12 @@ FIGURE 6.22: When you see another Precetor Table section.
 <p>By default, <code><a href="https://mc-stan.org/rstanarm/reference/stan_glm.html">stan_glm()</a></code> will sample from the posterior in 2 sets of 2,000 iterations. If needed we can change the default number of iterations using the <code>iter</code> argument, but there are few reasons to do so. Some of us may still want to know why we sample from the posterior in the first place. Why not use the entire posterior? The answer is that the posterior is a theoretical beast, which makes it difficult to work with.</p>
 <p>For example, what if we wanted to know the probability that <span class="math inline">\(\rho\)</span> is between .3 and .4? To answer this using the pure posterior, we would need to calculate the area under the distribution from when <span class="math inline">\(.3 &lt; \rho &lt; .4\)</span>. This is more difficult then it seems, as the posterior is a distribution, so it has no individual observations to work with as it’s continuous!</p>
 <p>Instead, we can work with draws from the posterior. With enough draws we create a close approximation of the posterior which models the counts of our observations. This is an <em>approximation</em>; it is not exactly the posterior, but close enough for our purposes. We can easily convert our posterior distribution into a <strong>posterior probability distribution</strong>, by making the area under the graph sum to 1. The posterior probability distribution is often used as a visual aid, as percentages are more easy to conceptualize than raw numbers. One way to convert a posterior distribution into a probability distribution is to group by each value of <span class="math inline">\(\rho\)</span> and turn the counts into probabilities:</p>
-<div class="sourceCode" id="cb657"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb664"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">ppd_for_p</span> <span class="op">%&gt;%</span>
   <span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span>digits <span class="op">=</span> <span class="fl">2</span><span class="op">)</span> <span class="op">%&gt;%</span>
-  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html">group_by</a></span><span class="op">(</span><span class="va">p</span><span class="op">)</span> <span class="op">%&gt;%</span>
+  <span class="fu">group_by</span><span class="op">(</span><span class="va">p</span><span class="op">)</span> <span class="op">%&gt;%</span>
   <span class="fu">summarize</span><span class="op">(</span>prob <span class="op">=</span> <span class="fu">n</span><span class="op">(</span><span class="op">)</span><span class="op">/</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html">nrow</a></span><span class="op">(</span><span class="va">ppd_for_p</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span>
-  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html">arrange</a></span><span class="op">(</span><span class="fu">desc</span><span class="op">(</span><span class="va">prob</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+  <span class="fu">arrange</span><span class="op">(</span><span class="fu">desc</span><span class="op">(</span><span class="va">prob</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <pre><code>## # A tibble: 46 x 2
 ##        p   prob
 ##    &lt;dbl&gt;  &lt;dbl&gt;
@@ -2655,12 +2661,12 @@ FIGURE 6.22: When you see another Precetor Table section.
 ## 10  0.38 0.0442
 ## # … with 36 more rows</code></pre>
 <p>We can also accomplish a similar effect by passing <code>aes(y = after_stat(count/sum(count))</code> into <code>geom_histogram()</code> when plotting. Oftentimes, like in answering the probability that <span class="math inline">\(\rho\)</span> is between .3 and .4, we can work with the posterior distribution to the very end. Just divide the number of draws that meet our condition (are between .3 and .4), by the total number of draws.</p>
-<div class="sourceCode" id="cb659"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb666"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">ppd_for_p</span><span class="op">$</span><span class="va">p</span> <span class="op">&gt;</span> <span class="fl">.3</span> <span class="op">&amp;</span> <span class="va">ppd_for_p</span><span class="op">$</span><span class="va">p</span> <span class="op">&lt;</span> <span class="fl">.4</span><span class="op">)</span><span class="op">/</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html">nrow</a></span><span class="op">(</span><span class="va">ppd_for_p</span><span class="op">)</span></code></pre></div>
 <pre><code>## [1] 0.54</code></pre>
 <p>There is approximately a 54% chance that <span class="math inline">\(\rho\)</span> is between .3 and .4. Give me draws from the posterior and I can show you the world!</p>
 <div class="figure">
-<span id="fig:unnamed-chunk-492"></span>
+<span id="fig:unnamed-chunk-495"></span>
 <iframe src="https://www.youtube.com/embed/sVxUUotm1P4?showcase=0" width="100%" height="400px">
 </iframe>
 <p class="caption">
@@ -2676,7 +2682,9 @@ FIGURE 6.23: Time for a quick musical interlude. We’ve earned it.
 <div class="inline-figure"><img src="other/images/Temperance.jpg" width="100%"></div>
 <p>With the fitted model object <code>fit_1</code>, we can now make predictions into the future and answer our questions.</p>
 <p>Recall the second question we started with:</p>
-<p><em>What is the probability, using the same urn, that we will draw more than 8 red beads if we use a shovel of size 20?</em></p>
+<blockquote>
+<p>What is the probability, using the same urn, that we will draw more than 8 red beads if we use a shovel of size 20?</p>
+</blockquote>
 <div id="using-the-posterior" class="section level4" number="6.4.4.1">
 <h4>
 <span class="header-section-number">6.4.4.1</span> Using the posterior<a class="anchor" aria-label="anchor" href="#using-the-posterior"><i class="fas fa-link"></i></a>
@@ -2684,7 +2692,7 @@ FIGURE 6.23: Time for a quick musical interlude. We’ve earned it.
 <p>Whenever someone asks you a question, you need to decide what posterior probability distribution would make it easy for you to answer that question. In this case, if we know the posterior probability distribution for the number of red beads in a shovel of size 20, then a question about the likelihood of drawing more than 8 (or any other value) is easy to answer.</p>
 <p>The posterior probability distribution for a probability is a tricky thing. It is much easier just to estimate the posterior probability distribution for the outcome — number of red beads out of 20 — and then work with that distribution in order to answer probability-type questions.</p>
 <p>To predict these future unknown samples, we use <code><a href="https://mc-stan.org/rstanarm/reference/posterior_predict.stanreg.html">posterior_predict()</a></code>. We pass the posterior created using <code><a href="https://mc-stan.org/rstanarm/reference/stan_glm.html">stan_glm()</a></code> as the first argument, and because we want to estimate the number of red draws with a shovel size of 20, we use pass a tibble with 20 rows into <code>newdata</code>.</p>
-<div class="sourceCode" id="cb661"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb668"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://mc-stan.org/rstanarm/reference/posterior_predict.stanreg.html">posterior_predict</a></span><span class="op">(</span><span class="va">fit_1</span>, 
                   newdata <span class="op">=</span> <span class="fu">tibble</span><span class="op">(</span>constant <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">20</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
   <span class="fu">as_tibble</span><span class="op">(</span><span class="op">)</span></code></pre></div>
@@ -2703,13 +2711,13 @@ FIGURE 6.23: Time for a quick musical interlude. We’ve earned it.
 ## 10 0     0     0     0     0     1     0     0     0     1     1     0     0    
 ## # … with 3,990 more rows, and 7 more variables: 14 &lt;ppd&gt;, 15 &lt;ppd&gt;, 16 &lt;ppd&gt;,
 ## #   17 &lt;ppd&gt;, 18 &lt;ppd&gt;, 19 &lt;ppd&gt;, 20 &lt;ppd&gt;</code></pre>
-<p>Each of our 4,000 rows represents one instance of us predicting a future sample from the urn, and each column represents the color bead in a shovel slot. We will create a new column called <code>total</code> and use <code><a href="https://rdrr.io/r/base/colSums.html">rowSums()</a></code> to calculate the total number of red beads drawn in the sample. Finally, we will graph the resulting distribution.</p>
-<div class="sourceCode" id="cb663"><pre class="downlit sourceCode r">
+<p>Each of our 4,000 rows represent one instance of us predicting a future sample from the urn, and each column represents the color bead in a shovel slot. We will create a new column called <code>total</code> and use <code><a href="https://rdrr.io/r/base/colSums.html">rowSums()</a></code> to calculate the total number of red beads drawn in the sample. Finally, we will graph the resulting distribution.</p>
+<div class="sourceCode" id="cb670"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">ppd_reds_in_20</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://mc-stan.org/rstanarm/reference/posterior_predict.stanreg.html">posterior_predict</a></span><span class="op">(</span><span class="va">fit_1</span>, 
                   newdata <span class="op">=</span> <span class="fu">tibble</span><span class="op">(</span>constant <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">20</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
   <span class="fu">as_tibble</span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span> 
-  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>total <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/colSums.html">rowSums</a></span><span class="op">(</span><span class="fu">across</span><span class="op">(</span><span class="va">`1`</span><span class="op">:</span><span class="va">`20`</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
-  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">total</span><span class="op">)</span>
+  <span class="fu">mutate</span><span class="op">(</span>total <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/colSums.html">rowSums</a></span><span class="op">(</span><span class="fu">across</span><span class="op">(</span><span class="va">`1`</span><span class="op">:</span><span class="va">`20`</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+  <span class="fu">select</span><span class="op">(</span><span class="va">total</span><span class="op">)</span>
 
 
 <span class="va">ppd_reds_in_20</span>   <span class="op">%&gt;%</span> 
@@ -2723,14 +2731,14 @@ FIGURE 6.23: Time for a quick musical interlude. We’ve earned it.
     <span class="fu">scale_x_continuous</span><span class="op">(</span>labels <span class="op">=</span> <span class="fu">scales</span><span class="fu">::</span><span class="fu"><a href="https://scales.r-lib.org/reference/label_number.html">number_format</a></span><span class="op">(</span>accuracy <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
     <span class="fu">scale_y_continuous</span><span class="op">(</span>labels <span class="op">=</span> <span class="fu">scales</span><span class="fu">::</span><span class="fu"><a href="https://scales.r-lib.org/reference/label_percent.html">percent_format</a></span><span class="op">(</span>accuracy <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
     <span class="fu">theme_classic</span><span class="op">(</span><span class="op">)</span></code></pre></div>
-<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-495-1.png" width="100%"></div>
+<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-498-1.png" width="100%"></div>
 <p>We have successfully created the posterior probability distribution for the number of red beads drawn in a shovel of size 20. But before we answer our question, some of us may be wondering why we made our predictions using <code><a href="https://mc-stan.org/rstanarm/reference/posterior_predict.stanreg.html">posterior_predict()</a></code> instead of <code><a href="https://mc-stan.org/rstanarm/reference/posterior_linpred.stanreg.html">posterior_epred()</a></code>. Let’s examine what happens if we use <code><a href="https://mc-stan.org/rstanarm/reference/posterior_linpred.stanreg.html">posterior_epred()</a></code> instead.</p>
-<div class="sourceCode" id="cb664"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb671"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">post_epred</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://mc-stan.org/rstanarm/reference/posterior_linpred.stanreg.html">posterior_epred</a></span><span class="op">(</span><span class="va">fit_1</span>, 
                   newdata <span class="op">=</span> <span class="fu">tibble</span><span class="op">(</span>constant <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">20</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
   <span class="fu">as_tibble</span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span> 
-  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>total <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/colSums.html">rowSums</a></span><span class="op">(</span><span class="fu">across</span><span class="op">(</span><span class="va">`1`</span><span class="op">:</span><span class="va">`20`</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
-  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">total</span><span class="op">)</span>
+  <span class="fu">mutate</span><span class="op">(</span>total <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/colSums.html">rowSums</a></span><span class="op">(</span><span class="fu">across</span><span class="op">(</span><span class="va">`1`</span><span class="op">:</span><span class="va">`20`</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+  <span class="fu">select</span><span class="op">(</span><span class="va">total</span><span class="op">)</span>
 
 <span class="va">post_epred</span>  <span class="op">%&gt;%</span> 
   <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">total</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
@@ -2744,13 +2752,13 @@ FIGURE 6.23: Time for a quick musical interlude. We’ve earned it.
     <span class="fu">scale_y_continuous</span><span class="op">(</span>labels <span class="op">=</span> <span class="fu">scales</span><span class="fu">::</span><span class="fu"><a href="https://scales.r-lib.org/reference/label_percent.html">percent_format</a></span><span class="op">(</span>accuracy <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
     <span class="fu">theme_classic</span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <div class="figure">
-<span id="fig:unnamed-chunk-496"></span>
-<img src="book_temp_files/figure-html/unnamed-chunk-496-1.png" alt="Using posterior_epred()" width="100%"><p class="caption">
+<span id="fig:unnamed-chunk-499"></span>
+<img src="book_temp_files/figure-html/unnamed-chunk-499-1.png" alt="Using posterior_epred()" width="100%"><p class="caption">
 FIGURE 6.24: Using posterior_epred()
 </p>
 </div>
 <p>What happened? <code><a href="https://mc-stan.org/rstanarm/reference/posterior_linpred.stanreg.html">posterior_epred()</a></code> shows the distribution of the <strong>entire population</strong>, which is continuous. The expected predictions can be fractional, because <code><a href="https://mc-stan.org/rstanarm/reference/posterior_linpred.stanreg.html">posterior_epred()</a></code> returns draws from the posterior (which can be fractional) contingent on some covariate. In our scenario we have no covariates for which to create expected predictions from, so <code><a href="https://mc-stan.org/rstanarm/reference/posterior_linpred.stanreg.html">posterior_epred()</a></code> just returns the posterior, but re-scaled to between 0 and 20 beads instead of between 0 and 1 as before. The shape of the distributions are identical:</p>
-<div class="sourceCode" id="cb665"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb672"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">post_epred</span> <span class="op">%&gt;%</span> 
   <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">total</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
     <span class="fu">geom_histogram</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>y <span class="op">=</span> <span class="fu">after_stat</span><span class="op">(</span><span class="va">count</span><span class="op">/</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">count</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>,
@@ -2765,32 +2773,34 @@ FIGURE 6.24: Using posterior_epred()
        y <span class="op">=</span> <span class="st">"Probability"</span><span class="op">)</span> <span class="op">+</span> 
   <span class="fu">plot_annotation</span><span class="op">(</span>title <span class="op">=</span> <span class="st">'Expected prediction for sample of size 20 on left, posterior on right.'</span>,
                   subtitle <span class="op">=</span> <span class="st">"The two distributions have an identical shape."</span><span class="op">)</span></code></pre></div>
-<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-497-1.png" width="100%"></div>
-<p>On the other hand, <code><a href="https://mc-stan.org/rstanarm/reference/posterior_predict.stanreg.html">posterior_predict()</a></code> models the posterior distribution for future <strong>individuals</strong>. In our scenario, we model the binomial distribution is of a discrete random variable. The bars only appear at real numbers between 1 and 16, because we are predicting the probability of individual samples. We cannot draw fractions of beads in our sample. Using <code><a href="https://mc-stan.org/rstanarm/reference/posterior_predict.stanreg.html">posterior_predict()</a></code> essentially replicates the DGM, taking many virtual draws from our urn and summarizing all the results.</p>
+<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-500-1.png" width="100%"></div>
+<p>On the other hand, <code><a href="https://mc-stan.org/rstanarm/reference/posterior_predict.stanreg.html">posterior_predict()</a></code> models the posterior distribution for future <strong>individuals</strong>. In our scenario, we model the binomial distribution of a discrete random variable. The bars only appear at real numbers between 1 and 16, because we are predicting the probability of individual samples. We cannot draw fractions of beads in our sample. Using <code><a href="https://mc-stan.org/rstanarm/reference/posterior_predict.stanreg.html">posterior_predict()</a></code> essentially replicates the DGM, taking many virtual draws from our urn and summarizing all the results.</p>
 <p>In summary, use <code><a href="https://mc-stan.org/rstanarm/reference/posterior_predict.stanreg.html">posterior_predict()</a></code> when to predict the outcome of individual(s) in the future, and use <code><a href="https://mc-stan.org/rstanarm/reference/posterior_linpred.stanreg.html">posterior_epred()</a></code> to model the probability across the entire population using the posterior. To answer our question, we want to know the probability of outcomes using a single shovel of size 20. We should use <code><a href="https://mc-stan.org/rstanarm/reference/posterior_predict.stanreg.html">posterior_predict()</a></code> to model taking individual samples many times, and we can then analyze the probabilities. If this is confusing do not fret! We will have plenty of practice with these 2 functions for the remainder of this <em>Primer</em>.</p>
 <p>Now let’s attempt to actually answer our question:</p>
-<p><em>What is the probability, using the same urn, that we will draw more than 8 red beads if we use a shovel of size 20?</em></p>
+<blockquote>
+<p>What is the probability, using the same urn, that we will draw more than 8 red beads if we use a shovel of size 20?</p>
+</blockquote>
 <p>Because <code><a href="https://mc-stan.org/rstanarm/reference/posterior_predict.stanreg.html">posterior_predict()</a></code> takes predictive draws for us, we can simply count the number of draws that have more than 8 red beads, and divide by the total number of draws.</p>
-<div class="sourceCode" id="cb666"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb673"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># Same code as earlier, included as a refresher. </span>
 <span class="va">ppd_reds_in_20</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://mc-stan.org/rstanarm/reference/posterior_predict.stanreg.html">posterior_predict</a></span><span class="op">(</span><span class="va">fit_1</span>, 
                   newdata <span class="op">=</span> <span class="fu">tibble</span><span class="op">(</span>constant <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">20</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
   <span class="fu">as_tibble</span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span> 
-  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>total <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/colSums.html">rowSums</a></span><span class="op">(</span><span class="fu">across</span><span class="op">(</span><span class="va">`1`</span><span class="op">:</span><span class="va">`20`</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
-  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">total</span><span class="op">)</span>
+  <span class="fu">mutate</span><span class="op">(</span>total <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/colSums.html">rowSums</a></span><span class="op">(</span><span class="fu">across</span><span class="op">(</span><span class="va">`1`</span><span class="op">:</span><span class="va">`20`</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+  <span class="fu">select</span><span class="op">(</span><span class="va">total</span><span class="op">)</span>
 
 <span class="co"># Calculating the probability</span>
 <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">ppd_reds_in_20</span><span class="op">$</span><span class="va">total</span> <span class="op">&gt;</span> <span class="fl">8</span><span class="op">)</span><span class="op">/</span><span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span><span class="op">(</span><span class="va">ppd_reds_in_20</span><span class="op">$</span><span class="va">total</span><span class="op">)</span></code></pre></div>
 <pre><code>## [1] 0.25</code></pre>
-<p><strong>There is approximately a 25% chance that we will draw more than 8 red beads out of a sample size of 20. .</strong></p>
+<p><strong>There is approximately a 25% chance that we will draw more than 8 red beads out of a sample size of 20.</strong></p>
 <p>To visualize this probability graphically, we will reuse our posterior, and add a new column called <code>above_eight</code> that is <code>TRUE</code> if <code>total &gt; 8</code>.</p>
-<div class="sourceCode" id="cb668"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb675"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">ppd_reds_in_20</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://mc-stan.org/rstanarm/reference/posterior_predict.stanreg.html">posterior_predict</a></span><span class="op">(</span><span class="va">fit_1</span>, 
                     newdata <span class="op">=</span> <span class="fu">tibble</span><span class="op">(</span>constant <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">20</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
   <span class="fu">as_tibble</span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span> 
-  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>total <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/colSums.html">rowSums</a></span><span class="op">(</span><span class="fu">across</span><span class="op">(</span><span class="va">`1`</span><span class="op">:</span><span class="va">`20`</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span>
-  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">total</span><span class="op">)</span> <span class="op">%&gt;%</span>
-  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>above_eight <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html">ifelse</a></span><span class="op">(</span><span class="va">total</span> <span class="op">&gt;</span> <span class="fl">8</span>, <span class="cn">TRUE</span>, <span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span>
+  <span class="fu">mutate</span><span class="op">(</span>total <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/colSums.html">rowSums</a></span><span class="op">(</span><span class="fu">across</span><span class="op">(</span><span class="va">`1`</span><span class="op">:</span><span class="va">`20`</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span>
+  <span class="fu">select</span><span class="op">(</span><span class="va">total</span><span class="op">)</span> <span class="op">%&gt;%</span>
+  <span class="fu">mutate</span><span class="op">(</span>above_eight <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html">ifelse</a></span><span class="op">(</span><span class="va">total</span> <span class="op">&gt;</span> <span class="fl">8</span>, <span class="cn">TRUE</span>, <span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span>
 
 <span class="va">ppd_reds_in_20</span></code></pre></div>
 <pre><code>## # A tibble: 4,000 x 2
@@ -2808,7 +2818,7 @@ FIGURE 6.24: Using posterior_epred()
 ## 10     6 FALSE      
 ## # … with 3,990 more rows</code></pre>
 <p>We can then can set the fill of our histogram to when <code>above_eight == TRUE</code> to visualize the probability of drawing more than 8 red beads.</p>
-<div class="sourceCode" id="cb670"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb677"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">ppd_reds_in_20</span>   <span class="op">%&gt;%</span> 
   
   <span class="co"># Set fill as above_eight. </span>
@@ -2830,7 +2840,7 @@ FIGURE 6.24: Using posterior_epred()
     <span class="fu">scale_x_continuous</span><span class="op">(</span>labels <span class="op">=</span> <span class="fu">scales</span><span class="fu">::</span><span class="fu"><a href="https://scales.r-lib.org/reference/label_number.html">number_format</a></span><span class="op">(</span>accuracy <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
     <span class="fu">scale_y_continuous</span><span class="op">(</span>labels <span class="op">=</span> <span class="fu">scales</span><span class="fu">::</span><span class="fu"><a href="https://scales.r-lib.org/reference/label_percent.html">percent_format</a></span><span class="op">(</span>accuracy <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
     <span class="fu">theme_classic</span><span class="op">(</span><span class="op">)</span></code></pre></div>
-<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-500-1.png" width="100%"></div>
+<div class="inline-figure"><img src="book_temp_files/figure-html/unnamed-chunk-503-1.png" width="100%"></div>
 <p>The red bars illustrate the area under a specific section of the curve, as compared to the <em>entire</em> area under the curve. <em>Each question requires looking at a new area under the curve.</em> When someones asks you a question, they are doing two things. First, they are providing instructions as to the posterior your should create. Here, the results with a shovel of 20 slots. Second, they are asking a question about the area under the curve in a specific region. Here, the region where the number of red beads is greater than 8 is highlighted in red. Therefore, the area below the curve that <strong>is red</strong> is how we get our estimate.</p>
 <p>See Chapter <a href="two-parameters.html#two-parameters">7</a> for a thorough discussion of the use of <strong>rstanarm</strong>. This package will be our main tool for the rest of the <em>Primer</em>.</p>
 </div>
@@ -2847,11 +2857,11 @@ FIGURE 6.24: Using posterior_epred()
 <p>The total number of red beads selected in a sample of 20 beads, <span class="math inline">\(T_i\)</span>, is modeled by a binomial distribution with <span class="math inline">\(n = 20\)</span> observations and an unknown probability <span class="math inline">\(\rho\)</span> of the proportion of red beads in the urn.</p>
 <p>We must realize that our 25% estimate is based on an entire posterior. We are uncertain about the exact value of <span class="math inline">\(\rho\)</span>, so <code><a href="https://mc-stan.org/rstanarm/reference/posterior_predict.stanreg.html">posterior_predict()</a></code> takes our uncertainty into account when creating the model. However, there is in fact some actual value for <span class="math inline">\(\rho\)</span>, even if we don’t know it.</p>
 <p>If the actual value of <span class="math inline">\(\rho\)</span> was 30%, we can calculate the <strong>correct</strong> answer to our question using the binomial probability distribution function:</p>
-<div class="sourceCode" id="cb671"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb678"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/stats/Binomial.html">pbinom</a></span><span class="op">(</span>q <span class="op">=</span> <span class="fl">8</span>, size <span class="op">=</span> <span class="fl">20</span>, prob <span class="op">=</span> <span class="fl">.3</span>, lower.tail <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></code></pre></div>
 <pre><code>## [1] 0.11</code></pre>
 <p>Or maybe the actual value of <span class="math inline">\(\rho\)</span> is 40%:</p>
-<div class="sourceCode" id="cb673"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb680"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/stats/Binomial.html">pbinom</a></span><span class="op">(</span>q <span class="op">=</span> <span class="fl">8</span>, size <span class="op">=</span> <span class="fl">20</span>, prob <span class="op">=</span> <span class="fl">.4</span>, lower.tail <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></code></pre></div>
 <pre><code>## [1] 0.4</code></pre>
 <p>Sadly, the answer to our question could be 11%, 40%, a value in between, or even a more extreme value. We will never know the correct answer, and must settle with our best estimate of 25% that factors in our uncertainty regarding the true value of <span class="math inline">\(\rho\)</span>. Long story short, our models are never the truth.</p>
@@ -2868,8 +2878,11 @@ FIGURE 6.24: Using posterior_epred()
 <h4>
 <span class="header-section-number">6.4.5.1</span> Confidence intervals<a class="anchor" aria-label="anchor" href="#confidence-intervals"><i class="fas fa-link"></i></a>
 </h4>
+<!-- RS: If we end up not discussing the √p(1-p)/n equation, then this section will have to be deleted or reworked.  -->
 <p>Let’s go back to our first question:</p>
-<p><em>If we get 17 red beads in a random sample of size 50 taken from a mixed urn, what proportion <span class="math inline">\(\rho\)</span> of the beads in the urn are red?</em></p>
+<blockquote>
+<p>If we get 17 red beads in a random sample of size 50 taken from a mixed urn, what proportion <span class="math inline">\(\rho\)</span> of the beads in the urn are red?</p>
+</blockquote>
 <p>If we had decided to, we could have answered this question using confidence intervals and statistics. First calculate the standard error given 34% of the beads in the sample are red out of a sample size of 50:</p>
 <p><span class="math display">\[  SE = \sqrt\frac{.34(1-.34)}{50} \approx .067\]</span></p>
 <p>We can then create a 95% confidence interval:</p>
@@ -2890,14 +2903,10 @@ FIGURE 6.24: Using posterior_epred()
 </div>
 </div>
 </div>
-<div id="discussion" class="section level2" number="6.5">
+<div id="sampling-case-study" class="section level2" number="6.5">
 <h2>
-<span class="header-section-number">6.5</span> Discussion<a class="anchor" aria-label="anchor" href="#discussion"><i class="fas fa-link"></i></a>
+<span class="header-section-number">6.5</span> Case study: Polls<a class="anchor" aria-label="anchor" href="#sampling-case-study"><i class="fas fa-link"></i></a>
 </h2>
-<div id="sampling-case-study" class="section level3" number="6.5.1">
-<h3>
-<span class="header-section-number">6.5.1</span> Case study: Polls<a class="anchor" aria-label="anchor" href="#sampling-case-study"><i class="fas fa-link"></i></a>
-</h3>
 <p>Let’s now switch gears to a more realistic sampling scenario: a poll. In practice, pollsters do not take 1,000 repeated samples as we did in our previous sampling activities, but rather take only a <em>single sample</em> that’s as large as possible.</p>
 <p>On December 4, 2013, National Public Radio in the US reported on a poll of President Obama’s approval rating among young Americans aged 18-29 in an article, <a href="https://www.npr.org/sections/itsallpolitics/2013/12/04/248793753/poll-support-for-obama-among-young-americans-eroding">“Poll: Support For Obama Among Young Americans Eroding.”</a> The poll was conducted by the Kennedy School’s Institute of Politics at Harvard University. A quote from the article:</p>
 <blockquote>
@@ -2905,7 +2914,6 @@ FIGURE 6.24: Using posterior_epred()
 <p>According to a new Harvard University Institute of Politics poll, just 41 percent of millennials — adults ages 18-29 — approve of Obama’s job performance, his lowest-ever standing among the group and an 11-point drop from April.</p>
 </blockquote>
 <p>Let’s tie elements of the real life poll in this new article with our “tactile” and “virtual” urn activity from Sections <a href="one-parameter.html#sampling-activity">6.1</a> and <a href="one-parameter.html#virtual-sampling">6.2</a> using the terminology, notations, and definitions we learned in Section <a href="one-parameter.html#standard-errors">6.3</a>. You’ll see that our sampling activity with the urn is an idealized version of what pollsters are trying to do in real life.</p>
-<!-- RS: I love the way this section uses the vocabulary, and I think this should be replicated everywhere else in the chapter. Very helpful to see the meaning of each word in practice. Maybe add mention to the first cardinal value when setting up the problem to really teach the concept? -->
 <p>First, who is the <strong>(Study) Population</strong> of <span class="math inline">\(N\)</span> individuals or observations of interest?</p>
 <ul>
 <li>Urn: <span class="math inline">\(N\)</span> = 1000 identically sized red and white beads</li>
@@ -2984,22 +2992,6 @@ FIGURE 6.24: Using posterior_epred()
 <!-- RS: I definetly support further exploring the Kennedy study further in this chapter, or in the tutorial because I feel like it would be much more informative than redoing the urn problem.  -->
 <!-- RS: Consider a brief section about observational study design? I know this isn't a stats class, but might be useful to at least discuss bad sampling methods (volunteer surveys, convienence, and other types of biases. ) -->
 </div>
-<div id="precision-versus-accuracy-or-bias-versus-variance" class="section level3" number="6.5.2">
-<h3>
-<span class="header-section-number">6.5.2</span> Precision versus accuracy (or bias versus variance)<a class="anchor" aria-label="anchor" href="#precision-versus-accuracy-or-bias-versus-variance"><i class="fas fa-link"></i></a>
-</h3>
-<p>We saw in a previous section that as our sample size <span class="math inline">\(n\)</span> increases, our point estimates will vary less and less and be more and more concentrated around the true population parameter. This variation is quantified by the decreasing <em>standard error</em>. In other words, the typical error of your point estimates will decrease. In our sampling exercise, as the sample size increased, the variation of our sample proportions <span class="math inline">\(\hat{\rho}\)</span> decreased. This is also known as having a <em>precise</em> estimate.</p>
-<p>So random sampling ensures our point estimates are <em>accurate</em>, while on the other hand having a large sample size ensures our point estimates are <em>precise</em>. While the terms “accuracy” and “precision” may sound like they mean the same thing, there is a subtle difference. Accuracy describes how “on target” our estimates are, whereas precision describes how “consistent” our estimates are. The image below illustrates the difference.</p>
-<div class="figure">
-<span id="fig:unnamed-chunk-503"></span>
-<img src="06-one-parameter/images/accuracy_vs_precision.jpg" alt="Comparing accuracy and precision." width="100%"><p class="caption">
-FIGURE 6.25: Comparing accuracy and precision.
-</p>
-</div>
-<p>Now, it’s obvious that the best case scenario is the most precise and the most accurate option. However, real life sampling isn’t so easy!</p>
-<p>What if we had the option to use a shovel with <strong>200</strong> slots, but it had a minor magnetic property that caused it to pick up slightly more red beads than the 100 slotted shovel? On one hand, the larger shovel gives us increased precision due to a larger sample size. On the other, its magnetic property gives us decreased accuracy due to a sampling bias. Here, as is often the case in the real world, there is a tradeoff!</p>
-</div>
-</div>
 <div id="summary-7" class="section level2" number="6.6">
 <h2>
 <span class="header-section-number">6.6</span> Summary<a class="anchor" aria-label="anchor" href="#summary-7"><i class="fas fa-link"></i></a>
@@ -3054,9 +3046,9 @@ FIGURE 6.25: Comparing accuracy and precision.
 <code><a href="https://mc-stan.org/rstanarm/reference/stan_glm.html">stan_glm()</a></code> can create a joint distribution and then estimate the posterior probability distribution, conditional on the data which was passed in to the data argument. This is a much easier way to create the posterior distribution, and will be explored in more detail in Chapter <a href="two-parameters.html#two-parameters">7</a>.</li>
 </ul>
 </div>
-<div id="discussion-1" class="section level3" number="6.6.5">
+<div id="discussion" class="section level3" number="6.6.5">
 <h3>
-<span class="header-section-number">6.6.5</span> Discussion<a class="anchor" aria-label="anchor" href="#discussion-1"><i class="fas fa-link"></i></a>
+<span class="header-section-number">6.6.5</span> Discussion<a class="anchor" aria-label="anchor" href="#discussion"><i class="fas fa-link"></i></a>
 </h3>
 <ul>
 <li>The sampling mechanism is responsible for which items/beads/people/etc are selected to be sampled. In the urn example, the <em>sampling mechanism</em> is the shovel.</li>
@@ -3109,19 +3101,14 @@ FIGURE 6.25: Comparing accuracy and precision.
 <li><a class="nav-link" href="#bad-practices"><span class="header-section-number">6.4.5</span> Bad practices</a></li>
 </ul>
 </li>
-<li>
-<a class="nav-link" href="#discussion"><span class="header-section-number">6.5</span> Discussion</a><ul class="nav navbar-nav">
-<li><a class="nav-link" href="#sampling-case-study"><span class="header-section-number">6.5.1</span> Case study: Polls</a></li>
-<li><a class="nav-link" href="#precision-versus-accuracy-or-bias-versus-variance"><span class="header-section-number">6.5.2</span> Precision versus accuracy (or bias versus variance)</a></li>
-</ul>
-</li>
+<li><a class="nav-link" href="#sampling-case-study"><span class="header-section-number">6.5</span> Case study: Polls</a></li>
 <li>
 <a class="nav-link" href="#summary-7"><span class="header-section-number">6.6</span> Summary</a><ul class="nav navbar-nav">
 <li><a class="nav-link" href="#tactial-sampling"><span class="header-section-number">6.6.1</span> Tactial sampling</a></li>
 <li><a class="nav-link" href="#virtual-sampling-1"><span class="header-section-number">6.6.2</span> Virtual sampling</a></li>
 <li><a class="nav-link" href="#standard-error"><span class="header-section-number">6.6.3</span> Standard error</a></li>
 <li><a class="nav-link" href="#answering-the-questions"><span class="header-section-number">6.6.4</span> Answering the questions</a></li>
-<li><a class="nav-link" href="#discussion-1"><span class="header-section-number">6.6.5</span> Discussion</a></li>
+<li><a class="nav-link" href="#discussion"><span class="header-section-number">6.6.5</span> Discussion</a></li>
 </ul>
 </li>
 </ul>

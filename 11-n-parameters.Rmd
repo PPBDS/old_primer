@@ -161,9 +161,9 @@ Justice emphasizes a few key concepts:
 
 We then make an assumption about the data generating mechanism. 
 
-### Actual Preceptor Table
+### Preceptor Table
 
-Recall that in an actual Preceptor Table, we will have a bunch of missing data! We can not use simple arithmetic to calculate the causal effect of voting reminders on voting behavior. Instead, we will be required to estimate it. This is our estimand, a variable in the real world that we are trying to measure.An estimand is not the value you calculated, but is rather the unknown variable you want to estimate.
+Recall that in an actual Preceptor Table, we will have a bunch of missing data! We can not use simple arithmetic to calculate the causal effect of voting reminders on voting behavior. Instead, we will be required to estimate it. This is our estimand, a variable in the real world that we are trying to measure. An estimand is not the value you calculated, but is rather the unknown variable you want to estimate.
 
 Let's build a basic visualization for the actual Preceptor Table for this scenario:
 
@@ -444,7 +444,7 @@ tbl_regression(fit_2,
 ```
 
 Now that we have a summarized visual for our data, let's interpret the findings: 
-* The intercept of `fit_2` is the expected probability of voting in the upcoming election for a woman of average age  (~ 50 years old in this data), who is assigned to the Control group, and is a Rarely Voter. The
+* The intercept of `fit_2` is the expected probability of voting in the upcoming election for a woman of average age  (~ 50 years old in this data), who is assigned to the No Postcard group, and is a Rarely Voter. The
 estimate is `r round((coef(fit_2)["(Intercept)"] * 100), 1)`%. 
 * The coefficient of z_age, `r round(coef(fit_2)["z_age"], 1)`, implies a change of ~`r round((coef(fit_2)["z_age"] * 100), 1)`% in likelihood of voting for each increment of one standard deviation (~ 14.45 years). For example: when comparing someone 50 years old with someone 65, the latter is about `r round((coef(fit_2)["z_age"] * 100), 1)`% more likely to vote.
 * Exposure to the Neighbors treatment shows a ~`r round((coef(fit_2)["treatmentNeighbors"] * 100), 1)`% increase in voting likelihood for someone in the Rarely Vote category. Because of random assignment of treatment, we can interpret that coefficient as an estimate
@@ -478,7 +478,7 @@ To begin, we will need to create our `newobs` object.
 
 sex <- "Male"
 z_age <- 0
-treatment <- c("Control",
+treatment <- c("No Postcard",
                "Civic Duty",
                "Hawthorne",
                "Self",
@@ -517,7 +517,7 @@ pe <- posterior_epred(fit_2,
 
 Now that we have our `newobs` to work with, we will need to create an object named `plot_data` that collects the treatment effect calculations. 
 
-Recall that, when calculating a treatment effect, we need to subtract the estimate for each category from the control group for that category. For example, if we wanted to find the treatment effect for the Always Vote Neighbors group, we would need: Always Vote Neighbors - Always Vote Control. 
+Recall that, when calculating a treatment effect, we need to subtract the estimate for each category from the control group for that category. For example, if we wanted to find the treatment effect for the Always Vote Neighbors group, we would need: Always Vote Neighbors - Always Vote No Postcard. 
 
 Therefore, we will use `mutate()` twelve times, for each of the treatments and voting frequencies. After, we will `pivot_longer` in order for the treatment effects to be sensibly categorized for plotting. If any of this sounds confusing, read the code comments carefully. 
 
@@ -529,18 +529,18 @@ plot_data <- pe %>%
   # how much easier the code reads because we have taken the trouble to line up
   # the columns.
   
-  mutate(`Always Civic-Duty`    = `Civic Duty_Always Vote`     - `Control_Always Vote`,
-         `Always Hawthorne`     = `Hawthorne_Always Vote`      - `Control_Always Vote`,
-         `Always Self`          = `Self_Always Vote`           - `Control_Always Vote`,
-         `Always Neighbors`     = `Neighbors_Always Vote`      - `Control_Always Vote`,
-         `Sometimes Civic-Duty` = `Civic Duty_Sometimes Vote`  - `Control_Sometimes Vote`,
-         `Sometimes Hawthorne`  = `Hawthorne_Sometimes Vote`   - `Control_Sometimes Vote`,
-         `Sometimes Self`       = `Self_Sometimes Vote`        - `Control_Sometimes Vote`,
-         `Sometimes Neighbors`  = `Neighbors_Sometimes Vote`   - `Control_Sometimes Vote`,
-         `Rarely Civic-Duty`    = `Civic Duty_Rarely Vote`     - `Control_Rarely Vote`,
-         `Rarely Hawthorne`     = `Hawthorne_Rarely Vote`      - `Control_Rarely Vote`,
-         `Rarely Self`          = `Self_Rarely Vote`           - `Control_Rarely Vote`,
-         `Rarely Neighbors`     = `Neighbors_Rarely Vote`      - `Control_Rarely Vote`) %>% 
+  mutate(`Always Civic-Duty`    = `Civic Duty_Always Vote`     - `No Postcard_Always Vote`,
+         `Always Hawthorne`     = `Hawthorne_Always Vote`      - `No Postcard_Always Vote`,
+         `Always Self`          = `Self_Always Vote`           - `No Postcard_Always Vote`,
+         `Always Neighbors`     = `Neighbors_Always Vote`      - `No Postcard_Always Vote`,
+         `Sometimes Civic-Duty` = `Civic Duty_Sometimes Vote`  - `No Postcard_Sometimes Vote`,
+         `Sometimes Hawthorne`  = `Hawthorne_Sometimes Vote`   - `No Postcard_Sometimes Vote`,
+         `Sometimes Self`       = `Self_Sometimes Vote`        - `No Postcard_Sometimes Vote`,
+         `Sometimes Neighbors`  = `Neighbors_Sometimes Vote`   - `No Postcard_Sometimes Vote`,
+         `Rarely Civic-Duty`    = `Civic Duty_Rarely Vote`     - `No Postcard_Rarely Vote`,
+         `Rarely Hawthorne`     = `Hawthorne_Rarely Vote`      - `No Postcard_Rarely Vote`,
+         `Rarely Self`          = `Self_Rarely Vote`           - `No Postcard_Rarely Vote`,
+         `Rarely Neighbors`     = `Neighbors_Rarely Vote`      - `No Postcard_Rarely Vote`) %>% 
   
   # This is a critical step, we need to be able to reference voter
   # classification separately from the treatment assignment, so pivoting in the

@@ -6,13 +6,20 @@ library(gt)
 library(gtsummary)
 ```
 
-*This chapter is being re-drafted.*
+<!-- Use new Preceptor Table and Population Table formats in Chapters 8 through 11. -->
 
-<!-- Re-arrange and add rows to the first Population Table. First population, then data, then population, then Preceptor Table, the population. MF: Done. -->
+<!-- Changes discussions in Chapter 8 through 11 about validity, stability and representativeness. -->
 
-<!-- Add a Covariate column for Gender to Two values for tau. Explain what a covariate is. (One sentence.) This allows us to know which units have causal effect \tau_f and \tau_m. MF: Done.  -->
+<!-- Population Table, by definition, always has three columns: Source, Time and ID (in that order), although Time might be replaced with the unit of time, like Year or Date. Think about just placing the Preceptor Table (and the data set) within a larger context. -->
 
-<!-- Begin the Assumptions section by making your first real Population Table: including a Source column and a Time column. Not sure if you should use the height example or the train example. But we need a full example in order to make clear what the assumptions refer to. MF: Done. -->
+<!-- All Population Tables have lots of ... (to indicate missing rows) since we need to highlight that the Population is big.  -->
+
+<!-- It is typically the case that the order of the Source's in the Population Table is Population, Data, Population, Preceptor Table, Population. That is, the Data and the Preceptor Tables are almost always assumed to be have been drawn from a population which covers the time periods before, between and after the data and the Preceptor Table. -->
+
+<!-- Row for Population Table under assumptions are wrong. We have the outcome under either treatment or control for our Data rows, not for Population or Preceptor rows. -->
+
+<!-- Ignore everything below this. -->
+
 
 <!-- https://stats.stackexchange.com/questions/3520/can-someone-explain-the-concept-of-exchangeability -->
 
@@ -87,6 +94,7 @@ tibble(ID = c("Robert", "Andy", "Beau", "Ishan", "Nicholas"),
   # Then, we use the gt function to make it pretty
   
   gt() %>%
+  tab_header(title = "Preceptor Table") %>% 
   cols_label(ID = md("ID"),
                 Heights = "Heights (cm)") %>%
   tab_style(cell_borders(sides = "right"),
@@ -120,6 +128,7 @@ tibble(ID = c("Student 1", "Student 2", "...", "Student 473", "Student 474",
   # Then, we use the gt function to make it pretty
   
   gt() %>%
+  tab_header(title = "Preceptor Table") %>% 
   cols_label(ID = md("ID"),
                 Heights = "Heights (cm)") %>%
   tab_style(cell_borders(sides = "right"),
@@ -207,6 +216,7 @@ tibble(ID = "Yao",
   # Then, we use the gt function to make it pretty
   
   gt() %>%
+  tab_header(title = "Preceptor Table") %>% 
   cols_label(ID = md("ID"),
                 ytreat = "Attitude if Treated",
                 ycontrol = "Attitude if Control") %>%
@@ -235,18 +245,21 @@ tibble(subject = "Yao",
   
   # Then, we use the gt function to make it pretty
   
-gt() %>%
-  cols_label(subject = md("ID"),
-                ytreat = md("$$Y_t$$"),
-                ycontrol = md("$$Y_c$$")) %>%
-  tab_style(cell_borders(sides = "right"),
-            location = cells_body(columns = c(subject))) %>%
-  tab_style(style = cell_text(align = "left", v_align = "middle", size = "large"), 
-            locations = cells_column_labels(columns = c(subject))) %>%
-  cols_align(align = "center", columns = everything()) %>%
-  cols_align(align = "left", columns = c(subject)) %>%
-  fmt_markdown(columns = everything()) %>%
-  tab_spanner(label = "$$\\text{Outcomes}$$", c(ytreat, ycontrol))
+  gt() %>%
+    tab_header(title = "Preceptor Table") %>% 
+    cols_label(subject = md("ID"),
+                  ytreat = md("$$Y_t$$"),
+                  ycontrol = md("$$Y_c$$")) %>%
+    tab_style(cell_borders(sides = "right"),
+              location = cells_body(columns = c(subject))) %>%
+    tab_style(style = cell_text(align = "left", 
+                                v_align = "middle", size = "large"), 
+              locations = cells_column_labels(columns = 
+                                                c(subject))) %>%
+    cols_align(align = "center", columns = everything()) %>%
+    cols_align(align = "left", columns = c(subject)) %>%
+    fmt_markdown(columns = everything()) %>%
+    tab_spanner(label = "$$\\text{Outcomes}$$", c(ytreat, ycontrol))
 ```
 
 &nbsp;
@@ -265,20 +278,21 @@ tibble(subject = "Yao",
   # Then, we use the gt function to make it pretty
   
   gt() %>%
-  cols_label(subject = md("ID"),
-                ytreat = md("$$Y_t$$"),
-                ycontrol = md("$$Y_c$$"),
-                ydiff = md("$$Y_t - Y_c$$")) %>%
-  cols_move(columns = c(ytreat, ycontrol), after = c(subject)) %>%
-  tab_style(cell_borders(sides = "right"),
-            location = cells_body(columns = c(subject))) %>%
-  tab_style(style = cell_text(align = "left", v_align = "middle", size = "large"), 
-            locations = cells_column_labels(columns = c(subject))) %>%
-  cols_align(align = "center", columns = everything()) %>%
-  cols_align(align = "left", columns = c(subject)) %>%
-  fmt_markdown(columns = everything()) %>%
-  tab_spanner(label = "$$\\text{Outcomes}$$", c(ytreat, ycontrol)) %>%
-  tab_spanner(label = "$$\\text{Causal Effect}$$", c(ydiff))
+    tab_header(title = "Preceptor Table") %>% 
+    cols_label(subject = md("ID"),
+                  ytreat = md("$$Y_t$$"),
+                  ycontrol = md("$$Y_c$$"),
+                  ydiff = md("$$Y_t - Y_c$$")) %>%
+    cols_move(columns = c(ytreat, ycontrol), after = c(subject)) %>%
+    tab_style(cell_borders(sides = "right"),
+              location = cells_body(columns = c(subject))) %>%
+    tab_style(style = cell_text(align = "left", v_align = "middle", size = "large"), 
+              locations = cells_column_labels(columns = c(subject))) %>%
+    cols_align(align = "center", columns = everything()) %>%
+    cols_align(align = "left", columns = c(subject)) %>%
+    fmt_markdown(columns = everything()) %>%
+    tab_spanner(label = "$$\\text{Outcomes}$$", c(ytreat, ycontrol)) %>%
+    tab_spanner(label = "$$\\text{Causal Effect}$$", c(ydiff))
 ```
 
 &nbsp;
@@ -324,20 +338,21 @@ tibble(subject = c("Yao", "Emma", "Cassidy", "Tahmid", "Diego"),
   # Then, we use the gt function to make it pretty
   
   gt() %>%
-  cols_label(subject = md("ID"),
-                ytreat = md("$$Y_t(u)$$"),
-                ycontrol = md("$$Y_c(u)$$"),
-                ydiff = md("$$Y_t(u) - Y_c(u)$$")) %>%
-  cols_move(columns = c(ytreat, ycontrol), after = c(subject)) %>%
-  tab_style(cell_borders(sides = "right"),
-            location = cells_body(columns = c(subject))) %>%
-  tab_style(style = cell_text(align = "left", v_align = "middle", size = "large"), 
-            locations = cells_column_labels(columns = c(subject))) %>%
-  cols_align(align = "center", columns = everything()) %>%
-  cols_align(align = "left", columns = c(subject)) %>%
-  fmt_markdown(columns = everything()) %>%
-  tab_spanner(label = "$$\\text{Outcomes}$$", c(ytreat, ycontrol))  %>%
-  tab_spanner(label = "$$\\text{Causal Effect}$$", c(ydiff))
+    tab_header(title = "Preceptor Table") %>% 
+    cols_label(subject = md("ID"),
+                  ytreat = md("$$Y_t(u)$$"),
+                  ycontrol = md("$$Y_c(u)$$"),
+                  ydiff = md("$$Y_t(u) - Y_c(u)$$")) %>%
+    cols_move(columns = c(ytreat, ycontrol), after = c(subject)) %>%
+    tab_style(cell_borders(sides = "right"),
+              location = cells_body(columns = c(subject))) %>%
+    tab_style(style = cell_text(align = "left", v_align = "middle", size = "large"), 
+              locations = cells_column_labels(columns = c(subject))) %>%
+    cols_align(align = "center", columns = everything()) %>%
+    cols_align(align = "left", columns = c(subject)) %>%
+    fmt_markdown(columns = everything()) %>%
+    tab_spanner(label = "$$\\text{Outcomes}$$", c(ytreat, ycontrol))  %>%
+    tab_spanner(label = "$$\\text{Causal Effect}$$", c(ydiff))
 ```
 
 &nbsp;
@@ -372,20 +387,21 @@ tibble(subject = c("Yao", "Emma", "Cassidy", "Tahmid", "Diego"),
   # Then, we use the gt function to make it pretty
   
   gt() %>%
-  cols_label(subject = md("ID"),
-                ytreat = md("$$Y_t(u)$$"),
-                ycontrol = md("$$Y_c(u)$$"),
-                ydiff = md("$$Y_t(u) - Y_c(u)$$")) %>%
-  cols_move(columns = c(ytreat, ycontrol), after = c(subject)) %>%
-  tab_style(cell_borders(sides = "right"),
-            location = cells_body(columns = c(subject))) %>%
-  tab_style(style = cell_text(align = "left", v_align = "middle", size = "large"), 
-            locations = cells_column_labels(columns = c(subject))) %>%
-  cols_align(align = "center", columns = everything()) %>%
-  cols_align(align = "left", columns = c(subject)) %>%
-  fmt_markdown(columns = everything())  %>%
-  tab_spanner(label = "$$\\text{Outcomes}$$", c(ytreat, ycontrol))  %>%
-  tab_spanner(label = "$$\\text{Causal Effect}$$", c(ydiff))
+    tab_header(title = "Preceptor Table") %>% 
+    cols_label(subject = md("ID"),
+                  ytreat = md("$$Y_t(u)$$"),
+                  ycontrol = md("$$Y_c(u)$$"),
+                  ydiff = md("$$Y_t(u) - Y_c(u)$$")) %>%
+    cols_move(columns = c(ytreat, ycontrol), after = c(subject)) %>%
+    tab_style(cell_borders(sides = "right"),
+              location = cells_body(columns = c(subject))) %>%
+    tab_style(style = cell_text(align = "left", v_align = "middle", size = "large"), 
+              locations = cells_column_labels(columns = c(subject))) %>%
+    cols_align(align = "center", columns = everything()) %>%
+    cols_align(align = "left", columns = c(subject)) %>%
+    fmt_markdown(columns = everything())  %>%
+    tab_spanner(label = "$$\\text{Outcomes}$$", c(ytreat, ycontrol))  %>%
+    tab_spanner(label = "$$\\text{Causal Effect}$$", c(ydiff))
 ```
 
 &nbsp;
@@ -417,19 +433,20 @@ tibble(subject = c("Platform 1", "Platform 2", "Platform 3", "Platform 4", "Plat
   # Then, we use the gt function to make it pretty
   
   gt() %>%
-  cols_label(subject = md("ID"),
-                ytreat = md("$$Y_t(u)$$"),
-                ycontrol = md("$$Y_c(u)$$"),
-                ydiff = md("$$Y_t(u) - Y_c(u)$$")) %>%
-  cols_move(columns = c(ytreat, ycontrol), after = c(subject)) %>%
-  tab_style(cell_borders(sides = "right"),
-            location = cells_body(columns = c(subject))) %>%
-  tab_style(style = cell_text(align = "left", v_align = "middle", size = "large"), 
-            locations = cells_column_labels(columns = c(subject))) %>%
-  cols_align(align = "center", columns = everything()) %>%
-  cols_align(align = "left", columns = c(subject)) %>%
-  tab_spanner(label = "$$\\text{Outcomes}$$", c(ytreat, ycontrol)) %>%
-  tab_spanner(label = "$$\\text{Causal Effect}$$", c(ydiff))
+    tab_header(title = "Preceptor Table") %>% 
+    cols_label(subject = md("ID"),
+                  ytreat = md("$$Y_t(u)$$"),
+                  ycontrol = md("$$Y_c(u)$$"),
+                  ydiff = md("$$Y_t(u) - Y_c(u)$$")) %>%
+    cols_move(columns = c(ytreat, ycontrol), after = c(subject)) %>%
+    tab_style(cell_borders(sides = "right"),
+              location = cells_body(columns = c(subject))) %>%
+    tab_style(style = cell_text(align = "left", v_align = "middle", size = "large"), 
+              locations = cells_column_labels(columns = c(subject))) %>%
+    cols_align(align = "center", columns = everything()) %>%
+    cols_align(align = "left", columns = c(subject)) %>%
+    tab_spanner(label = "$$\\text{Outcomes}$$", c(ytreat, ycontrol)) %>%
+    tab_spanner(label = "$$\\text{Causal Effect}$$", c(ydiff))
 ```
 
 &nbsp;
@@ -447,19 +464,20 @@ tibble(subject = c("Platform 1", "Platform 2", "Platform 3", "Platform 4", "Plat
   # Then, we use the gt function to make it pretty
   
   gt() %>%
-  cols_label(subject = md("ID"),
-                ytreat = md("$$Y_t(u)$$"),
-                ycontrol = md("$$Y_c(u)$$"),
-                ydiff = md("$$Y_t(u) - Y_c(u)$$")) %>%
-  cols_move(columns = c(ytreat, ycontrol), after = c(subject)) %>%
-  tab_style(cell_borders(sides = "right"),
-            location = cells_body(columns = c(subject))) %>%
-  tab_style(style = cell_text(align = "left", v_align = "middle", size = "large"), 
-            locations = cells_column_labels(columns = c(subject))) %>%
-  cols_align(align = "center", columns = everything()) %>%
-  cols_align(align = "left", columns = c(subject)) %>%
-  tab_spanner(label = "$$\\text{Outcomes}$$", c(ytreat, ycontrol)) %>%
-  tab_spanner(label = "$$\\text{Causal Effect}$$", c(ydiff)) 
+    tab_header(title = "Preceptor Table") %>% 
+    cols_label(subject = md("ID"),
+                  ytreat = md("$$Y_t(u)$$"),
+                  ycontrol = md("$$Y_c(u)$$"),
+                  ydiff = md("$$Y_t(u) - Y_c(u)$$")) %>%
+    cols_move(columns = c(ytreat, ycontrol), after = c(subject)) %>%
+    tab_style(cell_borders(sides = "right"),
+              location = cells_body(columns = c(subject))) %>%
+    tab_style(style = cell_text(align = "left", v_align = "middle", size = "large"), 
+              locations = cells_column_labels(columns = c(subject))) %>%
+    cols_align(align = "center", columns = everything()) %>%
+    cols_align(align = "left", columns = c(subject)) %>%
+    tab_spanner(label = "$$\\text{Outcomes}$$", c(ytreat, ycontrol)) %>%
+    tab_spanner(label = "$$\\text{Causal Effect}$$", c(ydiff)) 
 ```
 
 &nbsp;
@@ -517,20 +535,21 @@ tibble(subject = c("Yao", "Emma", "Cassidy", "Tahmid", "Diego"),
   # Then, we use the gt function to make it pretty
   
   gt() %>%
-  cols_label(subject = md("ID"),
-                ytreat = md("$$Y_t(u)$$"),
-                ycontrol = md("$$Y_c(u)$$"),
-                ydiff = md("$$Y_t(u) - Y_c(u)$$")) %>%
-  cols_move(columns = c(ytreat, ycontrol), after = c(subject)) %>%
-  tab_style(cell_borders(sides = "right"),
-            location = cells_body(columns = c(subject))) %>%
-  tab_style(style = cell_text(align = "left", v_align = "middle", size = "large"), 
-            locations = cells_column_labels(columns = c(subject))) %>%
-  cols_align(align = "center", columns = everything()) %>%
-  cols_align(align = "left", columns = c(subject)) %>%
-  tab_spanner(label = "$$\\text{Outcomes}$$", c(ytreat, ycontrol)) %>%
-  tab_spanner(label = "$$\\text{Causal Effect}$$", c(ydiff)) %>%
-  fmt_markdown(columns = everything())
+    tab_header(title = "Preceptor Table") %>% 
+    cols_label(subject = md("ID"),
+                  ytreat = md("$$Y_t(u)$$"),
+                  ycontrol = md("$$Y_c(u)$$"),
+                  ydiff = md("$$Y_t(u) - Y_c(u)$$")) %>%
+    cols_move(columns = c(ytreat, ycontrol), after = c(subject)) %>%
+    tab_style(cell_borders(sides = "right"),
+              location = cells_body(columns = c(subject))) %>%
+    tab_style(style = cell_text(align = "left", v_align = "middle", size = "large"), 
+              locations = cells_column_labels(columns = c(subject))) %>%
+    cols_align(align = "center", columns = everything()) %>%
+    cols_align(align = "left", columns = c(subject)) %>%
+    tab_spanner(label = "$$\\text{Outcomes}$$", c(ytreat, ycontrol)) %>%
+    tab_spanner(label = "$$\\text{Causal Effect}$$", c(ydiff)) %>%
+    fmt_markdown(columns = everything())
 ```
 
 &nbsp;
@@ -550,20 +569,21 @@ tibble(subject = c("Yao", "Emma", "Cassidy", "Tahmid", "Diego"),
   # Then, we use the gt function to make it pretty
   
   gt() %>%
-  cols_label(subject = md("ID"),
-                ytreat = md("$$Y_t(u)$$"),
-                ycontrol = md("$$Y_c(u)$$"),
-                ydiff = md("$$Y_t(u) - Y_c(u)$$")) %>%
-  cols_move(columns = c(ytreat, ycontrol), after = c(subject)) %>%
-  tab_style(cell_borders(sides = "right"),
-            location = cells_body(columns = c(subject))) %>%
-  tab_style(style = cell_text(align = "left", v_align = "middle", size = "large"), 
-            locations = cells_column_labels(columns = c(subject))) %>%
-  cols_align(align = "center", columns = everything()) %>%
-  cols_align(align = "left", columns = c(subject)) %>%
-  tab_spanner(label = "$$\\text{Outcomes}$$", c(ytreat, ycontrol)) %>%
-  tab_spanner(label = "$$\\text{Causal Effect}$$", c(ydiff)) %>%
-  fmt_markdown(columns = everything())
+    tab_header(title = "Preceptor Table") %>% 
+    cols_label(subject = md("ID"),
+                  ytreat = md("$$Y_t(u)$$"),
+                  ycontrol = md("$$Y_c(u)$$"),
+                  ydiff = md("$$Y_t(u) - Y_c(u)$$")) %>%
+    cols_move(columns = c(ytreat, ycontrol), after = c(subject)) %>%
+    tab_style(cell_borders(sides = "right"),
+              location = cells_body(columns = c(subject))) %>%
+    tab_style(style = cell_text(align = "left", v_align = "middle", size = "large"), 
+              locations = cells_column_labels(columns = c(subject))) %>%
+    cols_align(align = "center", columns = everything()) %>%
+    cols_align(align = "left", columns = c(subject)) %>%
+    tab_spanner(label = "$$\\text{Outcomes}$$", c(ytreat, ycontrol)) %>%
+    tab_spanner(label = "$$\\text{Causal Effect}$$", c(ydiff)) %>%
+    fmt_markdown(columns = everything())
 ```
 
 &nbsp;
@@ -585,20 +605,21 @@ tibble(subject = c("Yao", "Emma", "Cassidy", "Tahmid", "Diego"),
   # Then, we use the gt function to make it pretty
   
   gt() %>%
-  cols_label(subject = md("ID"),
-                ytreat = md("$$Y_t(u)$$"),
-                ycontrol = md("$$Y_c(u)$$"),
-                ydiff = md("$$Y_t(u) - Y_c(u)$$")) %>%
-  cols_move(columns = c(ytreat, ycontrol), after = c(subject)) %>%
-  tab_style(cell_borders(sides = "right"),
-            location = cells_body(columns = c(subject))) %>%
-  tab_style(style = cell_text(align = "left", v_align = "middle", size = "large"), 
-            locations = cells_column_labels(columns = c(subject))) %>%
-  cols_align(align = "center", columns = everything()) %>%
-  cols_align(align = "left", columns = c(subject)) %>%
-  tab_spanner(label = "$$\\text{Outcomes}$$", c(ytreat, ycontrol)) %>%
-  tab_spanner(label = "$$\\text{Causal Effect}$$", c(ydiff)) %>%
-  fmt_markdown(columns = everything())
+    tab_header(title = "Preceptor Table") %>% 
+    cols_label(subject = md("ID"),
+                  ytreat = md("$$Y_t(u)$$"),
+                  ycontrol = md("$$Y_c(u)$$"),
+                  ydiff = md("$$Y_t(u) - Y_c(u)$$")) %>%
+    cols_move(columns = c(ytreat, ycontrol), after = c(subject)) %>%
+    tab_style(cell_borders(sides = "right"),
+              location = cells_body(columns = c(subject))) %>%
+    tab_style(style = cell_text(align = "left", v_align = "middle", size = "large"), 
+              locations = cells_column_labels(columns = c(subject))) %>%
+    cols_align(align = "center", columns = everything()) %>%
+    cols_align(align = "left", columns = c(subject)) %>%
+    tab_spanner(label = "$$\\text{Outcomes}$$", c(ytreat, ycontrol)) %>%
+    tab_spanner(label = "$$\\text{Causal Effect}$$", c(ydiff)) %>%
+    fmt_markdown(columns = everything())
 ```
 
 &nbsp;
@@ -616,20 +637,21 @@ tibble(subject = c("Yao", "Emma", "Cassidy", "Tahmid", "Diego"),
   # Then, we use the gt function to make it pretty
   
   gt() %>%
-  cols_label(subject = md("ID"),
-                ytreat = md("$$Y_t(u)$$"),
-                ycontrol = md("$$Y_c(u)$$"),
-                ydiff = md("$$Y_t(u) - Y_c(u)$$")) %>%
-  cols_move(columns = c(ytreat, ycontrol), after = c(subject)) %>%
-  tab_style(cell_borders(sides = "right"),
-            location = cells_body(columns = c(subject))) %>%
-  tab_style(style = cell_text(align = "left", v_align = "middle", size = "large"), 
-            locations = cells_column_labels(columns = c(subject))) %>%
-  cols_align(align = "center", columns = everything()) %>%
-  cols_align(align = "left", columns = c(subject)) %>%
-  tab_spanner(label = "$$\\text{Outcomes}$$", c(ytreat, ycontrol)) %>%
-  tab_spanner(label = "$$\\text{Causal Effect}$$", c(ydiff)) %>%
-  fmt_markdown(columns = everything())
+    tab_header(title = "Preceptor Table") %>% 
+    cols_label(subject = md("ID"),
+                  ytreat = md("$$Y_t(u)$$"),
+                  ycontrol = md("$$Y_c(u)$$"),
+                  ydiff = md("$$Y_t(u) - Y_c(u)$$")) %>%
+    cols_move(columns = c(ytreat, ycontrol), after = c(subject)) %>%
+    tab_style(cell_borders(sides = "right"),
+              location = cells_body(columns = c(subject))) %>%
+    tab_style(style = cell_text(align = "left", v_align = "middle", size = "large"), 
+              locations = cells_column_labels(columns = c(subject))) %>%
+    cols_align(align = "center", columns = everything()) %>%
+    cols_align(align = "left", columns = c(subject)) %>%
+    tab_spanner(label = "$$\\text{Outcomes}$$", c(ytreat, ycontrol)) %>%
+    tab_spanner(label = "$$\\text{Causal Effect}$$", c(ydiff)) %>%
+    fmt_markdown(columns = everything())
 ```
 
 <!-- DK: Need a discussion here. -->
@@ -656,21 +678,22 @@ tibble(subject = c("Yao", "Emma", "Cassidy", "Tahmid", "Diego"),
   # Then, we use the gt function to make it pretty
   
   gt() %>%
-  cols_label(subject = md("ID"),
-                ytreat = md("$$Y_t(u)$$"),
-                ycontrol = md("$$Y_c(u)$$"),
-                ydiff = md("$$Y_t(u) - Y_c(u)$$")) %>%
-  cols_move(columns = c(ytreat, ycontrol), after = c(subject)) %>%
-  tab_style(cell_borders(sides = "right"),
-            location = cells_body(columns = c(subject))) %>%
-  tab_style(style = cell_text(align = "left", v_align = "middle", size = "large"), 
-            locations = cells_column_labels(columns = c(subject))) %>%
-  cols_align(align = "center", columns = everything()) %>%
-  cols_align(align = "left", columns = c(subject)) %>%
-  tab_spanner(label = "$$\\text{Outcomes}$$", c(ytreat, ycontrol)) %>%
-  tab_spanner(label = "$$\\text{Causal Effect}$$", c(ydiff)) %>%
-  tab_spanner(label = "$$\\text{Covariate}$$", c(gender)) %>%
-  fmt_markdown(columns = everything())
+    tab_header(title = "Preceptor Table") %>% 
+    cols_label(subject = md("ID"),
+                  ytreat = md("$$Y_t(u)$$"),
+                  ycontrol = md("$$Y_c(u)$$"),
+                  ydiff = md("$$Y_t(u) - Y_c(u)$$")) %>%
+    cols_move(columns = c(ytreat, ycontrol), after = c(subject)) %>%
+    tab_style(cell_borders(sides = "right"),
+              location = cells_body(columns = c(subject))) %>%
+    tab_style(style = cell_text(align = "left", v_align = "middle", size = "large"), 
+              locations = cells_column_labels(columns = c(subject))) %>%
+    cols_align(align = "center", columns = everything()) %>%
+    cols_align(align = "left", columns = c(subject)) %>%
+    tab_spanner(label = "$$\\text{Outcomes}$$", c(ytreat, ycontrol)) %>%
+    tab_spanner(label = "$$\\text{Causal Effect}$$", c(ydiff)) %>%
+    tab_spanner(label = "$$\\text{Covariate}$$", c(gender)) %>%
+    fmt_markdown(columns = everything())
 ```
 
 &nbsp;
@@ -693,20 +716,21 @@ tibble(subject = c("Yao", "Emma", "Cassidy", "Tahmid", "Diego"),
   # Then, we use the gt function to make it pretty
   
   gt() %>%
-  cols_label(subject = md("ID"),
-                ytreat = md("$$Y_t(u)$$"),
-                ycontrol = md("$$Y_c(u)$$"),
-                ydiff = md("$$Y_t(u) - Y_c(u)$$")) %>%
-  cols_move(columns = c(ytreat, ycontrol), after = c(subject)) %>%
-  tab_style(cell_borders(sides = "right"),
-            location = cells_body(columns = c(subject))) %>%
-  tab_style(style = cell_text(align = "left", v_align = "middle", size = "large"), 
-            locations = cells_column_labels(columns = c(subject))) %>%
-  cols_align(align = "center", columns = everything()) %>%
-  cols_align(align = "left", columns = c(subject)) %>%
-  tab_spanner(label = "$$\\text{Outcomes}$$", c(ytreat, ycontrol)) %>%
-  tab_spanner(label = "$$\\text{Causal Effect}$$", c(ydiff)) %>%
-  fmt_markdown(columns = everything())
+    tab_header(title = "Preceptor Table") %>% 
+    cols_label(subject = md("ID"),
+                  ytreat = md("$$Y_t(u)$$"),
+                  ycontrol = md("$$Y_c(u)$$"),
+                  ydiff = md("$$Y_t(u) - Y_c(u)$$")) %>%
+    cols_move(columns = c(ytreat, ycontrol), after = c(subject)) %>%
+    tab_style(cell_borders(sides = "right"),
+              location = cells_body(columns = c(subject))) %>%
+    tab_style(style = cell_text(align = "left", v_align = "middle", size = "large"), 
+              locations = cells_column_labels(columns = c(subject))) %>%
+    cols_align(align = "center", columns = everything()) %>%
+    cols_align(align = "left", columns = c(subject)) %>%
+    tab_spanner(label = "$$\\text{Outcomes}$$", c(ytreat, ycontrol)) %>%
+    tab_spanner(label = "$$\\text{Causal Effect}$$", c(ydiff)) %>%
+    fmt_markdown(columns = everything())
 ```
 
 &nbsp;
@@ -724,20 +748,21 @@ tibble(subject = c("Yao", "Emma", "Cassidy", "Tahmid", "Diego"),
   # Then, we use the gt function to make it pretty
   
   gt() %>%
-  cols_label(subject = md("ID"),
-                ytreat = md("$$Y_t(u)$$"),
-                ycontrol = md("$$Y_c(u)$$"),
-                ydiff = md("$$Y_t(u) - Y_c(u)$$")) %>%
-  cols_move(columns = c(ytreat, ycontrol), after = c(subject)) %>%
-  tab_style(cell_borders(sides = "right"),
-            location = cells_body(columns = c(subject))) %>%
-  tab_style(style = cell_text(align = "left", v_align = "middle", size = "large"), 
-            locations = cells_column_labels(columns = c(subject))) %>%
-  cols_align(align = "center", columns = everything()) %>%
-  cols_align(align = "left", columns = c(subject)) %>%
-  tab_spanner(label = "$$\\text{Outcomes}$$", c(ytreat, ycontrol)) %>%
-  tab_spanner(label = "$$\\text{Causal Effect}$$", c(ydiff)) %>%
-  fmt_markdown(columns = everything())
+    tab_header(title = "Preceptor Table") %>% 
+    cols_label(subject = md("ID"),
+                  ytreat = md("$$Y_t(u)$$"),
+                  ycontrol = md("$$Y_c(u)$$"),
+                  ydiff = md("$$Y_t(u) - Y_c(u)$$")) %>%
+    cols_move(columns = c(ytreat, ycontrol), after = c(subject)) %>%
+    tab_style(cell_borders(sides = "right"),
+              location = cells_body(columns = c(subject))) %>%
+    tab_style(style = cell_text(align = "left", v_align = "middle", size = "large"), 
+              locations = cells_column_labels(columns = c(subject))) %>%
+    cols_align(align = "center", columns = everything()) %>%
+    cols_align(align = "left", columns = c(subject)) %>%
+    tab_spanner(label = "$$\\text{Outcomes}$$", c(ytreat, ycontrol)) %>%
+    tab_spanner(label = "$$\\text{Causal Effect}$$", c(ydiff)) %>%
+    fmt_markdown(columns = everything())
 ```
 
 &nbsp;
@@ -763,20 +788,21 @@ tibble(subject = c("Yao", "Emma", "Cassidy", "Tahmid", "Diego"),
   # Then, we use the gt function to make it pretty
   
   gt() %>%
-  cols_label(subject = md("ID"),
-                ytreat = md("$$Y_t(u)$$"),
-                ycontrol = md("$$Y_c(u)$$"),
-                ydiff = md("$$Y_t(u) - Y_c(u)$$")) %>%
-  cols_move(columns = c(ytreat, ycontrol), after = c(subject)) %>%
-  tab_style(cell_borders(sides = "right"),
-            location = cells_body(columns = c(subject))) %>%
-  tab_style(style = cell_text(align = "left", v_align = "middle", size = "large"), 
-            locations = cells_column_labels(columns = c(subject))) %>%
-  cols_align(align = "center", columns = everything()) %>%
-  cols_align(align = "left", columns = c(subject)) %>%
-  tab_spanner(label = "$$\\text{Outcomes}$$", c(ytreat, ycontrol)) %>%
-  tab_spanner(label = "$$\\text{Causal Effect}$$", c(ydiff)) %>%
-  fmt_markdown(columns = everything())
+    tab_header(title = "Preceptor Table") %>% 
+    cols_label(subject = md("ID"),
+                  ytreat = md("$$Y_t(u)$$"),
+                  ycontrol = md("$$Y_c(u)$$"),
+                  ydiff = md("$$Y_t(u) - Y_c(u)$$")) %>%
+    cols_move(columns = c(ytreat, ycontrol), after = c(subject)) %>%
+    tab_style(cell_borders(sides = "right"),
+              location = cells_body(columns = c(subject))) %>%
+    tab_style(style = cell_text(align = "left", v_align = "middle", size = "large"), 
+              locations = cells_column_labels(columns = c(subject))) %>%
+    cols_align(align = "center", columns = everything()) %>%
+    cols_align(align = "left", columns = c(subject)) %>%
+    tab_spanner(label = "$$\\text{Outcomes}$$", c(ytreat, ycontrol)) %>%
+    tab_spanner(label = "$$\\text{Causal Effect}$$", c(ydiff)) %>%
+    fmt_markdown(columns = everything())
 ```
 
 &nbsp;
@@ -824,20 +850,21 @@ tibble(subject = c("Yao", "Emma", "Cassidy", "Tahmid", "Diego"),
   # Then, we use the gt function to make it pretty
   
   gt() %>%
-  cols_label(subject = md("ID"),
-                ytreat = md("$$Y_t(u)$$"),
-                ycontrol = md("$$Y_c(u)$$"),
-                ydiff = md("$$Y_t(u) - Y_c(u)$$")) %>%
-  cols_move(columns = c(ytreat, ycontrol), after = c(subject)) %>%
-  tab_style(cell_borders(sides = "right"),
-            location = cells_body(columns = c(subject))) %>%
-  tab_style(style = cell_text(align = "left", v_align = "middle", size = "large"), 
-            locations = cells_column_labels(columns = c(subject))) %>%
-  cols_align(align = "center", columns = everything()) %>%
-  cols_align(align = "left", columns = c(subject)) %>%
-  tab_spanner(label = "$$\\text{Outcomes}$$", c(ytreat, ycontrol)) %>%
-  tab_spanner(label = "$$\\text{Causal Effect}$$", c(ydiff)) %>%
-  fmt_markdown(columns = everything())
+    tab_header(title = "Preceptor Table") %>% 
+    cols_label(subject = md("ID"),
+                  ytreat = md("$$Y_t(u)$$"),
+                  ycontrol = md("$$Y_c(u)$$"),
+                  ydiff = md("$$Y_t(u) - Y_c(u)$$")) %>%
+    cols_move(columns = c(ytreat, ycontrol), after = c(subject)) %>%
+    tab_style(cell_borders(sides = "right"),
+              location = cells_body(columns = c(subject))) %>%
+    tab_style(style = cell_text(align = "left", v_align = "middle", size = "large"), 
+              locations = cells_column_labels(columns = c(subject))) %>%
+    cols_align(align = "center", columns = everything()) %>%
+    cols_align(align = "left", columns = c(subject)) %>%
+    tab_spanner(label = "$$\\text{Outcomes}$$", c(ytreat, ycontrol)) %>%
+    tab_spanner(label = "$$\\text{Causal Effect}$$", c(ydiff)) %>%
+    fmt_markdown(columns = everything())
 ```
 
 &nbsp;
@@ -875,22 +902,23 @@ tibble(source = c("Population", "Population", "Data",
   # Then, we use the gt function to make it pretty
   
   gt() %>%
-  cols_label(source = md("Source"),
-             year = md("Year"),
-             sex = md("Sex"),
-                ytreat = md("$$Y_t(u)$$"),
-                ycontrol = md("$$Y_c(u)$$"),
-                ydiff = md("$$Y_t(u) - Y_c(u)$$")) %>%
-  cols_move(columns = c(ytreat, ycontrol), after = c(source)) %>%
-  tab_style(cell_borders(sides = "right"),
-            location = cells_body(columns = c(source))) %>%
-  tab_style(style = cell_text(align = "left", v_align = "middle", size = "large"), 
-            locations = cells_column_labels(columns = c(source))) %>%
-  cols_align(align = "center", columns = everything()) %>%
-  cols_align(align = "left", columns = c(source)) %>%
-  tab_spanner(label = "$$\\text{Outcomes}$$", c(ytreat, ycontrol)) %>%
-  tab_spanner(label = "$$\\text{Causal Effect}$$", c(ydiff)) %>% 
-  tab_spanner(label = "$$\\text{Covariates}$$", c(sex))
+    tab_header(title = "Population Table") %>% 
+    cols_label(source = md("Source"),
+               year = md("Year"),
+               sex = md("Sex"),
+                  ytreat = md("$$Y_t(u)$$"),
+                  ycontrol = md("$$Y_c(u)$$"),
+                  ydiff = md("$$Y_t(u) - Y_c(u)$$")) %>%
+    cols_move(columns = c(ytreat, ycontrol), after = c(source)) %>%
+    tab_style(cell_borders(sides = "right"),
+              location = cells_body(columns = c(source))) %>%
+    tab_style(style = cell_text(align = "left", v_align = "middle", size = "large"), 
+              locations = cells_column_labels(columns = c(source))) %>%
+    cols_align(align = "center", columns = everything()) %>%
+    cols_align(align = "left", columns = c(source)) %>%
+    tab_spanner(label = "$$\\text{Outcomes}$$", c(ytreat, ycontrol)) %>%
+    tab_spanner(label = "$$\\text{Causal Effect}$$", c(ydiff)) %>% 
+    tab_spanner(label = "$$\\text{Covariates}$$", c(sex))
 ```
 
 &nbsp;
@@ -923,20 +951,21 @@ tibble(subject = c("Yao", "Emma", "Cassidy", "Tahmid", "Diego"),
   # Then, we use the gt function to make it pretty
   
   gt() %>%
-  cols_label(subject = md("ID"),
-             ytreat = md("$$Y_{\\text{58 dB}}(u)$$"),
-             ytreat1001 = md("$$Y_{\\text{59 dB}}(u)$$"),
-             ytreat1002 = md("$$Y_{\\text{60 dB}}(u)$$"),
-             yellipsis = md("$$Y_{\\text{61 dB}}(u)$$"),
-             ycontrol = md("$$Y_c(u)$$")) %>%
-  tab_style(cell_borders(sides = "right"),
-            location = cells_body(columns = c(subject))) %>%
-  tab_style(style = cell_text(align = "left", v_align = "middle", size = "large"), 
-            locations = cells_column_labels(columns = c(subject))) %>%
-  cols_align(align = "center", columns = everything()) %>%
-  cols_align(align = "left", columns = c(subject)) %>%
-  tab_spanner(label = "$$\\text{Outcomes}$$", c(ytreat, ytreat1001, ytreat1002, yellipsis, ycontrol)) %>%
-  fmt_markdown(columns = everything())
+    cols_label(subject = md("ID"),
+               ytreat = md("$$Y_{\\text{58 dB}}(u)$$"),
+               ytreat1001 = md("$$Y_{\\text{59 dB}}(u)$$"),
+               ytreat1002 = md("$$Y_{\\text{60 dB}}(u)$$"),
+               yellipsis = md("$$Y_{\\text{61 dB}}(u)$$"),
+               ycontrol = md("$$Y_c(u)$$")) %>%
+    tab_style(cell_borders(sides = "right"),
+              location = cells_body(columns = c(subject))) %>%
+    tab_style(style = cell_text(align = "left", v_align = "middle", size = "large"), 
+              locations = cells_column_labels(columns = c(subject))) %>%
+    cols_align(align = "center", columns = everything()) %>%
+    cols_align(align = "left", columns = c(subject)) %>%
+    tab_spanner(label = "$$\\text{Outcomes}$$", 
+                c(ytreat, ytreat1001, ytreat1002, yellipsis, ycontrol)) %>%
+    fmt_markdown(columns = everything())
 ```
 
 &nbsp;

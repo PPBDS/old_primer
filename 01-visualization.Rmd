@@ -4,25 +4,25 @@ Everyone loves visualizations.
 
 <!-- Heather owns this Chapter! Change anything an everything! Change anything you like in Getting Started. -->
 
-<!-- Discuss `group` aesthetic, especially for line plots. Don't use the unemployment data anymore. Use two or three of the temperature series from primer.data::temperature. -->
+<!-- Cut out all R and R Studio section. Place cool/useful parts of it in Getting Started. -->
+
+<!-- Talk more about aesthetics (i.e., aes()) in Basic plots. Make more use of color and fill. Explain how you can use either constants (like "steelblue") or variables (like party) when using these aesthetics. -->
 
 <!-- Add the formula for median, like this one: https://math.stackexchange.com/questions/1097546/what-is-the-general-formula-for-calculating-the-median -->
 
 <!-- Better explain Tidyverse. -->
 
-<!-- Fix opening graph so that it looks nicer? Used to use economist_theme(), which was slick but the subtitle overlapping with the title wasn't great aesthetically and also probably wasn't the best "hey look pretty graphs" appeal. Even with the new clean_theme(), the last 50,000 axis label is cropped. Or maybe change the graph completely? -->
+<!-- Don't do this yet. Same with the `group` aesthetic, especially for line plots. Don't use the unemployment data anymore. Use two or three of the temperature series from primer.data::temperature. -->
 
-<!-- Make graphs at end also use clean_theme(). -->
-
-<!-- Maybe use Biden approval for lead plot. Or presidential approval over last three Presidents? -->
-
-<!-- Plot should be much cooler, perhaps even using bigger data. And an associated map. Precinct level voting changes 2012 -> 2016 -> 2020, perhaps. But still needs to be something which we can easily use with plotly. Necessary for it to be animateable? -->
 
 ```{r, message = FALSE, echo = FALSE}
 library(tidyverse)
 library(ggthemes)
 library(scales)
 library(gapminder)
+
+# first plot, I'm keeping the old plot in here because it takes too long to load
+# the trump plot in plotly
 
 gap_p <- gapminder %>%
   filter(continent != "Oceania") %>%
@@ -42,23 +42,37 @@ gap_p <- gapminder %>%
     theme_clean() + 
     theme(legend.position = "none")
 
-gap_p
+
+
+# download.file(url = "",
+#              destfile = "01-visualization/data/visualization_trump_data.csv")
+
+trump_data <- read_csv("01-visualization/data/visualization_trump_data.csv",
+                       show_col_types = FALSE)
+
+trump_p <- trump_data %>% 
+  ggplot(mapping = aes(x = enddate,
+                       y = rate,
+                       color = approval_type)) +
+   geom_point(alpha = 0.05,
+              size = 0.5) +
+   geom_smooth(method = "gam",
+               formula = y ~ s(x, bs = "cs")) +
+   coord_cartesian(ylim = c(30, 65)) +
+   theme_fivethirtyeight() +
+   labs(title = "Trump's Approval and Disapproval Ratings From \n2017-2021",
+        subtitle = "His approval peaked in late 2017 but has since stayed consistent throughout.",
+        x = NULL,
+        y = NULL,
+        color = "Approval or Disapproval")
+trump_p
 ```
 
 Once you have read this chapter, and completed the associated tutorials, you will be able to create graphics like this one with your data. Join us on the journey.
 
-## R and RStudio
+## Basic R commands
 
-We use the terms "coding" and "programming" interchangeably.
-
-If you want a slower introduction than we are providing here, check out the short book, [*Getting Used to R, RStudio, and R Markdown*](https://rbasics.netlify.com/). @usedtor2016 include screencast recordings that you can follow along and pause as you learn. They include an introduction to R Markdown, a tool used for reproducible research in R.
-
-With the rest of this primer, we will use a different font to distinguish regular text from `computer_code`.
-
-
-<!-- KX: can we copy the order from https://www.tutorialspoint.com/r/r_data_types.htm? -->
-
-If you'd like to follow along with this section, you can open open the *Console pane* in RStudio.
+We use the terms "coding" and "programming" interchangeably. With the rest of this *Primer*, we will use a different font to distinguish regular text from `computer_code`. If you'd like to follow along with this section, you can open open the *Console pane* in RStudio.
 
 * *Running code*: the act of telling R to put our code into action. 
 
@@ -211,7 +225,6 @@ We see the first few values for each variable in a row after the variable name. 
 
 `dbl` refers to "double", which is computer terminology for quantitative/numerical variables. `int` is for  "integer." `fct` is refers to a "factor," a variable that is "nominal," meaning a member of a smallish number of categories. `chr` is for character data.
 
-<!-- HL: the definitions for these terms feel sort of all over the place, maybe the terms + the abbreviations R uses should just all be in the glossary so people have one place to reference when they're confused -->
 
 #### `summary()`
 
@@ -560,7 +573,7 @@ Note the message. R is telling us that we need to specify the `method` and `form
 
 Let's add the argument `method = "lm"`, where "lm" stands for **l**inear **m**odel. This causes the fitted line to be straight rather than curved. Let's also add the argument `formula = y ~ x`. This makes both messages go away. Again, R was not giving us an error before. It was simply telling us what options it was using since we did not specify the options ourselves.
 
-<!-- HL: should we explain why we make the argument formula = y~x? -->
+<!-- HL: should we explain why we make the argument formula = y~x? The reason is that R is concerned that we don't know exactly what model it is estimating. So, it is warning us that y is function of x. We make the warning go away by specifying that relationship in the argument. -->
 
 *Always include enough detail in your code to make those messages disappear.*
 
@@ -612,7 +625,7 @@ The values on the y-axis are scaled so that the total area under the curve equal
 
 <!-- DK: Other stuff to finish this section with? -->
 
-<!-- HL: could we just list other uncommonly used geom functions that people have the option of using if they want to and point them to another resource that they can learn from if they want? -->
+<!-- HL: could we just list other uncommonly used geom functions that people have the option of using if they want to and point them to another resource that they can learn from if they want? Yes!  -->
 
 
 ## Tidyverse
@@ -905,7 +918,7 @@ The *quantile* of a distribution is the value of that distribution which occupie
 
 The 5th percentile distribution is the point below which 5% of the data falls. The 95th percentile is, similarly, the point below which 95% of the data falls. The 50th percentile, the median, splits the data into two separate, and equal, parts. The minimum is at the 0th percentile. The maximum is at the 100th percentile.
 
-<!-- HL: it's kinda unclear what the relationship between this paragraph and quantiles is? Also I sort of think the definition of quantile is rather wordy and not super clear -->
+<!-- HL: it's kinda unclear what the relationship between this paragraph and quantiles is? Also I sort of think the definition of quantile is rather wordy and not super clear. So fix it! -->
 
 Let's take a look at the `poverty` variable in the `kenya` tibble from the **primer.data** package. `poverty` is the percentage of residents in each community with incomes below the poverty line. Let's first confirm that  `quantile()` works by comparing its output with that from simpler functions.
 
@@ -1084,7 +1097,7 @@ ggplot(data = gapminder,
 
 Recall that the y-aesthetic of a histogram --- the count of the observations in each bin --- gets computed automatically. We can use the  `after_stat()` argument within `geom_histogram()` to generate percent values as our y-aesthetic. 
 
-<!-- HL: should probably explain what after_stat does -->
+<!-- HL: should probably explain what after_stat does. So do so! -->
 
 
 ```{r}
@@ -1095,44 +1108,9 @@ ggplot(data = gapminder,
   labs(y = "Percentage")
 ```
 
- 
-### Coordinate Systems
-
-<!-- DK: Awk? Delete? Need more tricks, but more pithily explained and demonstrated. -->
-
-We can switch the axes on a plot with `coord_flip()`. Consider the faceted scatterplot we previously created. 
-
-```{r}
-ggplot(data = gapminder_filt, 
-       mapping = aes(x = gdpPercap, 
-                     y = lifeExp, 
-                     color = continent)) +
-  geom_point() +
-  facet_wrap(~ continent, nrow = 1) +
-  geom_smooth(method = "lm", 
-              formula = y ~ x, 
-              se = FALSE)
-```
-
-Adding the layer `coord_flip()` flips the axes.
-
-```{r}
-ggplot(data = gapminder_filt, 
-       mapping = aes(x = gdpPercap, 
-                     y = lifeExp, 
-                     color = continent)) +
-  geom_point() +
-  facet_wrap(~ continent, nrow = 1) +
-  geom_smooth(method = "lm", 
-              formula = y ~ x, 
-              se = FALSE) +
-  coord_flip()
-```
-
-`lifeExp` is now on the x-axis and `gdpPercap` on the y-axis. Compared to the previous plot it is now easier to observe the distribution of life expectancy in the respective continents. For example, we can see that many countries in Africa are at about 55 years, in the Americas and Asia at 75 years, and in Europe at 80 years. However, we think it makes more sense to consider `lifeExp` as the dependent variable, so we won't use `coord_flip()` in subsequent plots.
-
-
 ### Axis Limits and Scales
+
+#### `coord_cartesian()`
 
 We can also manipulate the limits of the axes by using `xlim()` and `ylim()` within a call to `coord_cartesian()`. For example, assume that we are only interested in countries with a GDP per capita from 0 to 30,000. Recall that, because `data` is the first argument and `mapping` is the second to `ggplot()`, we don't actually have to name the arguments. We can just provide them, as long as they are in the correct order.
 
@@ -1147,6 +1125,7 @@ ggplot(gapminder_filt,
 
 We can see that the GDP per capita on the x-axis is now only shown from 0 to 30,000. 
 
+#### `scale_x` and `scale_y`
 
 We can also change the scaling of the axes. For example, it might be useful to display the axes on a logarithmic scale by using `scale_x_log10()` or `scale_y_log10()`. Also, note that we can (lazily!) not provide the explicit `x` and `y` argument names to `aes()` as long as we provide the values in the right order: `x` comes before `y`. 
 
@@ -1161,6 +1140,33 @@ ggplot(gapminder_filt,
 
 <!-- BG: Need scale_x_cont and scale_y_cont here -->
 
+Beyond `scale_x_log10()`, there are other ways to change the scales. We will cover `scale_y_continuous` and `scale_x_continuous` in this section. 
+
+There are two major uses for `scale_x_continuous`, and that is to change the breaks and the labels. Take the graph below.
+
+```{r}
+ggplot(gapminder_filt, 
+       aes(gdpPercap, lifeExp, color = continent)) +
+  geom_point() +
+  facet_wrap(~continent) +
+  geom_smooth(formula = y ~ x, method = "lm", se = FALSE)
+```
+
+We only want there to be breaks on the y-axis every 20 years instead of every 10. We also want to add dollar signs to the x-axis, and to have breaks every 20,000 dollars. Let's fix the graph!
+
+```{r}
+ggplot(gapminder_filt, 
+       aes(gdpPercap, lifeExp, color = continent)) +
+  geom_point() +
+  facet_wrap(~continent) +
+  geom_smooth(formula = y ~ x, method = "lm", se = FALSE) +
+  scale_y_continuous(breaks = c(40, 60, 80)) +
+  scale_x_continuous(labels = scales::dollar_format(),
+                     breaks = c(0, 20000, 40000))
+```
+Let's break this down. We used the `breaks` argument to create the breaks on the scale. We used the `c()` function to specify what breaks we wanted. Then, we used `labels` to modify the labels on the x-axis. The `::` allows us to extract a function from a specific package, if the function exists in multiple packages. So, we specifically extract the `dollar_format` function from the `scales` package to change the labels of the x-axis. 
+
+There is another function called `scale_x_discrete/scale_y_discrete`. This function is similar enough to `scale_y/x_continuous` that we will not give it its own section. The only difference in the usage of the discrete vs. continuous function is that the discrete function is applied to **discrete variables**. Discrete variables are those that are countable (i.e. the number of tables in a room) with nothing in between, whereas continuous variables have infinite possibilities (i.e. height has infinite possibilities). 
 
 ### Text
 
@@ -1269,7 +1275,6 @@ The `theme()` function also offers a wide [selection](https://ggplot2.tidyverse.
 There are two key elements in the `theme()` function.
 
 * **Theme elements**: these specify the non-data elements you can control. For example, `panel.border` is the element that controls the border of the grid area.
-
 * **Element function**: this describes the visual properties of the element. There are four main element functions, `element_blank()`, `element_rect()`, `element_line()`, `element_text()`. 
   * **element_blank()**: this hides the element from the theme.
   * **element_line()**: this modifies elements that are plot lines, grid lines, axes, etc.
@@ -1306,6 +1311,7 @@ ggplot(data = economics,
         panel.background = element_rect(fill = "lightblue"),
         panel.grid.minor.x = element_blank())
 ```
+
 There! Within the `theme()` function, we can change the plot title to bold, the background to blue, and get rid of the "minor" grid lines. `theme()` is a very versatile function. See the full list of elements [here](https://ggplot2-book.org/polishing.html#polishing).
 
 ## Summary
@@ -1333,14 +1339,12 @@ Recall the plot we began the chapter with:
 
 
 ```{r, echo = FALSE}
-gap_p
+trump_p
 ```
 
 You now know enough to make plots like this by yourself.
 
-<!-- HL: maybe we should just leave a link to other areas of the primer where they can explore the annimate and plotly stuff? feels sort of wrong to just leave it dangling here and then not explain it. Maybe we can include the pretty graphs as a teaser and then redirect them to where they should actually learn about it bc the code feels awkwardly plopped here -->
-
-It is important to know that we have only seen a small part of what R offers. For example, we can use the **gganimate** package to bring a slightly modified version of our gapminder plot to life:
+It is important to know that we have only seen a small part of what R offers. For example, we can use the **gganimate** package to bring plots to life:
 
 ```{r, cache = TRUE}
 library(gganimate)
@@ -1363,13 +1367,6 @@ gap_anim <- gapminder %>%
 gap_anim
 ```
 
-The **plotly** package makes our plot interactive. Click on it and explore!
 
-
-```{r, cache = TRUE, message = FALSE, warning = FALSE}
-library(plotly)
-
-ggplotly(gap_p)
-```
 
 A beautiful plot is just a collection of steps, each simple enough on its own. We have taught you (some of) these steps. Time to start walking on your own.
