@@ -1,5 +1,6 @@
 # N Parameters {#n-parameters}
 
+ <!-- MF: POpulation Table adjusted. Validity, stability, and representativeness modified but could use some polishing --> 
 
 <!-- Continuing in Justice, what assumption do we make about the form of the model? (Meaning linear, logistic and so on.) Also, discuss the fact that we have assuming that the unknown joint distribution is consistent for the whole population. That is, there is a formula which works for all the rows in the Population Table. This may require removing some rows from the Population Table. JUst because Wisdom handed us a Population Table with X rows does not mean we need to keep all X rows, especially if creating a model which covers all rows is hard/impossible. We can just simplify the claims we are making about the world by removing some rows. But we better not remove the rows we need to answer the question we started with. Justice finishes with a generic model form, but not with a decision about which variables to include.
 -->
@@ -214,27 +215,41 @@ The rows from the population have no data. These are subjects which fall under o
 ```{r, echo = FALSE}
 # First, we create a tibble with the values we want for the table
 
-tibble(source = c("Preceptor Table", "Preceptor Table", "...",
-                  "Data", "Data", "Data", "...", 
-                  "Population", "Population", "Population"),
-       gender = c("Female", "Male", "...",
-                  "Male", "Female", "Female", "...",
-                  "?", "?", "?"),
-       year = c("2021", "2021", "...",
-                "2006", "2006", "2006", "...",
-                "?", "?", "?"),
-       state = c("Texas", "Texas", "...",
-                 "Michigan", "Michigan", "Michigan", "...",
-                 "?", "?", "?"),
+tibble(source = c("Population", "Population", "...",
+                  "Data", "Data", "...", 
+                  "Population", "Population", "...",
+                  "Preceptor Table", "Preceptor Table", "...",
+                  "Population", "Population"),
+       gender = c("?", "?", "...",
+                  "Male", "Female", "...",
+                  "?", "?", "...",
+                  "Female", "Female", "...",
+                  "?", "?"),
+       year = c("1990", "1995", "...",
+                "2006", "2006", "...",
+                "2010", "2012", "...",
+                "2021", "2021", "...",
+                "2026", "2030"),
+       state = c("?", "?", "...",
+                 "Michigan", "Michigan", "...",
+                 "?", "?", "...",
+                 "Texas", "Texas", "...",
+                 "?", "?"),
        ytreat = c("?", "?", "...", 
-                  "Did not vote", "?", "Voted", "...",
-                  "?", "?", "?"),
+                  "Did not vote", "?", "...",
+                  "?", "?", "...",
+                  "?", "?", "...",
+                  "?", "?"),
        ycontrol = c("?", "?", "...", 
-                    "?", "Voted", "?", "...",
-                    "?", "?", "?"),
+                    "?", "Voted", "...",
+                    "?", "?", "...", 
+                    "?", "?", "...",
+                    "?", "?"),
        ydiff = c("?", "?", "...", 
-                 "?", "?", "?", "...",
-                 "?", "?", "?")) %>%
+                 "?", "?", "...",
+                 "?", "?", "...",
+                 "?", "?", "...",
+                 "?", "?")) %>%
   
   # Then, we use the gt function to make it pretty
   
@@ -257,9 +272,25 @@ tibble(source = c("Preceptor Table", "Preceptor Table", "...",
   tab_spanner(label = "$$\\text{Causal Effect}$$", c(ydiff))
 ```
 
-### Representativeness/validity
+### Validity
 
-<!-- Answering questions about representativeness and validity is only possible if you have specified your population precisely. The more narrow the population you choose, the easier it is to make assumptions about representativeness and validity. The more broad your population, the more useful your model. -->
+To understand validity in regards to the Population Table, we must first recognize an inherent flaw in any experiment design: *no two units receive exactly the same treatment*.
+
+We might be thinking: well, surely two postcards are the same? But, they aren't! The postcards sent from our data were sent with information relevant to 2006 --- a different candidate, different language, different syntax. A postcard sent in 2021, even if we used the exact same language, would be encouraging a new candidate with new reform and differing policies. 
+
+Thus, despite the fact that two units are in the same treatment --- that is, receiving a postcard --- they have very different versions of that treatment. Indeed, there are an infinite number of possible treatments. This is why it is so important to define our estimand clearly.
+
+### Stability
+
+Stability means that the relationship between the columns is the same for three categories of rows: the data, the Preceptor table, and the larger population from which both are drawn. 
+
+With something like height, it is much easier to assume stability over a greater period of time. Changes in global height occur extremely slowly, so height being stable across a span of 20 years is reasonable to assume. Can we say the same for this example, where we are looking at voting behavior?
+
+Is data collected in 2006 on voting behavior likely to be the same in 2021? Frankly, we don't know! We aren't sure what would impact someone's response to a postcard encouraging them to vote. It is possible, for instance, that a postcard informing neighbors of voting status *would have more of an effect on voting behavior during a pandemic, when you are more closely interacting with neighbors*. 
+
+When we are confronted with this uncertainty, we can consider making our timeframe smaller. However, we would still need to assume stability from 2006 (time of data collection) to today. Stability allows us to ignore the issue of time. 
+
+### Representativeness 
 
 This is a good time to consider what it really means to accept that our data is representative of our population. With that in mind, let's break down our real, current question: 
 
@@ -273,12 +304,8 @@ So, how similar are these groups? Let's start with some differences.
 * The data is from 2006. Our question is asking for answers from 2021. This is not a small gap in time. A lot changes in a decade and a half!
 * The data excludes all non-voters in the last election. Our question, which seeks to increase voting turnout *in all citizens*, would want for non-voters to be included. So, can we make any claims about those citizens? Probably not.
 * The data only includes voters from Michigan. We want to make inferences about Texas, or perhaps the United States as a whole. Is it within reason to do that?
-* The voting reminders in the data were sent by mail. Is this the most practical option in 2021, where it may be easier to send an electronic notice? 
-* The contents of voting reminders in 2006 are going to differ from voting reminders sent in 2021. Thus, our "treatments" are fundamentally different.
 
-These are not small issues. These are big, in-our-face issues. If we say that data from voters in 2006 and data from voters in 2021 is exchangeable --- meaning that they represent the same thing --- we also have to consider what that means for other time frames. Can data from 2006 be used to predict for 2030, 2040, and beyond? What makes 2021 an acceptable option specifically?
-
-It can be helpful in cases like these to make data exchangeable conditional on another assumption. For instance, if there was a trend of less voting in 2021 compared with 2006, we may need to account for that in order for our predictions to be helpful. Alternatively, if we were studying a state that has historically more voting participation than Michigan, we may want to make our predictions based on the assumption that "people, on average, vote more in State X."
+Generally: *if there was no chance that a certain type of person would have been in this experiment, we cannot make an assumption for that person*. 
 
 The purpose of this section is to make us think critically about the assumptions we are making and whether those assumptions can be reasonably made. Though we will continue using this dataset in the remainder of the chapter, it is clear that we must make our predictions with caution.  
 
