@@ -54,14 +54,13 @@ for discussion. I think that something like c("$$13 - \\tau_M$$") could become c
 
 <!-- Rubin (2011, page 288), Discussion of “Towards more accessible conceptions of statistical inferences” by C. J. Wild, M. Pfannkuch, M. Regan and N. J. Horton, Journal of the Royal Statistical Society. Series A (Statistics in Society), Vol. 174, No. 2 (APRIL 2011), pp. 247-295. -->
 
+<!-- SZ: Going back to previous meeting, I still don't really understand the importance of this: Maybe we can mention it in the chapter as well? -->
 
 Have you ever wondered what the world would be like without you?
 
 ```{r, echo = FALSE}
 knitr::include_app("https://www.youtube.com/embed/cR7p-IB6INM")
 ```
-
-<!-- SZ: Movie clips are stupid. Students will never watch them. -->
 
 George Bailey, a character from the movie "It's a Wonderful Life," believes that his life has served no purpose. The movie follows George as he explores a world in which he was never born. It is clear that he had a profound impact on the lives of many people in his community. His actions mattered, more than he ever realized. 
 
@@ -101,6 +100,8 @@ In this case, we have a row for each brother and a column for their height. An i
 To estimate average height, we need to estimate Andy's height -- our missing data. One guess is just the average of the other four brothers: $$\frac{(178 + 165 + 172 + 173)}{4} = 172$$ Is that realistic? We should consider things like why we know the four other brothers' heights. Were they sampled randomly? Or do we know their heights because they are the tallest in the family? In that case would it make sense to use an average to estimate Andy's height? Probably not! 
 
 Keep in mind that there is a *truth* out there, a state of the world independent of our knowledge of it. Andy is a specific height. If we had a complete Preceptor Table, with no missing values, we could calculate the average height of the brothers exactly. No fancy statistics would be needed. Just arithmetic.
+
+<!-- SZ: If we wanted to shorten down the amount of text, we can just use one example: either harvard height or brothers, and apply it to the population table as well -->
 
 ### Harvard Height
 
@@ -182,7 +183,7 @@ knitr::include_graphics("04-rubin-causal-model/images/enos_seal.png")
 ```
 
 
-The Rubin Causal Model (RCM) is based on the idea of **potential outcomes.** For example, @enos2014 measured attitudes toward immigration among Boston commuters. Individuals were exposed to one of two possible conditions, and then their attitudes towards immigrants were recorded. One condition was waiting on a train platform near individuals speaking Spanish. The other was being on a train platform without Spanish-speakers. To calculate the causal effect of having Spanish-speakers nearby, we need to compare the outcome for an individual in one possible state of the world (with Spanish-speakers) to the outcome for that same individual in another state of the world (without Spanish-speakers). It is impossible to observe both potential outcomes at once. One of the potential outcomes is always missing, since a unit cannot experience both treatments. This dilemma is the *Fundamental Problem of Causal Inference*.
+The Rubin Causal Model (RCM) is based on the idea of **potential outcomes.** For example, @enos2014 measured attitudes toward immigration among Boston commuters. Individuals were exposed to one of two possible conditions, and then their attitudes towards immigrants were recorded. One condition was waiting on a train platform near individuals speaking Spanish. The other was being on a train platform without Spanish-speakers. To calculate the causal effect of having Spanish-speakers nearby, we need to compare the outcome for an individual in one possible state of the world (with Spanish-speakers) to the outcome for that same individual in another state of the world (without Spanish-speakers). However, it is impossible to observe both potential outcomes at once. One of the potential outcomes is always missing, since a unit cannot travel back in time, and experience both treatments. This dilemma is the *Fundamental Problem of Causal Inference*.
 
 In most circumstances, we are interested in comparing two experimental manipulations, one generally termed "treatment" and the other "control." The difference between the potential outcome under treatment and the potential outcome under control is a "causal effect" or a "treatment effect." According to the RCM, the **causal effect** of being on the platform with Spanish-speakers is the *difference* between what your attitude would have been under "treatment" (with Spanish-speakers) and under "control" (no Spanish-speakers).
 
@@ -192,7 +193,7 @@ We will use the symbol $Y$ to represent potential outcomes, the variable we are 
 
 ### Potential outcomes
 
-Suppose that Yao is one of the commuters surveyed in this experiment. If we were omniscient, we would know the outcomes for Yao under both treatment (with Spanish-speakers) and control (no Spanish-speakers). We can show this using a Preceptor Table. Calculating the number we are interested in is trivial because none of the data is missing.
+Suppose that Yao is one of the commuters surveyed in this experiment. If we were omniscient, we would know the outcomes for Yao under both treatment (with Spanish-speakers) and control (no Spanish-speakers), and we'd be able to ignore the Fundamental Problem of Causal Inference. We can show this using a Preceptor Table. Calculating the number we are interested in is trivial because none of the data is missing.
 
 ```{r, echo = FALSE, fig.align = 'left'}
 # First, we create a tibble with the values we want for the table
@@ -220,7 +221,7 @@ tibble(ID = "Yao",
 &nbsp;
 
 
-From this table we only know the causal effect on Yao. Everyone else in the study might have a lower attitude score (more liberal) if treated. Regardless of what the causal effect is for other subjects, the causal effect for Yao of being on the train platform with Spanish-speakers is a shift towards a more conservative attitude.
+From this table we only know the causal effect on Yao. Everyone else in the study might have a lower (more liberal) or higher (more conservative) attitude scores if treated. Regardless of what the causal effect is for other subjects, the causal effect for Yao of being on the train platform with Spanish-speakers is a shift towards a more conservative attitude.
 
 Using the response variable --- the actual symbol rather than a written description --- makes for a more concise Preceptor Table.
 
@@ -297,6 +298,8 @@ Causal inference is often compared with prediction.  In prediction, we want to k
 
 These are both missing data problems. Prediction involves estimating an outcome variable that we don't have, and thus is missing, whether because it is in the future or because it is from data that we are unable to collect. Thus, prediction is the term for using statistical inference to fill in missing data for *individual* outcomes. Causal inference, however, is the term for filling in missing data for *numerous* potential outcomes. This is unlike prediction, where only one potential outcome can *ever* be observed, even in principle.  
 
+<!-- SZ: Sounds a lot more confusing than it really is, maybe adding two tables side-by-side to compare would help?  -->
+
 Key point: In a predictive model, there is only one $Y(u)$ value for each unit. This is very different to the RCM where there are (at least) two potential outcomes (treatment and control). There is only one outcome column in a predictive model, whereas there are two or more in a causal model.
 
 With a predictive model, we cannot infer what would happen to the outcome $Y(u)$ if we changed $X$ *for a given unit*. We can only *compare* two units, one with one value of $X$ and another with a different value of $X$. 
@@ -372,6 +375,13 @@ From this Preceptor Table, there are many possible estimands we might be interes
 
 :::
 
+Similar concepts can also be applied to the Population Table, where similar to Preceptor Tables, can contain more than one potential outcome. 
+
+<!-- SZ: Not sure how to expand on this - you can't really calculate the estimand of a population table, can you? -->
+
+<!-- DK: Feel free to add a paragraph about Population Tables. Like: "Population Tables, like Preceptor Tables, can include more than one potential outcome. Otherwise, the structure of such Population Tables is the same as we saw earlier: ... " -->
+
+
 And so on. There are a lot of things one might care about!
 
 All of the variables calculated above are examples of estimands we might be interested in. One estimand is important enough that it has its own name: the **average treatment effect**, often abbreviated as **ATE**. The average treatment effect is the mean of all the individual causal effects. Here, the mean is $+1.6$.
@@ -413,9 +423,6 @@ Calculating values from this table is no longer a simple math problem. See this 
 ```{r echo = FALSE}
 knitr::include_app("https://www.youtube.com/embed/gyRZSzCtU_o")
 ```
-
-<!-- DK: Feel free to add a paragraph about Population Tables. Like: "Population Tables, like Preceptor Tables, can include more than one potential outcome. Otherwise, the structure of such Population Tables is the same as we saw earlier: ... " -->
-
 
 ## Simple models
 
@@ -558,6 +565,8 @@ tibble(subject = c("Yao", "Emma", "Cassidy", "Tahmid", "Diego"),
     fmt_markdown(columns = everything())
 ```
 
+&nbsp;
+
 If we make the assumption that there is a single value for $\tau$ *and* that $1$ is a good estimate of that value, then we can determine the missing potential outcomes. The Preceptor Table no longer has any missing values, so we can use it to easily answer (almost) any conceivable question.
 
 &nbsp;
@@ -596,7 +605,7 @@ tibble(subject = c("Yao", "Emma", "Cassidy", "Tahmid", "Diego"),
     cols_align(align = "left", columns = c(subject)) %>%
     tab_spanner(label = "Outcomes", c(ytreat, ycontrol)) %>%
     tab_spanner(label = "Causal Effect", c(ydiff)) %>%
-    tab_spanner(label = "$$\\text{Covariate}$$", c(gender)) %>%
+    tab_spanner(label = "Covariate", c(gender)) %>%
     fmt_markdown(columns = everything())
 ```
 
@@ -726,7 +735,7 @@ If we already did this exact same calculation above, why are we talking about it
 
 As we noted before, this is a popular estimand. Why?
 
-1. There's an obvious *estimator* for this estimand: the difference in *observed* outcomes between the treated group and the control group: $Y_t(u) - Y_c(u)$.
+1. There's an obvious *estimator* for this estimand: the mean difference of the *observed* outcomes between the treated group and the control group: $Y_t(u) - Y_c(u)$.
 
 2. If treatment is *randomly assigned*, the estimator is *unbiased*: you can be fairly confident in the estimate if you have a large enough treatment and control group.
 
@@ -735,6 +744,7 @@ As we noted before, this is a popular estimand. Why?
 Just because the ATE is often a useful estimand doesn't mean that it *always* is. 
 
 <!-- DK: Would be nice if the numbers here were calculated from the actual data, and not hard coded. -->
+<!-- SZ: I mean, we can add back in the spanish trains problem -->
 
 Consider point #3. For example, let's say the treatment effect does vary dependent on sex. For males there is a strong negative effect (-3.5), but for females there is a smaller positive effect (+1). However, the average treatment effect for the whole sample, even if you estimate it correctly, will be a single negative number (-1) -- since the negative effect for males is larger than the positive effect for females.  
 
@@ -1003,7 +1013,6 @@ In many circumstances, however, randomized trials are not possible due to ethica
 For example, let's say some of the train platforms in the experiment are so loud the Spanish-speakers might not be heard by anyone nearby. Therefore by necessity, only quieter platforms can be assigned to the treatment group. This non-random assignment may introduce confounding. Say there is some systematic difference between the people on quieter platforms compared with the people on the louder platforms. In that case, the assignment mechanism is correlated with potential outcomes, so there is confounding. 
 
 Many statistical methods have been developed for causal inference when there is a non-random assignment mechanism. Those methods, however, are beyond the scope of this book.
-
 
 
 ## Summary
