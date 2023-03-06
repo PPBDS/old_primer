@@ -4,9 +4,7 @@
 
 ## Introduction
 
-<!-- Add one paragraph Distill section, including links, like from Bootcamp page. Point toward tutorial. DONE -->
-
-<!-- Any inspiration to be drawn from this: https://ubc-dsci.github.io/introduction-to-datascience/reading.html -->
+<!-- Any inspiration to be drawn from this? https://ubc-dsci.github.io/introduction-to-datascience/reading.html -->
 
 <!-- Add these?  -->
 
@@ -16,52 +14,36 @@
 
 <!-- Add Google sheets example. -->
 
-<!-- Investigate this error, which appears when knitting the chapter: -->
-<!-- * Output created: docs/index.html -->
-<!-- Warning message: -->
-<!-- In readLines(file) : -->
-<!--   incomplete final line found on '/var/folders/mk/lh99bg295msg8myvcf5yczkc0000gn/T//RtmpgXdsMq/file171757d88bd09' -->
  
-Getting data into and out of R is a major part of any real world data science project. There are multiple data formats that you use to transport this data, each with their own positives and negatives.
+Getting data into and out of R is a major part of any real world data science project. 
 
-Start by loading the packages which we will need in this chapter.
+Load the packages which we will need in this chapter.
 
 ```{r}
 #| message: false
 #| warning: false
+
 library(tidyverse)
-library(primer.data)
 library(dbplyr)
 library(janitor)
 ```
 
-You can find most of the files that we use for this chapter [here](https://github.com/PPBDS/primer.tutorials/raw/master/inst/tutorials/031-data-files/data/). We can also access these files by saving the URL to R and then using it so that we can download and access the files located on the internet.
+You can find most of the files that we use for this chapter [here](https://github.com/PPBDS/all.primer.tutorials/raw/master/inst/tutorials/033-data-files/data/). We can also access these files by saving the URL to R and then using it so that we can download and access the files located on the internet.
 
 ```{r}
-github_url <- "https://raw.githubusercontent.com/PPBDS/primer.tutorials/master/inst/tutorials/033-data-files/data/"
+github_url <- "https://raw.githubusercontent.com/PPBDS/all.primer.tutorials/master/inst/tutorials/033-data-files/data/"
 ```
 
 ## Reading and writing files
 
-```{r}
-#| echo: false
-#| out.width: 50%
-#| fig.cap: Choose your file formats wisely.
-#| fig.align: center
-knitr::include_graphics("03-data/images/file_extensions.png")
-```
-
-<!-- Added this since I wanted the introduction section to actually have some sort of introduction rather than just package downloads. -->
-
-The first method that we can use to import data is by using a file. You've likely downloaded files before, whether it's a game's EXE file, an image's JPG file, or an essay's PDF file. At their core, those files are just data. The JPG file has a bunch of data about the colors in the image and the PDF file has a bunch of data about the text. So we can use these files to store data from experiments or surveys so that we can then analyze that data later or share that data with other people.
-
-In this section, we'll be going over the common file formats and how we can pull data from these files into R or create new files so that we can share them with other people.
+This section reviews common file formats. We will review how to pull data from these files into R and how cto reate new files so that we can share data with other people.
 
 ### Text files
 
 The most common type of data text file is "CSV," which stands for **c**omma **s**eparated **v**alue. In other words, CSV files are files whose values are separated by commas. Each comma from the csv file corresponds to a column, and the column names are, by default, taken from the first line of the file.
 
-CSV files (and their counterparts) are easily transferable between computers and programming languages and are extremely simple because they're effectively just text files that have a special format. Additionally, they're very easy to parse through small amounts of data because they're easily readable by humans and computers. 
+CSV files (and their counterparts) are easily transferable between computers and programming languages and are extremely simple because they're effectively just text files that have a special format. 
+
 However, due to their simple nature, CSV files are only able to move basic data and only as text values. They also have poor support for special characters like commas, which can make the dataset harder to organize and understand by adding a new column for a few specific entries. This make CSV files good for sharing data between computers and languages, but not efficient for transporting or saving large amounts of data.
 
 #### Reading and writing from a CSV file
@@ -100,10 +82,11 @@ read_csv("my_csv.csv")
 When you want to remove a file from your system, use `file.remove()`.
 
 ```{r}
+#| output: false
 file.remove("my_csv.csv")
 ```
 
-Sometimes, CSV files will not be what you want. Maybe they have the wrong column names, have information at the top of the file, or have comments interspersed within the file.
+Sometimes, CSV files will be inconveniently formatted. Maybe they have the wrong column names, have information at the top of the file, or have comments interspersed within the file.
 
 #### `skip`
 
@@ -118,7 +101,7 @@ Consider the following csv file: `test_2.csv`. Here's what it looks like as a te
 
 file_2 <- paste0(github_url, "test_2.csv")
 
-readLines(file_2)
+cat(readLines(file_2), sep = "\n")
 ```
 
 As you can see, there is text at the top of this file. Often times information about how data was collected, or other relevant information, is included at the top of the data file. However, `read_csv()` can't differentiate between this text and the data that we want to read, causing it to fail and output gibberish.
@@ -192,11 +175,13 @@ read_csv(file_3)
 ```
 
 We can fix this by changing the `col_names` argument.
+
 ```{r}
 read_csv(file_3, col_names = c("a", "b", "c"))
 ```
 
-You can also create names automatically by setting `col_names` to FALSE
+You can also create names automatically by setting `col_names` to `FALSE`.
+
 ```{r}
 read_csv(file_3, col_names = FALSE)
 ```
@@ -214,20 +199,21 @@ file_4_tibble <- read_csv(file_4)
 file_4_tibble
 ```
 
-As you can see, while the function does compile the names aren't easy to access. It's possible to access the column by using the ` tickmark like below:
+
+The function runs but the column names are not easy to work with. It is possible to access the column by using a  backticks (\`) around the name.
 
 ```{r}
 file_4_tibble$`one powers`
 ```
 
-But that can still cause problems down the line and it's just annoying to use the backticks every time you want a column name. This is when we can use the `clean_names()` function from the **janitor** package. It essentially formats the column names so that they follow the [underscore separated naming convention](https://en.wikipedia.org/wiki/Snake_case) and are all unique.
+But that can still cause problems down the line and it's just annoying to use backticks every time you want a column name. The `clean_names()` function from the **janitor** package formats the column names so that they follow the [underscore separated naming convention](https://en.wikipedia.org/wiki/Snake_case) and are all unique.
 
 ```{r}
 file_4_tibble |> 
   clean_names()
 ```
 
-This cleans the column names, saving you time when your file has a large amount of columns or you need to type a lot of column names. These issues are more common when you're pulling data off of the internet as that's normally dirty data and can have a lot of columns formatted in weird ways.
+These issues are more common when you're pulling data off of the internet as that's normally dirty data and can have a lot of columns formatted in weird ways.
 
 <!-- The tutorial includes a lot of arguments like na and comment, but that makes the book feel like it's really long once it's actually put into text form with paragraphs and stuff. -->
 
@@ -638,12 +624,12 @@ tail(aboriginal_lang_data)
 In order to delete and stop using an SQLite server, you need to first disconnect the file from the connection be using `dbDisconnect()` and passing in the connection object as an argument. You can then safely delete the database file from your computer by using `file.remove()`.
 
 ```{r}
-#| results: hide
+#| output: false
 dbDisconnect(con_lang_data)
 file.remove("example_db.db")
 ```
 
-Additionally, some operations will not work to extract columns or single values from the reference given by the `tbl` function. Thus, once you have finished your data wrangling of the `tbl()` database reference object, it is advisable to bring it into your local machine's memory using `collect()` as a data frame. 
+Some operations will not work to extract columns or single values from the reference given by the `tbl` function. Thus, once you have finished your data wrangling of the `tbl()` database reference object, it is advisable to bring it into your local machine's memory using `collect()` as a data frame. 
 
 > Warning: Usually, databases are very big! Reading the object into your local machine may give an error or take a lot of time to run so be careful if you plan to do this! 
 
@@ -686,38 +672,44 @@ As you can see, these tables both have a common column: the `ArtistId` column. H
 
 Here is the [full relationship diagram](http://schemaspy.org/sample/diagrams/summary/relationships.real.large.png) of the database that we're using.
 
-Let's go over some of the operations that you can do on a SQLite database.
+<!-- Let's go over some of the operations that you can do on a SQLite database. -->
 
-#### Using dbplyr
+<!-- #### Using dbplyr -->
 
-We've already seen how you can use the **dbpylr** package to get a table from a database, but let's look at how you can also use it to do operations on databases as well.
+<!-- We've already seen how you can use the **dbpylr** package to get a table from a database, but let's look at how you can also use it to do operations on databases as well. -->
 
-The **dbpylr** package allows you to use many of the same functions from the **tidyverse** like `select()`, `filter()`, `mutate()` without any issues, making it the easiest to do operations with.
+<!-- The **dbpylr** package allows you to use many of the same functions from the **tidyverse** like `select()`, `filter()`, `mutate()` without any issues. -->
 
-Here's an example of using the **dbpylr** package to get the number of albums each artist has created.
+<!-- Here's an example of using the **dbpylr** package to get the number of albums each artist has created. -->
 
-```{r} 
+```{r}
+#| echo: false
+# DK: This code used to work. It now fails. So, for now, I am commenting out
+# this whole section. The error arises in the last select(). Why does that not
+# work? Perhaps the class, which is tbl_SQLiteConnection, makes for trouble . .
+# .
+
 # You can keep a column during the summarize() if you just put the name equal to
 # itself. This code is deliberately long in order to show the common functions
 # that we use.
 
-band_albums <- tbl(con, "albums") |>
-                 inner_join(tbl(con, "artists"), by = "ArtistId") |>
-                 select("AlbumId", "ArtistId", "Title", "Name") |>
-                 summarize(Name = Name, 
-                           num_albums = n(),
-                           .by = ArtistId) |>
-                 mutate(artist_name = Name) |>
-                 mutate(artist_id = ArtistId) |>
-                 filter(num_albums > 3) |>
-                 arrange(desc(num_albums)) |>
-                 select(artist_id, artist_name, num_albums)
-band_albums
+# band_albums <- tbl(con, "albums") |>
+#                  inner_join(tbl(con, "artists"), by = "ArtistId") |>
+#                  select("AlbumId", "ArtistId", "Title", "Name") |>
+#                  summarize(Name = Name, 
+#                            num_albums = n(),
+#                            .by = ArtistId) |>
+#                  mutate(artist_name = Name) |>
+#                  mutate(artist_id = ArtistId) |>
+#                  filter(num_albums > 3) |>
+#                  arrange(desc(num_albums)) |>
+#                  select(artist_id, artist_name, num_albums)
+# band_albums
 ```
 
-These are the functions that we're already familiar with using, and they work just as well on database tables as well.
+<!-- These are the functions that we're already familiar with using, and they work just as well on database tables as well. -->
 
-However, there are cases where you will have to use SQL code to accomplish certain tasks.
+<!-- However, there are cases where you will have to use SQL code to accomplish certain tasks. -->
 
 ```{r}
 #| echo: false
@@ -942,12 +934,13 @@ invisible(file.remove("chinook.db"))
 
 ```{r}
 #| echo: false
+#| out-width:  
 knitr::include_graphics("03-data/images/tags.png")
 ```
 
 In the first part of this chapter, we learned how to read in data from plain text files that are usually "rectangular" in shape using the **tidyverse** `read_*` functions. Sadly, not all data comes in this simple format, but we can happily use many other tools to read in more messy/wild data formats. The formal name for gathering non-rectangular data from the web and transforming it into a more useful format for data analysis is *web scraping*.
 
-We can do web scraping through r by using the **rvest** library, which is a library that allows us to look at HTML and CSS selectors, then pick them apart to get the data we want. Let's look at what this means.
+We can do web scraping by using the **rvest** package, which is a library that allows us to look at HTML and CSS selectors, then pick them apart to get the data we want. Let's look at what this means.
 
 ### HTML and CSS selectors
 
@@ -1654,102 +1647,7 @@ If an R package doesn’t exist for an open API and you’d like to write your o
 
 Information for this section on API's was taken from *Mastering Software Development in R* textbook, authored by Roger D. Peng, Sean Kross, and Brooke Anderson. 
 
-## Distill
 
-<!-- DK: Copied the below from bootcamp. Useful? -->
-
-<!-- [Distill for R Markdown](https://rstudio.github.io/distill/) is the main documentation page. Key sections are [Creating a Website](https://rstudio.github.io/distill/website.html) and [Publishing Websites](https://rstudio.github.io/distill/publish_website.html). Step-by-step guides include: -->
-
-<!--   + [Building a blog with distill](https://themockup.blog/posts/2020-08-01-building-a-blog-with-distill/) by Thomas Mock.   -->
-<!--   + [Building a {distill} website](https://lisalendway.netlify.app/posts/2020-12-09-buildingdistill/) by Lisa Lendway.   -->
-<!--   + [Create a distill website](https://aosmith16.github.io/spring-r-topics/materials.html#week-2-create-a-distill-website) and [More on distill articles and deploy website](https://aosmith16.github.io/spring-r-topics/materials.html#week-3-more-on-distill-articles-and-deploy-website) by Ariel Muldoon. -->
-
-<!-- Add one paragraph Distill section, including links, like from Bootcamp page. Point toward tutorial. -->
-
-Now, you may have noticed that whenever we knit our .Rmd files, we produce an HTML file. And just a little bit earlier in the [webscraping section](#website-structure), we talked about how websites using HTML to make up the basic structure. So by that logic, can't we make our own websites by using the HTML files that are created when we knit the .Rmd?
-
-That's exactly what the **distill** package does. Essentially, **distill** allows you to make websites using the HTML files that are output when you knit them. It also organizes the pages nicely to make the website navigable and look professional.
-
-Here's an [example of a distill website](https://bootcamp.davidkane.info/). As you can see, this is a clear, easy website with a few pages and easily distinguishable information.
-
-We cover how to use the **distill** package in the associated [primer tutorials](https://ppbds.github.io/primer.tutorials/), where we'll walk you through creating a distill page and developing your own citations.
-
-<!-- AG: As said during a past session, people don't read the primer but they do look back at the primer for a reference. It might be a good idea to include common errors since these people are almost definitely looking back because their website is ugly or they're getting stupid errors. As such, I'm including a short-ish description of useful distill functions and things like that for these references (having each of them as their own section makes things very simple as you can just click it). It may be better to just include all of the things that the tutorial has, but that's very long and includes a few things that I think are somewhat unnecessary in the primer (like all of the plot and text sections). It's pretty simple to rework or delete this if it's wrong though, so don't spare any criticism. -->
-
-### Common Errors and Functions
-
-As you forge onwards into the world of distill, you will likely encounter a variety of errors that'll make you want to throw your computer away. As such, we'll go through a few of the common functions and errors encountered while making a distill page.
-
-#### `create_website()`
-
-The first step to creating a website is by using the `create_website()` function. This creates the entire distill website and should be the first function that you run whenever you want to make one. Just use the following syntax:
-
-```{r}
-#| eval: false
-library(distill)
-create_website(dir = ".", title = "title-of-your-website", gh_pages = TRUE)
-```
-
-This essentially creates a distill website in your current R project, titles it "title-of-your-website" and formats it so that we can publish it on [Github Pages](https://pages.github.com/) (Github's website publishing service). After you run this, you should see an `index.Rmd` and an `about.Rmd` file in your project, as well as some other miscellaneous files. These are the "Home" and "About" pages that you can use on your website.
-
-#### `create_article()`
-
-But what if I want more pages than that? Only being restricted to a Home and About page is pretty bad, especially when you want to have a bibliography. This is when we use `create_article()` to create a new page within our website. Just run the function with the title of the file and it'll automatically create the .Rmd file for you to code in.
-
-```{r}
-#| eval: false
-create_article("sources.Rmd")
-```
-
-Then, you need to put it into your website. Just go to the `_site.yml` file and add the page in using `text: "Sources"` and `"href: sources.html"`. This is what the `_site.yml` file should look like after you add the page.
-
-```
-name: "."
-title: "title-of-your-website"
-description: |
-  Welcome to the website. I hope you enjoy it!
-output_dir: "docs"
-navbar:
-  right:
-    # These two pages were automatically put in.
-    - text: "Home"
-      href: index.html
-    - text: "About"
-      href: about.html
-    # This page was added by us.
-    - text: "Sources"
-      href: sources.html
-output: distill::distill_article
-```
-
-The `_site.yml` is the file that keeps everything in line and organizes your distill website. *However, it's very specific as to the syntax, so you should take care to only add in specific things.* Additionally, keep in mind that you should always use the `create_article()` function whenever you need to create a new page or a .Rmd file. *Do not add in a .Rmd file manually.* These both lead to errors that can break your project.
-
-#### Formatting the article
-
-You can format the article just like you did before because it's still an RMarkdown file. However, you can also put more advanced features like block quotes [here](https://www.rstudio.com/wp-content/uploads/2015/02/rmarkdown-cheatsheet.pdf). Just make sure not to edit the headers at the top of the file without knowing exactly what you're doing in order to prevent any errors.
-
-#### `Error: $ operator is invalid for atomic vectors`
-
-This is the error caused by creating a .Rmd file without using it in your `_site.yml` or using `create_article()` to make it. Essentially, distill doesn't know how to deal with the extra .Rmd file and crashes because of it. This can normally be solved just by deleting the extra .Rmd, but it may be necessary to just nuke the project from orbit and restart.
-
-As such, make sure that you never create an extra .Rmd, as it's just going to be more work on your end when you start encountering this error. If you want to write R code for a graph so that you can put it into your website, just use a normal R script file by going to File -> New File -> R Script in RStudio.
-
-#### YAML Errors
-
-These are errors that are created by problems in your `_site.yml` file or in the headers (the --- part) at the top of your file. These parts essentially tell distill what the title and the description of your page is, as well as some other information. However, missing parts can cause pretty significant problems because distill just doesn't have the information that it needs. For example, deleting the `site: ` part of the header will not allow the website to work or not including `description: |` will stop the description from showing up.
-
-Here's what the YAML header at the top of your .Rmd file should look like. You can make some edits to it or add more information, but make sure to keep this basic structure in order to prevent any errors.
-
-```
----
-title: "Home"
-description: |
-  Description of the page
-site: distill::distill_website
----
-```
-
-Keep in mind that you can modify this when you need to make a new page. However, whenever you have an error beginning with `Error in yaml::yaml.load(..., eval.expr = TRUE) :`, that normally means that you have a YAML error and you need to fix this part of the code.
 
 ## Summary
 
@@ -1759,15 +1657,12 @@ Keep in mind that you can modify this when you need to make a new page. However,
 
 *Use files like CSV, Excel, RDS, JSON, and SQL files/databases to organize and share your data.*
 
-*Use SelectorGadget to pull data off of websites, but make sure it's legal to.*
+*Use SelectorGadget to pull data off of websites.*
 
 *Use an API when to get data from government agencies or companies.*
 
-*Publish your results on a website by using Distill.*
 
-This chapter is all about pulling data into R. It's not about graphing that data, cleaning it, wrangling it, or anything like that, it's just about pulling that data in without losing your mind.
-
-In this chapter, we looked at a few common file formats and used the **readr** package to read them and pull data from them so that we can use that data in our plots. This allowed us to download data from websites like [kaggle.com](https://kaggle.com) and use it in our R session.
+In this chapter, we looked at a few common file formats and used the **readr** package to read them and pull data from them so that we can use that data in our plots. 
 
 We also looked at databases and how we can pull in a few select pieces of data from them so that we aren't overloading our computers with thousands or millions of data rows. We went over how we can write SQL queries so that we can acheive some special effects without causing errors or detonating our computers.
 
