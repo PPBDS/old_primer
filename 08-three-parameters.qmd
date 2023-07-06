@@ -251,7 +251,7 @@ Our Preceptor Table rows are chronologically ordered. The "other" rows are our g
 
 We want to build a model and then use that model to make claims about the world. Our questions about the relationship between `age` and `party` are the following:
 
-*What is the expected age of a Democrat at the train station?*
+*What is the probability that, if a Democrat shows up at the train station, he will be over 50 years old?*
 
 *In a group of three Democrats and three Republicans, what will the age difference be between the oldest Democrat and the youngest Republican?* 
 
@@ -264,7 +264,42 @@ We can answer these and similar questions by creating a model that uses party af
 <!-- This sections ends with the Population  Table. -->
 
 
+### Wisdom
 
+Let's take a look at our question below:
+
+*What is the probability that, if a Democrat shows up at the train station, he will be over 50 years old?*
+
+First, we need to take a look at the model of our question. Do we have a **causal** or **predictive** model? In our question above we have a predictive model as we only have one outcome: age based on our predictor: party. A good way at looking at this is with a Preceptor Table, as seen below. Since our data does not include all Republicans and Democrats in the world, not every row is filled in. Our Preceptor Table only contains one possible outcome: age, which means that we have a **predictive** model at hand.
+
+```{r}
+#| echo: false
+tibble(ID = c("1", "2", "...", "473", "474",
+              "...", "3,258", "3,259", "...", "N"),
+       party = c("D", "?", "...", "D", "?", "...", "?", "R", "...", "?"), 
+       age = c("31", "?", "...", "58", "?", "...", "?", "49", "...", "?")) |>
+  
+  # Then, we use the gt function to make it pretty
+  
+  gt() |>
+  tab_header(title = "Preceptor Table") |> 
+  cols_label(ID = md("ID"),
+             party = md("Party"),
+             age = md("Age")) |>
+  tab_style(cell_borders(sides = "right"),
+            location = cells_body(columns = c(ID))) |>
+  tab_style(style = cell_text(align = "left", v_align = "middle", size = "large"), 
+            locations = cells_column_labels(columns = c(ID))) |>
+  cols_align(align = "center", columns = everything()) |>
+  cols_align(align = "left", columns = c(ID)) |>
+  fmt_markdown(columns = everything()) |>
+  tab_spanner(label = "Predictor", columns = c(party)) |>
+  tab_spanner(label = "Outcome", columns = c(age))
+```
+
+Recall: a Preceptor Table is the smallest possible table such that, if there is no missing data, all our questions are easy to answer. To answer questions — like “What is the probability that, if a Democrat shows up at the train station, he will be over 50 years old?” — we need a row for every party member.
+
+In our predictive model above, do we have a treatment? No, treatments will only apply to the situations with causal models, however, we do have covariates which in this case is our party. Our covariate is party in this situation because it plays a huge role in being a predictor for our outcome for each separate ID.
 
 ### Justice
 
@@ -276,15 +311,17 @@ knitr::include_graphics("other/images/Justice.jpg")
 
 Justice concerns four topics: stability, representativeness, unconfoundedness and the mathematical structure of the model.
 
-We then must consider the stability of our model. Stability means that the relationship between the columns is the same for three categories of rows: the data, the Preceptor table, and the larger population from which both are drawn. With something like height, it is much easier to assume stability over a greater period of time. Changes in global height occur extremely slowly, so height being stable across a span of 20 years is reasonable to assume. With something like political ideology, it is much harder to make the assertion that data collected in 2010 would be stable to data collected in 2030. When we are confronted with this uncertainty, we can consider making our timeframe smaller. However, we would still need to assume stability from 2014 (time of data collection) to today.  Stability allows us to ignore the issue of time. 
+We then must consider the stability of our model. **Stability** means that the relationship between the columns is the same for three categories of rows: the data, the Preceptor table, and the larger population from which both are drawn. With something like height, it is much easier to assume stability over a greater period of time. Changes in global height occur extremely slowly, so height being stable across a span of 20 years is reasonable to assume. With something like political ideology, it is much harder to make the assertion that data collected in 2010 would be stable to data collected in 2030. When we are confronted with this uncertainty, we can consider making our timeframe smaller. However, we would still need to assume stability from 2014 (time of data collection) to today.  Stability allows us to ignore the issue of time. 
 
-Next, let's consider representativeness. Representativeness has to do with how well our sample represents the larger population we are interested in generalizing to. Does the train experiment allow us to calculate a causal effect for people who commute by cars? Can we calculate the causal effect for people in New York City? Before we generalize to broader populations we have to consider if our experimental estimates are applicable beyond our experiment. Generally: *if there was no chance that a certain type of person would have been in this experiment, we cannot make an assumption for that person*. 
+Next, let's consider representativeness. **Representativeness** has to do with how well our sample represents the larger population we are interested in generalizing to. Does the train experiment allow us to calculate a causal effect for people who commute by cars? Can we calculate the causal effect for people in New York City? Before we generalize to broader populations we have to consider if our experimental estimates are applicable beyond our experiment. Generally: *if there was no chance that a certain type of person would have been in this experiment, we cannot make an assumption for that person*. 
+
+Next, let's consider unconfoundedness. **Unconfoundedness** means that the treatment assignment is independent of the potential outcomes, when we condition on pre-treatment covariates. However, with our scenario, we have a predictive model and this assumption is only relevant for causal models.
 
 <!-- MM: kind of DGM should be discussing linear or logistic -->
 
 Now let's discuss the kind of DGM we will be using. For our purposes, we will be choosing between linear or logistic, however, there are several different types of distributions which we will not be dealing with at the moment. Let's recall the difference between linear and logistic models, which is dependent upon the outcome variable. If the outcome variable is continuous, we will use the a linear model, and when the outcome variable is binary, or only has two options, we will use a logistic model. In this case, our outcome variable is age which is continous, so it is a linear model.
 
-We can also consider the type of DGM. Any DGM with age as its dependent variable will be predictive, not causal, for the simple reason that nothing, other than time, can change your age. You are X years old. It would not matter if you changed your party registration from Democrat to Republican or vice versa. Your age is your age. When dealing with a non-causal DGM, the focus is on predicting things. The underlying mechanism which connects age with party is less important than the brute statistical fact that there is a connection.  *Predictive models care little about causality.*
+We can also consider the type of DGM. Any DGM with age as its dependent variable will be predictive, not causal, for the simple reason that nothing, other than time, can change your age. You are X years old. It would not matter if you changed your party registration from Democrat to Republican or vice versa. Your age is your age. When dealing with a non-causal DGM, the focus is on predicting things. The underlying mechanism which connects age with party is less important than the brute statistical fact that there is a connection. *Predictive models care little about causality.*
 
 <!-- Preceptor Tables should be laid out like the formula: outcome on left, predictors on right. -->
 
@@ -294,21 +331,25 @@ A good way at looking at this is with a Preceptor Table, as seen below. Unlike t
 #| echo: false
 tibble(ID = c("1", "2", "...", "473", "474",
               "...", "3,258", "3,259", "...", "N"),
-       Party = c("D", "?", "...", "D", "?", "...", "?", "R", "...", "?"),
-      Age = c("31", "?", "...", "58", "?", "...", "?", "49", "...", "?")) |>
+       party = c("D", "?", "...", "D", "?", "...", "?", "R", "...", "?"), 
+       age = c("31", "?", "...", "58", "?", "...", "?", "49", "...", "?")) |>
   
   # Then, we use the gt function to make it pretty
   
   gt() |>
-  cols_label(ID = md("ID"),Party = "Political Party", Age = "Age") |>
+  tab_header(title = "Preceptor Table") |> 
+  cols_label(ID = md("ID"),
+             party = md("Party"),
+             age = md("Age")) |>
   tab_style(cell_borders(sides = "right"),
             location = cells_body(columns = c(ID))) |>
-  tab_style(style = cell_text(align = "left", v_align = "middle"), 
+  tab_style(style = cell_text(align = "left", v_align = "middle", size = "large"), 
             locations = cells_column_labels(columns = c(ID))) |>
   cols_align(align = "center", columns = everything()) |>
   cols_align(align = "left", columns = c(ID)) |>
-  tab_spanner(label = "Outcome", columns = c(Age)) |>
-  tab_spanner(label = "Predictor", columns = c(Party))
+  fmt_markdown(columns = everything()) |>
+  tab_spanner(label = "Predictor", columns = c(party)) |>
+  tab_spanner(label = "Outcome", columns = c(age))
 ```
 
 &nbsp;
@@ -354,6 +395,43 @@ Some things to note about our model:
 
 * The model in @sec-two-parameters is sometimes called "intercept-only" because the only (interesting) parameter is the intercept. Here we have a "two intercept" model because, instead of estimating an average for the whole population, we are estimating two averages.
 
+We can make a Population Table with our Preceptor Table and other data based on our assumptions that we have made. We have discussed the importance of assumption of stability, representativeness, unconfoundedness, and the DGM structure. With all of these factors we are able to construct a Population Table because we have been able to confirm that our rows in the Preceptor Table and data are similar. 
+
+```{r}
+#| echo: false
+tibble(source = c("Other", "Other", "...", 
+                  "Data", "Data", "...",
+                  "Other", "Other", "...",
+                  "Preceptor Table", "Preceptor Table", "...",
+                  "Other", "Other"),
+       age = c("?", "?", "...",
+                "43", "52", "...",
+               "?", "?", "...",
+               "45", "65", "...",
+               "?", "?"),
+       party = c("?", "?", "...", 
+                  "Democrat", "Republican", "...",
+                 "?", "?", "...",
+                 "Republican", "Republican", "...",
+                 "?", "?")) |>
+  
+  # Then, we use the gt function to make it pretty
+  
+  gt() |>
+  tab_header(title = "Population Table") |> 
+  cols_label(source = md("Source"),
+             age = md("Age"),
+             party = md("Party")) |>
+  tab_style(cell_borders(sides = "right"),
+            location = cells_body(columns = c(source))) |>
+  tab_style(style = cell_text(align = "left", v_align = "middle", size = "large"), 
+            locations = cells_column_labels(columns = c(source))) |>
+  cols_align(align = "center", columns = everything()) |>
+  cols_align(align = "left", columns = c(source)) |>
+  fmt_markdown(columns = everything())  
+```
+
+Our Preceptor Table rows are chronologically ordered. The "other" rows are our greater population for which we are making assumptions --- this is why the year at the start is earlier than our data and the year at the end is later than our Preceptor Table. This shows the more expansive population about which we are making inferences.
 
 ### Courage
 
@@ -645,7 +723,6 @@ The intercept, 42.6, is the same as the `partyDemocrat` estimate in the first mo
 Little else about the models will be different. They will have the same fitted values and residuals. `posterior_predict()` will generate the same posterior predictive probabilty distributions. Which parameterization we use does not matter much. But you should be able to interpret the meaning of the coefficients in both.
 
 <!-- Need more here? -->
-
 
 ## att_end ~ treatment
 
