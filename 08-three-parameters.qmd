@@ -268,9 +268,9 @@ Let's take a look at our question below:
 
 *What is the probability that, if a Democrat shows up at US train stations now, he will be over 50 years old?*
 
-First, we need to take a look at the model of our question. Do we have a **causal** or **predictive** model? In our question above we have a predictive model as we only have one outcome: age based on our predictor: party. A good way at looking at this is with a Preceptor Table, as seen below. Since our data does not include all Republicans and Democrats in the world, not every row is filled in. Our Preceptor Table only contains one possible outcome: age, which means that we have a **predictive** model at hand.
+First, we need to take a look at the model of our question. Do we have a **causal** or **predictive** model? In our question above we have a predictive model as we only have one outcome: `age` based on our predictor: `party`. A good way at looking at this is with a Preceptor Table, as seen below. Since our data does not include all Republicans and Democrats in the world, not every row is filled in. Our Preceptor Table only contains one possible outcome: `age`, which means that we have a **predictive** model at hand.
 
-Second, we need to evaluate what our units are for our situation. When taking a look at the Preceptor Table below: we can view that all our ID's are dependant on each individual. Our units for this scenario would be the individuals becuase there are several individuals at the station.
+Second, we need to evaluate what our units are for our situation. When taking a look at the Preceptor Table below: we can view that all our ID's are dependent on each individual. Our units for this scenario would be the individuals because there are several individuals at the station.
 
 Next, when taking a look at the Preceptor Table we can view that we only have one outcome based on each individual and covariate of party. Our outcome of age changes based on each individual and party that is with them.
 
@@ -328,7 +328,7 @@ trains |>
 
 Now let's take a look at the **assumption of validity** for our data and Preceptor Table. There is no **truth** here. The data is real enough, but you created the Preceptor Table. Whether or not there is a population from which you can assume both the data and the Preceptor Table might have been drawn is not a TRUE/FALSE question. The Preceptor Table is all US train commuters today. However, the data we have involves train commuters in the Boston area in 2012. In addition, is our data from the Preceptor Table accurate? The data has been collected from filling out surveys about age without checking a driver's license. The data has been collected from filling out surveys about party without going to the train station. Finally, the privacy of a train station differs from filling out surveys at home. While all of these questions and assumptions prove validity wrong, overall, the assumption of validity seems reasonable. `age` and `party` are similar enough between our data and The Preceptor Table that we can “stack” them on top of each other. We can assume that both are drawn from the same population.
 
-With our assumption of validity proving to be reasonably accurate, we can now create our Population Table. We can make a Population Table with our Preceptor Table and other data based on our assumptions that we have made. We have discussed the importance of assumption of stability, representativeness, unconfoundedness, and the DGM structure. With all of these factors we are able to construct a Population Table because we have been able to confirm that our rows in the Preceptor Table and data are similar. 
+With our assumption of validity proving to be reasonably accurate, we can now create our Population Table. We can make a Population Table with our Preceptor Table and other data based on our assumptions that we have made. With the assumption of validity proving to be reasonable we are able to construct a Population Table because we have been able to confirm that our rows in the Preceptor Table and data are similar. 
 
 ```{r}
 #| echo: false
@@ -759,8 +759,123 @@ Above, we created a predictive model: with someone's party affiliation, we can m
 
 Models help us answer questions better than we could without those models, but only if we follow the Cardinal Virtues.
 
+### Wisdom
 
+```{r}
+#| echo: false
+knitr::include_graphics("other/images/Wisdom.jpg")
+```
 
+Wisdom requires the creation of a Preceptor Table, an examination of our data, and a determination, using the concept of "validity," as to whether or not we can (reasonably!) assume that the two come from the same *population*.
+
+Let's take a look at our question below:
+
+*What is the average treatment effect, of exposing people to Spanish-speakers, on their attitudes toward immigration?* 
+
+*What is the largest causal effect which still has a 1 in 10 chance of occurring?*
+
+First, we need to take a look at the model of our question. Do we have a **causal** or **predictive** model? In our question above we have a causal model as we multiple outcomes with `att_end` based on our predictor: `treatment`. A good way at looking at this is with a Preceptor Table, as seen below. Since our data does not include all Republicans and Democrats in the world, not every row is filled in. Our Preceptor Table contains two possible outcomes with `att_end`, which means that we have a **causal** model at hand.
+
+Second, we need to evaluate what our units are for our situation. When taking a look at the Preceptor Table below: we can view that all our ID's are dependent on each individual. Our units for this scenario would be the individuals because there are several individuals at the station.
+
+Next, when taking a look at the Preceptor Table we can view that we have two outcomes based on each individual as they could have the treatment applied or not applied. Our outcome of attitude changes based on each individual's response/no response to the treatment.
+
+Finally, do we have a treatment? Yes, treatments applies to this situation with a causal model. We are exposing the commuters to the Spanish-speakers, which play a role in changing the situation at hand.
+
+Now we can create our Preceptor Table:
+
+```{r}
+tibble(ID = ID = c("1", "2", "...", "10", "11",
+                  "...", "20", "21", "...", "N"),
+            treatment = c("Yes", "?", "No", "Yes", "Yes", "No", "?", "No", "...", "?"),
+            attitude_after_control = c("...", "?", "7", "...", "...", "4", "?", "6", "...", "?"),
+            attitude_after_treated = c("8", "?", "...", "5", "7", "...", "?", "...", "...", "?")
+       ) |>
+  
+  gt() |>
+  tab_header(title = "Preceptor Table") |> 
+  cols_label(ID = md("ID"),
+             treatment = md("Treatment"),
+             attitude_after_control = md("Control Ending Attitude"),
+             attitude_after_treated = md("Treated Ending Attitude")) |>
+  tab_style(cell_borders(sides = "right"),
+            location = cells_body(columns = c(ID))) |>
+  tab_style(style = cell_text(align = "left", v_align = "middle", size = "large"), 
+            locations = cells_column_labels(columns = c(ID))) |>
+  cols_align(align = "center", columns = everything()) |>
+  cols_align(align = "left", columns = c(ID)) |>
+  fmt_markdown(columns = everything()) |>
+  tab_spanner(label = "Predictor", columns = c(treatment)) |>
+  tab_spanner(label = "Outcomes", columns = c(attitude_after_control, attitude_after_treatment))
+```
+
+Recall: a Preceptor Table is table with rows and columns such that, if there is no missing data, all our questions are easy to answer. To answer questions — like “What is the average treatment effect, of exposing people to Spanish-speakers, on their attitudes toward immigration? and What is the largest causal effect which still has a 1 in 10 chance of occurring?” — we need a row for every individual at the station.
+
+*Always explore your data.* Recall the discussion from @sec-rubin-causal-model. @enos2014 randomly placed Spanish-speaking confederates on nine train platforms around Boston, Massachusetts. The data that we want to analyze consists of the age and party of each individual on these train platforms based on our variables in our Preceptor Table. These reactions were measured through changes in answers to three survey questions. Load the necessary libraries and look at the data.
+
+```{r}
+library(primer.data)
+library(rstanarm)
+library(tidyverse)
+```
+
+```{r}
+trains |>
+  select(att_end, treatment)
+```
+
+As specified in the Preceptor Table we only care about `treatment` specifies whether the respondent was given the treatment of being exposed to Spanish-speakers in the train station and `att_end` tell us about the respondent’s attitude toward immigration after the experiment.
+
+```{r}
+trains |>
+  select(att_end, treatment) |>
+  summary()
+```
+
+`summary()` shows us what the different values of `att_end` and `treatment` are because it is a factor. The range for `att_end` seems reasonable. Recall that participants were asked three questions about immigration issues, each of which allowed for an answer indicated strength of agreement on a scale form 1 to 5, with higher values indicating more agreement with conservative viewpoints.
+
+Now let's take a look at the **assumption of validity** for our data and Preceptor Table. There is no **truth** here. The data is real enough, but you created the Preceptor Table. Whether or not there is a population from which you can assume both the data and the Preceptor Table might have been drawn is not a TRUE/FALSE question. The Preceptor Table is all US train commuters today. However, the data we have involves train commuters in the Boston area in 2012. In addition, is our data from the Preceptor Table accurate? The validity may not hold as the treatment is not evenly split or completely randomized. While this  assumption can prove validity wrong, overall, the assumption of validity seems reasonable. `att_end` and `treatment` are similar enough between our data and The Preceptor Table that we can “stack” them on top of each other. We can assume that both are drawn from the same population.
+
+With our assumption of validity proving to be reasonably accurate, we can now create our Population Table. We can make a Population Table with our Preceptor Table and other data based on our assumptions that we have made.With the assumption of validity proving to be reasonable we are able to construct a Population Table because we have been able to confirm that our rows in the Preceptor Table and data are similar. 
+
+```{r}
+tibble(source = c("Other", "Other", "...", 
+                  "Data", "Data", "...",
+                  "Other", "Other", "...",
+                  "Preceptor Table", "Preceptor Table", "...",
+                  "Other", "Other"),
+       treatment = c("?", "?", "...", 
+                  "Yes", "No", "...",
+                  "?", "?", "...",
+                  "?", "?", "Yes",
+                  "?", "No"),
+       att_treat = c("?", "?", "...", 
+                 "6", "?", "...",
+                 "?", "?", "...", 
+                 "?", "?", "9",
+                 "?", "?"),
+       att_control = c("?", "?", "...", 
+                 "?", "2", "...",
+                 "?", "?", "...", 
+                 "?", "?", "...",
+                 "?", "5")) |>
+  
+  gt() |>
+  tab_header(title = "Population Table") |> 
+  cols_label(source = md("Source"),
+             treatment = md("Treatment"),
+             att_treat = md("Treated"),
+             att_control = md("Controlled")) |>
+  tab_style(cell_borders(sides = "right"),
+            location = cells_body(columns = c(source))) |>
+  tab_style(style = cell_text(align = "left", v_align = "middle", size = "large"), 
+            locations = cells_column_labels(columns = c(source))) |>
+  cols_align(align = "center", columns = everything()) |>
+  cols_align(align = "left", columns = c(source)) |>
+  fmt_markdown(columns = everything())  
+```
+
+Our Preceptor Table rows are chronologically ordered. The "other" rows are our greater population for which we are making assumptions --- this is why the year at the start is earlier than our data and the year at the end is later than our Preceptor Table. This shows the more expansive population about which we are making inferences.
 
 ### Justice
 
@@ -771,8 +886,6 @@ knitr::include_graphics("other/images/Justice.jpg")
 ```
 
 The four concerns of Justice in a data science project remain the same: stability, representativeness, unconfoundedness and the mathematical structure of the model. 
-
-
 
 Consider the stability of our model for the relationship between `att_end` and `treatment` between 2012 and 2023. Is this relationship from 2012, four years before Donald Trump's election as president, still the same? While we might not know for sure, we have to consider this in order to continue and make assumptions with our data. For our purposes, we will consider the relationship to be stable. Even though we know that there may have been some changes, we will consider the model to be the same in both years.
 
