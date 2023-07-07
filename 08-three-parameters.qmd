@@ -785,7 +785,8 @@ Finally, do we have a treatment? Yes, treatments applies to this situation with 
 Now we can create our Preceptor Table:
 
 ```{r}
-tibble(ID = ID = c("1", "2", "...", "10", "11",
+#| echo: false
+tibble(ID = c("1", "2", "...", "10", "11",
                   "...", "20", "21", "...", "N"),
             treatment = c("Yes", "?", "No", "Yes", "Yes", "No", "?", "No", "...", "?"),
             attitude_after_control = c("...", "?", "7", "...", "...", "4", "?", "6", "...", "?"),
@@ -806,7 +807,7 @@ tibble(ID = ID = c("1", "2", "...", "10", "11",
   cols_align(align = "left", columns = c(ID)) |>
   fmt_markdown(columns = everything()) |>
   tab_spanner(label = "Predictor", columns = c(treatment)) |>
-  tab_spanner(label = "Outcomes", columns = c(attitude_after_control, attitude_after_treatment))
+  tab_spanner(label = "Outcomes", columns = c(attitude_after_control, attitude_after_treated))
 ```
 
 Recall: a Preceptor Table is table with rows and columns such that, if there is no missing data, all our questions are easy to answer. To answer questions — like “What is the average treatment effect, of exposing people to Spanish-speakers, on their attitudes toward immigration? and What is the largest causal effect which still has a 1 in 10 chance of occurring?” — we need a row for every individual at the station.
@@ -836,9 +837,10 @@ trains |>
 
 Now let's take a look at the **assumption of validity** for our data and Preceptor Table. There is no **truth** here. The data is real enough, but you created the Preceptor Table. Whether or not there is a population from which you can assume both the data and the Preceptor Table might have been drawn is not a TRUE/FALSE question. The Preceptor Table is all US train commuters today. However, the data we have involves train commuters in the Boston area in 2012. In addition, is our data from the Preceptor Table accurate? The validity may not hold as the treatment is not evenly split or completely randomized. While this  assumption can prove validity wrong, overall, the assumption of validity seems reasonable. `att_end` and `treatment` are similar enough between our data and The Preceptor Table that we can “stack” them on top of each other. We can assume that both are drawn from the same population.
 
-With our assumption of validity proving to be reasonably accurate, we can now create our Population Table. We can make a Population Table with our Preceptor Table and other data based on our assumptions that we have made.With the assumption of validity proving to be reasonable we are able to construct a Population Table because we have been able to confirm that our rows in the Preceptor Table and data are similar. 
+With our assumption of validity proving to be reasonably accurate, we can now create our Population Table. We can make a Population Table with our Preceptor Table and other data based on our assumptions that we have made. With the assumption of validity proving to be reasonable we are able to construct a Population Table because we have been able to confirm that our rows in the Preceptor Table and data are similar. 
 
 ```{r}
+#| echo: false
 tibble(source = c("Other", "Other", "...", 
                   "Data", "Data", "...",
                   "Other", "Other", "...",
@@ -1129,11 +1131,120 @@ So far, we have only created models in which the predictor variable is discrete,
 
 *What would you expect the income to be for a 40-year old?*
 
+### Wisdom
+
+```{r}
+#| echo: false
+knitr::include_graphics("other/images/Wisdom.jpg")
+```
+
+Wisdom requires the creation of a Preceptor Table, an examination of our data, and a determination, using the concept of "validity," as to whether or not we can (reasonably!) assume that the two come from the same *population*.
+
+Let's take a look at our question below:
+
+*What would you expect the income to be for a 40-year old?*
+
+First, we need to take a look at the model of our question. Do we have a **causal** or **predictive** model? In our question above we have a predictive model as we only have one outcome: `income` based on our predictor: `age`. A good way at looking at this is with a Preceptor Table, as seen below. Our Preceptor Table only contains one possible outcome: `income`, which means that we have a **predictive** model at hand.
+
+Second, we need to evaluate what our units are for our situation. When taking a look at the Preceptor Table below: we can view that all our ID's are based on income in which the units would be dollars. Our units for this scenario would be the dollars as we are concerned with dollars at the station for 40-year olds.
+
+Next, when taking a look at the Preceptor Table we can view that we only have one outcome based on each individual and covariate of age. Our outcome of income changes based on each individual and age that is with them.
+
+Finally, do we have a treatment? No, treatments will only apply to the situations with causal models, however, we do have covariates which in this case is our age. Our covariate is age in this situation because it plays a huge role in being a predictor for our outcome for each separate ID.
+
+Now we can create our Preceptor Table:
+
+```{r}
+#| echo: false
+tibble(ID = c("1", "2", "...", "10", "11",
+              "...", "20", "21", "...", "N"),
+       age = c("31", "?", "...", "58", "?", 
+               "...", "?", "49", "...", "?"),
+       income = c("150000", "?", "...", "50000", "?", 
+                  "...", "?", "35000", "...", "?")) |>
+  
+  gt() |>
+  tab_header(title = "Preceptor Table") |> 
+  cols_label(ID = md("ID"),
+             age = md("Age"),
+             income = md("Income")) |>
+  tab_style(cell_borders(sides = "right"),
+            location = cells_body(columns = c(ID))) |>
+  tab_style(style = cell_text(align = "left", v_align = "middle", size = "large"), 
+            locations = cells_column_labels(columns = c(ID))) |>
+  cols_align(align = "center", columns = everything()) |>
+  cols_align(align = "left", columns = c(ID)) |>
+  fmt_markdown(columns = everything()) |>
+  tab_spanner(label = "Predictor", columns = c(age)) |>
+  tab_spanner(label = "Outcome", columns = c(income))
+```
+
+Recall: a Preceptor Table is table with rows and columns such that, if there is no missing data, all our questions are easy to answer. To answer questions — like “What would you expect the income to be for a 40-year old?” — we need a row for every individual at the station.
+
+*Always explore your data.* Recall the discussion from @sec-rubin-causal-model. @enos2014 randomly placed Spanish-speaking confederates on nine train platforms around Boston, Massachusetts. The data that we want to analyze consists of the age and party of each individual on these train platforms based on our variables in our Preceptor Table. These reactions were measured through changes in answers to three survey questions. Load the necessary libraries and look at the data.
+
+```{r}
+library(primer.data)
+library(rstanarm)
+library(tidyverse)
+```
+
+```{r}
+trains |>
+  select(age, income)
+```
+
+As specified in the Preceptor Table we only care about `age` is the age of the respondent and `income` is the income of the respondent.
+
+```{r}
+trains |>
+  select(age, income) |>
+  summary()
+```
+
+`summary()` shows us what the different values of `age` and `income` are because it is a factor. The range for `age` seems reasonable. Recall that participants were asked three questions about immigration issues, each of which allowed for an answer indicated strength of agreement on a scale form 1 to 5, with higher values indicating more agreement with conservative viewpoints.
+
+Now let's take a look at the **assumption of validity** for our data and Preceptor Table. There is no **truth** here. The data is real enough, but you created the Preceptor Table. Whether or not there is a population from which you can assume both the data and the Preceptor Table might have been drawn is not a TRUE/FALSE question. The Preceptor Table is all US train commuters today. However, the data we have involves train commuters in the Boston area in 2012. In addition, is our data from the Preceptor Table accurate? The data has been collected from filling out surveys about age without checking a driver's license. The data has been collected from filling out surveys about income without cross-checking with the government database. Finally, the privacy of a train station differs from filling out surveys at home. While all of these questions and assumptions prove validity wrong, overall, the assumption of validity seems reasonable. `age` and `income` are similar enough between our data and The Preceptor Table that we can “stack” them on top of each other. We can assume that both are drawn from the same population.
+
+With our **assumption of validity** proving to be reasonably accurate, we can now create our Population Table. We can make a Population Table with our Preceptor Table and other data based on our assumptions that we have made. With the assumption of validity proving to be reasonable we are able to construct a Population Table because we have been able to confirm that our rows in the Preceptor Table and data are similar. 
+
+```{r}
+#| echo: false
+tibble(source = c("Other", "Other", 
+                  "Data", "Data", "...",
+                  "Other", "Other", "...",
+                  "Preceptor Table", "Preceptor Table", "...",
+                  "Other", "Other"),
+       age = c("?", "?",
+                "43", "52", "...",
+               "?", "?", "...",
+               "45", "65", "...",
+               "?", "?"),
+       income = c("?", "?",
+                  "150000", "50000", "...",
+                 "?", "?", "...",
+                 "45000", "15000", "...",
+                 "?", "?")) |>
+  
+  gt() |>
+  tab_header(title = "Population Table") |> 
+  cols_label(source = md("Source"),
+             age = md("Age"),
+             income = md("Income")) |>
+  tab_style(cell_borders(sides = "right"),
+            location = cells_body(columns = c(source))) |>
+  tab_style(style = cell_text(align = "left", v_align = "middle", size = "large"), 
+            locations = cells_column_labels(columns = c(source))) |>
+  cols_align(align = "center", columns = everything()) |>
+  cols_align(align = "left", columns = c(source)) |>
+  fmt_markdown(columns = everything())  
+```
+
+Our Preceptor Table rows are chronologically ordered. The "other" rows are our greater population for which we are making assumptions --- this is why the year at the start is earlier than our data and the year at the end is later than our Preceptor Table. This shows the more expansive population about which we are making inferences.
+
 ### Justice
 
 Once again, in Justice, we must consider stability, representativeness, unconfoundedness, and the data generating mechanism.
-
-
 
 Consider the stability of our model and if we believe that our relationship between age and income has changed between 2012 and now. Once again, let's consider inflation and how that could impact income. If incomes were to increase at the rate of inflation, then the income distribution would be different than that of 2012. However, wages don't tend to change as quickly as inflation does, so they likely did not change significantly and we can consider this model to be stable.
 
@@ -1285,7 +1396,6 @@ pe |>
 
 <!-- More discussion! -->
 
-
 ## liberal ~ income
 
 So far in this chapter, we have only considered *continuous* outcome variables. `age`, `att_end` and `income` all take on a variety of values. None of them are, truly, continuous, of course. `age` is only reported as an integer value. `att_end` can only, by definition, take on 13 distinct values. However, from a modeling perspective, what matters is that they have more than 2 possible values.
@@ -1296,6 +1406,123 @@ So far in this chapter, we have only considered *continuous* outcome variables. 
 
 *Assume we have a group of eight people, two of whom make $100,000, two $200,000, two $300,000 and two $400,000. How many will be liberal?*
 
+### Wisdom
+
+```{r}
+#| echo: false
+knitr::include_graphics("other/images/Wisdom.jpg")
+```
+
+Wisdom requires the creation of a Preceptor Table, an examination of our data, and a determination, using the concept of "validity," as to whether or not we can (reasonably!) assume that the two come from the same *population*.
+
+Let's take a look at our question below:
+
+*Among all people who have an income $100,000, what proportion are liberal?*
+
+*Assume we have a group of eight people, two of whom make $100,000, two $200,000, two $300,000 and two $400,000. How many will be liberal?*
+
+First, we need to take a look at the model of our question. Do we have a **causal** or **predictive** model? In our question above we have a causal model as we multiple outcomes with `income` based on our predictor: `liberal`. A good way at looking at this is with a Preceptor Table, as seen below. Since our data does not include all Republicans and Democrats in the world, not every row is filled in. Our Preceptor Table contains two possible outcomes with `liberal`, which means that we have a **causal** model at hand.
+
+Second, we need to evaluate what our units are for our situation. When taking a look at the Preceptor Table below: we can view that all our ID's are dependent on each individual. Our units for this scenario would be the individuals because there are several individuals at the station.
+
+Next, when taking a look at the Preceptor Table we can view that we have two outcomes based on each individual as they could have the treatment applied or not applied. Our outcome of attitude changes based on each individual's response/no response to the treatment.
+
+Finally, do we have a treatment? Yes, treatments applies to this situation with a causal model. We are exposing the commuters to the Spanish-speakers, which play a role in changing the situation at hand.
+
+Now we can create our Preceptor Table:
+
+```{r}
+#| echo: false
+tibble(ID = c("1", "2", "...", "10", "11",
+                  "...", "20", "21", "...", "N"),
+       income = c("45000", "?", "150000", "35000", "2500", "75000", "?", "...", "...", "?"),
+       attitude_yes_liberal = c("...", "?", "7", "...", "...", "4", "?", "6", "...", "?"),
+       attitude_no_liberal = c("8", "?", "...", "5", "7", "...", "?", "...", "...", "?")) |>
+  gt() |>
+  tab_header(title = "Preceptor Table") |> 
+  cols_label(ID = md("ID"),
+             income = md("Income"),
+             attitude_yes_liberal = md("Liberal Ending Attitude"),
+             attitude_no_liberal = md("Not Liberal Ending Attitude")) |>
+  tab_style(cell_borders(sides = "right"),
+            location = cells_body(columns = c(ID))) |>
+  tab_style(style = cell_text(align = "left", v_align = "middle", size = "large"), 
+            locations = cells_column_labels(columns = c(ID))) |>
+  cols_align(align = "center", columns = everything()) |>
+  cols_align(align = "left", columns = c(ID)) |>
+  fmt_markdown(columns = everything()) |>
+  tab_spanner(label = "Predictor", columns = c(income)) |>
+  tab_spanner(label = "Outcomes", columns = c(attitude_yes_liberal, attitude_no_liberal))
+```
+
+Recall: a Preceptor Table is table with rows and columns such that, if there is no missing data, all our questions are easy to answer. To answer questions — like “Among all people who have an income $100,000, what proportion are liberal?
+and Assume we have a group of eight people, two of whom make $100,000, two $200,000, two $300,000 and two $400,000. How many will be liberal?” — we need a row for every individual at the station.
+
+*Always explore your data.* Recall the discussion from @sec-rubin-causal-model. @enos2014 randomly placed Spanish-speaking confederates on nine train platforms around Boston, Massachusetts. The data that we want to analyze consists of the age and party of each individual on these train platforms based on our variables in our Preceptor Table. These reactions were measured through changes in answers to three survey questions. Load the necessary libraries and look at the data.
+
+```{r}
+library(primer.data)
+library(rstanarm)
+library(tidyverse)
+```
+
+```{r}
+trains |>
+  select(liberal, income)
+```
+
+As specified in the Preceptor Table we only care about `liberal` is whether they are liberal or not and `income` is the income of the respondent.
+
+```{r}
+trains |>
+  select(liberal, income) |>
+  summary()
+```
+
+`summary()` shows us what the different values of `liberal` and `income` are because it is a factor. The range for `income` seems reasonable.
+
+Now let's take a look at the **assumption of validity** for our data and Preceptor Table. There is no **truth** here. The data is real enough, but you created the Preceptor Table. Whether or not there is a population from which you can assume both the data and the Preceptor Table might have been drawn is not a TRUE/FALSE question. The Preceptor Table is all US train commuters today. However, the data we have involves train commuters in the Boston area in 2012. In addition, is our data from the Preceptor Table accurate? The validity may not hold as the liberal is not evenly split or completely randomized. While this  assumption can prove validity wrong, overall, the assumption of validity seems reasonable. `liberal` and `income` are similar enough between our data and The Preceptor Table that we can “stack” them on top of each other. We can assume that both are drawn from the same population.
+
+With our assumption of validity proving to be reasonably accurate, we can now create our Population Table. We can make a Population Table with our Preceptor Table and other data based on our assumptions that we have made. With the assumption of validity proving to be reasonable we are able to construct a Population Table because we have been able to confirm that our rows in the Preceptor Table and data are similar. 
+
+```{r}
+#| echo: false
+tibble(source = c("Other", "Other", "...", 
+                  "Data", "Data", "...",
+                  "Other", "Other", "...",
+                  "Preceptor Table", "Preceptor Table", "...",
+                  "Other", "Other"),
+       income = c("?", "?", "...", 
+                  "150000", "75000", "...",
+                  "?", "?", "...",
+                  "?", "?", "35000",
+                  "?", "60000"),
+       att_yes_liberal = c("?", "?", "...", 
+                 "6", "?", "...",
+                 "?", "?", "...", 
+                 "?", "?", "9",
+                 "?", "?"),
+       att_no_liberal = c("?", "?", "...", 
+                 "?", "2", "...",
+                 "?", "?", "...", 
+                 "?", "?", "...",
+                 "?", "5")) |>
+  gt() |>
+  tab_header(title = "Population Table") |> 
+  cols_label(source = md("Source"),
+             income = md("Income"),
+             att_yes_liberal = md("Liberal Ending Attitude"),
+             att_no_liberal = md("Not Liberal Ending Attitude")) |>
+  tab_style(cell_borders(sides = "right"),
+            location = cells_body(columns = c(source))) |>
+  tab_style(style = cell_text(align = "left", v_align = "middle", size = "large"), 
+            locations = cells_column_labels(columns = c(source))) |>
+  cols_align(align = "center", columns = everything()) |>
+  cols_align(align = "left", columns = c(source)) |>
+  fmt_markdown(columns = everything())  
+```
+
+Our Preceptor Table rows are chronologically ordered. The "other" rows are our greater population for which we are making assumptions --- this is why the year at the start is earlier than our data and the year at the end is later than our Preceptor Table. This shows the more expansive population about which we are making inferences.
 
 ### Justice
 
