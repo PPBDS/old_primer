@@ -12,21 +12,15 @@ library(patchwork)
 
 <!-- Need a separate Preceptor Table for each question. Do the whole cycle each time, doing an EDA of the variables you want to use for that question. -->
 
-
 <!-- Need a table which shows all 4 (?) languages for describing a model together: English, math, code, output. ? -->
-
 
 <!-- DK: Clean up these residuals plots to be similar across chapters! Also, we should ensure that the width of 10 units is the same in each plot. Or does that already happen? Want the intuition that, the more predictive the model, the smaller the remaining variation in the residuals. The below is from chapter 7. -->
 
-
 <!-- Come up with common ways in which a lack of representativeness causes problems. This is a list of things that we can check each time when we are interrogating a data science problem. Key issue is the correlation, if anything, between the "assignment mechanism" or "sampling mechanism" and other variables. Discuss sampling mechanism in all cases except att_end ~ treatment. For that, use "assignment mechanism." -->
-
 
 Models have parameters. In @sec-one-parameter we created models with a single parameter $p$, the proportion of red beads in an urn. In @sec-two-parameters, we used models with two parameters: $\mu$ (the average height in the population, generically known as a model "intercept") and $\sigma$ (the variation in height in the population). Here --- can you guess where this is going? --- we will build models with three parameters: $\sigma$ (which serves the same role throughout the book) and two "coefficients." In models which relate a continuous predictor to the outcome, those two parameters will be labeled $\beta_0$ and $\beta_1$. In models which estimate two averages, the parameters will be $\beta_1$ and $\beta_2$. All this notation is confusing, not least because different academic fields use inconsistent schemes. Follow the Cardinal Virtues and tackle your problem step by step.
 
 Perhaps more importantly, a focus on parameters is less relevant now than it was decades ago, when computational limitations made answering our actual questions harder. *Parameters are imaginary.* They don't exist. They, in general, are not the answer to an real world question. They are tools, along with the models of which they are a part, we use to answer questions.
-
-
 
 ## Wisdom
 
@@ -34,13 +28,11 @@ Perhaps more importantly, a focus on parameters is less relevant now than it was
 
 Wisdom begins with considering the questions we desire to answer and the data set we are given. In this chapter, we are going to ask a series of questions involving train commuters' ages, party affiliations, incomes, and political ideology, as well as the causal effect of exposure to Spanish-speakers on their attitude toward immigration. These questions will pertain to all train commuters in the US today. Given these types of questions, the Preceptor Table would be:
 
-
 ```{r}
 #| echo: false
 #| message: false
 library(tidyverse)
 ```
-
 
 ```{r}
 #| echo: false
@@ -75,9 +67,9 @@ tibble(ID = c("Commuter 1", "Commuter 2", "...", "Commuter 1000", "Commuter 1001
 
 Recall: a Preceptor Table is the smallest possible table such that, if there is no missing data, all our questions are easy to answer. To answer questions --- like "What is, today, the average age of train commuters in the US?" --- we need a row for every train commuter.
 
-Notice that one of our questions is about a causal effect: What change in immigration attitudes is caused by being exposed to Spanish-speakers? Answering causal questions requires (at least) two potential outcomes: immigration attitudes when people receive the treatment of being exposed to Spanish-speakers and immigration attitudes, for those same people, when they don't receive the treatment. 
+Notice that one of our questions is about a causal effect: What change in immigration attitudes is caused by being exposed to Spanish-speakers? Answering causal questions requires (at least) two potential outcomes: immigration attitudes when people receive the treatment of being exposed to Spanish-speakers and immigration attitudes, for those same people, when they don't receive the treatment.
 
-Having created the Preceptor Table, we now look at the data we have:  the `trains` data set from the **primer.data** package. 
+Having created the Preceptor Table, we now look at the data we have: the `trains` data set from the **primer.data** package.
 
 ### EDA for `trains`
 
@@ -95,9 +87,9 @@ library(tidyverse)
 glimpse(trains)
 ```
 
-The data include information about each respondent's gender, political affiliations, age, income and so on. `treatment` indicates whether a subject was in the control or treatment group. The key outcomes are their attitudes toward immigration both before (`att_start`) and after (`att_end`) the experiment. Type `?trains` to read the help page for more information about each variable. 
+The data include information about each respondent's gender, political affiliations, age, income and so on. `treatment` indicates whether a subject was in the control or treatment group. The key outcomes are their attitudes toward immigration both before (`att_start`) and after (`att_end`) the experiment. Type `?trains` to read the help page for more information about each variable.
 
-Let's restrict attention to a subset of the variables we need to answer our questions, as specified in the Preceptor Table. `age` is the age of the respondent; `party` is their political party affiliation; `liberal` is whether they are liberal or not; `income` is the income of the respondent; `treatment` specifies whether the respondent was given the treatment of being exposed to Spanish-speakers in the train station; and `att_end` tell us about the respondent's attitude toward immigration after the experiment. 
+Let's restrict attention to a subset of the variables we need to answer our questions, as specified in the Preceptor Table. `age` is the age of the respondent; `party` is their political party affiliation; `liberal` is whether they are liberal or not; `income` is the income of the respondent; `treatment` specifies whether the respondent was given the treatment of being exposed to Spanish-speakers in the train station; and `att_end` tell us about the respondent's attitude toward immigration after the experiment.
 
 ```{r}
 ch5 <- trains |> 
@@ -111,14 +103,14 @@ ch5 |>
   slice_sample(n = 5)
 ```
 
-`att_end` is a measure of person's attitude toward immigration. A higher number means more conservative, i.e., a more exclusionary stance toward immigration into the United States. 
+`att_end` is a measure of person's attitude toward immigration. A higher number means more conservative, i.e., a more exclusionary stance toward immigration into the United States.
 
 ```{r}
 ch5 |> 
   glimpse()
 ```
 
-Pay attention to the variable types. Do they make sense? Perhaps. But there are certainly grounds for suspicion. Why is  `att_end` a double rather than an integer? All the values in the data appear to be integers, so there is no benefit to having these variables be doubles. Why is `party` a character variable and `treatment` a factor variable? It could be that these are intentional choices made by the creator of the tibble, i.e., us. Or, these could be mistakes. Most likely, these choices are a mixture of sensible and arbitrary. Regardless, it is your responsibility to notice them. You can't make a good model without looking closely at the data which you are using.
+Pay attention to the variable types. Do they make sense? Perhaps. But there are certainly grounds for suspicion. Why is `att_end` a double rather than an integer? All the values in the data appear to be integers, so there is no benefit to having these variables be doubles. Why is `party` a character variable and `treatment` a factor variable? It could be that these are intentional choices made by the creator of the tibble, i.e., us. Or, these could be mistakes. Most likely, these choices are a mixture of sensible and arbitrary. Regardless, it is your responsibility to notice them. You can't make a good model without looking closely at the data which you are using.
 
 ```{r}
 ch5 |> 
@@ -127,9 +119,7 @@ ch5 |>
 
 `summary()` shows us what the different values of `treatment` are because it is a factor. Unfortunately, it does not do the same for character variables like `party`. The ranges for `age` and `att_end` seem reasonable. Recall that participants were asked three questions about immigration issues, each of which allowed for an answer indicated strength of agreement on a scale form 1 to 5, with higher values indicating more agreement with conservative viewpoints. `att_end` is the sum of the responses to the three questions, so the most liberal possible value is 3 and the most conservative is 15.
 
-
 ### Population
-
 
 <!-- Combo of old things from different sections and new explanations, need to combine and clarify -->
 
@@ -137,19 +127,19 @@ ch5 |>
 
 The data that we have are very limited. There are only 115 observations, all from 2012 and involving train commuters to Boston. *Can we assume that the the data we have and the data in our Preceptor Table are drawn from the same population?* Only your judgment, along with advice from your colleagues, can guide you.
 
-There is no **truth** here. The data is real enough, but you created the Preceptor Table. Whether or not there is a population from which you can assume both the data and the Preceptor Table might have been drawn is not a TRUE/FALSE question. 
+There is no **truth** here. The data is real enough, but you created the Preceptor Table. Whether or not there is a population from which you can assume both the data and the Preceptor Table might have been drawn is not a TRUE/FALSE question.
 
-The Preceptor Table is all US train commuters today. However, the data we have involves train commuters in the Boston area in 2012. Can we assume the this data from Boston in 2012 is drawn from the same population as all train commuters in the US today? 
+The Preceptor Table is all US train commuters today. However, the data we have involves train commuters in the Boston area in 2012. Can we assume the this data from Boston in 2012 is drawn from the same population as all train commuters in the US today?
 
-The key concept is the idea of a "population." From which larger population is the data we have being (conceptually) drawn? If we were only interested in the age of individuals in our data set, we would have no need for inference. *We know everyone's ages already.* We only need tools like `stan_glm()` if we seek to understand individuals not in our data. 
+The key concept is the idea of a "population." From which larger population is the data we have being (conceptually) drawn? If we were only interested in the age of individuals in our data set, we would have no need for inference. *We know everyone's ages already.* We only need tools like `stan_glm()` if we seek to understand individuals not in our data.
 
 The issue is always: Do the data we have and the data we want to have come from the same population? If there is no connection between the two, progress is impossible. But, in this case, if we are willing to consider the population to be US train commuters over the last decade (including today), and if we are willing to assume that there is a single population from which the Preceptor Table and our data set is drawn, then we can use our data to create a model to answer our questions.
 
 *Validity* is the assumption which allows us to consider the Preceptor Table and our data to have been drawn from the same population.
 
-Consider the treatment variable. What does it mean for somebody to receive the treatment? Let's say somebody was running late on their way to the train in the morning. Well, this person may have heard the Spanish-speakers for a shorter amount of time than a commuter who arrived earlier. Similarly, some Spanish-speakers may have been speaking louder than others or some commuters may have been closer to the speakers than other commuters. Therefore, these commuters would hear the treatment of being exposed to Spanish-speakers less loudly than the other commuters. Additionally, the Spanish-speakers weren't the same for every train station in our 2012 data and if we were to get data for now, we wouldn't be able to hire the exact same Spanish-speakers. When considering validity with reference to treatments, what we must determine is if we can assume that the treatments of being exposed to Spanish-speakers that each commuter may experience a bit differently can be assumed to be the same. 
+Consider the treatment variable. What does it mean for somebody to receive the treatment? Let's say somebody was running late on their way to the train in the morning. Well, this person may have heard the Spanish-speakers for a shorter amount of time than a commuter who arrived earlier. Similarly, some Spanish-speakers may have been speaking louder than others or some commuters may have been closer to the speakers than other commuters. Therefore, these commuters would hear the treatment of being exposed to Spanish-speakers less loudly than the other commuters. Additionally, the Spanish-speakers weren't the same for every train station in our 2012 data and if we were to get data for now, we wouldn't be able to hire the exact same Spanish-speakers. When considering validity with reference to treatments, what we must determine is if we can assume that the treatments of being exposed to Spanish-speakers that each commuter may experience a bit differently can be assumed to be the same.
 
-Consider the validity of `age` and `income`. Recall that validity refers to whether or not we can consider the columns `age` and `income` to have the same meaning in our data set of 2012 Boston train commuters and in our Preceptor Table. While `age` doesn't really change meaning over time, `income` can be impacted by inflation. After all, $100,000 in 2012 doesn't have the same worth as $100,000 now due to inflation and now would have less purchasing power. This would result in income being underestimated within our model. However, since there hasn't been drastic inflation that dramatically changed the buying power, we will consider income to be valid. If there had been like 300% inflation, however, our conclusion would probably be different. 
+Consider the validity of `age` and `income`. Recall that validity refers to whether or not we can consider the columns `age` and `income` to have the same meaning in our data set of 2012 Boston train commuters and in our Preceptor Table. While `age` doesn't really change meaning over time, `income` can be impacted by inflation. After all, \$100,000 in 2012 doesn't have the same worth as \$100,000 now due to inflation and now would have less purchasing power. This would result in income being underestimated within our model. However, since there hasn't been drastic inflation that dramatically changed the buying power, we will consider income to be valid. If there had been like 300% inflation, however, our conclusion would probably be different.
 
 Look at the validity of the `liberal` variable. This column has the values "Liberal" and "Not Liberal" to convey the political ideology of the train commuters. We must determine if the column `liberal`, and therefore the meaning of being liberal, is the same in Boston in 2012 as in the US in 2023. If we can determine these to be the same, then we can assume validity, and in this case, because the core beliefs of being liberal have not changed very much between 2012 and 2023, we can determine that the data is valid.
 
@@ -157,17 +147,17 @@ Overall, the assumption of *validity* seems reasonable. `age`, `treatment` and o
 
 ### Population Table
 
-Having determined that the Preceptor Table and the data were drawn from the same population, we can produce a Population Table. 
+Having determined that the Preceptor Table and the data were drawn from the same population, we can produce a Population Table.
 
 The Population Table includes rows from three sources: the **Preceptor Table**, the **actual data**, and all *other* members of the population.
 
-The rows in the **Preceptor Table** contain the information that we would *want* to know in order to answer our questions. These rows contain entries for our covariates but they do not contain any outcome results. We are trying to answer questions about the train commuter population in 2023, so our city entries for these rows will vary and our year entries of these rows will read "2023". 
+The rows in the **Preceptor Table** contain the information that we would *want* to know in order to answer our questions. These rows contain entries for our covariates but they do not contain any outcome results. We are trying to answer questions about the train commuter population in 2023, so our city entries for these rows will vary and our year entries of these rows will read "2023".
 
 Our **actual data** rows contain the information that we *do* know. These rows contain entries for both our covariates *and* the outcomes. In this case, the actual data comes from a study conducted on train commuters around Boston, MA in 2012, so our city entries for these rows will read "Boston, MA" and our year entries of these rows will read "2012".
 
 Our **other** rows contain no data. These are subjects which are members of our assumed population, but for which we have no data. As such, all outcomes and covariates are missing. The "Other" rows may include, for example, data from a range of years before and after 2012, since we considered little change overtime, so we would also consider this data to be representative and drawn from the larger population of train commuters in years near 2012.
 
-The Population Table includes commuters from our Preceptor Table with the information that we would ideally have to answer the questions and those from the data we have that is specific to Boston, MA. Additionally, the Population Table also includes the groups of people within the population from which both the data we have and the Preceptor table is drawn from that we don't have. 
+The Population Table includes commuters from our Preceptor Table with the information that we would ideally have to answer the questions and those from the data we have that is specific to Boston, MA. Additionally, the Population Table also includes the groups of people within the population from which both the data we have and the Preceptor table is drawn from that we don't have.
 
 ```{r}
 #| echo: false
@@ -243,15 +233,15 @@ tibble(source = c("Other", "Other", "...",
   fmt_markdown(columns = everything())  
 ```
 
-Our Preceptor Table rows are chronologically ordered. The "other" rows are our greater population for which we are making assumptions --- this is why the year at the start is earlier than our data and the year at the end is later than our Preceptor Table. This shows the more expansive population about which we are making inferences. 
+Our Preceptor Table rows are chronologically ordered. The "other" rows are our greater population for which we are making assumptions --- this is why the year at the start is earlier than our data and the year at the end is later than our Preceptor Table. This shows the more expansive population about which we are making inferences.
 
-## age ~ party
+## age \~ party
 
 We want to build a model and then use that model to make claims about the world. Our questions about the relationship between `age` and `party` are the following:
 
 *What is the probability that, if a Democrat shows up at the train station, he will be over 50 years old?*
 
-*In a group of three Democrats and three Republicans, what will the age difference be between the oldest Democrat and the youngest Republican?* 
+*In a group of three Democrats and three Republicans, what will the age difference be between the oldest Democrat and the youngest Republican?*
 
 We can answer these and similar questions by creating a model that uses party affiliation to predict age
 
@@ -301,7 +291,7 @@ tibble(ID = c("1", "2", "...", "10", "11",
   tab_spanner(label = "Outcome", columns = c(age))
 ```
 
-Recall: a Preceptor Table is table with rows and columns such that, if there is no missing data, all our questions are easy to answer. To answer questions — like “What is the probability that, if a Democrat shows up at the train station, he will be over 50 years old?” — we need a row for every individual at the station.
+Recall: a Preceptor Table is table with rows and columns such that, if there is no missing data, all our questions are easy to answer. To answer questions --- like "What is the probability that, if a Democrat shows up at the train station, he will be over 50 years old?" --- we need a row for every individual at the station.
 
 *Always explore your data.* Recall the discussion from @sec-rubin-causal-model. @enos2014 randomly placed Spanish-speaking confederates on nine train platforms around Boston, Massachusetts. The data that we want to analyze consists of the age and party of each individual on these train platforms based on our variables in our Preceptor Table. These reactions were measured through changes in answers to three survey questions. Load the necessary libraries and look at the data.
 
@@ -326,9 +316,9 @@ trains |>
 
 `summary()` shows us what the different values of `age` and `party` are because it is a factor. The range for `age` seems reasonable. Recall that participants were asked three questions about immigration issues, each of which allowed for an answer indicated strength of agreement on a scale form 1 to 5, with higher values indicating more agreement with conservative viewpoints.
 
-Now let's take a look at the **assumption of validity** for our data and Preceptor Table. There is no **truth** here. The data is real enough, but you created the Preceptor Table. Whether or not there is a population from which you can assume both the data and the Preceptor Table might have been drawn is not a TRUE/FALSE question. The Preceptor Table is all US train commuters today. However, the data we have involves train commuters in the Boston area in 2012. In addition, is our data from the Preceptor Table accurate? The data has been collected from filling out surveys about age without checking a driver's license. The data has been collected from filling out surveys about party without going to the train station. Finally, the privacy of a train station differs from filling out surveys at home. While all of these questions and assumptions prove validity wrong, overall, the assumption of validity seems reasonable. `age` and `party` are similar enough between our data and The Preceptor Table that we can “stack” them on top of each other. We can assume that both are drawn from the same population.
+Now let's take a look at the **assumption of validity** for our data and Preceptor Table. There is no **truth** here. The data is real enough, but you created the Preceptor Table. Whether or not there is a population from which you can assume both the data and the Preceptor Table might have been drawn is not a TRUE/FALSE question. The Preceptor Table is all US train commuters today. However, the data we have involves train commuters in the Boston area in 2012. In addition, is our data from the Preceptor Table accurate? The data has been collected from filling out surveys about age without checking a driver's license. The data has been collected from filling out surveys about party without going to the train station. Finally, the privacy of a train station differs from filling out surveys at home. While all of these questions and assumptions prove validity wrong, overall, the assumption of validity seems reasonable. `age` and `party` are similar enough between our data and The Preceptor Table that we can "stack" them on top of each other. We can assume that both are drawn from the same population.
 
-With our assumption of validity proving to be reasonably accurate, we can now create our Population Table. We can make a Population Table with our Preceptor Table and other data based on our assumptions that we have made. With the assumption of validity proving to be reasonable we are able to construct a Population Table because we have been able to confirm that our rows in the Preceptor Table and data are similar. 
+With our assumption of validity proving to be reasonably accurate, we can now create our Population Table. We can make a Population Table with our Preceptor Table and other data based on our assumptions that we have made. With the assumption of validity proving to be reasonable we are able to construct a Population Table because we have been able to confirm that our rows in the Preceptor Table and data are similar.
 
 ```{r}
 #| echo: false
@@ -374,9 +364,9 @@ knitr::include_graphics("other/images/Justice.jpg")
 
 Justice concerns four topics: stability, representativeness, unconfoundedness and the mathematical structure of the model.
 
-We then must consider the stability of our model. **Stability** means that the relationship between the columns is the same for three categories of rows: the data, the Preceptor table, and the larger population from which both are drawn. With something like height, it is much easier to assume stability over a greater period of time. Changes in global height occur extremely slowly, so height being stable across a span of 20 years is reasonable to assume. With something like political ideology, it is much harder to make the assertion that data collected in 2010 would be stable to data collected in 2030. When we are confronted with this uncertainty, we can consider making our timeframe smaller. However, we would still need to assume stability from 2014 (time of data collection) to today.  Stability allows us to ignore the issue of time. 
+We then must consider the stability of our model. **Stability** means that the relationship between the columns is the same for three categories of rows: the data, the Preceptor table, and the larger population from which both are drawn. With something like height, it is much easier to assume stability over a greater period of time. Changes in global height occur extremely slowly, so height being stable across a span of 20 years is reasonable to assume. With something like political ideology, it is much harder to make the assertion that data collected in 2010 would be stable to data collected in 2030. When we are confronted with this uncertainty, we can consider making our timeframe smaller. However, we would still need to assume stability from 2014 (time of data collection) to today. Stability allows us to ignore the issue of time.
 
-Next, let's consider representativeness. **Representativeness** has to do with how well our sample represents the larger population we are interested in generalizing to. Does the train experiment allow us to calculate a causal effect for people who commute by cars? Can we calculate the causal effect for people in New York City? Before we generalize to broader populations we have to consider if our experimental estimates are applicable beyond our experiment. Generally: *if there was no chance that a certain type of person would have been in this experiment, we cannot make an assumption for that person*. 
+Next, let's consider representativeness. **Representativeness** has to do with how well our sample represents the larger population we are interested in generalizing to. Does the train experiment allow us to calculate a causal effect for people who commute by cars? Can we calculate the causal effect for people in New York City? Before we generalize to broader populations we have to consider if our experimental estimates are applicable beyond our experiment. Generally: *if there was no chance that a certain type of person would have been in this experiment, we cannot make an assumption for that person*.
 
 Next, let's consider unconfoundedness. **Unconfoundedness** means that the treatment assignment is independent of the potential outcomes, when we condition on pre-treatment covariates. However, with our scenario, we have a predictive model and this assumption is only relevant for causal models.
 
@@ -388,7 +378,7 @@ We can also consider the type of DGM. Any DGM with age as its dependent variable
 
 <!-- Preceptor Tables should be laid out like the formula: outcome on left, predictors on right. -->
 
-A good way at looking at this is with a Preceptor Table, as seen below. Unlike the previous table in @sec-two-parameters, we now have two columns in addition to ID.  Since our data does not include all Republicans and Democrats in the world, not every row is filled in. 
+A good way at looking at this is with a Preceptor Table, as seen below. Unlike the previous table in @sec-two-parameters, we now have two columns in addition to ID. Since our data does not include all Republicans and Democrats in the world, not every row is filled in.
 
 ```{r}
 #| echo: false
@@ -415,13 +405,13 @@ tibble(ID = c("1", "2", "...", "473", "474",
   tab_spanner(label = "Outcome", columns = c(age))
 ```
 
-&nbsp;
+ 
 
 We now know that we are working with a predictive DGM. Recall:
 
 $$\text{outcome} = \text{model} + \text{not in the model}$$
 
-In words, any event depends on our explicitly described model as well as on influences unknown to us. Everything that happens in the world is the result of various factors, and we can only consider some of them in our model (because we do not know about some influences, or because we have no data about them).  
+In words, any event depends on our explicitly described model as well as on influences unknown to us. Everything that happens in the world is the result of various factors, and we can only consider some of them in our model (because we do not know about some influences, or because we have no data about them).
 
 <!-- Review concept of dummy variables in the context of the intercept model with categorical predictor. -->
 
@@ -429,10 +419,7 @@ Let's make our DGM. The mathematics:
 
 $$ y_i = \beta_1 republican_i + \beta_2 democrat_i + \epsilon_i$$
 
-where \n
-$$republican_i, democrat_i \in \{0,1\}$$ \n
-$$republican_i +  democrat_i = 1$$ \n
-$$\epsilon_i \sim N(0, \sigma^2)$$   
+where \n $$republican_i, democrat_i \in \{0,1\}$$ \n $$republican_i +  democrat_i = 1$$ \n $$\epsilon_i \sim N(0, \sigma^2)$$
 
 Don't panic dear poets and philosophers, the whole thing is easier than it looks. This will follow the form above in which the outcome is the result of what is in our model and not in our model.
 
@@ -440,23 +427,23 @@ Don't panic dear poets and philosophers, the whole thing is easier than it looks
 
 On the left-hand side we have the outcome, $y_i$, which is the variable to be explained. In our case, this is the age of an individual in the population.
 
-The right-hand side contains two parts, that which is contained within the model, and that which isn't. 
+The right-hand side contains two parts, that which is contained within the model, and that which isn't.
 
-* First, we have the part contained in the model, which consists of the parameter and the data points. The betas are our two parameters: $\beta_1$ is the average age of Republicans in the population and $\beta_2$ is the average age of Democrats in the population.  $republican_i$ and $democrat_i$ are our explanatory variables and take the values 1 or 0. As shown in our model, $\beta_1 republican_i$ and $\beta_2 democrat_i$ are two similar terms which are added together to make our model and each term consists of a parameter and a data point. If person $i$ is a Republican we have $republican_i = 1$ and $democrat_i = 0$. If person $i$ is a Democrat we have $republican_i = 0$ and $democrat_i = 1$. In other words, their values are mutually exclusive -- if you are a Democrat, you cannot also be a Republican.
+-   First, we have the part contained in the model, which consists of the parameter and the data points. The betas are our two parameters: $\beta_1$ is the average age of Republicans in the population and $\beta_2$ is the average age of Democrats in the population. $republican_i$ and $democrat_i$ are our explanatory variables and take the values 1 or 0. As shown in our model, $\beta_1 republican_i$ and $\beta_2 democrat_i$ are two similar terms which are added together to make our model and each term consists of a parameter and a data point. If person $i$ is a Republican we have $republican_i = 1$ and $democrat_i = 0$. If person $i$ is a Democrat we have $republican_i = 0$ and $democrat_i = 1$. In other words, their values are mutually exclusive -- if you are a Democrat, you cannot also be a Republican.
 
 <!-- "Connected to" is awkward here. -->
 
-* The second part in the right-hand side, $\epsilon_i$ (“epsilon”), represents the unexplained part of the outcome and is called the error term. This includes all factors that have an influence on someone's age but are not related to party affiliation. In other words, $\epsilon_i$ is what influence age that is not factored into our model. We assume that this error follows a normal distribution with an expected value of 0 (meaning it is 0 on average) and it is simply the difference between the outcome and our model predictions. 
+-   The second part in the right-hand side, $\epsilon_i$ ("epsilon"), represents the unexplained part of the outcome and is called the error term. This includes all factors that have an influence on someone's age but are not related to party affiliation. In other words, $\epsilon_i$ is what influence age that is not factored into our model. We assume that this error follows a normal distribution with an expected value of 0 (meaning it is 0 on average) and it is simply the difference between the outcome and our model predictions.
 
-Some things to note about our model: 
+Some things to note about our model:
 
-* The small $i$'s are an index to number the observations. It is equivalent to the "ID" column in our Preceptor Table and simply states that the outcome for person $i$ is explained by the modeled and non-modeled factors for person $i$. 
+-   The small $i$'s are an index to number the observations. It is equivalent to the "ID" column in our Preceptor Table and simply states that the outcome for person $i$ is explained by the modeled and non-modeled factors for person $i$.
 
-* The model is a claim about how the world works, not just for the 115 individuals for which we have data but for the all the people in the population for which we seek to draw inferences.
+-   The model is a claim about how the world works, not just for the 115 individuals for which we have data but for the all the people in the population for which we seek to draw inferences.
 
-* Although terminology differs across academic fields, the most common term to describe a model like this is a "regression." We are "regressing" `age` on `party` in order to see if they are associated with each other. The formula above is a "regression formula", and the model is a "regression model." This terminology would also apply to our model of `height` in @sec-two-parameters. 
+-   Although terminology differs across academic fields, the most common term to describe a model like this is a "regression." We are "regressing" `age` on `party` in order to see if they are associated with each other. The formula above is a "regression formula", and the model is a "regression model." This terminology would also apply to our model of `height` in @sec-two-parameters.
 
-* The model in @sec-two-parameters is sometimes called "intercept-only" because the only (interesting) parameter is the intercept. Here we have a "two intercept" model because, instead of estimating an average for the whole population, we are estimating two averages.
+-   The model in @sec-two-parameters is sometimes called "intercept-only" because the only (interesting) parameter is the intercept. Here we have a "two intercept" model because, instead of estimating an average for the whole population, we are estimating two averages.
 
 ### Courage
 
@@ -468,8 +455,7 @@ knitr::include_graphics("other/images/Courage.jpg")
 
 Courage allows us to translate math to code.
 
-
-To get posterior distributions for our three parameters, we will again use `stan_glm()`, just as we did in @sec-two-parameters. 
+To get posterior distributions for our three parameters, we will again use `stan_glm()`, just as we did in @sec-two-parameters.
 
 ```{r}
 fit_1 <- stan_glm(age ~ party - 1, 
@@ -479,13 +465,13 @@ fit_1 <- stan_glm(age ~ party - 1,
                     refresh = 0)
 ```
 
-* The variable before the tilde, `age`, is our outcome. 
+-   The variable before the tilde, `age`, is our outcome.
 
-* The only explanatory variable is `party`. This variable has only two values, 'Democrat' and 'Republican'. 
+-   The only explanatory variable is `party`. This variable has only two values, 'Democrat' and 'Republican'.
 
-* Recall that our model is linear. Since we are using a linear model, the `family` we use will be `gaussian`.
+-   Recall that our model is linear. Since we are using a linear model, the `family` we use will be `gaussian`.
 
-* We have also added `-1` at the end of the equation, indicating that we do not want an intercept, which would otherwise be added by default. 
+-   We have also added `-1` at the end of the equation, indicating that we do not want an intercept, which would otherwise be added by default.
 
 The resulting output:
 
@@ -493,11 +479,9 @@ The resulting output:
 fit_1
 ```
 
-
 `partyDemocrat` corresponds to $\beta_1$, the average age of Democrats in the population. `partyRepublican` corresponds to $\beta_2$, the average age of Republicans in the population. Since we don't really care about the posterior distribution for $\sigma$, we won't discuss it here. Graphically:
 
 <!-- Lots to clean up about this plot! -->
-
 
 ```{r}
 fit_1 |> 
@@ -522,16 +506,15 @@ fit_1 |>
 
 The unknown parameters $\beta_1$ (partyDemocrat) and $\beta_2$ (partyRepublican) are still unknown. We can never know the true average age of all Democrats in the population. But we can calculate a posterior probability distribution for each parameter. Comments:
 
-* Democrats seem slightly older than Republicans. That was true in the sample and so, almost (but not quite!) by definition, it will be true in our the posterior probability distributions.
+-   Democrats seem slightly older than Republicans. That was true in the sample and so, almost (but not quite!) by definition, it will be true in our the posterior probability distributions.
 
-* Our estimate for the average age of Democrats in the population is much more precise than that for Republicans because we have five times as many Democrats as Republicans in our sample. A central lesson from @sec-one-parameter is that the more data you have related to a parameter, the narrower your posterior distribution will be.
+-   Our estimate for the average age of Democrats in the population is much more precise than that for Republicans because we have five times as many Democrats as Republicans in our sample. A central lesson from @sec-one-parameter is that the more data you have related to a parameter, the narrower your posterior distribution will be.
 
-* There is a great deal of overlap between the two distributions. Would we be surprised if, in truth, the average age of Republicans in the population was greater than that for Democrats? Not really. We don't have enough data to be sure either way.
+-   There is a great deal of overlap between the two distributions. Would we be surprised if, in truth, the average age of Republicans in the population was greater than that for Democrats? Not really. We don't have enough data to be sure either way.
 
-* The phrase "in the population" is doing a great deal of work because we have not said what, precisely, we mean by the "population." Is it the set of people on those commuter platforms on those days in 2012 when the experiment was done? Is it the set of people on all platforms, including ones never visited? Is it the set of all Boston commuters? All Massachusetts residents? All US residents? Does it include people today, or can we only draw inferences for 2012? We should explore these questions in every model we create.
+-   The phrase "in the population" is doing a great deal of work because we have not said what, precisely, we mean by the "population." Is it the set of people on those commuter platforms on those days in 2012 when the experiment was done? Is it the set of people on all platforms, including ones never visited? Is it the set of all Boston commuters? All Massachusetts residents? All US residents? Does it include people today, or can we only draw inferences for 2012? We should explore these questions in every model we create.
 
-* The parameters $\beta_1$ and $\beta_2$ can be interpreted in two ways. First, like all parameters, they are a part of the model. We need to estimate them. But, in many cases, we don't really care what the value of the parameter is. The exact value of $\sigma$, for example, does not really matter. Second, some parameters have a substantive interpretaion, as with $\beta_1$ and $\beta_2$ being the average ages in the population. But this will often not be the case! Fortunately, with such models, we can use functions like `posterior_epred()` and `posterior_predict()` to answer our questions.
-
+-   The parameters $\beta_1$ and $\beta_2$ can be interpreted in two ways. First, like all parameters, they are a part of the model. We need to estimate them. But, in many cases, we don't really care what the value of the parameter is. The exact value of $\sigma$, for example, does not really matter. Second, some parameters have a substantive interpretaion, as with $\beta_1$ and $\beta_2$ being the average ages in the population. But this will often not be the case! Fortunately, with such models, we can use functions like `posterior_epred()` and `posterior_predict()` to answer our questions.
 
 Consider a table which shows a sample of 8 individuals.
 
@@ -556,13 +539,11 @@ trains |>
 
 <!-- More extreme awkwardness. -->
 
-&nbsp;
+ 
 
-The fitted values are the same for all Republicans and for all Democrats, as the model produces one fitted value for each condition. This table shows how just a sample of 8 individuals captures a wide range of residuals, making it difficult to predict the age of a new individual. We can get a better picture of the unmodeled variation in our sample if we plot these three variables for all the individuals in our data. 
+The fitted values are the same for all Republicans and for all Democrats, as the model produces one fitted value for each condition. This table shows how just a sample of 8 individuals captures a wide range of residuals, making it difficult to predict the age of a new individual. We can get a better picture of the unmodeled variation in our sample if we plot these three variables for all the individuals in our data.
 
 The following three histograms show the actual outcomes, fitted values, and residuals of all people in `trains`:
-
-
 
 ```{r}
 outcome <- ch5 |> 
@@ -589,14 +570,13 @@ outcome + fitted + res +
   plot_annotation(title = "Decomposition of Height into Fitted Values and Residuals")
 ```
 
+The three plots are structured like our equation and table above. A value in the left plot is the sum of one value from the middle plot plus one from the right plot.
 
-The three plots are structured like our equation and table above. A value in the left plot is the sum of one value from the middle plot plus one from the right plot. 
+-   The actual age distribution looks like a normal distribution. It is centered around 43, and it has a standard deviation of about 12 years.
 
-* The actual age distribution looks like a normal distribution. It is centered around 43, and it has a standard deviation of about 12 years. 
+-   The middle plot for the fitted values shows only two adjacent spikes, which represent the estimates for Democrats and Republicans.
 
-* The middle plot for the fitted values shows only two adjacent spikes, which represent the estimates for Democrats and Republicans. 
-
-* Since the residuals plot represents the difference between the other two plots, its distribution looks like the first plot. 
+-   Since the residuals plot represents the difference between the other two plots, its distribution looks like the first plot.
 
 <!-- All unclear and would benefit from clean up. -->
 
@@ -612,12 +592,11 @@ knitr::include_graphics("other/images/Temperance.jpg")
 
 Recall the first questions with which we began this section:
 
-* What is the probability that, if a Democrat shows up at the train station, he will be over 50 years old? 
+-   What is the probability that, if a Democrat shows up at the train station, he will be over 50 years old?
 
 So far we have only tried our model on people from our data set whose real age we already knew. This is helpful to understand the model, but our ultimate goal is to understand more about the real world, about people we don't yet know much about. Temperance guides us to make meaningful predictions and to become aware of their known and unknown limitations.
 
-
-Start with a simple question, what are the chances that a random Democrat is over 50 years old? First, we create a tibble with the assumed input for our model. In our case the tibble has a variable named "party" which contains a single observation with the value "Democrat". This is a bit different than @sec-two-parameters. 
+Start with a simple question, what are the chances that a random Democrat is over 50 years old? First, we create a tibble with the assumed input for our model. In our case the tibble has a variable named "party" which contains a single observation with the value "Democrat". This is a bit different than @sec-two-parameters.
 
 ```{r}
 new_obs <- tibble(party = "Democrat")
@@ -625,7 +604,7 @@ new_obs <- tibble(party = "Democrat")
 
 <!-- Does this D_age work? If so, similar discussion should be used more broadly. Also discuss R_age. Even Person_age for a random person, an analysis which accounts for the mix of Rs and Ds in the sample/population. -->
 
-Use `posterior_predict()` to create draws from the posterior for this scenario. Note that we have a new posterior distribution under consideration here. The unknown parameter, call it $D_{age}$, is the age of a Democrat. This could be the age of a randomly selected Democrat from the population or of the next Democrat we meet or of the next Democrat we interview on the train platform. The definition of "population" determines the appropriate interpretation. Yet, regardless, $D_{age}$ is an unknown parameter. But it is not one --- like $\beta_1$,  $\beta_2$, or $\sigma$ --- for which we have already created a posterior probability distribution. That is why we need `posterior_predict()`.
+Use `posterior_predict()` to create draws from the posterior for this scenario. Note that we have a new posterior distribution under consideration here. The unknown parameter, call it $D_{age}$, is the age of a Democrat. This could be the age of a randomly selected Democrat from the population or of the next Democrat we meet or of the next Democrat we interview on the train platform. The definition of "population" determines the appropriate interpretation. Yet, regardless, $D_{age}$ is an unknown parameter. But it is not one --- like $\beta_1$, $\beta_2$, or $\sigma$ --- for which we have already created a posterior probability distribution. That is why we need `posterior_predict()`.
 
 `posterior_predict()` takes two arguments: the model for which the simulations should be run, and a tibble indicating for which and how many parameters we want to run these simulations. In this case, the model is the one from Courage and the tibble is the one we just created.
 
@@ -636,10 +615,7 @@ pp <- posterior_predict(fit_1, newdata = new_obs) |>
 head(pp, 10)
 ```
 
-The result are draws from the posterior distribution of the age of a Democrat. It is important to understand that this is not a concrete person from the `trains` dataset - the algorithm in `posterior_predict()` simply uses the existing data from  `trains` to estimate this posterior distribution. 
-
-
-
+The result are draws from the posterior distribution of the age of a Democrat. It is important to understand that this is not a concrete person from the `trains` dataset - the algorithm in `posterior_predict()` simply uses the existing data from `trains` to estimate this posterior distribution.
 
 ```{r}
 pp |> 
@@ -663,7 +639,7 @@ sum(pp$`1` > 50) / nrow(pp)
 
 Recall the second question:
 
-* In a group of three Democrats and three Republicans, what will the age difference be between the oldest Democrat and the youngest Republican? 
+-   In a group of three Democrats and three Republicans, what will the age difference be between the oldest Democrat and the youngest Republican?
 
 As before we start by creating a tibble with the assumed input. Note that the name of the column ("party") and the observations ("Democrat", "Republican") must always be *exactly* as they are in the original data set. This tibble as well as our model can then be used as arguments for `posterior_predict()`:
 
@@ -682,7 +658,6 @@ We have 6 columns: one for each person. `posterior_predict()` does not name the 
 <!-- DK: I am unsure about this code. Would c() in place of c_across() work as well? -->
 
 <!-- DK: This works without mutate(all...), but it takes much more time than it should because the the pp object still has every column as a ppd object, even after as_tibble(). The rest of the code still works, but takes a 100x longer than it should. Maybe that is a better approach for handling the ppd problem? Just ignore it and take the time hit? -->
-
 
 ```{r}
 pp <- posterior_predict(fit_1, newdata = newobs) |>
@@ -731,8 +706,7 @@ In words, we would expect the oldest Democrat to be about 22 years older than th
 
 Instead of parameterizing this model without an intercept, we could have used one. In that case, the math would be:
 
-$$ y_i = \beta_0  + \beta_1 democratic_i + \epsilon_i$$
-The interpretations of the parameters are different from the prior model. $\beta_0$ is now the average age of Republicans. This is the same interpretation as $\beta_1$ in the original set up. $\beta_1$ is now the difference between the the average age of Republicans and that of Democrats. 
+$$ y_i = \beta_0  + \beta_1 democratic_i + \epsilon_i$$ The interpretations of the parameters are different from the prior model. $\beta_0$ is now the average age of Republicans. This is the same interpretation as $\beta_1$ in the original set up. $\beta_1$ is now the difference between the the average age of Republicans and that of Democrats.
 
 To fit this model, we use the exact same code as before, except without the `-1` in the `formula` argument.
 
@@ -749,11 +723,11 @@ Little else about the models will be different. They will have the same fitted v
 
 <!-- Need more here? -->
 
-## att_end ~ treatment
+## att_end \~ treatment
 
 Above, we created a predictive model: with someone's party affiliation, we can make a better guess as to what their age is than we could have in the absence of information about their party. There was nothing causal about that model. Changing someone's party registration can not change their age. In this example, we build a causal model. Consider these two questions:
 
-*What is the average treatment effect, of exposing people to Spanish-speakers, on their attitudes toward immigration?* 
+*What is the average treatment effect, of exposing people to Spanish-speakers, on their attitudes toward immigration?*
 
 *What is the largest causal effect which still has a 1 in 10 chance of occurring?*
 
@@ -770,7 +744,7 @@ Wisdom requires the creation of a Preceptor Table, an examination of our data, a
 
 Let's take a look at our question below:
 
-*What is the average treatment effect, of exposing people to Spanish-speakers, on their attitudes toward immigration?* 
+*What is the average treatment effect, of exposing people to Spanish-speakers, on their attitudes toward immigration?*
 
 *What is the largest causal effect which still has a 1 in 10 chance of occurring?*
 
@@ -785,6 +759,7 @@ Finally, do we have a treatment? Yes, treatments applies to this situation with 
 Now we can create our Preceptor Table:
 
 ```{r}
+#| echo: false
 tibble(ID = c("1", "2", "...", "10", "11",
                   "...", "20", "21", "...", "N"),
             treatment = c("Yes", "?", "No", "Yes", "Yes", "No", "?", "No", "...", "?"),
@@ -809,7 +784,7 @@ tibble(ID = c("1", "2", "...", "10", "11",
   tab_spanner(label = "Outcomes", columns = c(attitude_after_control, attitude_after_treated))
 ```
 
-Recall: a Preceptor Table is table with rows and columns such that, if there is no missing data, all our questions are easy to answer. To answer questions — like “What is the average treatment effect, of exposing people to Spanish-speakers, on their attitudes toward immigration? and What is the largest causal effect which still has a 1 in 10 chance of occurring?” — we need a row for every individual at the station.
+Recall: a Preceptor Table is table with rows and columns such that, if there is no missing data, all our questions are easy to answer. To answer questions --- like "What is the average treatment effect, of exposing people to Spanish-speakers, on their attitudes toward immigration? and What is the largest causal effect which still has a 1 in 10 chance of occurring?" --- we need a row for every individual at the station.
 
 *Always explore your data.* Recall the discussion from @sec-rubin-causal-model. @enos2014 randomly placed Spanish-speaking confederates on nine train platforms around Boston, Massachusetts. The data that we want to analyze consists of the age and party of each individual on these train platforms based on our variables in our Preceptor Table. These reactions were measured through changes in answers to three survey questions. Load the necessary libraries and look at the data.
 
@@ -824,7 +799,7 @@ trains |>
   select(att_end, treatment)
 ```
 
-As specified in the Preceptor Table we only care about `treatment` specifies whether the respondent was given the treatment of being exposed to Spanish-speakers in the train station and `att_end` tell us about the respondent’s attitude toward immigration after the experiment.
+As specified in the Preceptor Table we only care about `treatment` specifies whether the respondent was given the treatment of being exposed to Spanish-speakers in the train station and `att_end` tell us about the respondent's attitude toward immigration after the experiment.
 
 ```{r}
 trains |>
@@ -834,11 +809,12 @@ trains |>
 
 `summary()` shows us what the different values of `att_end` and `treatment` are because it is a factor. The range for `att_end` seems reasonable. Recall that participants were asked three questions about immigration issues, each of which allowed for an answer indicated strength of agreement on a scale form 1 to 5, with higher values indicating more agreement with conservative viewpoints.
 
-Now let's take a look at the **assumption of validity** for our data and Preceptor Table. There is no **truth** here. The data is real enough, but you created the Preceptor Table. Whether or not there is a population from which you can assume both the data and the Preceptor Table might have been drawn is not a TRUE/FALSE question. The Preceptor Table is all US train commuters today. However, the data we have involves train commuters in the Boston area in 2012. In addition, is our data from the Preceptor Table accurate? The validity may not hold as the treatment is not evenly split or completely randomized. While this  assumption can prove validity wrong, overall, the assumption of validity seems reasonable. `att_end` and `treatment` are similar enough between our data and The Preceptor Table that we can “stack” them on top of each other. We can assume that both are drawn from the same population.
+Now let's take a look at the **assumption of validity** for our data and Preceptor Table. There is no **truth** here. The data is real enough, but you created the Preceptor Table. Whether or not there is a population from which you can assume both the data and the Preceptor Table might have been drawn is not a TRUE/FALSE question. The Preceptor Table is all US train commuters today. However, the data we have involves train commuters in the Boston area in 2012. In addition, is our data from the Preceptor Table accurate? The validity may not hold as the treatment is not evenly split or completely randomized. While this assumption can prove validity wrong, overall, the assumption of validity seems reasonable. `att_end` and `treatment` are similar enough between our data and The Preceptor Table that we can "stack" them on top of each other. We can assume that both are drawn from the same population.
 
-With our assumption of validity proving to be reasonably accurate, we can now create our Population Table. We can make a Population Table with our Preceptor Table and other data based on our assumptions that we have made.With the assumption of validity proving to be reasonable we are able to construct a Population Table because we have been able to confirm that our rows in the Preceptor Table and data are similar. 
+With our assumption of validity proving to be reasonably accurate, we can now create our Population Table. We can make a Population Table with our Preceptor Table and other data based on our assumptions that we have made. With the assumption of validity proving to be reasonable we are able to construct a Population Table because we have been able to confirm that our rows in the Preceptor Table and data are similar.
 
 ```{r}
+#| echo: false
 tibble(source = c("Other", "Other", "...", 
                   "Data", "Data", "...",
                   "Other", "Other", "...",
@@ -885,43 +861,39 @@ Our Preceptor Table rows are chronologically ordered. The "other" rows are our g
 knitr::include_graphics("other/images/Justice.jpg")
 ```
 
-The four concerns of Justice in a data science project remain the same: stability, representativeness, unconfoundedness and the mathematical structure of the model. 
+The four concerns of Justice in a data science project remain the same: stability, representativeness, unconfoundedness and the mathematical structure of the model.
 
 Consider the stability of our model for the relationship between `att_end` and `treatment` between 2012 and 2023. Is this relationship from 2012, four years before Donald Trump's election as president, still the same? While we might not know for sure, we have to consider this in order to continue and make assumptions with our data. For our purposes, we will consider the relationship to be stable. Even though we know that there may have been some changes, we will consider the model to be the same in both years.
 
 Let's now once again consider whether the data from 2012 train commuters around Boston is representative of 2012 train commuters in the US. In our last model, we discussed the issue about how Boston may be different from other cities and therefore not representative of the US, and we will now consider the issue of random sampling that may lead to representativeness issues.
 
-Let's say that even though Boston is different from other US cities, we considered Boston to be perfectly representative of the US. Great, but this 2012 data could still not be representative. This is because there could be bias within those who are chosen to give the survey, in that the commuters who are approached and receive the surveys may not be random or representative. What if the individuals giving out the surveys were younger and also tended to choose people to approach with a survey that were similar in age to them? A scenario like this could end up overestimating younger train commuters in the population, which could influence our answers to any of our questions. Specifically, when considering the relationship between `att_end` and `treatment`, this could influence the results of the model because younger individuals may have similar attitudes on immigration. 
+Let's say that even though Boston is different from other US cities, we considered Boston to be perfectly representative of the US. Great, but this 2012 data could still not be representative. This is because there could be bias within those who are chosen to give the survey, in that the commuters who are approached and receive the surveys may not be random or representative. What if the individuals giving out the surveys were younger and also tended to choose people to approach with a survey that were similar in age to them? A scenario like this could end up overestimating younger train commuters in the population, which could influence our answers to any of our questions. Specifically, when considering the relationship between `att_end` and `treatment`, this could influence the results of the model because younger individuals may have similar attitudes on immigration.
 
 <!-- We need to add Preceptor Tables here and in Wisdom. The below one is wrong because it does not show two potential outcomes.  Should use proper potential outcome notation, as introduced in chapter 4. -->
 
-Now, let's determine whether our DGM will be linear or logistic. Since our outcome variable `att_end` is a continuous variable since it has a range of possible values, we will use a linear model. 
+Now, let's determine whether our DGM will be linear or logistic. Since our outcome variable `att_end` is a continuous variable since it has a range of possible values, we will use a linear model.
 
 The math for this model is exactly the same as the math for the predictive model in the first part of this chapter, although we change the notation a bit for clarity.
 
 $$ y_i = \beta_1 treatment_i + \beta_2 control_i + \epsilon_i$$
 
-where \n
-$$treatment_i, control_i \in \{0,1\}$$ \n
-$$treatment_i +  control_i = 1$$ \n
-$$\epsilon_i \sim N(0, \sigma^2)$$  
+where \n $$treatment_i, control_i \in \{0,1\}$$ \n $$treatment_i +  control_i = 1$$ \n $$\epsilon_i \sim N(0, \sigma^2)$$
 
 <!-- DK: make these sections much more similar across the chapters, always separating out the data and the paramters -->
 
-Nothing has changed, except for the meaning of the data items and the interpretations of the parameters. 
+Nothing has changed, except for the meaning of the data items and the interpretations of the parameters.
 
-On the left-hand side we still have the outcome, $y_i$, however in this case, this is a person's attitude toward immigration after the experiment is complete.  $y_i$ takes on integer values between 3 and 15 inclusive.
+On the left-hand side we still have the outcome, $y_i$, however in this case, this is a person's attitude toward immigration after the experiment is complete. $y_i$ takes on integer values between 3 and 15 inclusive.
 
-On the right-hand side, the part contained in the model will consist of the terms $\beta_1 treatment_i$ and $\beta_2 control_i$. These two terms stand for Treated and Control and as before, each term consists of a parameter and a data point.  $\beta_1$ is the average attitude toward immigration for treated individuals --- those exposed to Spanish-speakers ---   in the population. $\beta_2$ is the average attitude toward immigration for control individuals --- those not exposed to Spanish-speakers ---  in the population.These are both our parameters. The $x$'s are our explanatory variables and take the values 1 or 0. If person $i$ is Treated, $treatment_i = 1$ and $control_i = 0$. If person $i$ is Control, $treatment_i = 0$ and $control_i = 1$. In other words, these are binary variables and are mutually exclusive -- if you are Treated, you cannot also be Control.
+On the right-hand side, the part contained in the model will consist of the terms $\beta_1 treatment_i$ and $\beta_2 control_i$. These two terms stand for Treated and Control and as before, each term consists of a parameter and a data point. $\beta_1$ is the average attitude toward immigration for treated individuals --- those exposed to Spanish-speakers --- in the population. $\beta_2$ is the average attitude toward immigration for control individuals --- those not exposed to Spanish-speakers --- in the population.These are both our parameters. The $x$'s are our explanatory variables and take the values 1 or 0. If person $i$ is Treated, $treatment_i = 1$ and $control_i = 0$. If person $i$ is Control, $treatment_i = 0$ and $control_i = 1$. In other words, these are binary variables and are mutually exclusive -- if you are Treated, you cannot also be Control.
 
-The last part, $\epsilon_i$ (“epsilon”), represents the part that is not explained by our model and is called the error term. It is simply the difference between the outcome and our model predictions. In our particular case, this includes all factors that have an influence on someone's attitude toward immigration but are not explained by treatment status. We assume that this error follows a normal distribution with an expected value of 0.
+The last part, $\epsilon_i$ ("epsilon"), represents the part that is not explained by our model and is called the error term. It is simply the difference between the outcome and our model predictions. In our particular case, this includes all factors that have an influence on someone's attitude toward immigration but are not explained by treatment status. We assume that this error follows a normal distribution with an expected value of 0.
 
-* Note that the formula applies to everyone in the population, not just the 115 people for whom we have data. The index $i$ does not just go from 1 through 115. It goes from 1 through $N$, where $N$ is the number of individuals in the population. Conceptually, everyone has an `att_end` under treatment and under control. 
+-   Note that the formula applies to everyone in the population, not just the 115 people for whom we have data. The index $i$ does not just go from 1 through 115. It goes from 1 through $N$, where $N$ is the number of individuals in the population. Conceptually, everyone has an `att_end` under treatment and under control.
 
 <!-- DK: Above is not overly clear. -->
 
-* The small $i$'s are an index for the data set. It is equivalent to the "ID" column in our Preceptor Table and simply states that the outcome for person $i$ is explained by the predictor variables ($treatment$ and $control$) for person $i$, along with an error term. 
-
+-   The small $i$'s are an index for the data set. It is equivalent to the "ID" column in our Preceptor Table and simply states that the outcome for person $i$ is explained by the predictor variables ($treatment$ and $control$) for person $i$, along with an error term.
 
 ### Courage
 
@@ -931,7 +903,7 @@ The last part, $\epsilon_i$ (“epsilon”), represents the part that is not exp
 knitr::include_graphics("other/images/Courage.jpg")
 ```
 
-With Justice satisfied, we gather our Courage and fit the model. Note that, except for the change in variable names, the code is exactly the same as it was above, in our predictive model for age. *Predictive models and causal models use the same math and the same code.* The differences, and they are very important, lie in the interpretation of the results, not in their creation. 
+With Justice satisfied, we gather our Courage and fit the model. Note that, except for the change in variable names, the code is exactly the same as it was above, in our predictive model for age. *Predictive models and causal models use the same math and the same code.* The differences, and they are very important, lie in the interpretation of the results, not in their creation.
 
 ```{r}
 fit_2 <- stan_glm(att_end ~ treatment - 1, 
@@ -944,15 +916,15 @@ fit_2
 
 Note that once again, since we are using a linear model, we set the `family` argument to "gaussian".
 
-`treatmentTreated` corresponds to $\beta_1$. As always, R has, behind the scenes, estimated the entire posterior probability distribution for $\beta_1$. We will graph that distribution in the next section. But the basic print method for these objects can't show the entire distribution, so it gives us summary numbers: the median and the MAD SD. Speaking roughly, we would expect about 95% of the values in the posterior to be within two MAD SD's of the median. In other words, we are 95% confident that the true, but unknowable, average attitude toward immigration among the Treated in the population to be between 9.2 and 10.8. 
+`treatmentTreated` corresponds to $\beta_1$. As always, R has, behind the scenes, estimated the entire posterior probability distribution for $\beta_1$. We will graph that distribution in the next section. But the basic print method for these objects can't show the entire distribution, so it gives us summary numbers: the median and the MAD SD. Speaking roughly, we would expect about 95% of the values in the posterior to be within two MAD SD's of the median. In other words, we are 95% confident that the true, but unknowable, average attitude toward immigration among the Treated in the population to be between 9.2 and 10.8.
 
-`treatmentControl` corresponds to $\beta_2$. The same analysis applies. We are about 95% confident that the true value for the average attitude toward immigration for Control in the population is between 7.9 and 9.1. 
+`treatmentControl` corresponds to $\beta_2$. The same analysis applies. We are about 95% confident that the true value for the average attitude toward immigration for Control in the population is between 7.9 and 9.1.
 
 Up until now, we have used the Bayesian interpretation of "confidence interval." This is also the intuitive meaning which, outside of academia, is almost universal. There is a truth out there. We don't know, and sometimes can't know, the truth. A confidence interval, and its associated confidence level, tells us how likely the truth is to lie within a specific range. If your boss asks you for a confidence interval, she almost certainly is using this interpretation.
 
 But, in contemporary academic research, the phrase "confidence interval" is usually given a "Frequentist" interpretation. (The biggest divide in statistics is between Bayesians and Frequentist interpretations. The Frequentist approach, also known as "Classical" statistics, has been dominant for 100 years. Its power is fading, which is why this textbook uses the Bayesian approach.) For a Frequentist, a 95% confidence interval means that, if we were to apply the procedure we used in an infinite number of future situations like this, we would expect the true value to fall within the calculated confidence intervals 95% of the time. In academia, a distinction is sometimes made between *confidence intervals* (which use the Frequentist interpretation) and *credible intervals* (which use the Bayesian interpretation). We won't worry about that difference in this *Primer*.
 
-Let's look at the full posteriors for both $\beta_1$ and $\beta_2$. 
+Let's look at the full posteriors for both $\beta_1$ and $\beta_2$.
 
 <!-- DK: Change Parameter levels to something nice. -->
 
@@ -978,8 +950,7 @@ fit_2 |>
 
 It appears that the affect of the treatment is to change people's attitudes to be more conservative about immigration issues. Which is somewhat surprising!
 
-We can decompose the the dependent variable, `att_end` into two parts: the fitted values and the residuals. There are only two possible fitted values, one for the Treated and one for the Control. The residuals, as always, are simply the difference between the outcomes and the fitted values. 
-
+We can decompose the the dependent variable, `att_end` into two parts: the fitted values and the residuals. There are only two possible fitted values, one for the Treated and one for the Control. The residuals, as always, are simply the difference between the outcomes and the fitted values.
 
 ```{r}
 #| echo: false
@@ -1022,7 +993,7 @@ knitr::include_graphics("other/images/Temperance.jpg")
 
 Recall the first question with which we began this section:
 
-* What is the average treatment effect, of exposing people to Spanish-speakers, on their attitudes toward immigration? 
+-   What is the average treatment effect, of exposing people to Spanish-speakers, on their attitudes toward immigration?
 
 <!-- DK: Below is also not clear. -->
 
@@ -1074,15 +1045,13 @@ pe |>
     theme_classic()
 ```
 
-
-
 <!-- DK: Much more discussion. Explain what a test might be used for in this situation and why we should reject testing. -->
 
-Our second question: 
+Our second question:
 
-* What is the largest effect size which still has a 1 in 10 chance of occurring? 
+-   What is the largest effect size which still has a 1 in 10 chance of occurring?
 
-Create a tibble which we can pass to `posterior_predict()`. The variables in the tibble which will be passed in as `newdata`. Fortunately, the tibble we created above is just what we need for this question also. 
+Create a tibble which we can pass to `posterior_predict()`. The variables in the tibble which will be passed in as `newdata`. Fortunately, the tibble we created above is just what we need for this question also.
 
 Consider the result of `posterior_predict()` for two people, one treated and one control. Take the difference.
 
@@ -1112,10 +1081,9 @@ pp |>
     theme_classic()
 ```
 
-
 In this case, we are looking at the distribution of the treatment effect for a single individual. This is very different than the *average* treatment effect. In particular, it is much more variable. We are looking at one row in the Preceptor Table. For a single individual, `att_end` can be anywhere from 3 to 15, both under treatment and under control. The causal effect --- the difference between the two potential outcomes can, in theory, be anywhere from -12 to +12. Such extreme values are rare, but not impossible.
 
-The question, however, was interested in the value at the 90th percentile. 
+The question, however, was interested in the value at the 90th percentile.
 
 ```{r}
 quantile(pp$te, prob = 0.9)
@@ -1123,21 +1091,130 @@ quantile(pp$te, prob = 0.9)
 
 We would not expect a treatment effect of this magnitude to be common, but, at the same time, effects this big and bigger will occur about 10% of the time.
 
-## income ~ age
+## income \~ age
 
 So far, we have only created models in which the predictor variable is discrete, with two possible values. `party` is either "Democrat" or "Republican". `treatment` is either "Treated" or "Control". Often times, however, the predictor variable will be continuous. Fortunately, the exact same approach works in this case. Consider:
 
 *What would you expect the income to be for a 40-year old?*
 
+### Wisdom
+
+```{r}
+#| echo: false
+knitr::include_graphics("other/images/Wisdom.jpg")
+```
+
+Wisdom requires the creation of a Preceptor Table, an examination of our data, and a determination, using the concept of "validity," as to whether or not we can (reasonably!) assume that the two come from the same *population*.
+
+Let's take a look at our question below:
+
+*What would you expect the income to be for a 40-year old?*
+
+First, we need to take a look at the model of our question. Do we have a **causal** or **predictive** model? In our question above we have a predictive model as we only have one outcome: `income` based on our predictor: `age`. A good way at looking at this is with a Preceptor Table, as seen below. Our Preceptor Table only contains one possible outcome: `income`, which means that we have a **predictive** model at hand.
+
+Second, we need to evaluate what our units are for our situation. When taking a look at the Preceptor Table below: we can view that all our ID's are based on income in which the units would be dollars. Our units for this scenario would be the dollars as we are concerned with dollars at the station for 40-year olds.
+
+Next, when taking a look at the Preceptor Table we can view that we only have one outcome based on each individual and covariate of age. Our outcome of income changes based on each individual and age that is with them.
+
+Finally, do we have a treatment? No, treatments will only apply to the situations with causal models, however, we do have covariates which in this case is our age. Our covariate is age in this situation because it plays a huge role in being a predictor for our outcome for each separate ID.
+
+Now we can create our Preceptor Table:
+
+```{r}
+#| echo: false
+tibble(ID = c("1", "2", "...", "10", "11",
+              "...", "20", "21", "...", "N"),
+       age = c("31", "?", "...", "58", "?", 
+               "...", "?", "49", "...", "?"),
+       income = c("150000", "?", "...", "50000", "?", 
+                  "...", "?", "35000", "...", "?")) |>
+  
+  gt() |>
+  tab_header(title = "Preceptor Table") |> 
+  cols_label(ID = md("ID"),
+             age = md("Age"),
+             income = md("Income")) |>
+  tab_style(cell_borders(sides = "right"),
+            location = cells_body(columns = c(ID))) |>
+  tab_style(style = cell_text(align = "left", v_align = "middle", size = "large"), 
+            locations = cells_column_labels(columns = c(ID))) |>
+  cols_align(align = "center", columns = everything()) |>
+  cols_align(align = "left", columns = c(ID)) |>
+  fmt_markdown(columns = everything()) |>
+  tab_spanner(label = "Predictor", columns = c(age)) |>
+  tab_spanner(label = "Outcome", columns = c(income))
+```
+
+Recall: a Preceptor Table is table with rows and columns such that, if there is no missing data, all our questions are easy to answer. To answer questions — like “What would you expect the income to be for a 40-year old?” — we need a row for every individual at the station.
+
+*Always explore your data.* Recall the discussion from @sec-rubin-causal-model. @enos2014 randomly placed Spanish-speaking confederates on nine train platforms around Boston, Massachusetts. The data that we want to analyze consists of the age and party of each individual on these train platforms based on our variables in our Preceptor Table. These reactions were measured through changes in answers to three survey questions. Load the necessary libraries and look at the data.
+
+```{r}
+library(primer.data)
+library(rstanarm)
+library(tidyverse)
+```
+
+```{r}
+trains |>
+  select(age, income)
+```
+
+As specified in the Preceptor Table we only care about `age` is the age of the respondent and `income` is the income of the respondent.
+
+```{r}
+trains |>
+  select(age, income) |>
+  summary()
+```
+
+`summary()` shows us what the different values of `age` and `income` are because it is a factor. The range for `age` seems reasonable. Recall that participants were asked three questions about immigration issues, each of which allowed for an answer indicated strength of agreement on a scale form 1 to 5, with higher values indicating more agreement with conservative viewpoints.
+
+Now let's take a look at the **assumption of validity** for our data and Preceptor Table. There is no **truth** here. The data is real enough, but you created the Preceptor Table. Whether or not there is a population from which you can assume both the data and the Preceptor Table might have been drawn is not a TRUE/FALSE question. The Preceptor Table is all US train commuters today. However, the data we have involves train commuters in the Boston area in 2012. In addition, is our data from the Preceptor Table accurate? The data has been collected from filling out surveys about age without checking a driver's license. The data has been collected from filling out surveys about income without cross-checking with the government database. Finally, the privacy of a train station differs from filling out surveys at home. While all of these questions and assumptions prove validity wrong, overall, the assumption of validity seems reasonable. `age` and `income` are similar enough between our data and The Preceptor Table that we can “stack” them on top of each other. We can assume that both are drawn from the same population.
+
+With our **assumption of validity** proving to be reasonably accurate, we can now create our Population Table. We can make a Population Table with our Preceptor Table and other data based on our assumptions that we have made. With the assumption of validity proving to be reasonable we are able to construct a Population Table because we have been able to confirm that our rows in the Preceptor Table and data are similar. 
+
+```{r}
+#| echo: false
+tibble(source = c("Other", "Other", 
+                  "Data", "Data", "...",
+                  "Other", "Other", "...",
+                  "Preceptor Table", "Preceptor Table", "...",
+                  "Other", "Other"),
+       age = c("?", "?",
+                "43", "52", "...",
+               "?", "?", "...",
+               "45", "65", "...",
+               "?", "?"),
+       income = c("?", "?",
+                  "150000", "50000", "...",
+                 "?", "?", "...",
+                 "45000", "15000", "...",
+                 "?", "?")) |>
+  
+  gt() |>
+  tab_header(title = "Population Table") |> 
+  cols_label(source = md("Source"),
+             age = md("Age"),
+             income = md("Income")) |>
+  tab_style(cell_borders(sides = "right"),
+            location = cells_body(columns = c(source))) |>
+  tab_style(style = cell_text(align = "left", v_align = "middle", size = "large"), 
+            locations = cells_column_labels(columns = c(source))) |>
+  cols_align(align = "center", columns = everything()) |>
+  cols_align(align = "left", columns = c(source)) |>
+  fmt_markdown(columns = everything())  
+```
+
+Our Preceptor Table rows are chronologically ordered. The "other" rows are our greater population for which we are making assumptions --- this is why the year at the start is earlier than our data and the year at the end is later than our Preceptor Table. This shows the more expansive population about which we are making inferences.
+
 ### Justice
 
 Once again, in Justice, we must consider stability, representativeness, unconfoundedness, and the data generating mechanism.
 
-
-
 Consider the stability of our model and if we believe that our relationship between age and income has changed between 2012 and now. Once again, let's consider inflation and how that could impact income. If incomes were to increase at the rate of inflation, then the income distribution would be different than that of 2012. However, wages don't tend to change as quickly as inflation does, so they likely did not change significantly and we can consider this model to be stable.
 
-Next, let's consider another issue that we may have with representativeness. What if we were now to assume that Boston train commuters are perfectly representative of US train commuters AND those who were approached to respond to the survey were also random? Even if this were true, we could still not assume representativeness because those who actually complete and submit the survey are not random. Instead of having more young people chosen to respond by those handing out surveys like we discussed in our last model, what if were to assume that when the surveys are handed out randomly, younger people tended to fill out and submit them more than those who are older? Well, this would still skew the age distribution and overestimate younger people in the population, and if younger people also tend to have a lower income than older people, this could also alter our answers to our current questions. 
+Next, let's consider another issue that we may have with representativeness. What if we were now to assume that Boston train commuters are perfectly representative of US train commuters AND those who were approached to respond to the survey were also random? Even if this were true, we could still not assume representativeness because those who actually complete and submit the survey are not random. Instead of having more young people chosen to respond by those handing out surveys like we discussed in our last model, what if were to assume that when the surveys are handed out randomly, younger people tended to fill out and submit them more than those who are older? Well, this would still skew the age distribution and overestimate younger people in the population, and if younger people also tend to have a lower income than older people, this could also alter our answers to our current questions.
 
 If we had reason to believe this is true, one way that we could fix this issue of representativeness is to alter our population to be train commuters in the US who would respond to the survey. In doing so, our population would then accommodate for the skewed age distribution under the assumption that younger individuals tend to respond to surveys at higher rates than older people.
 
@@ -1155,9 +1232,7 @@ $$y_i = \beta_0  + \beta_1 age_i + \epsilon_i$$
 
 When comparing two people (persons 1 and 2), the first one year older than the second, $\beta_1$ is the expected difference in their incomes. The algebra is simple. Start with the two individuals.
 
-$$y_1 = \beta_0  + \beta_1 age_1$$
-$$y_2 = \beta_0  + \beta_1 age_2$$
-We want the difference between them, so we subtract the second from the first, performing that subtraction on both sides of the equals sign.
+$$y_1 = \beta_0  + \beta_1 age_1$$ $$y_2 = \beta_0  + \beta_1 age_2$$ We want the difference between them, so we subtract the second from the first, performing that subtraction on both sides of the equals sign.
 
 $$y_1 - y_2 = \beta_0  + \beta_1 age_1 - \beta_0 - \beta_1 age_2\\
 y_1 - y_2 = \beta_1 age_1 - \beta_1 age_2\\
@@ -1165,15 +1240,13 @@ y_1 - y_2 = \beta_1 (age_1 - age_2)$$
 
 So, if person 1 is one year older than person 2, we have:
 
-
 $$y_1 - y_2 = \beta_1 (age_1 - age_2)\\
 y_1 - y_2 = \beta_1 (1)\\
 y_1 - y_2 = \beta_1$$
 
 The algebra demonstrates that $\beta_1$ is the same for all ages. The difference in expected income between two people aged 23 and 24 is the same as the difference between two people aged 80 and 81. Is that plausible? Maybe. *The algebra does not lie.* When we create a model like this, this is the assumption we are making.
 
-Note how careful we are not to imply that increasing age by one year "causes" an increase in income. That is nonsense! *No causation without manipulation.* Since it is impossible to change someone's age, there is only one potential outcome. With only one potential outcome, a causal effect is not defined. 
-
+Note how careful we are not to imply that increasing age by one year "causes" an increase in income. That is nonsense! *No causation without manipulation.* Since it is impossible to change someone's age, there is only one potential outcome. With only one potential outcome, a causal effect is not defined.
 
 ### Courage
 
@@ -1181,7 +1254,7 @@ Note how careful we are not to imply that increasing age by one year "causes" an
 #| echo: false
 #| fig.cap: Courage
 knitr::include_graphics("other/images/Courage.jpg")
-``` 
+```
 
 The use of `stan_glm()` is the same as usual.
 
@@ -1194,17 +1267,17 @@ fit_3 <- stan_glm(income ~ age,
 print(fit_3, details = FALSE)
 ```
 
-*When comparing two individuals, one 30 years old and one 40, we expect the older to earn about $9,000 more. But we are far from certain: the 95% confidence interval ranges from -$3,000 to $20,000.*
+*When comparing two individuals, one 30 years old and one 40, we expect the older to earn about \$9,000 more. But we are far from certain: the 95% confidence interval ranges from -\$3,000 to \$20,000.*
 
-The above is a good summary of the models. 
+The above is a good summary of the models.
 
-* It is brief! No one wants to listen to too much of your prattle. One sentence gives a number of interest. The second sentence provides a confidence interval. 
+-   It is brief! No one wants to listen to too much of your prattle. One sentence gives a number of interest. The second sentence provides a confidence interval.
 
-* It rounds appropriately. No one wants to hear a bunch of decimals. Use sensible units. 
+-   It rounds appropriately. No one wants to hear a bunch of decimals. Use sensible units.
 
-* It does not just blindly repeat numbers in the printed display. A one year difference in age, which is associated with a $900 difference in income, is awkward. (We think.) A decade comparison is more sensible. 
+-   It does not just blindly repeat numbers in the printed display. A one year difference in age, which is associated with a \$900 difference in income, is awkward. (We think.) A decade comparison is more sensible.
 
-* "When comparing" is a great phrase to start the summary of any non-causal model. Avoid language like "associated with" or "leads to" or "implies" or anything which even hints at a causal claim. 
+-   "When comparing" is a great phrase to start the summary of any non-causal model. Avoid language like "associated with" or "leads to" or "implies" or anything which even hints at a causal claim.
 
 Consider our usual decomposition of the outcome into two parts: the model and the error term.
 
@@ -1242,7 +1315,6 @@ There are scores of different fitted values. Indeed, there are a greater number 
 
 <!-- MM: Agree, some discussion could possibly be one earlier with residuals and predicted values and reinforced throughout -->
 
-
 ### Temperance
 
 ```{r}
@@ -1268,7 +1340,6 @@ pe
 
 Plotting is the same as always.
 
-
 ```{r}
 pe |> 
   ggplot(aes(x = `1`)) +
@@ -1285,29 +1356,142 @@ pe |>
 
 <!-- More discussion! -->
 
-
-## liberal ~ income
+## liberal \~ income
 
 So far in this chapter, we have only considered *continuous* outcome variables. `age`, `att_end` and `income` all take on a variety of values. None of them are, truly, continuous, of course. `age` is only reported as an integer value. `att_end` can only, by definition, take on 13 distinct values. However, from a modeling perspective, what matters is that they have more than 2 possible values.
 
 `liberal`, however, only takes on two values: TRUE and FALSE. In order to model it, we must use the `binomial` family. We begin, as always, with some questions:
 
+*Among all people who have an income \$100,000, what proportion are liberal?*
+
+*Assume we have a group of eight people, two of whom make \$100,000, two \$200,000, two \$300,000 and two \$400,000. How many will be liberal?*
+
+### Wisdom
+
+```{r}
+#| echo: false
+knitr::include_graphics("other/images/Wisdom.jpg")
+```
+
+Wisdom requires the creation of a Preceptor Table, an examination of our data, and a determination, using the concept of "validity," as to whether or not we can (reasonably!) assume that the two come from the same *population*.
+Let's take a look at our question below:
+
 *Among all people who have an income $100,000, what proportion are liberal?*
 
 *Assume we have a group of eight people, two of whom make $100,000, two $200,000, two $300,000 and two $400,000. How many will be liberal?*
 
+First, we need to take a look at the model of our question. Do we have a **causal** or **predictive** model? In our question above we have a causal model as we multiple outcomes with `income` based on our predictor: `liberal`. A good way at looking at this is with a Preceptor Table, as seen below. Since our data does not include all Republicans and Democrats in the world, not every row is filled in. Our Preceptor Table contains two possible outcomes with `liberal`, which means that we have a **causal** model at hand.
+
+Second, we need to evaluate what our units are for our situation. When taking a look at the Preceptor Table below: we can view that all our ID's are dependent on each individual. Our units for this scenario would be the individuals because there are several individuals at the station.
+
+Next, when taking a look at the Preceptor Table we can view that we have two outcomes based on each individual as they could have the treatment applied or not applied. Our outcome of attitude changes based on each individual's response/no response to the treatment.
+
+Finally, do we have a treatment? Yes, treatments applies to this situation with a causal model. We are exposing the commuters to the Spanish-speakers, which play a role in changing the situation at hand.
+
+Now we can create our Preceptor Table:
+
+```{r}
+#| echo: false
+tibble(ID = c("1", "2", "...", "10", "11",
+                  "...", "20", "21", "...", "N"),
+       income = c("45000", "?", "150000", "35000", "2500", "75000", "?", "...", "...", "?"),
+       attitude_yes_liberal = c("...", "?", "7", "...", "...", "4", "?", "6", "...", "?"),
+       attitude_no_liberal = c("8", "?", "...", "5", "7", "...", "?", "...", "...", "?")) |>
+  gt() |>
+  tab_header(title = "Preceptor Table") |> 
+  cols_label(ID = md("ID"),
+             income = md("Income"),
+             attitude_yes_liberal = md("Liberal Ending Attitude"),
+             attitude_no_liberal = md("Not Liberal Ending Attitude")) |>
+  tab_style(cell_borders(sides = "right"),
+            location = cells_body(columns = c(ID))) |>
+  tab_style(style = cell_text(align = "left", v_align = "middle", size = "large"), 
+            locations = cells_column_labels(columns = c(ID))) |>
+  cols_align(align = "center", columns = everything()) |>
+  cols_align(align = "left", columns = c(ID)) |>
+  fmt_markdown(columns = everything()) |>
+  tab_spanner(label = "Predictor", columns = c(income)) |>
+  tab_spanner(label = "Outcomes", columns = c(attitude_yes_liberal, attitude_no_liberal))
+```
+
+Recall: a Preceptor Table is table with rows and columns such that, if there is no missing data, all our questions are easy to answer. To answer questions — like “Among all people who have an income $100,000, what proportion are liberal?
+and Assume we have a group of eight people, two of whom make $100,000, two $200,000, two $300,000 and two $400,000. How many will be liberal?” — we need a row for every individual at the station.
+
+*Always explore your data.* Recall the discussion from @sec-rubin-causal-model. @enos2014 randomly placed Spanish-speaking confederates on nine train platforms around Boston, Massachusetts. The data that we want to analyze consists of the age and party of each individual on these train platforms based on our variables in our Preceptor Table. These reactions were measured through changes in answers to three survey questions. Load the necessary libraries and look at the data.
+
+```{r}
+library(primer.data)
+library(rstanarm)
+library(tidyverse)
+```
+
+```{r}
+trains |>
+  select(liberal, income)
+```
+
+As specified in the Preceptor Table we only care about `liberal` is whether they are liberal or not and `income` is the income of the respondent.
+
+```{r}
+trains |>
+  select(liberal, income) |>
+  summary()
+```
+
+`summary()` shows us what the different values of `liberal` and `income` are because it is a factor. The range for `income` seems reasonable.
+
+Now let's take a look at the **assumption of validity** for our data and Preceptor Table. There is no **truth** here. The data is real enough, but you created the Preceptor Table. Whether or not there is a population from which you can assume both the data and the Preceptor Table might have been drawn is not a TRUE/FALSE question. The Preceptor Table is all US train commuters today. However, the data we have involves train commuters in the Boston area in 2012. In addition, is our data from the Preceptor Table accurate? The validity may not hold as the liberal is not evenly split or completely randomized. While this  assumption can prove validity wrong, overall, the assumption of validity seems reasonable. `liberal` and `income` are similar enough between our data and The Preceptor Table that we can “stack” them on top of each other. We can assume that both are drawn from the same population.
+
+With our assumption of validity proving to be reasonably accurate, we can now create our Population Table. We can make a Population Table with our Preceptor Table and other data based on our assumptions that we have made. With the assumption of validity proving to be reasonable we are able to construct a Population Table because we have been able to confirm that our rows in the Preceptor Table and data are similar. 
+
+```{r}
+#| echo: false
+tibble(source = c("Other", "Other", "...", 
+                  "Data", "Data", "...",
+                  "Other", "Other", "...",
+                  "Preceptor Table", "Preceptor Table", "...",
+                  "Other", "Other"),
+       income = c("?", "?", "...", 
+                  "150000", "75000", "...",
+                  "?", "?", "...",
+                  "?", "?", "35000",
+                  "?", "60000"),
+       att_yes_liberal = c("?", "?", "...", 
+                 "6", "?", "...",
+                 "?", "?", "...", 
+                 "?", "?", "9",
+                 "?", "?"),
+       att_no_liberal = c("?", "?", "...", 
+                 "?", "2", "...",
+                 "?", "?", "...", 
+                 "?", "?", "...",
+                 "?", "5")) |>
+  gt() |>
+  tab_header(title = "Population Table") |> 
+  cols_label(source = md("Source"),
+             income = md("Income"),
+             att_yes_liberal = md("Liberal Ending Attitude"),
+             att_no_liberal = md("Not Liberal Ending Attitude")) |>
+  tab_style(cell_borders(sides = "right"),
+            location = cells_body(columns = c(source))) |>
+  tab_style(style = cell_text(align = "left", v_align = "middle", size = "large"), 
+            locations = cells_column_labels(columns = c(source))) |>
+  cols_align(align = "center", columns = everything()) |>
+  cols_align(align = "left", columns = c(source)) |>
+  fmt_markdown(columns = everything())  
+```
+
+Our Preceptor Table rows are chronologically ordered. The "other" rows are our greater population for which we are making assumptions --- this is why the year at the start is earlier than our data and the year at the end is later than our Preceptor Table. This shows the more expansive population about which we are making inferences.
 
 ### Justice
 
 Let's now consider Justice for the relationship between `liberal` and `income`.
 
-
-
 Consider stability. To do so, we must look at the relationship between `liberal` and `income` and determine whether or not we believe that this relationship has changed between 2012 and 2023. With our knowledge of the world, do we have any reason to believe that this has changed? What if between 2012 and 2023, income increased for those who are liberal? Well, then our model for the the relationship between `income` and `liberal` would have changed over the years, and therefore so would the model. However, since with our knowledge of the world we have no reason to believe that something of the sorts happened to affect this relationship, we can consider our model to be stable.
 
 In our past three models, we have considered 3 possible issues that we could have with the representativeness of our model, such as the difference between Boston and other cities, problems with random sampling, and bias in those who respond, and we will now consider how in this survey there were surveys given before and after treatment, and some people may have filled out only one of the surveys. People who only filled out one of the surveys could affect the representativeness of the data because they could not be included in the data and if those who only filled out one survey tended to be liberal, then this would affect our data because it would underestimate the amount of liberals in the survey. This is something we must consider when looking at representativeness, since we could otherwise not determine if this data from train commuters in Boston in 2012 is representative enough of train commuters in the US now to continue using our data.
 
-Let's consider whether this model is linear or logistic. Unlike our previous models this chapter, the outcome variable, `liberal`, for this model, only has two options, "Liberal" or "Not Liberal". Therefore, this will be logistic because there are only 2 possible outcomes and the outcome variable isn't continuous. 
+Let's consider whether this model is linear or logistic. Unlike our previous models this chapter, the outcome variable, `liberal`, for this model, only has two options, "Liberal" or "Not Liberal". Therefore, this will be logistic because there are only 2 possible outcomes and the outcome variable isn't continuous.
 
 Recall the discussion in @sec-zero-one-outcomes about the logistic regression model which we use whenever the outcome or dependent variable is binary/logical. The math is there, if you care about math. We don't, at least not too much. Reminder:
 
@@ -1315,13 +1499,11 @@ $$p(\text{Liberal}_i = \text{TRUE}) = \frac{\text{exp}(\beta_0 + \beta_1 \text{i
 
 This model only has two parameters, $\beta_0$ and $\beta_1$. But these parameters do not have simple interpretations, unlike the parameters in a linear (or gaussian) model.
 
-
 Recall the fundamental structure of all data science problems:
 
-$$\text{outcome} = \text{model} + \text{what is not in the model}$$
-The exact mathematics of the model --- the parameters, their interpretations --- are all just [dross](https://en.wikipedia.org/wiki/Dross) in the foundry of our inferences: unavoidable but not worth too much of our time. 
+$$\text{outcome} = \text{model} + \text{what is not in the model}$$ The exact mathematics of the model --- the parameters, their interpretations --- are all just [dross](https://en.wikipedia.org/wiki/Dross) in the foundry of our inferences: unavoidable but not worth too much of our time.
 
-Even if the math is ignorable, the causal versus predictive nature of the model is not. Is this a causal model or a predictive model? It depends! It could be causal if you assume that we can *manipulate* someone's income, if, that is, there are at least two potential outcomes: person $i$'s liberal status if she makes X dollars and person $i$'s liberal status if she makes Y dollars. Remember: *No causation without manipulation*. The definition of a causal effect is the difference between two potential outcomes. If you only have one outcome, then your model can not be causal. 
+Even if the math is ignorable, the causal versus predictive nature of the model is not. Is this a causal model or a predictive model? It depends! It could be causal if you assume that we can *manipulate* someone's income, if, that is, there are at least two potential outcomes: person $i$'s liberal status if she makes X dollars and person $i$'s liberal status if she makes Y dollars. Remember: *No causation without manipulation*. The definition of a causal effect is the difference between two potential outcomes. If you only have one outcome, then your model can not be causal.
 
 In many circumstances, we don't really care if a model is causal or not. We might only want to forecast/predict/explain the outcome variable. In that case, whether we can interpret the influence of a variable as causal is irrelevant to our use of that variable.
 
@@ -1347,10 +1529,9 @@ Fitted models tell us about the posterior distributions for the parameters in th
 
 When working with a linear model, we will often interpret the meaning of the parameters, as we have already done in the first three sections of this chapter. Such interpretations are much harder with logistic models because the math is much less convenient. So, we won't even bother to try to understand the meaning of these parameters. However, we can note that $\beta_1$ is negative, suggesting that people with higher incomes are less likely to be liberal.
 
-
 ### Temperance
 
-*Among all people who have an income $100,000, what proportion are liberal?*
+*Among all people who have an income \$100,000, what proportion are liberal?*
 
 Although our model is now logistic, all the steps in answering a question like this are the same as with a linear/guassian model.
 
@@ -1362,7 +1543,7 @@ pe <- posterior_epred(fit_4,
   as_tibble()
 ```
 
-`pe` is a tibble with a single vector. That vector is 4,000 draws from the posterior distribution of proportion of people, among those who make $100,000, who are liberal. The population proportion is the same thing as the probability for any single individual.
+`pe` is a tibble with a single vector. That vector is 4,000 draws from the posterior distribution of proportion of people, among those who make \$100,000, who are liberal. The population proportion is the same thing as the probability for any single individual.
 
 ```{r}
 pe |> 
@@ -1380,7 +1561,7 @@ pe |>
 
 <!-- Mini discussion of graph? -->
 
-*Assume we have a group of eight people, two of whom make $100,000, two $200,000, two $300,000 and two $400,000. How many will be liberal?*
+*Assume we have a group of eight people, two of whom make \$100,000, two \$200,000, two \$300,000 and two \$400,000. How many will be liberal?*
 
 Because we are trying to predict the outcome for a small number of units, we use `posterior_predict()`. The more complex the questions we ask, the more care we need to devote to making the `newobs` tibble. We use the same `rowwise()` and `c_across()` tricks as earlier in the chapter.
 
@@ -1400,18 +1581,17 @@ pp <- posterior_predict(fit_4,
 pp
 ```
 
-Study the `pp` tibble. Understand its component parts. The first column, for example, is 4,000 draws from the posterior distribution for the liberal status of a random person with an income of $100,000. Note how all the draws are zeroes or ones. That is very different from the draws we have seen before! But it also makes sense. We are making a prediction about a binary variable, a variable which only have two possible values: zero or one. So, any (reasonable!) predictions will only be zero or one.
+Study the `pp` tibble. Understand its component parts. The first column, for example, is 4,000 draws from the posterior distribution for the liberal status of a random person with an income of \$100,000. Note how all the draws are zeroes or ones. That is very different from the draws we have seen before! But it also makes sense. We are making a prediction about a binary variable, a variable which only have two possible values: zero or one. So, any (reasonable!) predictions will only be zero or one.
 
-The second column is the same thing as the first column. Both are 4,000 draws from the posterior distribution for the liberal status of a random person with an income of $100,000. Yet they also have different values. They are both the same thing and different things, in the same way that `rnorm(10)` and `rnorm(10)` are the same thing --- both are 10 draws from the standard normal distribution --- and different things in that the values vary.
+The second column is the same thing as the first column. Both are 4,000 draws from the posterior distribution for the liberal status of a random person with an income of \$100,000. Yet they also have different values. They are both the same thing and different things, in the same way that `rnorm(10)` and `rnorm(10)` are the same thing --- both are 10 draws from the standard normal distribution --- and different things in that the values vary.
 
-The third and fourth columns are different from the first two columns. They are both 4,000 draws from the posterior distribution for the liberal status of a random person with an income of $200,000. And so on for later columns. We can answer very difficult questions by putting together simple building blocks, each of them a set of draws from a posterior distribution. Recall the discussion in @sec-distributions.
+The third and fourth columns are different from the first two columns. They are both 4,000 draws from the posterior distribution for the liberal status of a random person with an income of \$200,000. And so on for later columns. We can answer very difficult questions by putting together simple building blocks, each of them a set of draws from a posterior distribution. Recall the discussion in @sec-distributions.
 
 The `total` column is simply the sum of the first eight columns. Having created the building blocks with 8 columns of draws from four different posterior distributions, we can switch our focus to each row. Consider row 2. It has a vector of 8 numbers: `1 1 1 0 0 1 0 0`. We can treat that vector as a unit of analysis. This is what might happen with our 8 people. The first three might be liberal, the fourth not liberal and so on. This row is just one example of what might happen, one draw from the posterior distribution of possible outcomes for groups of eight people with these incomes.
 
-We can simplify this draw by taking the sum, or doing anything else which might answer the question with which we are confronted. Posterior distributions are as flexible as individual numbers. We can, more or less, just use algebra to work with them. 
+We can simplify this draw by taking the sum, or doing anything else which might answer the question with which we are confronted. Posterior distributions are as flexible as individual numbers. We can, more or less, just use algebra to work with them.
 
 Graphically we have:
-
 
 ```{r}
 pp |> 
@@ -1429,40 +1609,39 @@ pp |>
 
 As always, there is some *truth*. If, tomorrow, we were to meet 8 new people, with the specified incomes, a certain number of them would be liberal. If we had the ideal Preceptor Table, we could just look up that number. No data science required. Alas, we don't know the truth. The bets we can do is to create a posterior distribution for that unknown value, as we have done here. We then need to translate that posterior into English --- "The most likely number of liberals is 2 or 3, but a total as low as zero or as high as 5 is also plausible. Having 6 liberals would be really surprising. Having 7 or 8 is almost impossible."
 
-Are these two posterior probability distributions perfect? No! This is the central message of the virtue of Temperance. We must demonstrate our humility when we use our models. Recall the distinction between the *unknown true distribution* and the *estimated distribution*. The first is the posterior distribution we would create of we understood every detail of the process and could accurately model it. We would still not know the true unknown number, but our posterior distribution for that number would be perfect. Yet, our model is never perfect. We are making all sorts of assumptions behind the scenes. Some of those assumptions are plausible. Others are less so. Either way, the *estimated distribution* is what we have graphed above. 
+Are these two posterior probability distributions perfect? No! This is the central message of the virtue of Temperance. We must demonstrate our humility when we use our models. Recall the distinction between the *unknown true distribution* and the *estimated distribution*. The first is the posterior distribution we would create of we understood every detail of the process and could accurately model it. We would still not know the true unknown number, but our posterior distribution for that number would be perfect. Yet, our model is never perfect. We are making all sorts of assumptions behind the scenes. Some of those assumptions are plausible. Others are less so. Either way, the *estimated distribution* is what we have graphed above.
 
 The central lesson of Temperance is: Don't confuse the *estimated* posterior (which is what you have) with the *true* posterior (which is what you want). Recognize the unavoidable imperfections in the process. You can still use your estimated posterior --- what choice do you have? --- but be cautious and humble in doing so. The more that you suspect that your estimated posterior differs from the true posterior, the more humble and cautious you should be.
 
 ## Summary
 
-
 In this chapter, we explored relationships between different variables in the `trains` data set. We built three predictive models and one causal model.
 
-Similar to previous chapters, our first task is to use *Wisdom*. We judge how relevant our data is to the questions we ask. Is it reasonable to consider the data we have (e.g., income and age data from Boston commuters in 2012) as being drawn from the same population as the data we want to have (e.g., income and age data from today for the entire US)? Probably?  
+Similar to previous chapters, our first task is to use *Wisdom*. We judge how relevant our data is to the questions we ask. Is it reasonable to consider the data we have (e.g., income and age data from Boston commuters in 2012) as being drawn from the same population as the data we want to have (e.g., income and age data from today for the entire US)? Probably?
 
-*Justice* is necessary to decide the best way to represent the models we make. A little math won't kill you. We use  *Courage* to translate our models into code. Our goal is to understand, generate posterior distributions for the parameters, and interpret their meaning. *Temperance* leads us to the final stage, using our models to answer our questions. 
+*Justice* is necessary to decide the best way to represent the models we make. A little math won't kill you. We use *Courage* to translate our models into code. Our goal is to understand, generate posterior distributions for the parameters, and interpret their meaning. *Temperance* leads us to the final stage, using our models to answer our questions.
 
 *Key commands:*
 
-* Create a model with `stan_glm()`.
+-   Create a model with `stan_glm()`.
 
-* Use `posterior_epred()` to estimate expected values. The **e** in **e**pred stands for **e**xpected.
+-   Use `posterior_epred()` to estimate expected values. The **e** in **e**pred stands for **e**xpected.
 
-* Use `posterior_predict()` to make forecasts for individuals. The variable in predictions is always greater than the variability in expectations because predictions can't pretend that $\epsilon_i$ is zero.
+-   Use `posterior_predict()` to make forecasts for individuals. The variable in predictions is always greater than the variability in expectations because predictions can't pretend that $\epsilon_i$ is zero.
 
-Once we have draws from a posterior distribution for our outcome variable --- whether that be an expectation or a prediction --- we can manipulate those draws to answer our question. 
+Once we have draws from a posterior distribution for our outcome variable --- whether that be an expectation or a prediction --- we can manipulate those draws to answer our question.
 
 *Remember:*
 
-* *Always explore your data.*
+-   *Always explore your data.*
 
-* *Predictive models care little about causality.*
+-   *Predictive models care little about causality.*
 
-* *Predictive models and causal models use the same math and the same code.*
+-   *Predictive models and causal models use the same math and the same code.*
 
-* *"When comparing" is a great phrase to start the summary of any non-causal model.*
+-   *"When comparing" is a great phrase to start the summary of any non-causal model.*
 
-* *Don't confuse the estimated posterior (which is what you have) with the true posterior (which is what you want). Be humble and cautious in your use of the posterior.*
+-   *Don't confuse the estimated posterior (which is what you have) with the true posterior (which is what you want). Be humble and cautious in your use of the posterior.*
 
 ```{r}
 #| echo: false
