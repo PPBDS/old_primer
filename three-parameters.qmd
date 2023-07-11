@@ -10,11 +10,9 @@ library(gtsummary)
 library(patchwork)
 ```
 
-<!-- DK: Start of each chapter includes all packages, perhaps mentioning why we care. -->
+<!-- DK: Do the major surgery we discussed in age ~ party. Put addendum approach as main approach. DONE - addendum approach implemented in age~party & att_end~treatment and income~age & liberal~income both already have the addendum approach-->
 
-<!-- DK: Do the major surgery we discussed in age ~ party. Put addendum approach as main approach. -->
-
-<!-- Need a separate Preceptor Table for each question. Do the whole cycle each time, doing an EDA of the variables you want to use for that question. -->
+<!-- add plots: DONE added plots to the data analysis sections -->
 
 <!-- Need a table which shows all 4 (?) languages for describing a model together: English, math, code, output. ? -->
 
@@ -119,7 +117,23 @@ trains |>
 
 `summary()` shows us what the different values of `age` and `party` are because it is a factor. The range for `age` seems reasonable. Recall that participants were asked three questions about immigration issues, each of which allowed for an answer indicated strength of agreement on a scale form 1 to 5, with higher values indicating more agreement with conservative viewpoints.
 
-<!-- DK: Add a plot -->
+```{r}
+trains |> 
+  ggplot(aes(x = age, fill = party)) +
+    geom_histogram(aes(y = after_stat(count/sum(count))),
+                   alpha = 0.5, 
+                   bins = 100, 
+                   position = "identity") +
+    labs(title = "Probability for Average Age",
+         subtitle = "More data allows for a more precise probability",
+         x = "Age",
+         y = "Probability",
+         fill = NULL) +
+    scale_y_continuous(labels = scales::percent_format()) +
+    theme_classic()
+```
+
+We can never know the true average age of all Democrats in the population. But we can calculate a probability distribution for each parameter. Democrats seem slightly older than Republicans. Our estimate for the average age of Democrats in the population is much more precise than that for Republicans because we have five times as many Democrats as Republicans in our sample.
 
 #### Population Table
 
@@ -637,7 +651,21 @@ The data include information about each respondent's gender, political affiliati
 
 `summary()` shows us what the different values of `att_end` and `treatment` are because it is a factor. The range for `att_end` seems reasonable. Recall that participants were asked three questions about immigration issues, each of which allowed for an answer indicated strength of agreement on a scale form 1 to 5, with higher values indicating more agreement with conservative viewpoints.
 
-<!-- Add plot here -->
+```{r}
+trains |> 
+  ggplot(aes(x = att_end, fill = treatment)) +
+    geom_bar(aes(y = after_stat(count/sum(count))),
+                   position = "dodge") +
+    labs(title = "Expected Attitude Toward Immigration",
+         subtitle = "Treated Individuals Are More Conservative",
+         x = "Attitude",
+         y = "Probability",
+         fill = NULL) +
+    scale_y_continuous(labels = scales::percent_format()) + 
+    theme_classic()
+```
+
+We can never know the true average attitude of all treated in the population. But we can calculate a probability distribution for each parameter. As we can see with the plot above, the treated individuals tend to be more conservative. When compared with the controlled population, the treated individuals tend to show more signs of being conservative after having the treatment applied to them.
 
 #### Population Table
 
@@ -822,6 +850,21 @@ outcome + fitted + res +
 ```
 
 The smaller the spread of the residuals, the better a job the model is doing of explaining the outcomes.
+
+As we did with the age ~ party we can take a different approach and instead of parameterizing this model without an intercept, we could have used one. 
+
+To fit this model, we use the exact same code as before, except without the `-1` in the `formula` argument.
+
+```{r}
+stan_glm(att_end ~ treatment, 
+         data = trains, 
+         seed = 45,
+         refresh = 0)
+```
+
+The intercept, 10.0, is the same as the `treatmentTreated` estimate in the first model. The `treatmentControl` estimate, which was previously 8.5, is now -1.5, meaning it is the difference (allowing for rounding) between the average age of the two treatments.
+
+Little else about the models will be different. They will have the same fitted values and residuals. `posterior_predict()` will generate the same posterior predictive probabilty distributions. Which parameterization we use does not matter much. But you should be able to interpret the meaning of the coefficients in both.
 
 <!-- dd explanation of fit similar to how it was done previously. Can go faster, because we do not need to repeat everything.  -->
 
@@ -1012,7 +1055,18 @@ trains |>
 
 `summary()` shows us what the different values of `age` and `income` are because it is a factor. The range for `age` seems reasonable. Recall that participants were asked three questions about immigration issues, each of which allowed for an answer indicated strength of agreement on a scale form 1 to 5, with higher values indicating more agreement with conservative viewpoints.
 
-<!-- add plot -->
+```{r}
+trains |> 
+  ggplot(aes(age)) +
+    geom_histogram(aes(y = after_stat(count*10000)),
+      bins = 50) +
+    labs(x = "Age",
+         y = "Income") +
+    scale_y_continuous(labels = scales::dollar_format()) +
+    theme_classic()
+```
+
+We can never know the true average income of the population. But we can calculate a distribution for each parameter. As we can see with the plot above, the older individuals tend to be have more of an income. When compared with the younger individuals, the older individuals tend to exhibit a greater income because of the longer life and possibilities they have.
 
 #### Population Table
 
@@ -1297,7 +1351,21 @@ trains |>
 
 `summary()` shows us what the different values of `liberal` and `income` are because it is a factor. The range for `income` seems reasonable.
 
-<!-- add a plot -->
+```{r}
+trains |> 
+  ggplot(aes(x = income, fill = treatment)) +
+    geom_bar(aes(y = after_stat(count/sum(count))),
+                   position = "dodge") +
+    labs(title = "Expected Income Based On Treatment",
+         x = "Income in 10000s",
+         y = "Probability",
+         fill = NULL) +
+    scale_x_continuous(labels = scales::dollar_format(scale = 1/10000)) +
+    scale_y_continuous(labels = scales::percent_format()) + 
+    theme_classic()
+```
+
+We can never know the true average income is of all treated in the population. But we can calculate a probability distribution for each parameter. As we can see with the plot above, the income stays relatively constant based on either the treatment. 
 
 #### Population Table
 
