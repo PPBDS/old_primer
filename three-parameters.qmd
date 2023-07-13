@@ -122,21 +122,20 @@ There are about 5 times as many Democrats as Republicans, which is perhaps not t
 
 Plotting your data is always a good idea.
 
-<!-- DK: Swap colors. -->
-
 ```{r}
-trains |> 
+trains |>
   ggplot(aes(x = age, fill = party)) +
     geom_histogram(aes(y = after_stat(count/sum(count))),
                    alpha = 0.5, 
-                   bins = 100, 
-                   position = "identity") +
+                   bins = 25, 
+                   position = "dodge") +
     labs(title = "Distribution of Age and Party",
          subtitle = "More data allows for a more precise probability",
          x = "Age",
          y = "Percent of Sample",
          fill = NULL) +
     scale_y_continuous(labels = scales::percent_format()) +
+    scale_fill_manual( values = c("#7fdfe1", "#fbbab6")) +
     theme_classic()
 ```
 
@@ -178,7 +177,7 @@ tibble(source = c("...", "Data", "Data", "...",
        year = c("...", "2012", "2012", "...", 
                 "...", "2023", "2023", "..."),
        age = c("...", "43", "52", "...", 
-               "...", "?", "?", "..."),
+               "...", "...", "...", "..."),
        party = c("...", "Democrat", "Republican", "...", 
                  "...", "Republican", "Republican", "...")) |>
   
@@ -210,7 +209,7 @@ Our Preceptor Table rows are chronologically ordered. The "other" rows are our g
 
 **Unconfoundedness** means that the treatment assignment is independent of the potential outcomes, when we condition on pre-treatment covariates. However, with our scenario, we have a predictive model and this assumption is only relevant for causal models.
 
-#### Data Generating Mechanism
+#### Data Generating Mechanism (DGM)
 
 The type of outcome variable is the most important issue in determining the mathematical form of the **data generating mechanism**. Since our outcome is a (mostly) continuous variable, a linear DGM is reasonable. If the outcome variable had been binary --- had only has two options --- we would use a logistic model. 
 
@@ -228,8 +227,6 @@ knitr::include_graphics("other/images/Courage.jpg")
 
 Let's interpret **courage** with our our DGM. The mathematics:
 
-<!-- need to replace with beta_0 -->
-
 $$ y_i = \beta_0  + \beta_1 democratic_i + \epsilon_i$$
 
 where \n $$republican_i, democrat_i \in \{0,1\}$$ \n $$republican_i +  democrat_i = 1$$ \n $$\epsilon_i \sim N(0, \sigma^2)$$
@@ -246,8 +243,6 @@ The right-hand side contains two parts, that which is contained within the model
 
 -   First, we have the part contained in the model, which consists of the parameter and the data points. The interpretations of the parameters are different from the prior model. $\beta_0$ is now the average age of Republicans. This is the same interpretation as $\beta_1$ in the original set up. $\beta_1$ is now the difference between the the average age of Republicans and that of Democrats. $republican_i$ and $democrat_i$ are our explanatory variables and take the values 1 or 0. As shown in our model, $\beta_0$ and $\beta_1 republican_i$ are two similar terms which are added together to make our model and each term consists of a parameter and a data point. If person $i$ is a Republican we have $republican_i = 1$ and $democrat_i = 0$. If person $i$ is a Democrat we have $republican_i = 0$ and $democrat_i = 1$. In other words, their values are mutually exclusive -- if you are a Democrat, you cannot also be a Republican.
 
-<!-- "Connected to" is awkward here. -->
-
 -   The second part in the right-hand side, $\epsilon_i$ ("epsilon"), represents the unexplained part of the outcome and is called the error term. This includes all factors that have an influence on someone's age but are not related to party affiliation. In other words, $\epsilon_i$ is what influence age that is not factored into our model. We assume that this error follows a normal distribution with an expected value of 0 (meaning it is 0 on average) and it is simply the difference between the outcome and our model predictions.
 
 Some things to note about our model:
@@ -262,7 +257,7 @@ Some things to note about our model:
 
 #### Predictive Model
 
-Courage allows us to translate math to code.
+With the help of **Courage** we can translate this math into code.
 
 To get posterior distributions for our three parameters, we will again use `stan_glm()`, just as we did in @sec-two-parameters.
 
@@ -292,16 +287,13 @@ The intercept, 42.6 estimates the age of Democrats. The `partyRepublican` estima
 
 `posterior_predict()` will generate the same posterior predictive probability distributions. Which parameterization we use does not matter much. But you should be able to interpret the meaning of the coefficients in both.
 
-<!-- `partyDemocrat` corresponds to $\beta_1$, the average age of Democrats in the population. `partyRepublican` corresponds to $\beta_2$, the average age of Republicans in the population.  -->
-
-<!-- DK: We can keep/edit the below comments since many of these facts can be determined directly from the fitted object. -->
-
 We can display the fitted values of the parameters in a pleasing table:
 
-<!-- MT: need to remove the democrat from below and clean up table -->
+<!-- MT: do we want to keep Democrat here? -- we can keep several variables but not coefficients and democrat is a coefficient within this table (if needed find a way to mutate the data and change it)-->
 
 ```{r}
-gtsummary::tbl_regression(fit_1, intercept = TRUE)
+gtsummary::tbl_regression(fit_1, intercept = TRUE) %>%
+  bold_labels()
 ```
 
 Comments:
@@ -312,7 +304,7 @@ Comments:
 
 -   The phrase "in the population" is doing a great deal of work because we have not said what, precisely, we mean by the "population." Is it the set of people on those commuter platforms on those days in 2012 when the experiment was done? Is it the set of people on all platforms, including ones never visited? Is it the set of all Boston commuters? All Massachusetts residents? All US residents? Does it include people today, or can we only draw inferences for 2012? We should explore these questions in every model we create.
 
--   The parameters $\beta_0$ and $\beta_1$ can be interpreted in two ways. First, like all parameters, they are a part of the model. We need to estimate them. But, in many cases, we don't really care what the value of the parameter is. The exact value of $\sigma$, for example, does not really matter. Second, some parameters have a substantive interpretaion, as with $\beta_0$ and $\beta_1$ being the average age and difference in the population. Fortunately, with such models, we can use functions like `posterior_epred()` and `posterior_predict()` to answer our questions.
+-   The parameters $\beta_0$ and $\beta_1$ can be interpreted in two ways. First, like all parameters, they are a part of the model. We need to estimate them. But, in many cases, we don't really care what the value of the parameter is. The exact value of $\sigma$, for example, does not really matter. Second, some parameters have a substantive interpretation, as with $\beta_0$ and $\beta_1$ being the average age and difference in the population. Fortunately, with such models, we can use functions like `posterior_epred()` and `posterior_predict()` to answer our questions.
 
 Consider a table which shows a sample of 8 individuals.
 
@@ -465,10 +457,10 @@ We have 6 columns: one for each person. `posterior_predict()` does not name the 
 pp <- posterior_predict(fit_1, newdata = newobs) |>
     as_tibble() |>
 
-    # We don't need to rename the columns, but doing so makes the subsequest
-    # code much easier to understand. We could just have worked with columns 1,
-    # 2, 3 and so on. Either way, the key is to ensure that you correctly map
-    # the covariates in newobs to the columns in the posterior_predict object.
+  # We don't need to rename the columns, but doing so makes the subsequest
+  # code much easier to understand. We could just have worked with columns 1,
+  # 2, 3 and so on. Either way, the key is to ensure that you correctly map
+  # the covariates in newobs to the columns in the posterior_predict object.
   
     set_names(c("dem_1", "dem_2", "dem_3", 
                 "rep_1", "rep_2", "rep_3")) |> 
@@ -633,12 +625,12 @@ tibble(source = c("...", "Data", "Data", "...",
                 "...", "Wilmington, DE", "Atlanta, GA", "..."),
        year = c("...", "2012", "2012", "...", 
                 "...", "2023", "2023", "..."),
-       treatment = c("...", "...", "Yes", "No", 
+       treatment = c("...", "No", "Yes", "...", 
+                     "...", "Yes", "Yes", "..."),
+       att_treat = c("...", "...", "6", "...",
                      "...", "...", "...", "..."),
-       att_treat = c("...", "?", "6", "...",
-                     "...", "?", "?", "..."),
-       att_control = c("...", "...", "?", "2", 
-                       "...", "?", "?", "...")) |>
+       att_control = c("...", "2", "...", "...", 
+                       "...", "...", "...", "...")) |>
   
   gt() |>
   tab_header(title = "Population Table") |> 
@@ -679,8 +671,6 @@ $$ y_i = \beta_1 treatment_i + \beta_2 control_i + \epsilon_i$$
 
 where \n $$treatment_i, control_i \in \{0,1\}$$ \n $$treatment_i +  control_i = 1$$ \n $$\epsilon_i \sim N(0, \sigma^2)$$
 
-<!-- DK: make these sections much more similar across the chapters, always separating out the data and the paramters -->
-
 Nothing has changed, except for the meaning of the data items and the interpretations of the parameters.
 
 On the left-hand side we still have the outcome, $y_i$, however in this case, this is a person's attitude toward immigration after the experiment is complete. $y_i$ takes on integer values between 3 and 15 inclusive.
@@ -707,6 +697,8 @@ knitr::include_graphics("other/images/Courage.jpg")
 
 With Justice satisfied, we gather our Courage and fit the model. Note that, except for the change in variable names, the code is exactly the same as it was above, in our predictive model for age. *Predictive models and causal models use the same math and the same code.* The differences, and they are very important, lie in the interpretation of the results, not in their creation.
 
+<!-- MT: do we want to take out the -1 here, if we do we need to change all of the plots we have made below -->
+
 ```{r}
 fit_2 <- stan_glm(att_end ~ treatment - 1, 
                       data = trains, 
@@ -720,9 +712,12 @@ fit_2
 
 Note that once again, since we are using a linear model, we set the `family` argument to "gaussian".
 
-`treatmentTreated` corresponds to $\beta_1$. As always, R has, behind the scenes, estimated the entire posterior probability distribution for $\beta_1$. We will graph that distribution in the next section. But the basic print method for these objects can't show the entire distribution, so it gives us summary numbers: the median and the MAD SD. Speaking roughly, we would expect about 95% of the values in the posterior to be within two MAD SD's of the median. In other words, we are 95% confident that the true, but unknowable, average attitude toward immigration among the Treated in the population to be between 9.2 and 10.8.
+```{r}
+gtsummary::tbl_regression(fit_2, intercept = TRUE) %>%
+  bold_labels()
+```
 
-`treatmentControl` corresponds to $\beta_2$. The same analysis applies. We are about 95% confident that the true value for the average attitude toward immigration for Control in the population is between 7.9 and 9.1.
+`treatmentTreated` corresponds to 10.0 which is $\beta_1$. As always, R has, behind the scenes, estimated the entire posterior probability distribution for $\beta_1$. We will graph that distribution in the next section. But the basic print method for these objects can't show the entire distribution, so it gives us summary numbers: the median and the MAD SD. Speaking roughly, we would expect about 95% of the values in the posterior to be within two MAD SD's of the median. In other words, we are 95% confident that the true, but unknowable, average attitude toward immigration among the Treated in the population to be between 9.2 and 10.8. `treatmentControl` corresponds to $\beta_2$. The `treatmentControl` estimate, is 8.5.
 
 Up until now, we have used the Bayesian interpretation of "confidence interval." This is also the intuitive meaning which, outside of academia, is almost universal. There is a truth out there. We don't know, and sometimes can't know, the truth. A confidence interval, and its associated confidence level, tells us how likely the truth is to lie within a specific range. If your boss asks you for a confidence interval, she almost certainly is using this interpretation.
 
@@ -738,7 +733,7 @@ fit_2 |>
   select(-sigma) |> 
   pivot_longer(cols = treatmentTreated:treatmentControl,
                names_to = "Parameter",
-               values_to = "attitude") |> 
+               values_to = "attitude") |>
   ggplot(aes(x = attitude, fill = Parameter)) +
     geom_histogram(aes(y = after_stat(count/sum(count))),
                    alpha = 0.5, 
@@ -784,23 +779,6 @@ outcome + fitted + res +
 ```
 
 The smaller the spread of the residuals, the better a job the model is doing of explaining the outcomes.
-
-As we did with the age ~ party we can take a different approach and instead of parameterizing this model without an intercept, we could have used one. 
-
-To fit this model, we use the exact same code as before, except without the `-1` in the `formula` argument.
-
-```{r}
-stan_glm(att_end ~ treatment, 
-         data = trains, 
-         seed = 45,
-         refresh = 0)
-```
-
-The intercept, 10.0, is the same as the `treatmentTreated` estimate in the first model. The `treatmentControl` estimate, which was previously 8.5, is now -1.5, meaning it is the difference (allowing for rounding) between the average age of the two treatments.
-
-Little else about the models will be different. They will have the same fitted values and residuals. `posterior_predict()` will generate the same posterior predictive probabilty distributions. Which parameterization we use does not matter much. But you should be able to interpret the meaning of the coefficients in both.
-
-<!-- dd explanation of fit similar to how it was done previously. Can go faster, because we do not need to repeat everything.  -->
 
 ### Temperance
 
@@ -1028,7 +1006,7 @@ tibble(source = c("...", "Data", "Data", "...",
        year = c("...", "2012", "2012", "...", 
                 "...", "2023", "2023", "..."),
        age = c("...", "43", "52", "...", 
-               "...", "?", "?", "..."),
+               "...", "...", "...", "..."),
        income = c("...", "150000", "50000", "...",
                  "...", "45000", "15000", "...")) |>
   
@@ -1285,15 +1263,15 @@ trains |>
     geom_bar(aes(y = after_stat(count/sum(count))),
                    position = "dodge") +
     labs(title = "Expected Income Based On Treatment",
-         x = "Income in 10000s",
+         x = "Income in 1000s",
          y = "Probability",
          fill = NULL) +
-    scale_x_continuous(labels = scales::dollar_format(scale = 1/10000)) +
+    scale_x_continuous(labels = scales::dollar_format(scale = 1/1000)) +
     scale_y_continuous(labels = scales::percent_format()) + 
     theme_classic()
 ```
 
-We can never know the true average income is of all treated in the population. But we can calculate a probability distribution for each parameter. As we can see with the plot above, the income stays relatively constant based on either the treatment. 
+We can never know the true average income is of all treated in the population. But we can calculate a distribution. As we can see with the plot above, the income stays relatively constant based on either the treatment. 
 
 #### Validity
 
@@ -1496,33 +1474,33 @@ The central lesson of Temperance is: Don't confuse the *estimated* posterior (wh
 
 ## Summary
 
-In this chapter, we explored relationships between different variables in the `trains` data set. We built three predictive models and one causal model.
+Throughout this chapter, we explored relationships between different variables in the `trains` data set. We built three predictive models and one causal model.
 
-Similar to previous chapters, our first task is to use *Wisdom*. We judge how relevant our data is to the questions we ask. Is it reasonable to consider the data we have (e.g., income and age data from Boston commuters in 2012) as being drawn from the same population as the data we want to have (e.g., income and age data from today for the entire US)? Probably?
+Similar to previous chapters, our first task is to always use **Wisdom**. We want to judge how relevant our data is based on the questions we ask. Is it reasonable to consider the data we have (e.g., income and age data from Boston commuters in 2012) are being drawn from the same population as the data we want to have (e.g., income and age data from today for the entire US)? Probably? Recall that these questions will bring up the **assumption of validity** and whether our data will be able to "stack" up with each other.
 
-*Justice* is necessary to decide the best way to represent the models we make. A little math won't kill you. We use *Courage* to translate our models into code. Our goal is to understand, generate posterior distributions for the parameters, and interpret their meaning. *Temperance* leads us to the final stage, using our models to answer our questions.
+Our next step is to take a look at **Justice** which helps us decide the best way to represent the models that we will make. A little math won't kill you. Translating that math into code will be through the help of **Courage**. Our primary goal is to generate posterior distributions for the parameters and understand/interpret their meaning. Finally, we end off with **Temperance** that uses our models to answer the questions that we have asked above. Remember it is important to hone in on our questions to the most that we can because the most detailed questions will allow for the more accurate answers to prevail.
 
-*Key commands:*
+*Key Lessons and Commands That Were Talked About:*
 
--   Create a model with `stan_glm()`.
+-   Create a model using `stan_glm()`.
 
 -   Use `posterior_epred()` to estimate expected values. The **e** in **e**pred stands for **e**xpected.
 
 -   Use `posterior_predict()` to make forecasts for individuals. The variable in predictions is always greater than the variability in expectations because predictions can't pretend that $\epsilon_i$ is zero.
 
-Once we have draws from a posterior distribution for our outcome variable --- whether that be an expectation or a prediction --- we can manipulate those draws to answer our question.
+-   Once we have draws from a posterior distribution for our outcome variable --- whether that be an expectation or a prediction --- we can manipulate those draws to answer our question.
 
-*Remember:*
+*Always Remember the Following:*
 
--   *Always explore your data.*
+-   Always explore your data.
 
--   *Predictive models care little about causality.*
+-   Predictive models care little about causality.
 
--   *Predictive models and causal models use the same math and the same code.*
+-   Predictive models and causal models use the same math and the same code.
 
--   *"When comparing" is a great phrase to start the summary of any non-causal model.*
+-   "When comparing" is a great phrase to start the summary of any non-causal model.
 
--   *Don't confuse the estimated posterior (which is what you have) with the true posterior (which is what you want). Be humble and cautious in your use of the posterior.*
+-   Don't confuse the estimated posterior (which is what you have) with the true posterior (which is what you want). Be cautious in your use of the posterior.
 
 ```{r}
 #| echo: false
