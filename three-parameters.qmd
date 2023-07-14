@@ -10,7 +10,6 @@ library(gtsummary)
 library(patchwork)
 ```
 
-
 <!-- Need a table which shows all 4 (?) languages for describing a model together: English, math, code, output. ? -->
 
 <!-- DK: Clean up these residuals plots to be similar across chapters! Also, we should ensure that the width of 10 units is the same in each plot. Or does that already happen? Want the intuition that, the more predictive the model, the smaller the remaining variation in the residuals. The below is from chapter 7. -->
@@ -37,6 +36,8 @@ library(tidyverse)
 
 We are concerned with these three packages because we are exploring the `trains` dataset which exists within the **primer.data** package. We use the **rstanarm** package to explore models and the approach of `posterior_predict()`. Finally, we use the **tidyverse** package to conduct all of our graphs and functions.
 
+In this chapter, we are going to ask a series of questions involving train commuters' ages, party affiliations, incomes, and political ideology, as well as the causal effect of exposure to Spanish-speakers on their attitude toward immigration. These questions will pertain to all train commuters in the US today.
+
 ## age \~ party
 
 We want to build a model and then use that model to make claims about the world. Our questions about the relationship between `age` and `party` are the following:
@@ -54,33 +55,33 @@ We can answer these and similar questions by creating a model that uses party af
 knitr::include_graphics("other/images/Wisdom.jpg")
 ```
 
-Wisdom begins with considering the questions we desire to answer and the data set we are given. In this chapter, we are going to ask a series of questions involving train commuters' ages, party affiliations, incomes, and political ideology, as well as the causal effect of exposure to Spanish-speakers on their attitude toward immigration. These questions will pertain to all train commuters in the US today.
+Wisdom begins with considering the questions we desire to answer and the data set we are given. 
 
 #### Preceptor Table 
 
-First, do we need a **causal** or **predictive** model? In our question above we have a predictive model as we only have one outcome: `age` based on our predictor: `party`. 
+First, do we need a **causal** or **predictive** model? In our question above we have a predictive model as we only have one outcome which is the person's age based on our predictor which is the person's party. 
 
-Second, what is the outcome? `age` is the **outcome**. Note that the outcome is not necessarily the same concept mentioned in the questions. For example, the outcome column is not "probability that a person is over 50" even though that is one of the questions we need to answer.
+Second, what is the outcome? A person's age will be the **outcome**. Note that the outcome is not necessarily the same concept mentioned in the questions. For example, the outcome column is not "probability that a person is over 50" even though that is one of the questions we need to answer.
 
-Third, what are the **units**? Our units for this scenario would be individuals because the questions are about the attributes of unique people at the station.
+Third, what are the **units**? Our units for this scenario would be individuals because the questions are about the attributes of unique people at the station. The questions, however, leave unclear details. Where train stations are these people at? Which country? Also, at what moment in time is this experiment taking place? In order to dive deeper into these questions we need to engage in a conversation with the person that is asking us these questions.
 
-Fourth, what are the **covariates**? In this case, `party` is the only covariate. The Preceptor Table must include any covariates mentioned in the question.
+Fourth, what are the **covariates**? In our case, a person's party will be the only covariate because it is another factor that plays to the person's age and identity. The Preceptor Table must include any covariates mentioned in the question.
 
-Fifth, do we have a **treatment**? No. Treatments will only apply to the situations with causal models. A treatment is just a covariate which we can, at least in theory, manipulate, thereby creating other potential outcomes.
+Fifth, do we have a **treatment**? No. We will be using a predictive model as discussed above and treatments will only apply to situations with causal models. A treatment is just a covariate which we can, at least in theory, manipulate, thereby creating other potential outcomes.
 
-Now we can create our Preceptor Table:
+Our Preceptor Table:
 
 ```{r}
 #| echo: false
 tibble(ID = c("1", "2", "...", "10", "11", "...", "N"),
-       party = c("D", "R", "...", "R", "R", "...", "D"), 
-       age = c("31", "58", "...", "67", "23", "...", "44")) |>
+       age = c("31", "58", "...", "67", "23", "...", "44"),
+       party = c("D", "R", "...", "R", "R", "...", "D")) |>
   
   gt() |>
   tab_header(title = "Preceptor Table") |> 
   cols_label(ID = md("ID"),
-             party = md("Party"),
-             age = md("Age")) |>
+             age = md("Age"),
+             party = md("Party")) |>
   tab_style(cell_borders(sides = "right"),
             location = cells_body(columns = c(ID))) |>
   tab_style(style = cell_text(align = "left", v_align = "middle", size = "large"), 
@@ -88,8 +89,8 @@ tibble(ID = c("1", "2", "...", "10", "11", "...", "N"),
   cols_align(align = "center", columns = everything()) |>
   cols_align(align = "left", columns = c(ID)) |>
   fmt_markdown(columns = everything()) |>
-  tab_spanner(label = "Predictor", columns = c(party)) |>
-  tab_spanner(label = "Outcome", columns = c(age))
+  tab_spanner(label = "Outcome", columns = c(age)) |>
+  tab_spanner(label = "Covariate", columns = c(party))
 ```
 
 Recall: a Preceptor Table is smallest possible table with rows and columns such that, if there is no missing data, all our questions are easy to answer. To answer questions --- like "What is the probability that, if a Democrat shows up at the train station, he will be over 50 years old?" --- we need a row for every individual at the station.
@@ -103,7 +104,7 @@ trains |>
   select(age, party)
 ```
 
-As specified in the Preceptor Table we only care about `age` is the age of the respondent and `party` is their political party affiliation.
+As specified in the Preceptor Table we only care about `age` is the age of the respondent and `party` is their political party affiliation. `party` can be shown to have two possibilities: Democrat and Republican.
 
 ```{r}
 trains |>
@@ -145,14 +146,14 @@ Democrats seem slightly older than Republicans. Our estimate for the average age
 
 Do the columns in the Preceptor Table mean the same thing as the columns in the data? That is the heart of validity. Just because we use the same words --- `age` and `party` --- in both tables does not prove that they are, in fact, the same things.
 
-For example, what it means to be a "Republican" might be very different in Massachusetts (meaning in our data) than what it means in the rest of the United States (meaning the Preceptor Table). Just slapping the two data sources together does not solve that problem. Similarly, `age` in the data is measured from a survey. People make mistakes. They even lie. In our Preceptor Table, we want the column `age` to be each person's actual age.
-
 Validity is the assumption which allows us to consider the Preceptor Table and our data to have been drawn from the same population. There is no **truth** here. The data is real enough, but we created the Preceptor Table. Whether or not there is a population from which we can assume both the data and the Preceptor Table might have been drawn is not a TRUE/FALSE question. 
+tion, we can't use the data to make inferences about the Preceptor Table. 
 
-If `party` or `age` are too different between the Preceptor Table and our data, then the assumption of validity fails. We can't consider both sources to have been drawn from the same population, we can't use the data to make inferences about the Preceptor Table. 
+Now the **assumption of validity** may not hold due to the possibility of what our terms mean. For example, what it means to be a "Republican" might be very different in Massachusetts (meaning in our data) than what it means in the rest of the United States (meaning the Preceptor Table). Just slapping the two data sources together does not solve that problem. Similarly, `age` in the data is measured from a survey. People make mistakes. They even lie. In our Preceptor Table, we want the column `age` to be each person's actual age.
+
+If `party` or `age` are too different between the Preceptor Table and our data, then the assumption of validity fails. We can't consider both sources to have been drawn from the same popula
 
 Overall, however, the assumption of validity seems reasonable. `age` and `party` are close enough between our data and The Preceptor Table that we can "stack" them on top of each other. We will assume that both are drawn from the same population.
-
 
 ### Justice
 
@@ -518,7 +519,6 @@ knitr::include_graphics("other/images/Wisdom.jpg")
 
 Wisdom requires the creation of a Preceptor Table, an examination of our data, and a determination, using the concept of "validity," as to whether or not we can (reasonably!) assume that the two come from the same population.
 
-
 #### Preceptor Table
 
 First, do we need a **causal** or **predictive** model? In this case, the model is clearly causal, so our Preceptor Table will have two columns for the potential outcomes.
@@ -531,21 +531,19 @@ Fourth, do we have a **treatment**? Yes. In any causal model, there is at least 
 
 Our Preceptor Table:
 
-<!-- DK: Fix column order of table. -->
-
 ```{r}
 #| echo: false
 tibble(ID = c("1", "2", "...", "10", "11", "...", "N"),
-       treatment = c("Yes", "No", "...", "Yes", "Yes", "...", "No"),
        attitude_after_control = c("...", "7", "...", "...", "...", "...", "6"),
-       attitude_after_treated = c("8", "...", "...", "5", "7", "...", "...")) |>
+       attitude_after_treated = c("8", "...", "...", "5", "7", "...", "..."),
+       treatment = c("Yes", "No", "...", "Yes", "Yes", "...", "No")) |>
   
   gt() |>
   tab_header(title = "Preceptor Table") |> 
   cols_label(ID = md("ID"),
-             treatment = md("Treatment"),
              attitude_after_control = md("Control Ending Attitude"),
-             attitude_after_treated = md("Treated Ending Attitude")) |>
+             attitude_after_treated = md("Treated Ending Attitude"),
+             treatment = md("Treatment")) |>
   tab_style(cell_borders(sides = "right"),
             location = cells_body(columns = c(ID))) |>
   tab_style(style = cell_text(align = "left", v_align = "middle", size = "large"), 
@@ -553,8 +551,8 @@ tibble(ID = c("1", "2", "...", "10", "11", "...", "N"),
   cols_align(align = "center", columns = everything()) |>
   cols_align(align = "left", columns = c(ID)) |>
   fmt_markdown(columns = everything()) |>
-  tab_spanner(label = "Predictor", columns = c(treatment)) |>
-  tab_spanner(label = "Outcomes", columns = c(attitude_after_control, attitude_after_treated))
+  tab_spanner(label = "Potential Outcomes", columns = c(attitude_after_control, attitude_after_treated)) |>
+  tab_spanner(label = "Covariate", columns = c(treatment))
 ```
 
 Recall: a Preceptor Table is the smallest possible table with rows and columns such that, if there is no missing data, all our questions are easy to answer. To answer questions --- like "What is the average treatment effect, of exposing people to Spanish-speakers, on their attitudes toward immigration? and What is the largest causal effect which still has a 1 in 10 chance of occurring?" --- we need a row for every individual.
@@ -568,8 +566,7 @@ trains |>
   select(att_end, treatment)
 ```
 
-
-<!-- DK: Say something. -->
+The `treatment` can either be "Treated" or "Control" which are the two factors that may influence `att_end`. Participants were asked three questions about immigration issues, each of which allowed for an answer indicated strength of agreement on a scale form 1 to 5, with higher values for `att_end` indicating more agreement with conservative viewpoints.
 
 ```{r}
 trains |>
@@ -579,7 +576,7 @@ trains |>
 
 The data include information about each respondent's gender, political affiliations, age, income and so on. `treatment` indicates whether a subject was in the control or treatment group. The key outcomes are their attitudes toward immigration both before (`att_start`) and after (`att_end`) the experiment.
 
-`summary()` shows us what the different values of `att_end` and `treatment` are because it is a factor. The range for `att_end` seems reasonable. Recall that participants were asked three questions about immigration issues, each of which allowed for an answer indicated strength of agreement on a scale form 1 to 5, with higher values indicating more agreement with conservative viewpoints.
+`summary()` shows us what the different values of `att_end` and `treatment` are because it is a factor. The range for `att_end` seems reasonable.
 
 ```{r}
 trains |> 
@@ -599,11 +596,11 @@ We can never know the true average attitude of all treated in the population. Bu
 
 #### Validity
 
-<!-- DK: Two specific examples as to why validity fails. -->
+Now the **assumption of validity** may not hold due to the possibility of when our data was collected. For example if the data was collected in the morning for our Preceptor Table the people that are interviewed may be more grumpy when going to work. Compared to the possibility of our other data being collected at night when the people are more relaxed coming back from work to go home.
 
-Now let's take a look at the **assumption of validity** for our data and Preceptor Table. There is no **truth** here. The data is real enough, but you created the Preceptor Table. Whether or not there is a population from which you can assume both the data and the Preceptor Table might have been drawn is not a TRUE/FALSE question. The Preceptor Table is all the people in Chicago in 2023. However, the data we have involves train commuters in the Boston area in 2012. 
+Another case where the **assumption of validity** may not hold because the variables may be too different from each other within the data and the Preceptor Table as the columns are not similar enough between each other. One possible reason we may consider is that the Preceptor Table is all the people in Chicago in 2023. However, the data we have involves train commuters in the Boston area in 2012.
 
-While this assumption can prove validity wrong, overall, the assumption of validity seems reasonable. `att_end` and `treatment` are similar enough between to the underlying concepts in the Preceptor Table that we can "stack" them on top of each other. We can assume that both are drawn from the same population.
+While the assumption can prove validity to be wrong, overall, the assumption of validity seems reasonable enough. `att_end` and `treatment` are similar enough between to the underlying concepts in the Preceptor Table and the data that we can "stack" them on top of each other. We can assume that both are drawn from the same population.
 
 ### Justice
 
@@ -911,29 +908,29 @@ Let's take a look at our question below:
 
 #### Preceptor Table
 
-First, do we need a **causal** or **predictive** model? In our question above we have a predictive model as we only have one outcome: `income` based on our predictor: `age`.
+First, do we need a **causal** or **predictive** model? In our question above we have a predictive model as we are only considerd with one outcome: a person's income based on their age.
 
-Second, what is the outcome? `income` is the **outcome**. Note that the outcome is not necessarily the same concept mentioned in the questions.
+Second, what is the outcome? A person's income would be our **outcome**.
 
 Third, what are the **units**? Our units for this scenario would be dollars as we are concerned with dollars at the station for 40-year olds.
 
-Fourth, what are the **covariates**? In this case, `age` is the only covariate. The Preceptor Table must include any covariates mentioned in the question.
+Fourth, what are the **covariates**? In this case, a person's age is the only covariate. The Preceptor Table must include any covariates mentioned in the question.
 
-Fifth, do we have a **treatment**? No. Treatments will only apply to the situations with causal models. A treatment is just a covariate which we can, at least in theory, manipulate, thereby creating other potential outcomes.
+Fifth, do we have a **treatment**? No. We will be using a predictive model as discussed above and treatments will only apply to situations with causal models. A treatment is just a covariate which we can, at least in theory, manipulate, thereby creating other potential outcomes.
 
-Now we can create our Preceptor Table:
+Our Preceptor Table:
 
 ```{r}
 #| echo: false
 tibble(ID = c("1", "2", "...", "10", "11", "...", "N"),
-       age = c("31", "58", "...", "67", "23", "...", "44"),
-       income = c("150000", "50000", "...", "65000", "35000", "...", "78000"))|>
+       income = c("150000", "50000", "...", "65000", "35000", "...", "78000"),
+       age = c("31", "58", "...", "67", "23", "...", "44"))|>
   
   gt() |>
   tab_header(title = "Preceptor Table") |> 
   cols_label(ID = md("ID"),
-             age = md("Age"),
-             income = md("Income")) |>
+             income = md("Income"),
+             age = md("Age")) |>
   tab_style(cell_borders(sides = "right"),
             location = cells_body(columns = c(ID))) |>
   tab_style(style = cell_text(align = "left", v_align = "middle", size = "large"), 
@@ -941,8 +938,8 @@ tibble(ID = c("1", "2", "...", "10", "11", "...", "N"),
   cols_align(align = "center", columns = everything()) |>
   cols_align(align = "left", columns = c(ID)) |>
   fmt_markdown(columns = everything()) |>
-  tab_spanner(label = "Predictor", columns = c(age)) |>
-  tab_spanner(label = "Outcome", columns = c(income))
+  tab_spanner(label = "Outcome", columns = c(income)) |>
+  tab_spanner(label = "Covariate", columns = c(age))
 ```
 
 Recall: a Preceptor Table is table with rows and columns such that, if there is no missing data, all our questions are easy to answer. To answer questions — like “What would you expect the income to be for a 40-year old?” — we need a row for every individual at the station.
@@ -956,7 +953,7 @@ trains |>
   select(age, income)
 ```
 
-As specified in the Preceptor Table we only care about `age` is the age of the respondent and `income` is the income of the respondent.
+As specified in the Preceptor Table we only care about `age` is the age of the respondent and `income` is the income of the respondent. The `age` and `income` are both numbers either as a double or integer which plays a role in making up an individual's identity.
 
 ```{r}
 trains |>
@@ -981,9 +978,13 @@ We can never know the true average income of the population. But we can calculat
 
 #### Validity
 
-Now let's take a look at the **assumption of validity** for our data and Preceptor Table. There is no **truth** here. The data is real enough, but you created the Preceptor Table. Whether or not there is a population from which you can assume both the data and the Preceptor Table might have been drawn is not a TRUE/FALSE question. The Preceptor Table is all US train commuters today. However, the data we have involves train commuters in the Boston area in 2012. In addition, is our data from the Preceptor Table accurate? The data has been collected from filling out surveys about age without checking a driver's license. The data has been collected from filling out surveys about income without cross-checking with the government database. Finally, the privacy of a train station differs from filling out surveys at home. While all of these questions and assumptions prove validity wrong, overall, the assumption of validity seems reasonable. `age` and `income` are similar enough between our data and The Preceptor Table that we can “stack” them on top of each other. We can assume that both are drawn from the same population.
+Recall that validity refers to whether or not we can consider the columns `age` and `income` to have the same meaning in our data set of 2012 Boston train commuters and in our Preceptor Table. While `age` doesn't really change meaning over time, `income` can be impacted by inflation. After all, \$100,000 in 2012 doesn't have the same worth as \$100,000 now due to inflation and now would have less purchasing power. This would result in income being underestimated within our model. However, since there hasn't been drastic inflation that dramatically changed the buying power, we will consider income to be valid. If there had been like 300% inflation, however, our conclusion would probably be different.
 
-Consider the **validity** of `age` and `income`. Recall that validity refers to whether or not we can consider the columns `age` and `income` to have the same meaning in our data set of 2012 Boston train commuters and in our Preceptor Table. While `age` doesn't really change meaning over time, `income` can be impacted by inflation. After all, \$100,000 in 2012 doesn't have the same worth as \$100,000 now due to inflation and now would have less purchasing power. This would result in income being underestimated within our model. However, since there hasn't been drastic inflation that dramatically changed the buying power, we will consider income to be valid. If there had been like 300% inflation, however, our conclusion would probably be different.
+Now the **assumption of validity** may not hold due to the possibility of how our age data was collected. For example, the data has been collected from filling out surveys about age without checking a driver's license. We don't know whether our age is accurate enough when compared to the driver's license of an individual. 
+
+Another possible scenario that could prove the **assumption of validity** wrong could be the privacy of each station. The privacy of a train station differs from filling out surveys at home. The key difference that exists between the Preceptor Table and the data can exist from the difference in privacy that we have between the two sets of data. 
+
+While the assumption can prove validity to be wrong, overall, the assumption of validity seems reasonable enough. `age` and `income` are similar enough between to the underlying concepts in the Preceptor Table and the data that we can "stack" them on top of each other. We can assume that both are drawn from the same population.
 
 ### Justice
 
@@ -1204,28 +1205,28 @@ Let's take a look at our question below:
 
 #### Preceptor Table
 
-First, do we need a **causal** or **predictive** model? In our question above we have a causal model as we multiple outcomes with `income` based on our predictor: `liberal`.
+First, do we need a **causal** or **predictive** model? In our question above we have a causal model as we would have multiple potential outcomes with a person's attitude based on whether the person is liberal or not.
 
-Second, what is the outcome? `income` is the **outcome**. Note that the outcome is not necessarily the same concept mentioned in the questions.
+Second, what is the outcome? A person's attitude would be the **outcome** in this scenario.
 
 Third, what are the **units**? Our units for this scenario would be individuals because the questions are about the attributes of unique people at the station.
 
-Fourth, do we have a **treatment**? Yes. Treatments apply to the situations with causal models. A treatment is just a covariate which we can, at least in theory, manipulate, thereby creating other potential outcomes. We are exposing the commuters to the Spanish-speakers, which play a role in changing the situation at hand.
+Fourth, do we have a **treatment**? Yes. In any causal model, there is at least one covariate which is defined as the "treatment," something which we can manipulate so that some units receive one version and other units get a different version. In this case, the treatment would be whether an individual's attitude changes. Units can either be exposed, i.e., they are a "treated", or they can not be exposed, i.e., they are a "control."
 
-Now we can create our Preceptor Table:
+Our Preceptor Table:
 
 ```{r}
 #| echo: false
 tibble(ID = c("1", "2", "...", "10", "11", "...", "N"),
-       income = c("150000", "50000", "...", "65000", "35000", "...", "78000"),
        attitude_yes_liberal = c("...", "7", "...", "...", "4", "...", "6"),
-       attitude_no_liberal = c("8", "...", "...", "5", "...", "...", "...")) |>
+       attitude_no_liberal = c("8", "...", "...", "5", "...", "...", "..."),
+       income = c("150000", "50000", "...", "65000", "35000", "...", "78000")) |>
   gt() |>
   tab_header(title = "Preceptor Table") |> 
   cols_label(ID = md("ID"),
-             income = md("Income"),
              attitude_yes_liberal = md("Liberal Ending Attitude"),
-             attitude_no_liberal = md("Not Liberal Ending Attitude")) |>
+             attitude_no_liberal = md("Not Liberal Ending Attitude"),
+             income = md("Income")) |>
   tab_style(cell_borders(sides = "right"),
             location = cells_body(columns = c(ID))) |>
   tab_style(style = cell_text(align = "left", v_align = "middle", size = "large"), 
@@ -1233,8 +1234,8 @@ tibble(ID = c("1", "2", "...", "10", "11", "...", "N"),
   cols_align(align = "center", columns = everything()) |>
   cols_align(align = "left", columns = c(ID)) |>
   fmt_markdown(columns = everything()) |>
-  tab_spanner(label = "Predictor", columns = c(income)) |>
-  tab_spanner(label = "Outcomes", columns = c(attitude_yes_liberal, attitude_no_liberal))
+  tab_spanner(label = "Outcomes", columns = c(attitude_yes_liberal, attitude_no_liberal)) |>
+  tab_spanner(label = "Covariate", columns = c(income))
 ```
 
 Recall: a Preceptor Table is table with rows and columns such that, if there is no missing data, all our questions are easy to answer. To answer questions — like “Among all people who have an income $100,000, what proportion are liberal?
@@ -1249,7 +1250,7 @@ trains |>
   select(liberal, income)
 ```
 
-As specified in the Preceptor Table we only care about `liberal` is whether they are liberal or not and `income` is the income of the respondent.
+As specified in the Preceptor Table we only care about `liberal` is whether they are liberal or not and `income` is the income of the respondent. `liberal` is shown to be `TRUE` when the individual is liberal and `FALSE` when an individual is not liberal, playing a role in shaping their attitude towards the immigrants.
 
 ```{r}
 trains |>
@@ -1277,7 +1278,11 @@ We can never know the true average income is of all treated in the population. B
 
 #### Validity
 
-Now let's take a look at the **assumption of validity** for our data and Preceptor Table. There is no **truth** here. The data is real enough, but you created the Preceptor Table. Whether or not there is a population from which you can assume both the data and the Preceptor Table might have been drawn is not a TRUE/FALSE question. The Preceptor Table is all US train commuters today. However, the data we have involves train commuters in the Boston area in 2012. In addition, is our data from the Preceptor Table accurate? The validity may not hold as the liberal is not evenly split or completely randomized. While this  assumption can prove validity wrong, overall, the assumption of validity seems reasonable. `liberal` and `income` are similar enough between our data and The Preceptor Table that we can “stack” them on top of each other. We can assume that both are drawn from the same population.
+Now let's take a look at the **assumption of validity** for our data and Preceptor Table. There is no **truth** here. The **assumption of validity** may not hold due to the possibility of how our data was collected. We asked each individual whether they were "liberal," which means that we didn't rely on the government database. The possibility of the data being different from the government database and the way that we asked each individual may differ across both the Preceptor Table and the data which can prove the assumption of validity to be false.
+
+Another case where the **assumption of validity** may not hold would be from how our income data was collected similar to our age data collection. The data has been collected from filling out surveys about income without cross-checking with the government database. We don't know whether our income is accurate enough when compared to the government's database to the survey that each individual filled out.
+
+While this assumption can prove validity wrong, overall, the assumption of validity seems reasonable. `liberal` and `income` are similar enough between our data and The Preceptor Table that we can “stack” them on top of each other. We can assume that both are drawn from the same population.
 
 ### Justice
 
@@ -1476,7 +1481,7 @@ The central lesson of Temperance is: Don't confuse the *estimated* posterior (wh
 
 ## Summary
 
-Throughout this chapter, we explored relationships between different variables in the `trains` data set. We built three predictive models and one causal model.
+Throughout this chapter, we explored relationships between different variables in the `trains` data set. We built two predictive models and two causals model.
 
 Similar to previous chapters, our first task is to always use **Wisdom**. We want to judge how relevant our data is based on the questions we ask. Is it reasonable to consider the data we have (e.g., income and age data from Boston commuters in 2012) are being drawn from the same population as the data we want to have (e.g., income and age data from today for the entire US)? Probably? Recall that these questions will bring up the **assumption of validity** and whether our data will be able to "stack" up with each other.
 
