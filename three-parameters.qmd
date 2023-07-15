@@ -195,7 +195,9 @@ tibble(source = c("...", "Data", "Data", "...",
             locations = cells_column_labels(columns = c(source))) |>
   cols_align(align = "center", columns = everything()) |>
   cols_align(align = "left", columns = c(source)) |>
-  fmt_markdown(columns = everything())  
+  fmt_markdown(columns = everything()) |>
+  tab_spanner(label = "Outcome", columns = c(age)) |>
+  tab_spanner(label = "Covariates", columns = c(party, year, city))
 ```
 
 Our year within the Population table is an example of the moment in time.
@@ -620,32 +622,34 @@ After assuming validity, we can now create our Population Table. Recall that eve
 #| echo: false
 tibble(source = c("...", "Data", "Data", "...", 
                   "...", "Preceptor Table", "Preceptor Table", "..."),
+       att_treat = c("...", "...", "6", "...",
+                     "...", "...", "...", "..."),
+       att_control = c("...", "2", "...", "...", 
+                       "...", "...", "...", "..."),
        city = c("...", "Boston, MA", "Boston, MA", "...", 
                 "...", "Wilmington, DE", "Atlanta, GA", "..."),
        year = c("...", "2012", "2012", "...", 
                 "...", "2023", "2023", "..."),
        treatment = c("...", "No", "Yes", "...", 
-                     "...", "Yes", "Yes", "..."),
-       att_treat = c("...", "...", "6", "...",
-                     "...", "...", "...", "..."),
-       att_control = c("...", "2", "...", "...", 
-                       "...", "...", "...", "...")) |>
+                     "...", "Yes", "Yes", "...")) |>
   
   gt() |>
   tab_header(title = "Population Table") |> 
   cols_label(source = md("Source"),
-             city = md("City"),
-             year = md("Year"),
-             treatment = md("Treatment"),
              att_treat = md("Treated"),
-             att_control = md("Controlled")) |>
+             att_control = md("Controlled"),
+             treatment = md("Treatment"),
+             city = md("City"),
+             year = md("Year")) |>
   tab_style(cell_borders(sides = "right"),
             location = cells_body(columns = c(source))) |>
   tab_style(style = cell_text(align = "left", v_align = "middle", size = "large"), 
             locations = cells_column_labels(columns = c(source))) |>
   cols_align(align = "center", columns = everything()) |>
   cols_align(align = "left", columns = c(source)) |>
-  fmt_markdown(columns = everything())  
+  fmt_markdown(columns = everything()) |>
+  tab_spanner(label = "Potential Outcomes", columns = c(att_control, att_treat)) |>
+  tab_spanner(label = "Covariates", columns = c(treatment, year, city))
 ```
 
 Our year within the Population table is an example of the moment in time.
@@ -1004,29 +1008,32 @@ With our **assumption of validity** proving to be reasonably accurate, we can no
 #| echo: false
 tibble(source = c("...", "Data", "Data", "...", 
                   "...", "Preceptor Table", "Preceptor Table", "..."),
+       income = c("...", "150000", "50000", "...",
+                 "...", "45000", "15000", "..."),
        city = c("...", "Boston, MA", "Boston, MA", "...", 
                 "...", "Wilmington, DE", "Atlanta, GA", "..."),
        year = c("...", "2012", "2012", "...", 
                 "...", "2023", "2023", "..."),
        age = c("...", "43", "52", "...", 
-               "...", "...", "...", "..."),
-       income = c("...", "150000", "50000", "...",
-                 "...", "45000", "15000", "...")) |>
+               "...", "...", "...", "...")) |>
   
   gt() |>
   tab_header(title = "Population Table") |> 
   cols_label(source = md("Source"),
+             income = md("Income"),
              city = md("City"),
              year = md("Year"),
-             age = md("Age"),
-             income = md("Income")) |>
+             age = md("Age")) |>
   tab_style(cell_borders(sides = "right"),
             location = cells_body(columns = c(source))) |>
   tab_style(style = cell_text(align = "left", v_align = "middle", size = "large"), 
             locations = cells_column_labels(columns = c(source))) |>
   cols_align(align = "center", columns = everything()) |>
   cols_align(align = "left", columns = c(source)) |>
-  fmt_markdown(columns = everything())  
+  fmt_markdown(columns = everything()) |>
+  tab_spanner(label = "Outcome", columns = c(income)) |>
+  tab_spanner(label = "Covariates", columns = c(age, year, city))
+  
 ```
 
 Our year within the Population table is an example of the moment in time.
@@ -1234,7 +1241,7 @@ tibble(ID = c("1", "2", "...", "10", "11", "...", "N"),
   cols_align(align = "center", columns = everything()) |>
   cols_align(align = "left", columns = c(ID)) |>
   fmt_markdown(columns = everything()) |>
-  tab_spanner(label = "Outcomes", columns = c(attitude_yes_liberal, attitude_no_liberal)) |>
+  tab_spanner(label = "Potential Outcomes", columns = c(attitude_yes_liberal, attitude_no_liberal)) |>
   tab_spanner(label = "Covariate", columns = c(income))
 ```
 
@@ -1302,31 +1309,33 @@ With our **assumption of validity** proving to be reasonably accurate, we can no
 #| echo: false
 tibble(source = c("...", "Data", "Data", "...", 
                   "...", "Preceptor Table", "Preceptor Table", "..."),
+       att_yes_liberal = c("...", "6", "9", "...",
+                           "...", "...", "...", "..."),
+       att_no_liberal = c("...", "...", "...", "...",
+                          "...", "3", "2", "..."),
        city = c("...", "Boston, MA", "Boston, MA", "...", 
                 "...", "Wilmington, DE", "Atlanta, GA", "..."),
        year = c("...", "2012", "2012", "...", 
                 "...", "2023", "2023", "..."),
        income = c("...", "150000", "50000", "...",
-                 "...", "45000", "15000", "..."),
-       att_yes_liberal = c("...", "6", "9", "...",
-                           "...", "...", "...", "..."),
-       att_no_liberal = c("...", "...", "...", "...",
-                          "...", "3", "2", "...")) |>
+                 "...", "45000", "15000", "...")) |>
   gt() |>
   tab_header(title = "Population Table") |> 
   cols_label(source = md("Source"),
+             att_yes_liberal = md("Liberal Ending Attitude"),
+             att_no_liberal = md("Not Liberal Ending Attitude"),
              city = md("City"),
              year = md("Year"),
-             income = md("Income"),
-             att_yes_liberal = md("Liberal Ending Attitude"),
-             att_no_liberal = md("Not Liberal Ending Attitude")) |>
+             income = md("Income")) |>
   tab_style(cell_borders(sides = "right"),
             location = cells_body(columns = c(source))) |>
   tab_style(style = cell_text(align = "left", v_align = "middle", size = "large"), 
             locations = cells_column_labels(columns = c(source))) |>
   cols_align(align = "center", columns = everything()) |>
   cols_align(align = "left", columns = c(source)) |>
-  fmt_markdown(columns = everything())  
+  fmt_markdown(columns = everything()) |>
+  tab_spanner(label = "Potential Outcomes", columns = c(att_yes_liberal, att_no_liberal)) |>
+  tab_spanner(label = "Covariates", columns = c(income, year, city))
 ```
 
 Our year within the Population table is an example of the moment in time.
