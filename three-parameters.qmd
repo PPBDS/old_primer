@@ -14,8 +14,6 @@ library(patchwork)
 
 <!-- DK: Clean up these residuals plots to be similar across chapters! Also, we should ensure that the width of 10 units is the same in each plot. Or does that already happen? Want the intuition that, the more predictive the model, the smaller the remaining variation in the residuals. The below is from chapter 7. -->
 
-<!-- Come up with common ways in which a lack of representativeness causes problems. This is a list of things that we can check each time when we are interrogating a data science problem. Key issue is the correlation, if anything, between the "assignment mechanism" or "sampling mechanism" and other variables. Discuss sampling mechanism in all cases except att_end ~ treatment. For that, use "assignment mechanism." -->
-
 <!-- Combo of old things from different sections and new explanations, need to combine and clarify -->
 
 <!-- One of the key jobs of a data scientist is to guide people --- our colleagues, bosses and clients --- toward asking precise questions. We must help them to translate English into inference. That translation requires precision. -->
@@ -94,6 +92,8 @@ tibble(ID = c("1", "2", "...", "10", "11", "...", "N"),
 ```
 
 Recall: a Preceptor Table is smallest possible table with rows and columns such that, if there is no missing data, all our questions are easy to answer. To answer questions --- like "What is the probability that, if a Democrat shows up at the train station, he will be over 50 years old?" --- we need a row for every individual at the station.
+
+When we take a look at the questions we discover that there is a fundamental flaw within our questions. We don't know the location or the time that exists within these questions making it harder to find the answers to resolve our questions. When this occurs, we need to discuss and dive deeper into the questions that have been asked to understand what the true question is at hand. For the questions that we have at hand we will be using the year 2023 and the location of Chicago, Illinois which will allow us to answer the questions more accurately. 
 
 #### Always Explore Your Data
 
@@ -208,7 +208,7 @@ Our Preceptor Table rows are chronologically ordered. The "other" rows are our g
 
 **Stability** means that the relationship between the columns is the same for three categories of rows: the data, the Preceptor table, and the larger population from which both are drawn. With something like height, it is much easier to assume stability over a greater period of time. Changes in global height occur extremely slowly, so height being stable across a span of 20 years is reasonable to assume. With something like political ideology, it is much harder to make the assertion that data collected in 2010 would be stable to data collected in 2030. When we are confronted with this uncertainty, we can consider making our timeframe smaller. However, we would still need to assume stability from 2014 (time of data collection) to today. Stability allows us to ignore the issue of time.
 
-**Representativeness** has to do with how well our sample represents the larger population we are interested in generalizing to. Does the train experiment allow us to calculate a causal effect for people who commute by cars? Can we calculate the causal effect for people in New York City? Before we generalize to broader populations we have to consider if our experimental estimates are applicable beyond our experiment. Generally: *if there was no chance that a certain type of person would have been in this experiment, we cannot make an assumption for that person*.
+**Representativeness** has to do with how well our sample represents the larger population we are interested in generalizing to. For example does the correlation between our "sampling mechanism" and other variables hold to be true. The "sampling mechanism" refers to a mechanism that utilizes sampling in order to get the best possible outcomes with the help of randomization and application to general population. Does the train experiment allow us to calculate a causal effect for people who commute by cars? Can we calculate the causal effect for people in New York City? Before we generalize to broader populations we have to consider if our experimental estimates are applicable beyond our experiment. Generally: *if there was no chance that a certain type of person would have been in this experiment, we cannot make an assumption for that person*.
 
 **Unconfoundedness** means that the treatment assignment is independent of the potential outcomes, when we condition on pre-treatment covariates. However, with our scenario, we have a predictive model and this assumption is only relevant for causal models.
 
@@ -387,9 +387,11 @@ The three plots are structured like our equation and table above. A value in the
 knitr::include_graphics("other/images/Temperance.jpg")
 ```
 
-Recall the first questions with which we began this section:
+Recall the questions with which we began this section:
 
--   What is the probability that, if a Democrat shows up at the train station, he will be over 50 years old?
+*What is the probability that, if a Democrat shows up at the train station, he will be over 50 years old?*
+
+*In a group of three Democrats and three Republicans, what will the age difference be between the oldest Democrat and the youngest Republican?*
 
 So far we have only tried our model on people from our data set whose real age we already knew. This is helpful to understand the model, but our ultimate goal is to understand more about the real world, about people we don't yet know much about. Temperance guides us to make meaningful predictions and to become aware of their known and unknown limitations.
 
@@ -501,14 +503,11 @@ In words, we would expect the oldest Democrat to be about 22 years older than th
 
 ## att_end \~ treatment
 
-<!-- DK: At some point, specify the location and the year, 2023. Not at the beginning.  -->
-
 Above, we created a predictive model: with someone's party affiliation, we can make a better guess as to what their age is than we could have in the absence of information about their party. There was nothing causal about that model. Changing someone's party registration can not change their age. In this example, we build a causal model. Consider these two questions:
 
 *What is the average treatment effect, of exposing people to Spanish-speakers, on their attitudes toward immigration?*
 
 *What is the largest causal effect which still has a 1 in 10 chance of occurring?*
-
 
 Answering causal questions requires (at least) two potential outcomes: immigration attitudes when a person receives the treatment of being exposed to Spanish-speakers and immigration attitudes, for that same person, when they don't receive the treatment. We can answer these and similar questions by creating a model with immigration attitude as the dependent variable and exposure to Spanish-speakers as the independent variable. Let's follow the four Cardinal Virtue: Wisdom, Justice, Courage and Temperance.
 
@@ -558,6 +557,8 @@ tibble(ID = c("1", "2", "...", "10", "11", "...", "N"),
 ```
 
 Recall: a Preceptor Table is the smallest possible table with rows and columns such that, if there is no missing data, all our questions are easy to answer. To answer questions --- like "What is the average treatment effect, of exposing people to Spanish-speakers, on their attitudes toward immigration? and What is the largest causal effect which still has a 1 in 10 chance of occurring?" --- we need a row for every individual.
+
+When we take a look at the questions we discover a flaw exists. The individual that asked this question did not tell us where or when we are looking at these questions. It is important to understand where and when that we are answering these questions because otherwise our data could be not accurately applied to the whole country, nation, or specific state. Therefore, by diving deeper within these questions we are able to accurately answer our question with the population that it refers to. For the questions that we have at hand we will be using the year 2023 and the location of Chicago, Illinois which will allow us to answer the questions more accurately. 
 
 #### Exploratory Data Analysis
 
@@ -660,7 +661,7 @@ Our **actual data** rows contain the information that we *do* know. These rows c
 
 Consider the **stability** of our model for the relationship between `att_end` and `treatment` between 2012 and 2023. Is this relationship from 2012, four years before Donald Trump's election as president, still the same? While we might not know for sure, we have to consider this in order to continue and make assumptions with our data. For our purposes, we will consider the relationship to be stable. Even though we know that there may have been some changes, we will consider the model to be the same in both years.
 
-Let's now once again consider whether the data from 2012 train commuters around Boston is representative of 2012 train commuters in the US. In our last model, we discussed the issue about how Boston may be different from other cities and therefore not representative of the US, and we will now consider the issue of random sampling that may lead to **representativeness** issues.
+Let's now once again consider whether the data from 2012 train commuters around Boston is representative of 2012 train commuters in the US. In our last model, we discussed the issue about how Boston may be different from other cities and therefore not representative of the US, and we will now consider the issue of random sampling that may lead to **representativeness** issues. For example will the correlation between our "assignment mechanism" and other variables hold to be true? The "assignment mechanism" is a mechanism that utilizes random sampling in order to decide the treatment that certain subjects will receive - it plays a role in deciding which individuals will be the "treated" versus those that will be the "control"
 
 Let's say that even though Boston is different from other US cities, we considered Boston to be perfectly representative of the US. Great, but this 2012 data could still not be representative. This is because there could be bias within those who are chosen to give the survey, in that the commuters who are approached and receive the surveys may not be random or representative. What if the individuals giving out the surveys were younger and also tended to choose people to approach with a survey that were similar in age to them? A scenario like this could end up overestimating younger train commuters in the population, which could influence our answers to any of our questions. Specifically, when considering the relationship between `att_end` and `treatment`, this could influence the results of the model because younger individuals may have similar attitudes on immigration.
 
@@ -948,6 +949,8 @@ tibble(ID = c("1", "2", "...", "10", "11", "...", "N"),
 
 Recall: a Preceptor Table is table with rows and columns such that, if there is no missing data, all our questions are easy to answer. To answer questions — like “What would you expect the income to be for a 40-year old?” — we need a row for every individual at the station.
 
+When we take a look at the questions we discover a flaw exists. The individual that asked this question did not tell us where or when we are looking at these questions. Do we need to look at the year 2022, 2020, 2018? Do we need to look in Florida, Connecticut, Maryland? It is vital to understand where and when that we are answering these questions because otherwise our data could be not accurately applied to the whole country, nation, or specific state. Therefore, by diving deeper within these questions we are able to accurately answer our question with the population that it refers to. For the questions that we have at hand we will be using the year 2023 and the location of Chicago, Illinois which will allow us to answer the questions more accurately. 
+
 #### Data Analysis
 
 Recall the discussion from @sec-rubin-causal-model. @enos2014 randomly placed Spanish-speaking confederates on nine train platforms around Boston, Massachusetts. The data that we want to analyze consists of the age and party of each individual on these train platforms based on our variables in our Preceptor Table. These reactions were measured through changes in answers to three survey questions.
@@ -1044,7 +1047,7 @@ The Population Table includes commuters from our Preceptor Table with the inform
 
 Consider the **stability** of our model and if we believe that our relationship between age and income has changed between 2012 and now. Once again, let's consider inflation and how that could impact income. If incomes were to increase at the rate of inflation, then the income distribution would be different than that of 2012. However, wages don't tend to change as quickly as inflation does, so they likely did not change significantly and we can consider this model to be stable.
 
-Next, let's consider another issue that we may have with **representativeness**. What if we were now to assume that Boston train commuters are perfectly representative of US train commuters AND those who were approached to respond to the survey were also random? Even if this were true, we could still not assume representativeness because those who actually complete and submit the survey are not random. Instead of having more young people chosen to respond by those handing out surveys like we discussed in our last model, what if were to assume that when the surveys are handed out randomly, younger people tended to fill out and submit them more than those who are older? Well, this would still skew the age distribution and overestimate younger people in the population, and if younger people also tend to have a lower income than older people, this could also alter our answers to our current questions.
+Next, let's consider another issue that we may have with **representativeness**. For example will the correlation between our "sampling mechanism" and other variables hold to be true? The "sampling mechanism" is a mechanism that utilizes sampling in order to get the best possible outcomes with the help of randomization and application to general population. What if we were now to assume that Boston train commuters are perfectly representative of US train commuters AND those who were approached to respond to the survey were also random? Even if this were true, we could still not assume representativeness because those who actually complete and submit the survey are not random. Instead of having more young people chosen to respond by those handing out surveys like we discussed in our last model, what if were to assume that when the surveys are handed out randomly, younger people tended to fill out and submit them more than those who are older? Well, this would still skew the age distribution and overestimate younger people in the population, and if younger people also tend to have a lower income than older people, this could also alter our answers to our current questions.
 
 If we had reason to believe this is true, one way that we could fix this issue of representativeness is to alter our population to be train commuters in the US who would respond to the survey. In doing so, our population would then accommodate for the skewed age distribution under the assumption that younger individuals tend to respond to surveys at higher rates than older people.
 
@@ -1248,6 +1251,8 @@ tibble(ID = c("1", "2", "...", "10", "11", "...", "N"),
 Recall: a Preceptor Table is table with rows and columns such that, if there is no missing data, all our questions are easy to answer. To answer questions — like “Among all people who have an income $100,000, what proportion are liberal?
 and Assume we have a group of eight people, two of whom make $100,000, two $200,000, two $300,000 and two $400,000. How many will be liberal?” — we need a row for every individual at the station.
 
+When we take a look at the questions we discover that there is a flaw that exists. The individual that asked this question did not give us the location or the time that we want to use for these questions at hand. It is vital to understand where and when that we are answering these questions because otherwise it could apply to the whole country, nation, or specific state. Therefore, by diving deeper within these questions we are able to accurately answer our question with the population that it refers to. For the questions that we have at hand we will be using the year 2023 and the location of Chicago, Illinois which will allow us to answer the questions more accurately. 
+
 #### Data Analysis with Exploratory Approach
 
 Recall the discussion from @sec-rubin-causal-model. @enos2014 randomly placed Spanish-speaking confederates on nine train platforms around Boston, Massachusetts. The data that we want to analyze consists of the age and party of each individual on these train platforms based on our variables in our Preceptor Table. These reactions were measured through changes in answers to three survey questions.
@@ -1346,7 +1351,7 @@ Look at the **validity** of the `liberal` variable. This column has the values "
 
 Let's look at **stability** with the relationship between `liberal` and `income` and determine whether or not we believe that this relationship has changed between 2012 and 2023. With our knowledge of the world, do we have any reason to believe that this has changed? What if between 2012 and 2023, income increased for those who are liberal? Well, then our model for the the relationship between `income` and `liberal` would have changed over the years, and therefore so would the model. However, since with our knowledge of the world we have no reason to believe that something of the sorts happened to affect this relationship, we can consider our model to be stable.
 
-In our past three models, we have considered three possible issues that we could have with the **representativeness** of our model, such as the difference between Boston and other cities, problems with random sampling, and bias in those who respond, and we will now consider how in this survey there were surveys given before and after treatment, and some people may have filled out only one of the surveys. People who only filled out one of the surveys could affect the representativeness of the data because they could not be included in the data and if those who only filled out one survey tended to be liberal, then this would affect our data because it would underestimate the amount of liberals in the survey. This is something we must consider when looking at representativeness, since we could otherwise not determine if this data from train commuters in Boston in 2012 is representative enough of train commuters in the US now to continue using our data.
+When we take a look at **representativeness** we want to look at the correlation between our sampling mechanism and our variables at hand. For example will the correlation between our "sampling mechanism" and other variables hold to be true? The mechanism utilizes sampling in order to get the best possible outcomes with the help of randomization and application to general population. In our past three models, we have considered three possible issues that we could have with the **representativeness** of our model, such as the difference between Boston and other cities, problems with random sampling, and bias in those who respond, and we will now consider how in this survey there were surveys given before and after treatment, and some people may have filled out only one of the surveys. People who only filled out one of the surveys could affect the **representativeness** of the data because they could not be included in the data and if those who only filled out one survey tended to be liberal, then this would affect our data because it would underestimate the amount of liberals in the survey. This is something we must consider when looking at **representativeness**, since we could otherwise not determine if this data from train commuters in Boston in 2012 is representative enough of train commuters in the US now to continue using our data.
 
 #### Data Generating Mechanism (DGM)
 
