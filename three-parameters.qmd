@@ -10,15 +10,9 @@ library(gtsummary)
 library(patchwork)
 ```
 
+<!-- MT: do we want posterior predict check in courage or temperance. currently temperance has posterior predict, however, i have added the check before the table because it makes the most sense before putting the data in a table.  -->
 
-<!-- Courage Steps: -->
-<!-- 1. Data Generating Mechanism with the mathematics -->
-<!-- 2. Parameters that we will use in the model and why -->
-<!-- 3. Create a fitted model with posterior predict & model comparisons -->
-<!-- 4. Discuss the fitted model and what can be questioned -->
-<!-- age~party DONE, att_end~treatment DONE, income~age, liberal~income-->
-
-<!-- Courage. First, what is the mathematics? We need to show the math, to specify the variables which are included and the parameters which are used. Second, what are the values of the parameters? The math plus the parameters creates the Data Generating Mechanism, which is the final step of Courage. All of this is very circular. Fuss with the fitted model. Example is posterior predictive checks. Also model comparisons. Also checking parameters for reasonableness is a poor man's posterior predictive check. Iterative process. -->
+<!-- Courage. First, what is the mathematics? We need to show the math, to specify the variables which are included and the parameters which are used. Second, what are the values of the parameters? The math plus the parameters creates the Data Generating Mechanism, which is the final step of Courage. All of this is very circular. Fuss with the fitted model. Example is posterior predictive checks. Also model comparisons. Also checking parameters for reasonableness is a poor man's posterior predictive check. Iterative process. DONE-->
 
 <!-- Need a table which shows all 4 (?) languages for describing a model together: English, math, code, output. ? -->
 
@@ -238,7 +232,7 @@ Courage centers around the creation of the data generating mechanism, i.e., our 
 
 The type of outcome variable is the most important issue in determining the mathematical form of the **data generating mechanism**. Since our outcome is a (mostly) continuous variable, a linear DGM is reasonable. If the outcome variable had been binary --- had only has two options --- we would use a logistic model. 
 
-We can also consider the type of DGM. Any DGM with age as its dependent variable will be predictive, not causal, for the simple reason that nothing, other than time, can change your age. You are X years old. It would not matter if you changed your party registration from Democrat to Republican or vice versa. Your age is your age. When dealing with a non-causal DGM, the focus is on predicting things. The underlying mechanism which connects age with party is less important than the brute statistical fact that there is a connection. *Predictive models care little about causality.*
+We can also consider the type of DGM. Any DGM with age as its dependent variable will be predictive, not causal, for the simple reason that nothing, other than time, can change your age. You are X years old. It would not matter if you changed your party registration from Democrat to Republican or vice versa. Your age is your age. When dealing with a non-causal DGM, the focus is on predicting things. The underlying mechanism which connects age with party is less important than the brute statistical fact that there is a connection. *Predictive models care nothing about causality.*
 
 Let's interpret **courage** with our our DGM. First let's take a look at the mathematics:
 
@@ -248,9 +242,9 @@ where \n $$republican_i, democrat_i \in \{0,1\}$$ \n $$republican_i +  democrat_
 
 Don't panic dear poets and philosophers, the whole thing is easier than it looks. This will follow the form above in which the outcome is the result of what is in our model and not in our model.
 
-Let's dive deeper into the data generating mechanism at hand. On the left-hand side we have the outcome, $y_i$, which is the variable to be explained. In our case, this is the age of an individual in the population. The right-hand side contains two parts: that which is contained within the model, and that which isn't.
+Let's dive deeper into the data generating mechanism at hand. On the left-hand side we have the outcome, $y$, which is the variable to be explained. In our case, this is the age of an individual in the population. The right-hand side contains two parts: that which is contained within the model, and that which isn't.
 
-As important as our mathematics is, we need to take a look at the parameters that we have at hand. Looking at our parameters allows us to create fitted model by combining the mathematics and the interpretations of the parameters. $\beta_0$ is the difference between the the average age of Republicans and that of Democrats. $\beta_1$ is the average age of Democrats. As shown in our model, $\beta_0$ and $\beta_1$ are two terms that allow us to make our model. The second part in the right-hand side, $\epsilon_i$ ("epsilon"), represents the unexplained part of the outcome and is called the error term. This includes all factors that have an influence on someone's age but are not related to party affiliation. In other words, $\epsilon_i$ is what influence age that is not factored into our model. We assume that this error follows a normal distribution with an expected value of 0 (meaning it is 0 on average) and it is simply the difference between the outcome and our model predictions. Therefore, we have three main parameters: $\beta_0$, $\beta_1$, and $\epsilon_i$ that we will discuss within this section. 
+As important as our mathematics is, we need to take a look at the parameters that we have at hand. Looking at our parameters allows us to create fitted model by combining the mathematics and the interpretations of the parameters. $\beta_0$ is the difference between the the average age of Republicans and that of Democrats. $\beta_1$ is the average age of Democrats. As shown in our model, $\beta_0$ and $\beta_1$ are two terms that allow us to make our model. The second part in the right-hand side, $\epsilon$ ("epsilon"), represents the unexplained part of the outcome and is called the error term. In other words, $\sigma$ is what plays a role with age that is not factored into our model. We assume that this error follows a normal distribution with an expected value of 0 (meaning it is 0 on average) and it is simply the difference between the outcome and our model predictions. Therefore, we have three main parameters: $\beta_0$, $\beta_1$, and $\sigma$ that we will discuss within this section. 
 
 Some things we want to note about our model:
 
@@ -294,7 +288,14 @@ The intercept, 42.6 estimates the age of Democrats. The `partyRepublican` estima
 
 `posterior_predict()` will generate the same posterior predictive probability distributions. Which parameterization we use does not matter much. But you should be able to interpret the meaning of the coefficients in both.
 
-We can display the fitted values of the parameters in a pleasing table:
+```{r}
+#| echo: false
+pp_check(fit_1, plotfun = "hist", nreps = 2, binwidth = 3)
+```
+
+If we run a posterior predict check we can view our data based on a histogram graph. When we compare our data with the graphs on the right we can see that our model is fairly accurate. We have been able to predict data that has been proven to be fairly accurate as the fitted model can be seen to have roughly the same structure.
+
+Now that we have run a posterior predict check to ensure that we have a fitted model that best suits us we can display the fitted values of the parameters in a pleasing table:
 
 ```{r}
 gtsummary::tbl_regression(fit_1, intercept = TRUE) %>%
@@ -333,7 +334,6 @@ trains |>
 ```
 
 <!-- More extreme awkwardness. -->
-<!-- Need the bottom to flow with the top -->
  
 
 The fitted values are the same for all Republicans and for all Democrats, as the model produces one fitted value for each condition. This table shows how just a sample of 8 individuals captures a wide range of residuals, making it difficult to predict the age of a new individual. We can get a better picture of the unmodeled variation in our sample if we plot these three variables for all the individuals in our data.
@@ -381,7 +381,7 @@ The three plots are structured like our equation and table above. A value in the
 
 When we take a look at all of our data from the fitted model we want to understand the posterior predictive check. A posterior predictive check is targeted for the comparison between what the fitted model predicts and the actual observed data. The aim is to detect if the model is inadequate to describe the data. When we take a look at the data above we can understand that the residuals are high for the fitted model which makes the fitted model less accurate for us to use to predict. We can take a look at this through the fitted model's prediction of age when compared to the the actual data on the left hand side. 
 
-When we take a look at both of our variables: age and party there are several possibilities that may exist. For example, what would occur if the party would change for each person and the definition change, how would that affect our model? What would happen if we decided to use a different family besides "gaussian?" What would happen if we changed the seed? Or refresh? All of these seemingly "minute" factors play a strong role in changing the outcome of our fitted model and how we are able to provide more accurate results with the help of our model. 
+When we take a look at both of our variables: age and party there are several possibilities that may exist. These two variables hold several outcomes based on the way that we interpret them. All of these seemingly "minute" factors play a strong role in changing the outcome of our fitted model and how we are able to provide more accurate results with the help of our model. 
 
 <!-- DK: How can we check that the DGM is ok? Answer: By creating some fake data sets, and making sure that our real data set "looks like" the fake ones. -->
 
@@ -699,7 +699,7 @@ where \n $$treatment_i, control_i \in \{0,1\}$$ \n $$treatment_i +  control_i = 
 
 Nothing has changed, except for the meaning of the data items and the interpretations of the parameters. Let's take a look at the parameters of the situation which plays a role alongside the mathematics to create the fitted model.
 
-On the left-hand side we still have the outcome, $y_i$, however in this case, this is a person's attitude toward immigration after the experiment is complete. $y_i$ takes on integer values between 3 and 15 inclusive. On the right-hand side, the part contained in the model will consist of the terms $\beta_1$ and $\beta_2$. These two terms stand for the intercept and the control and as before, each term consists of a parameter and a data point. $\beta_1$ is the average attitude toward immigration for treated individuals. $\beta_2$ is the difference between the attitude toward immigration for treated individuals --- those exposed to Spanish-speakers --- and the average attitude toward immigration for control individuals --- those not exposed to Spanish-speakers. These are both our parameters. The $x$'s are our explanatory variables and take the values 1 or 0. In other words, these are binary variables and are mutually exclusive.The last part, $\epsilon_i$ ("epsilon"), represents the part that is not explained by our model and is called the error term. It is simply the difference between the outcome and our model predictions. In our particular case, this includes all factors that have an influence on someone's attitude toward immigration but are not explained by treatment status. We assume that this error follows a normal distribution with an expected value of 0.
+On the left-hand side we still have the outcome, $y$, however in this case, this is a person's attitude toward immigration after the experiment is complete. $y$ takes on integer values between 3 and 15 inclusive. On the right-hand side, the part contained in the model will consist of the terms $\beta_1$ and $\beta_2$. These two terms stand for the intercept and the control and as before, each term consists of a parameter and a data point. $\beta_1$ is the average attitude toward immigration for treated individuals. $\beta_2$ is the difference between the attitude toward immigration for treated individuals --- those exposed to Spanish-speakers --- and the average attitude toward immigration for control individuals --- those not exposed to Spanish-speakers. These are both our parameters. The $x$'s are our explanatory variables and take the values 1 or 0. In other words, these are binary variables and are mutually exclusive.The last part, $\epsilon$ ("epsilon"), represents the part that is not explained by our model and is called the error term. It is simply the difference between the outcome and our model predictions. In our particular case, this includes all factors that have an influence on someone's attitude toward immigration but are not explained by treatment status. We assume that this error follows a normal distribution with an expected value of 0.
 
 -   Note that the formula applies to everyone in the population, not just the 115 people for whom we have data. The index $i$ does not just go from 1 through 115. It goes from 1 through $N$, where $N$ is the number of individuals in the population. Conceptually, everyone has an `att_end` under treatment and under control.
 
@@ -723,6 +723,15 @@ fit_2
 `att_end` is a measure of person's attitude toward immigration. A higher number means more conservative, i.e., a more exclusionary stance toward immigration into the United States.
 
 Note that once again, since we are using a linear model, we set the `family` argument to "gaussian".
+
+```{r}
+#| echo: false
+pp_check(fit_2, plotfun = "scatter", nreps = 3)
+```
+
+If we run a posterior predict check we can view our data based on a scatter graph. Through this we can visualize our predictions when compared to the actual data. Our predictions are seemingly accurate when we can run a check on it which shows us that our fitted model has been shown to be seemingly accurate. 
+
+Now that we have run a posterior predict check to ensure that we have a fitted model that best suits us we can create a table like the one below to visualize the data we currently have. 
 
 ```{r}
 #| echo: false
@@ -765,7 +774,7 @@ outcome + fitted + res +
   plot_annotation(title = "Decomposition of Immigration Attitudes into Fitted Values and Residuals")
 ```
 
-The smaller the spread of the residuals, the better a job the model is doing of explaining the outcomes. The residuals that we have above explains our error that we have within the model. As we can see above, our model did not do a great job of predicting the attitude toward immigration as our fitted values only present two possible values. The credit of this goes towards the residuals as the error within our graph is huge causing for the fitted values to be smaller and less precise. What would happen if we decided to use a different family besides "gaussian?" What would happen if we changed the seed? Or refresh? All of these seemingly "minute" factors play a strong role in changing the outcome of our fitted model and how we are able to provide more accurate results with the help of our model.
+The smaller the spread of the residuals, the better a job the model is doing of explaining the outcomes. The residuals that we have above explains our error that we have within the model. As we can see above, our model did not do a great job of predicting the attitude toward immigration as our fitted values only present two possible values. The credit of this goes towards the residuals as the error within our graph is huge causing for the fitted values to be smaller and less precise.
 
 ### Temperance
 
@@ -1075,6 +1084,8 @@ The algebra demonstrates that $\beta_1$ is the same for all ages. The difference
 
 Note how careful we are not to imply that increasing age by one year "causes" an increase in income. That is nonsense! *No causation without manipulation.* Since it is impossible to change someone's age, there is only one potential outcome. With only one potential outcome, a causal effect is not defined.
 
+As important as our mathematics is, we need to take a look at the parameters at hand. Looking at our parameters allows us to create fitted model by combining the mathematics and interpretations of the parameters. $\beta_0$ is the difference in expected income between individuals. $\beta_1$ is the average age within all of the people in the dataset. As shown in our model, $\beta_0$ and $\beta_1$ are two terms that allow us to make our model. The second part in the right-hand side, $\epsilon$ ("epsilon"), represents the unexplained part of the outcome and is called the error term. In other words, $\sigma$ is what plays a role with age that is not factored into our model. We assume that this error follows a normal distribution with an expected value of 0 (meaning it is 0 on average) and it is simply the difference between the outcome and our model predictions. Therefore, we have three main parameters: $\beta_0$, $\beta_1$, and $\sigma$ that we will use within this section. 
+
 #### Predictive Model
 
 The use of `stan_glm()` is the same as usual.
@@ -1099,6 +1110,24 @@ The above is a good summary of the models.
 -   It does not just blindly repeat numbers in the printed display. A one year difference in age, which is associated with a \$900 difference in income, is awkward. (We think.) A decade comparison is more sensible.
 
 -   "When comparing" is a great phrase to start the summary of any non-causal model. Avoid language like "associated with" or "leads to" or "implies" or anything which even hints at a causal claim.
+
+```{r}
+#| echo: false
+pp_check(fit_3, plotfun = "hist", nreps = 1, binwidth = 10000)
+```
+
+If we run a posterior predict check we can view our data based on a histogram graph. Through this we can visualize our predictions when compared to the actual data. Our predictions are seemingly accurate when we can run a check on it which shows us that our fitted model has been shown to be seemingly accurate even if it is not as probable
+about the data. 
+
+Now that we have run a posterior predict check to ensure that we have a fitted model that best suits us we can create a table like the one below to visualize the data we currently have. 
+
+```{r}
+#| echo: false
+gtsummary::tbl_regression(fit_3, intercept = TRUE) %>%
+  bold_labels()
+```
+
+`(Intercept)` corresponds to 103,062 which is $\beta_0$. As always, R has, behind the scenes, estimated the entire posterior probability distribution for $\beta_0$. We will graph that distribution in the next section. But the basic print method for these objects can't show the entire distribution, so it gives us summary numbers: the median and the MAD SD. Speaking roughly, we would expect about 95% of the values in the posterior to be within two MAD SD's of the median.
 
 Consider our usual decomposition of the outcome into two parts: the model and the error term.
 
@@ -1396,6 +1425,25 @@ print(fit_4, digits = 6)
 Fitted models tell us about the posterior distributions for the parameters in the formula which defines the model we have estimated. *We are assuming that the model is true.* And, as discussed in @sec-one-parameter, that assumption is always false! Our model is never a perfectly accurate representation of reality. But, if it were perfect, then the posterior distributions which we have created for $\beta_0$, $\beta_1$, and so on would be perfect as well.
 
 When working with a linear model, we will often interpret the meaning of the parameters, as we have already done in the first three sections of this chapter. Such interpretations are much harder with logistic models because the math is much less convenient. So, we won't even bother to try to understand the meaning of these parameters. However, we can note that $\beta_1$ is negative, suggesting that people with higher incomes are less likely to be liberal.
+
+```{r}
+#| echo: false
+pp_check(fit_4, plotfun = "boxplot", nreps = 3, notch = FALSE)
+```
+
+With the graph above we can view our predicted data based on the actual data. Our model did a great job in predicting the data as we can see above. The purpose of running a posterior predict check on our data is to ensure that the model we have will make sense based on the observed data.
+
+Now that we have run a posterior predict check to ensure that we have a fitted model that best suits us we can create a table like the one below to visualize the data we currently have. 
+
+```{r}
+#| echo: false
+gtsummary::tbl_regression(fit_4, intercept = TRUE) %>%
+  bold_labels()
+```
+
+`(Intercept)` corresponds to 0.56 which is $\beta_0$. As always, R has, behind the scenes, estimated the entire posterior probability distribution for $\beta_0$. We will graph that distribution in the next section. But the basic print method for these objects can't show the entire distribution, so it gives us summary numbers: the median and the MAD SD. Speaking roughly, we would expect about 95% of the values in the posterior to be within two MAD SD's of the median.
+
+As we can see with the able above are using log(OR) which means that the way that we interpret the data given to us plays a huge role in the way that we can predict future data. When we are dealing with income for example we can either use the log of income or deal with income straight which play different roles in changing the way that we feed and understand the data. With the different ways that we are inputting the data, the model changes because of the variables that are changing within the model. 
 
 ### Temperance
 
