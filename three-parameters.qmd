@@ -10,20 +10,11 @@ library(gtsummary)
 library(patchwork)
 ```
 
-
-<!-- End each Temperance section with reasons to be suspicious of the results. Maintain some humility. List all the problems with the process. -->
-
 <!-- MT: for all gtsummary tables we need to edit the tables to include specifics  -->
-
-<!-- End Courage section with two sentences, right after showing the table. The first describes the model. The second highlights the value, or at least the direction, of at least one of the coefficients of the model. Sometimes there might be three or four sentences, if you wanted to talk about more coefficients. -->
-
-<!-- "We model the age of individuals at a train station as a linear function of the party membership. We find that Republicans are about one and a half years younger than Democrats." -->
-
 
 <!-- Come up with common ways in which a lack of representativeness causes problems. This is a list of things that we can check each time when we are interrogating a data science problem. Key issue is the correlation, if anything, between the "assignment mechanism" or "sampling mechanism" and other variables. Discuss sampling mechanism in all cases except att_end ~ treatment. For that, use "assignment mechanism." -->
 
 <!-- DK: Make residual plots consistent in this chapter! Also, we should ensure that the width of 10 units is the same in each plot. Or does that already happen? Want the intuition that, the more predictive the model, the smaller the remaining variation in the residuals.  -->
-
 
 Models have parameters. In @sec-one-parameter we created models with a single parameter $p$, the proportion of red beads in an urn. In @sec-two-parameters, we used models with two parameters: $\mu$ (the average height in the population, generically known as a model "intercept") and $\sigma$ (the variation in height in the population). Here --- can you guess where this is going? --- we will build models with three parameters: $\sigma$ (which serves the same role throughout the book) and two "coefficients." In models which relate a continuous predictor to the outcome, those two parameters will be labeled $\beta_0$ and $\beta_1$. In models which estimate two averages, the parameters will be $\beta_1$ and $\beta_2$. All this notation is confusing, not least because different academic fields use inconsistent schemes. Follow the Cardinal Virtues and tackle your problem step by step.
 
@@ -153,8 +144,7 @@ Democrats seem slightly older than Republicans. Our estimate for the average age
 
 Do the columns in the Preceptor Table mean the same thing as the columns in the data? That is the heart of validity. Just because we use the same words --- `age` and `party` --- in both tables does not prove that they are, in fact, the same things.
 
-Validity is the assumption which allows us to consider the Preceptor Table and our data to have been drawn from the same population. There is no **truth** here. The data is real enough, but we created the Preceptor Table. Whether or not there is a population from which we can assume both the data and the Preceptor Table might have been drawn is not a TRUE/FALSE question. 
-tion, we can't use the data to make inferences about the Preceptor Table. 
+Validity is the assumption which allows us to consider the Preceptor Table and our data to have been drawn from the same population. There is no **truth** here. The data is real enough, but we created the Preceptor Table. Whether or not there is a population from which we can assume both the data and the Preceptor Table might have been drawn is not a TRUE/FALSE question, we can't use the data to make inferences about the Preceptor Table. 
 
 Now the **assumption of validity** may not hold due to the possibility of what our terms mean. For example, what it means to be a "Republican" might be very different in Massachusetts (meaning in our data) than what it means in the rest of the United States (meaning the Preceptor Table). Just slapping the two data sources together does not solve that problem. Similarly, `age` in the data is measured from a survey. People make mistakes. They even lie. In our Preceptor Table, we want the column `age` to be each person's actual age.
 
@@ -229,7 +219,7 @@ knitr::include_graphics("other/images/Courage.jpg")
 
 Courage centers around the creation of the data generating mechanism, i.e., our fitted model.
 
-#### Mathematical Structure and Parameters
+#### Mathematics
 
 The type of outcome variable is the most important issue in determining the mathematical structure of the **data generating mechanism**. Since our outcome is a (mostly) continuous variable, a linear structure is the most reasonable. If the outcome variable had been binary --- only two options --- we would use a logistic model. 
 
@@ -285,6 +275,8 @@ The key concept is the idea of a "population." From which larger population is t
 
 The intercept, 42.6 estimates the age of Democrats. The median suggests that the average age that is represented by the age is roughly 42.6 with a confidence of about 1.2 (which is good). We want to have a MAD_SD that is smaller because that represents that the median will be more accurate when predicted. The `partyRepublican` estimate which is -1.5 means that on average they would be 1.5 years younger than the median age for the Democrats. However, in this case the difference between the average age of Democrats and Republicans is less accurate when compared to the intercept above. The MAD_SD of `partyRepublican` is higher at 3.0 which means that there is more room for error to occur.
 
+When we are creating our fitted model we need to consider the type of model we are creating. Any model with the age as its dependent variable will be predictive, not causal, for the reason that nothing, other than time, can change your age. You are X years old. It would not matter if you changed your party registration from Democrat to Republican or vice versa. Your age is your age. The underlying model which connects age with party is less important than the brute statistical fact that there is a connection. *Predictive models care nothing about causality.*
+
 #### Model Checks
 
 Now that we have created our fitted model we can perform model checks to ensure that our fitted model is reasonably accurate. We attempt to the make the model as accurate as possible, however, we can only view whether it is accurate through model checks that we need to perform. 
@@ -310,7 +302,7 @@ trains |>
 
  
 
-If we take a look at the the observations above we see that the model only produces one fitted value for each condition. This table just takes a sample of the 8 individuals from the entire dataset to caputre the wide range of residuals. When we take a look at the residuals to the right hand side, we can view the error at hand. When we have the negative values that means that the age should be younger, and positive values means that the age should be higher. For the most part, the median age seems to be somewhat accurate as most of the values are within a reasonable range of the median age for both the Democrats and the Republicans. We can get a better picture of the unmodeled variation in our sample if we plot these three variables for all the individuals in our data.
+If we take a look at the the observations above we see that the model only produces one fitted value for each condition. This table just takes a sample of the 8 individuals from the entire dataset to capture the wide range of residuals. When we take a look at the residuals to the right hand side, we can view the error at hand. When we have the negative values that means that the age should be younger, and positive values means that the age should be higher. For the most part, the median age seems to be somewhat accurate as most of the values are within a reasonable range of the median age for both the Democrats and the Republicans. We can get a better picture of the unmodeled variation in our sample if we plot these three variables for all the individuals in our data.
 
 The following three histograms show the actual outcomes, fitted values, and residuals of all people in `trains`:
 
@@ -354,21 +346,19 @@ The three plots are structured like our equation and table above. A value in the
 
 These three plots play a strong role in understanding the error that is associated with the fitted model. With the fitted model that we have created we only have a smaller number of values when compared to the actual age. The bigger gap of residuals proves that the error that we have associated with the model makes the fitted model reasonably inadequate. 
 
-Another model check that we need to run is the posterior predictive check. With the help of the posterior predictive check we can run a "fake-data" simulation upon our fitted model that predicts the outcome based on the variables and data at hand. A posterior predictive check is targeted for the comparison between what the fitted model predicts and the actual observed data. The aim is to detect if the model is inadequate to describe the data. With the amount of observations and times we run the "fake-data" simulation we can view whether our fitted model is reasonably accurate when compared to our actual data.
+Another model check that we need to run is the posterior predictive check. With the help of the posterior predictive check we can run a "fake-data" simulation upon our fitted model that generates a distribution of the data. A posterior predictive check is targeted for the comparison between what the fitted model generates and the actual observed data. The aim is to detect if the model is inadequate to describe the data. With the amount of observations and times we run the "fake-data" simulation we can view whether our fitted model is reasonably accurate when compared to our actual data based on the distribution.
 
-`pp_check()` will create a graph that will plot the "fake-data" simulation when compared to the actual data. We are able to control how many times that we run the simulation through `nreps`. Through the use of `plotfun` we are able to classify what type of graph that we want to create. With the help of pp_check we are able to run a posterior predict check that allows us to check how accurate our data is. 
+`pp_check()` will create a graph that will plot the "fake-data" simulation when compared to the actual data. We are able to control how many times that we run the simulation through `nreps`. Through the use of `plotfun` we are able to classify what type of graph that we want to create. With the help of `pp_check()` we are able to run a posterior predict check that allows us to check how accurate our data is. 
 
 ```{r}
 pp_check(fit_1, plotfun = "hist", nreps = 5, binwidth = 3)
 ```
 
-Let's take a deeper look at the graphs that we have above. Our graph in the darker blue represents our actual data. As we can see with the lighter blue graph, our fitted model is able to predict the values for age that are reasonable accurate when compared to the actual data. One important item that we want to note is that for the actual data there is no value that is under 20 that is predicted for age, however, in the fitted model we are able to see several values for which the ages for under 20 are predicted for. For the most part our fitted model does a great job in predicting the values through the "fake-data" simulation when compared to the actual data set. 
-
-Now that we have run model checks to ensure that we have an accurate fitted model that best suits our needs we can create our data generating mechanism. The data generating mechanism is the last step in the process in **courage** that allows us to analyze and view our fitted model's data.
+Let's take a deeper look at the graphs that we have above. Our graph in the darker blue represents our actual data. As we can see with the lighter blue graph, our fitted model is able to generate a distribution that is similar when compared to the actual data. One important item that we want to note is that for the actual data there is no value that is under 20 for age, however, in the fitted model we are able to see several general values for which the ages are under 20. For the most part our fitted model does a great job in generating a distribution through the "fake-data" simulation when compared to the actual data set. 
 
 #### Data Generating Mechanism (DGM)
 
-When we are creating our data generating mechanism we need to consider the type of mechanism we are creating. Any DGM with the age as its dependent variable will be predictive, not causal, for the reason that nothing, other than time, can change your age. You are X years old. It would not matter if you changed your party registration from Democrat to Republican or vice versa. Your age is your age. When dealing with a non-causal DGM, the focus is on predicting things. The underlying mechanism which connects age with party is less important than the brute statistical fact that there is a connection. *Predictive models care nothing about causality.*
+Recall the preceptor table and the units from the beginning. We are concerned with three main ideas from the preceptor table: our units (individuals with unique attributes at the train station), our outcome (individual's age), our covariates (the party membership of each individual). With the help of the data generating mechanism that we have created from our fitted model we can fill in the missing values to the preceptor table. We use the data generating mechanism as the last step of **courage** as it allows us to analyze and view our fitted model's data.
 
 Let's view all of our fitted data through a pleasing table:
 
@@ -385,9 +375,9 @@ Comments:
 
 -   The phrase "in the population" is doing a great deal of work because we have not said what, precisely, we mean by the "population." Is it the set of people on those commuter platforms on those days in 2012 when the experiment was done? Is it the set of people on all platforms, including ones never visited? Is it the set of all Boston commuters? All Massachusetts residents? All US residents? Does it include people today, or can we only draw inferences for 2012? We should explore these questions in every model we create.
 
--   The parameters $\beta_0$ and $\beta_1$ can be interpreted in two ways. First, like all parameters, they are a part of the model. We need to estimate them. But, in many cases, we don't really care what the value of the parameter is. The exact value of $\sigma$, for example, does not really matter. Second, some parameters have a substantive interpretation, as with $\beta_0$ and $\beta_1$ being the average age and difference in the population.
+-   The parameters $\beta_0$ and $\beta_1$ can be interpreted in two ways. First, like all parameters, they are a part of the model. We need to estimate them. But, in many cases, we don't really care what the value of the parameter is. The exact value of $\sigma$, for example, does not really matter. Second, some parameters have a substantive interpretation, as with $\beta_0$ and $\beta_1$ being the average age and difference in the population. There are several possibilities that still exist with age and party. Each variable changes the way that we view the data because they hold several outcomes based on the way that we interpret them. All of these seemingly "minute" factors play a strong role in changing the outcome of our fitted model and how we are able to provide more accurate results with the help of our model.
 
-Finally there are several possibilities that still exist with age and party. Each variable changes the way that we view the data because they hold several outcomes based on the way that we interpret them. All of these seemingly "minute" factors play a strong role in changing the outcome of our fitted model and how we are able to provide more accurate results with the help of our model.
+In summary: we model the age of individuals at a train station as a linear function of the party membership. We find that the Republicans are about one and a half years younger than the Democrats at the train station.
 
 ### Temperance
 
@@ -408,7 +398,6 @@ Create a tibble with the assumed input for our model. In our case the tibble has
 ```{r}
 new_obs <- tibble(party = "Democrat")
 ```
-
 
 Use `posterior_predict()` to create draws from the posterior for this scenario. Note that we have a new posterior distribution under consideration here. The unknown parameter, call it $D_{age}$, is the age of a Democrat. This could be the age of a randomly selected Democrat from the population or of the next Democrat we meet or of the next Democrat we interview on the train platform. The definition of "population" determines the appropriate interpretation. Yet, regardless, $D_{age}$ is an unknown parameter. But it is not one --- like $\beta_0$, $\beta_1$, or $\sigma$ --- for which we have already created a posterior probability distribution. That is why we need `posterior_predict()`.
 
@@ -508,8 +497,7 @@ pp |>
 
 In words, we would expect the oldest Democrat to be about 22 years older than the youngest Republican, but we would not be too surprised if the oldest Democrat was actually younger than the youngest Republican in a group of 6.
 
-
-The answers we have provided, as always, almost certainly underestimate the true uncertainty of the world.
+Although we have used our fitted model and the Cardinal Virtues to answer our questions we still need to be suspicious of our results. We can not take our assumptions to be fully accurate as we have seen with the assumptions of stability, validity, representativeness, and unconfoundness. All of these assumptions have proved flaws within our line of reasoning and situation at hand which means that we can not take our model and results to be fully accurate. When we dealt with these assumptions we had problems with the "sampling mechanism", the true meaning of terms, and the way that we have collected our data. When we are dealing with the situations that we have at hand we need to make sure that we maintain humility because not all of our data and assumptions will be accurate. The answers we have provided, as always, almost certainly underestimate the true uncertainty of the world.
 
 ## att_end \~ treatment
 
@@ -687,7 +675,7 @@ knitr::include_graphics("other/images/Courage.jpg")
 
 Once we have the mathematical structure of the model, we use Courage to create a fitted model. In Chapter @sec-four-parameters, we will go into much more detail about the process of created a fitted model. This process will involve transforming the variables as well as selecting the variables to include and to discard. For now, however, we keep things simple.
 
-#### Mathematical Structure and Parameters
+#### Mathematics
 
 The math for this model is exactly the same as the math for the predictive model in the first part of this chapter, although we change the notation a bit for clarity.
 
@@ -724,7 +712,7 @@ Note that once again, since we are using a linear model, we set the `family` arg
 
 Now that we have created our fitted model we need to perform model checks so that we can ensure that the fitted model we created is reasonably accurate. We attempt to the make the model as accurate as possible, however, we can only view whether it is accurate through model checks that we perform. 
 
-let's decompose the the dependent variable, `att_end` into two parts: the fitted values and the residuals. There are only two possible fitted values, one for the Treated and one for the Control. The residuals, as always, are simply the difference between the outcomes and the fitted values.
+Let's decompose the the dependent variable, `att_end` into two parts: the fitted values and the residuals. There are only two possible fitted values, one for the Treated and one for the Control. The residuals, as always, are simply the difference between the outcomes and the fitted values.
 
 ```{r}
 #| echo: false
@@ -755,20 +743,18 @@ outcome + fitted + res +
 
 The smaller the spread of the residuals, the better a job the model is doing of explaining the outcomes. The residuals that we have above explains our error that we have within the model. As we can see above, our model did not do a great job of predicting the attitude toward immigration as our fitted values only present two possible values. The credit of this goes towards the residuals as the error within our graph is huge causing for the fitted values to be smaller and less precise.
 
-Another model check that we can and should run is the posterior predictive check. With the help of the posterior predictive check we can run a "fake-data" simulation upon our fitted model that predicts the outcome based on the variables and data at hand. A posterior predictive check is targeted for the comparison between what the fitted model predicts and the actual observed data.
+Another model check that we can and should run is the posterior predictive check. With the help of the posterior predictive check we can run a "fake-data" simulation upon our fitted model that generates a distribution based on the variables at hand. With the help of this check we can view our similar our distribution is when comapred with the "fake-data" simulation and the actual data.
 
 ```{r}
 #| echo: false
 pp_check(fit_2, plotfun = "hist", nreps = 3, binwidth = 1)
 ```
 
-Let's take a deeper look at the graphs that we have above. Our graph in the darker blue represents our actual data. As we can see with the lighter blue graph, our fitted model is able to predict the values for attitude that is reasonable accurate when compared to the actual data. One important item that we want to note is that for the actual data there are no values that are above 15. When we compare this to our fitted model we can see that during the "fake-data" simulation there were attitudes that we above 15. Our fitted model did a great job staying reasonably accurate when compared to the actual data, however, the residuals present within the fitted model will change the way that the error plays a strong factor in the graphs.
-
-Now that we have run model checks to ensure that we have an accurate fitted model that best suits our needs we can create our data generating mechanism. The data generating mechanism is the last step in the process in **courage** that allows us to analyze and view our fitted model's data.
+Let's take a deeper look at the graphs that we have above. Our graph in the darker blue represents our actual data. As we can see with the lighter blue graph, our fitted model is able to generate a distribution of the data that is similar when compared to the actual data. One important item that we want to note is that for the actual data there are no values that are above 15. When we compare this to our fitted model we can see that during the "fake-data" simulation there were attitudes that were above 15. Our fitted model did a great job staying reasonably accurate when compared to the actual data, however, the residuals present within the fitted model will change the way that the error plays a strong factor in the graphs.
 
 #### Data Generating Mechanism (DGM)
 
-Now, let's determine whether our **Data Generating Mechanism** will be linear or logistic. Since our outcome variable `att_end` is a continuous variable since it has a range of possible values, we will use a linear model.
+Recall the preceptor table and the units from the beginning. We are concerned with three main ideas from the preceptor table: our units (individuals with unique attributes at the train station), our outcome (individual's attitude toward immigration) covariates (the treatment that each individual will receive). Now, let's determine whether our **Data Generating Mechanism** will be linear or logistic. Since our outcome variable `att_end` is a continuous variable since it has a range of possible values, we will use a linear model. With the help of the data generating mechanism that we have created from our fitted model we can fill in the missing values to the preceptor tables. We use the data generating mechanism as the last step of **courage** as it allows us to analyze and view our fitted model's data.
 
 Now that we have tested our fitted model through the model checks we can view all of our data with the table that we have below:
 
@@ -784,6 +770,8 @@ Up until now, we have used the Bayesian interpretation of "confidence interval."
 
 But, in contemporary academic research, the phrase "confidence interval" is usually given a "Frequentist" interpretation. (The biggest divide in statistics is between Bayesians and Frequentist interpretations. The Frequentist approach, also known as "Classical" statistics, has been dominant for 100 years. Its power is fading, which is why this textbook uses the Bayesian approach.) For a Frequentist, a 95% confidence interval means that, if we were to apply the procedure we used in an infinite number of future situations like this, we would expect the true value to fall within the calculated confidence intervals 95% of the time. In academia, a distinction is sometimes made between *confidence intervals* (which use the Frequentist interpretation) and *credible intervals* (which use the Bayesian interpretation). We won't worry about that difference in this *Primer*.
 
+In summary: we model the attitude of individuals at a train station as a linear function of the treatment each individual receives. We find that the individuals that are "control" have about one and a half attitude less than when compared with the individuals that are "treated."
+
 ### Temperance
 
 ```{r}
@@ -793,8 +781,6 @@ knitr::include_graphics("other/images/Temperance.jpg")
 ```
 
 **Courage** gave us the fitted model. With **temperance** we can create posteriors of the quantities of interest. We should be modest in the claims we make.
-
-#### Posterior Predict
 
 Recall the first question with which we began this section:
 
@@ -873,6 +859,8 @@ quantile(pp$te, prob = 0.9)
 
 We would not expect a treatment effect of this magnitude to be common, but, at the same time, effects this big and bigger will occur about 10% of the time.
 
+Despite utilizing our fitted model and the Cardinal Virtues to address inquiries, it remains imperative to approach the outcomes with caution. The assumptions we made —-- stability, validity, representativeness, and unconfoundness —-- have all revealed inadequacies in our reasoning and the context we are dealing with. Consequently, our model's accuracy and the reliability of its results cannot be taken for granted. When we were dealt with these assumptions we had problems with the "assignment mechanism", the true meaning of terms, and the way that we have collected our data. In handling our current circumstances, it is crucial to retain a sense of humility, acknowledging that not all our data and presumptions are entirely precise. The responses we offer consistently tend to underestimate the genuine uncertainties present in the world.
+
 ## income \~ age
 
 So far, we have only created models in which the predictor variable is discrete, with two possible values. `party` is either "Democrat" or "Republican". `treatment` is either "Treated" or "Control". Often times, however, the predictor variable will be continuous. We can answer these and similar questions by creating a model that uses party affiliation to predict age. Let's follow the four Cardinal Virtue: Wisdom, Justice, Courage and Temperance. Fortunately, the exact same approach works in this case. Consider:
@@ -887,10 +875,6 @@ knitr::include_graphics("other/images/Wisdom.jpg")
 ```
 
 Wisdom requires the creation of a Preceptor Table, an examination of our data, and a determination, using the concept of "validity," as to whether or not we can (reasonably!) assume that the two come from the same *population*.
-
-Let's take a look at our question below:
-
-*What would you expect the income to be for a 40-year old?*
 
 #### Preceptor Table
 
@@ -1042,7 +1026,7 @@ knitr::include_graphics("other/images/Courage.jpg")
 
 Once we have construct the mathematical structure of our model through the data generating mechanism we can use **Courage** to create a fitted model. The process of creating our fitted model will involve the transformation of several variables with a discussion and what variables to include and discard.
 
-#### Mathematical Structure and Parameters
+#### Mathematics
 
 Let's interpret **courage** with with a look at the mathematics:
 
@@ -1130,20 +1114,18 @@ outcome + fitted + res +
 
 There are scores of different fitted values. Indeed, there are a greater number of different fitted values than there are different outcome values! This is often true for models which have continuous predictor variables, we have here with `age`.
 
-Another model check that we will run is the posterior predictive check. With the help of the posterior predictive check we can run a "fake-data" simulation upon our fitted model that predicts the outcome based on the variables and data at hand.
+Another model check that we will run is the posterior predictive check. With the help of the posterior predictive check we can run a "fake-data" simulation upon our fitted model that generates a distribution that allows us to view whether our fitted model is able to produce a distribution that is similar to the actual data distribution.
 
 ```{r}
 #| echo: false
 pp_check(fit_3, plotfun = "hist", nreps = 3, binwidth = 10000)
 ```
 
-Our graph in the darker blue represents our actual data. As we can see with the lighter blue graph, our fitted model is able to predict the values for income that are reasonable accurate when compared to the actual data. When we take a look at the predicted data that has been generated from our fitted model we can view that we don't have highly trusted responses to the results we have at hand. These three graphs that we have simulated all have data that is reasonably accurate when compared to the actual data, however, the residuals present within the fitted model will change the way that graph is presented.
-
-Now that we have run model checks to ensure that we have an accurate fitted model we can move on to the last step. The data generating mechanism is the last step in the process in **courage** that allows us to analyze and view our fitted model's data.
+Our graph in the darker blue represents our actual data. As we can see with the lighter blue graph, our fitted model is able to generate a distribution for the values of income that very similar to the distribution of values for income for our actual data. When we take a look at the generated distribution that has been generated from our fitted model we can view that we don't have highly trusted responses to the results we have at hand. These three graphs that we have simulated all have data that is reasonably accurate when compared to the actual data, however, the residuals present within the fitted model will change the way that graph is presented.
 
 #### Data Generating Mechanism (DGM)
 
-Now that we have run a posterior predict check to ensure that we have a fitted model that best suits us we can create a table like the one below to visualize the data we currently have.
+Recall the preceptor table and the units from the beginning. We are concerned with three main ideas from the preceptor table: our units (dollars for the 40-year olds at the train station), our outcome (individual's income) covariates (the age of each individual). Now that we have run a posterior predict check to ensure that we have a fitted model that best suits us we can create a table like the one below to visualize the data we currently have. With the help of the data generating mechanism that we have created from our fitted model we can use this to fill in all of the missing values for our preceptor table. We use the data generating mechanism as the last step of **courage** as it allows us to analyze and view our fitted model's data. 
 
 ```{r}
 #| echo: false
@@ -1152,6 +1134,8 @@ gtsummary::tbl_regression(fit_3, intercept = TRUE) %>%
 ```
 
 `(Intercept)` corresponds to 103,062 which is $\beta_0$. As always, R has, behind the scenes, estimated the entire posterior probability distribution for $\beta_0$. We will graph that distribution in the next section. But the basic print method for these objects can't show the entire distribution, so it gives us summary numbers: the median and the MAD SD. Speaking roughly, we would expect about 95% of the values in the posterior to be within two MAD SD's of the median.
+
+In summary: we model the income of individuals at a train station as a linear function of the age of each individual. We find that the average income for individuals at the train station approximates to 103,000.
 
 <!-- DK: Next step: A scatter plot with the fitted line drawn through it and a residual highlighted. Some more discussion! And some plots. Explain what the residuals are. And predicted values! Talk about sigma. More could be done. -->
 
@@ -1167,9 +1151,7 @@ knitr::include_graphics("other/images/Temperance.jpg")
 
 **Courage** gave us the fitted model. With **temperance** the posteriors we create are never the “truth.” The assumptions we made to create the model are never perfect.
 
-#### Posterior Predict
-
-Recall our question:
+Recall the question:
 
 *What would you expect the income to be for a random 40 year old?*
 
@@ -1199,6 +1181,8 @@ pe |>
     scale_y_continuous(labels = scales::percent_format()) +
     theme_classic()
 ```
+
+Now that we have plotted all of our models and viewed our data we want to talk about the usage of these models and how **Temperance** plays a strong factor in the usage of these models. Using our fitted model and considering the Cardinal Virtues to tackle questions, it is crucial to handle the findings cautiously. Our underlying assumptions regarding stability, validity, representativeness, and unconfoundness have exposed certain limitations in our reasoning and the specific context we are dealing with. Hence, the precision of our model and the dependability of its outcomes should not be assumed without reservation. When we dealt with these assumptions we had problems with the "sampling mechanism", the true meaning of terms, and the way that we have collected our data. When facing our present situation, it is essential to maintain humility and recognize that our data and assumptions might not be entirely accurate.
 
 <!-- More discussion! -->
 
@@ -1378,7 +1362,7 @@ knitr::include_graphics("other/images/Courage.jpg")
 
 We will use the mathematical structure that through the data generating mechanism to generate a fitted model with the help of **Courage**. Courage allows us to explore different models. We can avoid hypothesis tests as we check our models for consistency with the data we have.
 
-#### Mathematical Structure and Parameters
+#### Mathematics
 
 Let's consider whether this model is linear or logistic. Unlike our previous models this chapter, the outcome variable, `liberal`, for this model, only has two options, "Liberal" or "Not Liberal". Therefore, this will be logistic because there are only 2 possible outcomes and the outcome variable isn't continuous.
 
@@ -1420,20 +1404,18 @@ When working with a linear model, we will often interpret the meaning of the par
 
 #### Model Checks
 
-With the fitted model that we have created we are able to perform model checks. Model checks help us understand how accurate our model is to ensure that the fitted model that we have created is reasonably accurate when compared to the actual data. We can view our model through the posterior predictive check that simulates the data upon our fitted model to predict the outcome. With the posterior predictive check we are able to visualize how accurate our data is compared to the actual data ensuring that we have created a great fitted model.
+With the fitted model that we have created we are able to perform model checks. Model checks help us understand how accurate our model is to ensure that the fitted model that we have created is reasonably accurate when compared to the actual data. We can view our model through the posterior predictive check that simulates the data upon our fitted model to generate a distribution. With the posterior predictive check we are able to visualize how accurate our data is compared to the actual data ensuring that we have created a great fitted model.
 
 ```{r}
 #| echo: false
 pp_check(fit_4, plotfun = "hist", nreps = 3, binwidth = 0.1)
 ```
 
-Our graph in the darker blue represents our actual data. As we can see with the lighter blue graph, our fitted model is able to predict the values for liberal that is reasonably accurate when compared to the actual data. When we take a look at the fitted model's prediction when compared to the actual data we are able to view that our fitted model did a great job in prediction. For the most part the model is really accurate as we are able to see the predictions that seem to be highly accurate. 
-
-Now that we have run model checks to ensure that we have an accurate fitted model we can move on to the last step. The data generating mechanism is the last step in the process in **courage** that allows us to analyze and view our fitted model's data.
+Our graph in the darker blue represents our actual data. As we can see with the lighter blue graph, our fitted model is able to generate a distribution for liberal that is similar to the actual data distribution as shown above. For the most part the model is really accurate as we are able to see the predictions that seem to be highly accurate. 
 
 #### Data Generating Mechanism (DGM)
 
-Now that we have run the necessary model checks on our fitted model to ensure that we have the best suited model, we can create a tale o view our data. With the accurate fitted model and low residuals proving to be accurate we can use the data generating mechanism to finish the last step in the **Courage** process.
+Recall the preceptor table and the units from the beginning. We are concerned with three main ideas from the preceptor table: our units (individuals with unique attributes at the train station), our outcome (individual's attitude toward immigration) covariates (the treatment that each individual will receive). Now that we have run the necessary model checks on our fitted model to ensure that we have the best suited model, we can create a table to view our data. With the accurate fitted model and low residuals proving to be accurate we can use the data generating mechanism to finish the last step in the **Courage** process.
 
 ```{r}
 #| echo: false
@@ -1445,6 +1427,8 @@ gtsummary::tbl_regression(fit_4, intercept = TRUE) %>%
 
 As we can see with the able above are using log(OR) which means that the way that we interpret the data given to us plays a huge role in the way that we can predict future data. When we are dealing with income for example we can either use the log of income or deal with income straight which play different roles in changing the way that we feed and understand the data. With the different ways that we are inputting the data, the model changes because of the variables that are changing within the model. 
 
+In summary: we model the income of individuals at a train station as a linear function of the treatment each individual receives. We find that the liberal membership for individuals at the train station tends to be more liberal as shown with the median being 0.56.
+
 ### Temperance
 
 ```{r}
@@ -1454,8 +1438,6 @@ knitr::include_graphics("other/images/Temperance.jpg")
 ```
 
 **Courage** gave us the fitted model. With **temperance** the decisions made with flawed posteriors are almost always better than decisions made without them.
-
-#### Posterior Predict
 
 *Among all people who have an income \$100,000, what proportion are liberal?*
 
