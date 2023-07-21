@@ -16,12 +16,6 @@ library(patchwork)
 
 <!-- DK: Make residual plots consistent in this chapter! Also, we should ensure that the width of 10 units is the same in each plot. Or does that already happen? Want the intuition that, the more predictive the model, the smaller the remaining variation in the residuals.  -->
 
-<!-- DK: Preceptor Table is always capitalized and has no missing values. Star numbers in the Preceptor Table which will never be oberseved. -->
-
-<!-- DK: Preceptor Table rows in Population Table have no outcomes or covariates most of the time. -->
-
-<!-- DK: Plot ggplot(data = trains, aes(x = age, y = income)) + geom_point() instead of income versus age histogram. -->
-
 <!-- DK: Whenever we have a predictive model, use language like "when comparing." Avoid even the hint of a causal claim. -->
 
 Models have parameters. In @sec-one-parameter we created models with a single parameter $p$, the proportion of red beads in an urn. In @sec-two-parameters, we used models with two parameters: $\mu$ (the average height in the population, generically known as a model "intercept") and $\sigma$ (the variation in height in the population). Here --- can you guess where this is going? --- we will build models with three parameters: $\sigma$ (which serves the same role throughout the book) and two "coefficients." In models which relate a continuous predictor to the outcome, those two parameters will be labeled $\beta_0$ and $\beta_1$. In models which estimate two averages, the parameters will be $\beta_1$ and $\beta_2$. All this notation is confusing, not least because different academic fields use inconsistent schemes. Follow the Cardinal Virtues and tackle your problem step by step.
@@ -185,7 +179,7 @@ tibble(source = c("...", "Data", "Data", "...",
        age = c("...", "43", "52", "...", 
                "...", "...", "...", "..."),
        party = c("...", "Democrat", "Republican", "...", 
-                 "...", "Republican", "Republican", "...")) |>
+                 "...", "...", "...", "...")) |>
   
   gt() |>
   tab_header(title = "Population Table") |> 
@@ -211,7 +205,7 @@ Our Preceptor Table rows are chronologically ordered. The "other" rows are our g
 
 #### Assumptions
 
-**Stability** means that the relationship between the columns is the same for three categories of rows: the data, the Preceptor table, and the larger population from which both are drawn. With something like height, it is much easier to assume stability over a greater period of time. Changes in global height occur extremely slowly, so height being stable across a span of 20 years is reasonable to assume. With something like political ideology, it is much harder to make the assertion that data collected in 2010 would be stable to data collected in 2030. When we are confronted with this uncertainty, we can consider making our timeframe smaller. However, we would still need to assume stability from 2014 (time of data collection) to today. Stability allows us to ignore the issue of time.
+**Stability** means that the relationship between the columns is the same for three categories of rows: the data, the Preceptor table, and the larger population from which both are drawn. With something like height, it is much easier to assume stability over a greater period of time. Changes in global height occur extremely slowly, so height being stable across a span of 20 years is reasonable to assume. With something like political ideology, it is much harder to make the assertion that data collected in 2010 would be stable to data collected in 2030. When we are confronted with this uncertainty, we can consider making our time frame smaller. However, we would still need to assume stability from 2014 (time of data collection) to today. Stability allows us to ignore the issue of time.
 
 **Representativeness** has to do with how well our sample represents the larger population we are interested in generalizing to. For example does the correlation between our "sampling mechanism" and other variables hold to be true. The "sampling mechanism" refers to a mechanism that utilizes sampling in order to get the best possible outcomes with the help of randomization and application to general population. Does the train experiment allow us to calculate a causal effect for people who commute by cars? Can we calculate the causal effect for people in New York City? Before we generalize to broader populations we have to consider if our experimental estimates are applicable beyond our experiment. Generally: *if there was no chance that a certain type of person would have been in this experiment, we cannot make an assumption for that person*.
 
@@ -366,7 +360,7 @@ Let's take a deeper look at the graphs that we have above. Our graph in the dark
 
 #### Data Generating Mechanism (DGM)
 
-Recall the preceptor table and the units from the beginning. We are concerned with three main ideas from the preceptor table: our units (individuals with unique attributes at the train station), our outcome (individual's age), our covariates (the party membership of each individual). With the help of the data generating mechanism that we have created from our fitted model we can fill in the missing values to the preceptor table. We use the data generating mechanism as the last step of **courage** as it allows us to analyze and view our fitted model's data.
+Recall the Preceptor Table and the units from the beginning. We are concerned with three main ideas from the Preceptor Table: our units (individuals with unique attributes at the train station), our outcome (individual's age), our covariates (the party membership of each individual). With the help of the data generating mechanism that we have created from our fitted model we can fill in the missing values to the Preceptor Table. We use the data generating mechanism as the last step of **courage** as it allows us to analyze and view our fitted model's data.
 
 Let's view all of our fitted data through a pleasing table:
 
@@ -505,11 +499,7 @@ pp |>
 
 In words, we would expect the oldest Democrat to be about 22 years older than the youngest Republican, but we would not be too surprised if the oldest Democrat was actually younger than the youngest Republican in a group of 6.
 
-We should always be cautious about our inferences. Our assumptions are never true. 
-
-<!-- One sentence per assumption. -->
-
-Our stated inferences almost certainly underestimate the true uncertainty of the world. Stay cautious my friends.
+We should always be cautious about our inferences. Our assumptions are never true. We need to be cautious with our inferences when we deal with all of the assumptions that we have made within the chapter regarding validity, stability, representativeness, and model structure. When we take a look at the assumption of validity a possibility where it may not hold would be for what it means to be a "Republican" might be very different in Massachusetts (meaning in our data) than what it means in the rest of the United States (meaning the Preceptor Table). When we take a look at the assumption of stability a possibility where it may not hold would be for the time frame that we are currently considering and whether we would still need to assume stability from 2014 (time of data collection) to today. When we take a look at the assumption of representativeness a possibility where it may not hold would be with correlation between our "sampling mechanism" and other variables to be true. When we take a look at the assumption of the model structure a possibility where it may not hold would be with the flaw of the fitted model where we conducted a posterior predict check that generated a distribution of values that were under the age of 20 which is not possible with our actual data. Our stated inferences almost certainly underestimate the true uncertainty of the world. We need to maintain humility when we are making our inferences and decisions. Stay cautious my friends.
 
 <!-- Insert meme! -->
 
@@ -547,8 +537,8 @@ Our Preceptor Table:
 ```{r}
 #| echo: false
 tibble(ID = c("1", "2", "...", "10", "11", "...", "N"),
-       attitude_after_control = c("...", "7", "...", "...", "...", "...", "6"),
-       attitude_after_treated = c("8", "...", "...", "5", "7", "...", "..."),
+       attitude_after_control = c("5*", "7", "...", "3*", "10*", "...", "6"),
+       attitude_after_treated = c("8", "4*", "...", "5", "7", "...", "13*"),
        treatment = c("Yes", "No", "...", "Yes", "Yes", "...", "No")) |>
   
   gt() |>
@@ -567,6 +557,8 @@ tibble(ID = c("1", "2", "...", "10", "11", "...", "N"),
   tab_spanner(label = "Potential Outcomes", columns = c(attitude_after_control, attitude_after_treated)) |>
   tab_spanner(label = "Covariate", columns = c(treatment))
 ```
+
+Note: the values that have a star next to them symbolize the possible values that may exist if they were "control" instead of "treated" or vice versa.
 
 Recall: a Preceptor Table is the smallest possible table with rows and columns such that, if there is no missing data, all our questions are easy to answer. To answer questions --- like "What is the average treatment effect, of exposing people to Spanish-speakers, on their attitudes toward immigration? and What is the largest causal effect which still has a 1 in 10 chance of occurring?" --- we need a row for every individual.
 
@@ -635,16 +627,16 @@ After assuming validity, we can now create our Population Table. Recall that eve
 #| echo: false
 tibble(source = c("...", "Data", "Data", "...", 
                   "...", "Preceptor Table", "Preceptor Table", "..."),
-       att_treat = c("...", "...", "6", "...",
+       att_treat = c("...", "7*", "6", "...",
                      "...", "...", "...", "..."),
-       att_control = c("...", "2", "...", "...", 
+       att_control = c("...", "2", "10*", "...", 
                        "...", "...", "...", "..."),
        city = c("...", "Boston, MA", "Boston, MA", "...", 
                 "...", "Wilmington, DE", "Atlanta, GA", "..."),
        year = c("...", "2012", "2012", "...", 
                 "...", "2023", "2023", "..."),
        treatment = c("...", "No", "Yes", "...", 
-                     "...", "Yes", "Yes", "...")) |>
+                     "...", "...", "...", "...")) |>
   
   gt() |>
   tab_header(title = "Population Table") |> 
@@ -664,6 +656,8 @@ tibble(source = c("...", "Data", "Data", "...",
   tab_spanner(label = "Potential Outcomes", columns = c(att_control, att_treat)) |>
   tab_spanner(label = "Covariates", columns = c(treatment, year, city))
 ```
+
+Note: the values that have a star next to them symbolize the possible values that may exist if they were "control" instead of "treated" or vice versa.
 
 Our year within the Population table is an example of the moment in time.
 
@@ -770,7 +764,7 @@ Let's take a deeper look at the graphs that we have above. Our graph in the dark
 
 #### Data Generating Mechanism (DGM)
 
-Recall the preceptor table and the units from the beginning. We are concerned with three main ideas from the preceptor table: our units (individuals with unique attributes at the train station), our outcome (individual's attitude toward immigration) covariates (the treatment that each individual will receive). Now, let's determine whether our **Data Generating Mechanism** will be linear or logistic. Since our outcome variable `att_end` is a continuous variable since it has a range of possible values, we will use a linear model. With the help of the data generating mechanism that we have created from our fitted model we can fill in the missing values to the preceptor tables. We use the data generating mechanism as the last step of **courage** as it allows us to analyze and view our fitted model's data.
+Recall the Preceptor Table and the units from the beginning. We are concerned with three main ideas from the Preceptor Table: our units (individuals with unique attributes at the train station), our outcome (individual's attitude toward immigration) covariates (the treatment that each individual will receive). Now, let's determine whether our **Data Generating Mechanism** will be linear or logistic. Since our outcome variable `att_end` is a continuous variable since it has a range of possible values, we will use a linear model. With the help of the data generating mechanism that we have created from our fitted model we can fill in the missing values to the Preceptor Tables. We use the data generating mechanism as the last step of **courage** as it allows us to analyze and view our fitted model's data.
 
 Now that we have tested our fitted model through the model checks we can view all of our data with the table that we have below:
 
@@ -786,7 +780,7 @@ Up until now, we have used the Bayesian interpretation of "confidence interval."
 
 But, in contemporary academic research, the phrase "confidence interval" is usually given a "Frequentist" interpretation. (The biggest divide in statistics is between Bayesians and Frequentist interpretations. The Frequentist approach, also known as "Classical" statistics, has been dominant for 100 years. Its power is fading, which is why this textbook uses the Bayesian approach.) For a Frequentist, a 95% confidence interval means that, if we were to apply the procedure we used in an infinite number of future situations like this, we would expect the true value to fall within the calculated confidence intervals 95% of the time. In academia, a distinction is sometimes made between *confidence intervals* (which use the Frequentist interpretation) and *credible intervals* (which use the Bayesian interpretation). We won't worry about that difference in this *Primer*.
 
-In summary: we model the attitude of individuals at a train station as a linear function of the treatment each individual receives. We find that the individuals that are "control" have about one and a half attitude less than when compared with the individuals that are "treated."
+In summary: we model the attitude of individuals at a train station as a linear function of the treatment each individual receives. We find that the individuals that receive any Spanish speaking treatment are about half a standard deviation more in attitude than the attitude for individuals that did not receive Spanish speaking treatment meaning that the individuals that received Spanish speaking treatment ended up being more conservative.
 
 ### Temperance
 
@@ -875,7 +869,9 @@ quantile(pp$te, prob = 0.9)
 
 We would not expect a treatment effect of this magnitude to be common, but, at the same time, effects this big and bigger will occur about 10% of the time.
 
-Despite utilizing our fitted model and the Cardinal Virtues to address inquiries, it remains imperative to approach the outcomes with caution. The assumptions we made —-- stability, validity, representativeness, and unconfoundness —-- have all revealed inadequacies in our reasoning and the context we are dealing with. Consequently, our model's accuracy and the reliability of its results cannot be taken for granted. When we were dealt with these assumptions we had problems with the "assignment mechanism", the true meaning of terms, and the way that we have collected our data. In handling our current circumstances, it is crucial to retain a sense of humility, acknowledging that not all our data and presumptions are entirely precise. The responses we offer consistently tend to underestimate the genuine uncertainties present in the world.
+We should always be cautious about our inferences. Our assumptions are never true. We need to be cautious with our inferences when we deal with all of the assumptions that we have made within the chapter regarding validity, stability, representativeness, and model structure. When we take a look at the assumption of validity a possibility may not hold due to when our data was collected, for example if the data was collected in the morning the people that are interviewed may be more grumpy when going to work. When we take a look at the assumption of stability a possibility where it may not hold would be the definition of our party and how the definition of conservative may change over time. When we take a look at the assumption of representativeness a possibility where it may not hold would be with correlation between our "assignment mechanism" and other variables to be true. When we take a look at the assumption of the model structure a possibility where it may not hold would be with the flaw of the fitted model where we conducted a posterior predict check that generated a distribution of values that were less than 3 and above 15 indicating that there are flaws within the model. Our stated inferences almost certainly underestimate the true uncertainty of the world. We need to maintain humility when we are making our inferences and decisions. Stay cautious my friends.
+
+<!-- Insert meme! -->
 
 ## income \~ age
 
@@ -952,14 +948,13 @@ trains |>
 `summary()` shows us what the different values of `age` and `income` are because it is a factor. The range for `age` seems reasonable. Recall that participants were asked three questions about immigration issues, each of which allowed for an answer indicated strength of agreement on a scale form 1 to 5, with higher values indicating more agreement with conservative viewpoints.
 
 ```{r}
-trains |> 
-  ggplot(aes(age)) +
-    geom_histogram(aes(y = after_stat(count*10000)),
-      bins = 50) +
-    labs(x = "Age",
-         y = "Income") +
-    scale_y_continuous(labels = scales::dollar_format()) +
-    theme_classic()
+trains |>
+  ggplot(aes(x = age, y = income)) +
+  geom_point() +
+  labs(x = "Age",
+       y = "Income") +
+  scale_y_continuous(labels = scales::dollar_format()) +
+  theme_classic()
 ```
 
 We can never know the true average income of the population. But we can calculate a distribution for each parameter. As we can see with the plot above, the older individuals tend to be have more of an income. When compared with the younger individuals, the older individuals tend to exhibit a greater income because of the longer life and possibilities they have.
@@ -993,7 +988,7 @@ With our **assumption of validity** proving to be reasonably accurate, we can no
 tibble(source = c("...", "Data", "Data", "...", 
                   "...", "Preceptor Table", "Preceptor Table", "..."),
        income = c("...", "150000", "50000", "...",
-                 "...", "45000", "15000", "..."),
+                 "...", "...", "...", "..."),
        city = c("...", "Boston, MA", "Boston, MA", "...", 
                 "...", "Wilmington, DE", "Atlanta, GA", "..."),
        year = c("...", "2012", "2012", "...", 
@@ -1141,7 +1136,7 @@ Our graph in the darker blue represents our actual data. As we can see with the 
 
 #### Data Generating Mechanism (DGM)
 
-Recall the preceptor table and the units from the beginning. We are concerned with three main ideas from the preceptor table: our units (dollars for the 40-year olds at the train station), our outcome (individual's income) covariates (the age of each individual). Now that we have run a posterior predict check to ensure that we have a fitted model that best suits us we can create a table like the one below to visualize the data we currently have. With the help of the data generating mechanism that we have created from our fitted model we can use this to fill in all of the missing values for our preceptor table. We use the data generating mechanism as the last step of **courage** as it allows us to analyze and view our fitted model's data. 
+Recall the Preceptor Table and the units from the beginning. We are concerned with three main ideas from the Preceptor Table: our units (dollars for the 40-year olds at the train station), our outcome (individual's income) covariates (the age of each individual). Now that we have run a posterior predict check to ensure that we have a fitted model that best suits us we can create a table like the one below to visualize the data we currently have. With the help of the data generating mechanism that we have created from our fitted model we can use this to fill in all of the missing values for our Preceptor Table. We use the data generating mechanism as the last step of **courage** as it allows us to analyze and view our fitted model's data. 
 
 ```{r}
 #| echo: false
@@ -1151,7 +1146,7 @@ gtsummary::tbl_regression(fit_3, intercept = TRUE) %>%
 
 `(Intercept)` corresponds to 103,062 which is $\beta_0$. As always, R has, behind the scenes, estimated the entire posterior probability distribution for $\beta_0$. We will graph that distribution in the next section. But the basic print method for these objects can't show the entire distribution, so it gives us summary numbers: the median and the MAD SD. Speaking roughly, we would expect about 95% of the values in the posterior to be within two MAD SD's of the median.
 
-In summary: we model the income of individuals at a train station as a linear function of the age of each individual. We find that the average income for individuals at the train station approximates to 103,000.
+In summary: we model the income of individuals at a train station as a linear function of the age of each individual. We find that the average income for individuals at the train station approximates to 103,000 as well as, we can see that the older the age the more income seems to be.
 
 <!-- DK: Next step: A scatter plot with the fitted line drawn through it and a residual highlighted. Some more discussion! And some plots. Explain what the residuals are. And predicted values! Talk about sigma. More could be done. -->
 
@@ -1198,7 +1193,11 @@ pe |>
     theme_classic()
 ```
 
-Now that we have plotted all of our models and viewed our data we want to talk about the usage of these models and how **Temperance** plays a strong factor in the usage of these models. Using our fitted model and considering the Cardinal Virtues to tackle questions, it is crucial to handle the findings cautiously. Our underlying assumptions regarding stability, validity, representativeness, and unconfoundness have exposed certain limitations in our reasoning and the specific context we are dealing with. Hence, the precision of our model and the dependability of its outcomes should not be assumed without reservation. When we dealt with these assumptions we had problems with the "sampling mechanism", the true meaning of terms, and the way that we have collected our data. When facing our present situation, it is essential to maintain humility and recognize that our data and assumptions might not be entirely accurate.
+Now that we have plotted all of our models and viewed our data we want to talk about the usage of these models and how **Temperance** plays a strong factor in the usage of these models. 
+
+We should always be cautious about our inferences. Our assumptions are never true. We need to be cautious with our inferences when we deal with all of the assumptions that we have made within the chapter regarding validity, stability, representativeness, and model structure. When we take a look at the assumption of validity a possibility may not hold due could be the privacy of each station because the privacy of a train station differs from filling out surveys at home. When we take a look at the assumption of stability a possibility where it may not hold would be inflation and how that could impact income. When we take a look at the assumption of representativeness a possibility where it may not hold would be with correlation between our "sampling mechanism" and other variables to be true. When we take a look at the assumption of the model structure a possibility where it may not hold would be with the flaw of the fitted model where we conducted a posterior predict check that generated a distribution of values that showed the flaws within the model. Our stated inferences almost certainly underestimate the true uncertainty of the world. We need to maintain humility when we are making our inferences and decisions. Stay cautious my friends.
+
+<!-- Insert meme! -->
 
 <!-- More discussion! -->
 
@@ -1243,8 +1242,8 @@ Our Preceptor Table:
 ```{r}
 #| echo: false
 tibble(ID = c("1", "2", "...", "10", "11", "...", "N"),
-       attitude_yes_liberal = c("...", "7", "...", "...", "4", "...", "6"),
-       attitude_no_liberal = c("8", "...", "...", "5", "...", "...", "..."),
+       attitude_yes_liberal = c("3*", "7", "...", "10*", "4", "...", "6"),
+       attitude_no_liberal = c("8", "2*", "...", "5", "15*", "...", "7*"),
        income = c("150000", "50000", "...", "65000", "35000", "...", "78000")) |>
   gt() |>
   tab_header(title = "Preceptor Table") |> 
@@ -1263,7 +1262,9 @@ tibble(ID = c("1", "2", "...", "10", "11", "...", "N"),
   tab_spanner(label = "Covariate", columns = c(income))
 ```
 
-Recall: a Preceptor Table is table with rows and columns such that, if there is no missing data, all our questions are easy to answer. To answer questions — like “Among all people who have an income $100,000, what proportion are liberal?
+Note: the values that have a star next to them symbolize the possible values that may exist if they were "control" instead of "treated" or vice versa.
+
+Recall: a Preceptor Table is the smallest table with rows and columns such that, if there is no missing data, all our questions are easy to answer. To answer questions — like “Among all people who have an income $100,000, what proportion are liberal?
 and Assume we have a group of eight people, two of whom make $100,000, two $200,000, two $300,000 and two $400,000. How many will be liberal?” — we need a row for every individual at the station.
 
 When we take a look at the questions we discover that there is a flaw that exists. The individual that asked this question did not give us the location or the time that we want to use for these questions at hand. It is vital to understand where and when that we are answering these questions because otherwise it could apply to the whole country, nation, or specific state. Therefore, by diving deeper within these questions we are able to accurately answer our question with the population that it refers to. For the questions that we have at hand we will be using the year 2023 and the location of Chicago, Illinois which will allow us to answer the questions more accurately. 
@@ -1329,16 +1330,16 @@ With our **assumption of validity** proving to be reasonably accurate, we can no
 #| echo: false
 tibble(source = c("...", "Data", "Data", "...", 
                   "...", "Preceptor Table", "Preceptor Table", "..."),
-       att_yes_liberal = c("...", "6", "9", "...",
+       att_yes_liberal = c("...", "3", "4", "...",
                            "...", "...", "...", "..."),
-       att_no_liberal = c("...", "...", "...", "...",
-                          "...", "3", "2", "..."),
+       att_no_liberal = c("...", "6*", "9*", "...",
+                          "...", "...", "...", "..."),
        city = c("...", "Boston, MA", "Boston, MA", "...", 
                 "...", "Wilmington, DE", "Atlanta, GA", "..."),
        year = c("...", "2012", "2012", "...", 
                 "...", "2023", "2023", "..."),
        income = c("...", "150000", "50000", "...",
-                 "...", "45000", "15000", "...")) |>
+                 "...", "...", "...", "...")) |>
   gt() |>
   tab_header(title = "Population Table") |> 
   cols_label(source = md("Source"),
@@ -1357,6 +1358,8 @@ tibble(source = c("...", "Data", "Data", "...",
   tab_spanner(label = "Potential Outcomes", columns = c(att_yes_liberal, att_no_liberal)) |>
   tab_spanner(label = "Covariates", columns = c(income, year, city))
 ```
+
+Note: the values that have a star next to them symbolize the possible values that may exist if they were "control" instead of "treated" or vice versa.
 
 Our year within the Population table is an example of the moment in time.
 
@@ -1431,7 +1434,7 @@ Our graph in the darker blue represents our actual data. As we can see with the 
 
 #### Data Generating Mechanism (DGM)
 
-Recall the preceptor table and the units from the beginning. We are concerned with three main ideas from the preceptor table: our units (individuals with unique attributes at the train station), our outcome (individual's attitude toward immigration) covariates (the treatment that each individual will receive). Now that we have run the necessary model checks on our fitted model to ensure that we have the best suited model, we can create a table to view our data. With the accurate fitted model and low residuals proving to be accurate we can use the data generating mechanism to finish the last step in the **Courage** process.
+Recall the Preceptor Table and the units from the beginning. We are concerned with three main ideas from the Preceptor Table: our units (individuals with unique attributes at the train station), our outcome (individual's attitude toward immigration) covariates (the treatment that each individual will receive). Now that we have run the necessary model checks on our fitted model to ensure that we have the best suited model, we can create a table to view our data. With the accurate fitted model and low residuals proving to be accurate we can use the data generating mechanism to finish the last step in the **Courage** process.
 
 ```{r}
 #| echo: false
@@ -1443,7 +1446,7 @@ gtsummary::tbl_regression(fit_4, intercept = TRUE) %>%
 
 As we can see with the able above are using log(OR) which means that the way that we interpret the data given to us plays a huge role in the way that we can predict future data. When we are dealing with income for example we can either use the log of income or deal with income straight which play different roles in changing the way that we feed and understand the data. With the different ways that we are inputting the data, the model changes because of the variables that are changing within the model. 
 
-In summary: we model the income of individuals at a train station as a linear function of the treatment each individual receives. We find that the liberal membership for individuals at the train station tends to be more liberal as shown with the median being 0.56.
+In summary: we model the income of individuals at a train station as a linear function of the treatment each individual receives. We find that the individuals that receive any Spanish speaking treatment are about half a standard deviation more in attitude than the attitude for individuals that did not receive Spanish speaking treatment meaning that the individuals that received Spanish speaking treatment ended up being less liberal.
 
 ### Temperance
 
@@ -1533,9 +1536,11 @@ pp |>
 
 As always, there is some *truth*. If, tomorrow, we were to meet 8 new people, with the specified incomes, a certain number of them would be liberal. If we had the ideal Preceptor Table, we could just look up that number. No data science required. Alas, we don't know the truth. The bets we can do is to create a posterior distribution for that unknown value, as we have done here. We then need to translate that posterior into English --- "The most likely number of liberals is 2 or 3, but a total as low as zero or as high as 5 is also plausible. Having 6 liberals would be really surprising. Having 7 or 8 is almost impossible."
 
-Are these two posterior probability distributions perfect? No! This is the central message of the virtue of Temperance. We must demonstrate our humility when we use our models. Recall the distinction between the *unknown true distribution* and the *estimated distribution*. The first is the posterior distribution we would create of we understood every detail of the process and could accurately model it. We would still not know the true unknown number, but our posterior distribution for that number would be perfect. Yet, our model is never perfect. We are making all sorts of assumptions behind the scenes. Some of those assumptions are plausible. Others are less so. Either way, the *estimated distribution* is what we have graphed above.
+Are these two posterior probability distributions perfect? No! This is the central message of the virtue of Temperance. We must demonstrate our humility when we use our models. Recall the distinction between the *unknown true distribution* and the *estimated distribution*. The first is the posterior distribution we would create of we understood every detail of the process and could accurately model it. We would still not know the true unknown number, but our posterior distribution for that number would be perfect. Yet, our model is never perfect. We are making all sorts of assumptions behind the scenes. Some of those assumptions are plausible. Others are less so. Either way, the *estimated distribution* is what we have graphed above. When we take a look at the assumption of validity a possibility may not hold due would be from how our income data was collected similar to our age data collection. When we take a look at the assumption of stability a possibility where it may not hold would be inflation and how that could impact income. When we take a look at the assumption of representativeness a possibility where it may not hold would be with correlation between our "sampling mechanism" and other variables to be true. When we take a look at the assumption of the model structure a possibility where it may not hold would be with the flaw of the fitted model where we conducted a posterior predict check that generated a distribution of values that showed the flaws within the model.
 
-The central lesson of Temperance is: Don't confuse the *estimated* posterior (which is what you have) with the *true* posterior (which is what you want). Recognize the unavoidable imperfections in the process. You can still use your estimated posterior --- what choice do you have? --- but be cautious and humble in doing so. The more that you suspect that your estimated posterior differs from the true posterior, the more humble and cautious you should be.
+The central lesson of Temperance is: Don't confuse the *estimated* posterior (which is what you have) with the *true* posterior (which is what you want). Recognize the unavoidable imperfections in the process. You can still use your estimated posterior --- what choice do you have? --- but be cautious and humble in doing so. The more that you suspect that your estimated posterior differs from the true posterior, the more humble and cautious you should be. Stay cautious my friends.
+
+<!-- Insert meme! -->
 
 ## Summary
 
