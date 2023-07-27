@@ -10,15 +10,17 @@ library(gtsummary)
 library(patchwork)
 ```
 
-<!-- DK: Always need to ask specify the moment in time to which the Preceptor Table refers. The original question will almost never specify this, although the normal answer is often "now" or "today." Ask this question as part of the what is the outcome question. -->
+<!-- DK: Always need to ask specify the moment in time to which the Preceptor Table refers. The original question will almost never specify this, although the normal answer is often "now" or "today." Ask this question as part of the what is the outcome question. DONE-->
 
-<!-- DK: In each case, make the "refined" question explicit right before creating the Preceptor Table. -->
+<!-- Remove sampling & assignment mechanism -->
 
-<!-- DK: In the Validiy section, always discuss how we need to refine the question further in order to answer it, because variables do not come out of this air. -->
+<!-- DK: In each case, make the "refined" question explicit right before creating the Preceptor Table. DONE-->
 
-<!-- DK: Capitalize Population Table. -->
+<!-- DK: In the Validity section, always discuss how we need to refine the question further in order to answer it, because variables do not come out of this air. -->
 
-<!-- DK: Discussions of representativeness might seem redundant. And, of course, we always mention the two potential problems: Is our data representative of the population and is our Preceptor Table representative of the population? Each of these points gets its own short paragraph. There are always two levels of concerns: first is generic, second only applies to the variables you need to answer the question. -->
+<!-- DK: Capitalize Population Table. DONE-->
+
+<!-- DK: Discussions of representativeness might seem redundant. And, of course, we always mention the two potential problems: Is our data representative of the population and is our Preceptor Table representative of the population? Each of these points gets its own short paragraph. There are always two levels of concerns: first is generic, second only applies to the variables you need to answer the question. applied in age~party (needs to be applied elsewhere)-->
 
 <!-- MT: for all gtsummary tables we need to edit the tables to include specifics  -->
 
@@ -67,15 +69,19 @@ Wisdom begins with considering the questions we desire to answer and the data se
 
 #### Preceptor Table 
 
-First, do we need a **causal** or **predictive** model? In our question above we have a predictive model as we only have one outcome which is the person's age based on our predictor which is the person's party. 
+First, do we need a **causal** or **predictive** model? In our question above we have a predictive model as we only have one outcome which is the person's age based on our predictor which is the person's party.
 
-Second, what is the outcome? A person's age will be the **outcome**. Note that the outcome is not necessarily the same concept mentioned in the questions. For example, the outcome column is not "probability that a person is over 50" even though that is one of the questions we need to answer.
+Second, what is the outcome? A person's age will be the **outcome**. Note that the outcome is not necessarily the same concept mentioned in the questions. For example, the outcome column is not "probability that a person is over 50" even though that is one of the questions we need to answer. The questions, however, leave unclear details. Where train stations are these people at? Which country? Also, at what moment in time is this experiment taking place? In order to dive deeper into these questions we need to engage in a conversation with the person that is asking us these questions. When this occurs, we need to discuss and dive deeper into the questions that have been asked to understand what the true question is at hand. For the questions that we have at hand we will be talking about all the adults in July 1, 2012 at the location of Chicago, Illinois. 
 
-Third, what are the **units**? Our units for this scenario would be individuals because the questions are about the attributes of unique people at the station. The questions, however, leave unclear details. Where train stations are these people at? Which country? Also, at what moment in time is this experiment taking place? In order to dive deeper into these questions we need to engage in a conversation with the person that is asking us these questions.
+Third, what are the **units**? Our units for this scenario would be individuals because the questions are about the attributes of unique people at the station.
 
 Fourth, what are the **covariates**? In our case, a person's party will be the only covariate because it is another factor that plays to the person's age and identity. The Preceptor Table must include any covariates mentioned in the question.
 
 Fifth, do we have a **treatment**? No. We will be using a predictive model as discussed above and treatments will only apply to situations with causal models. A treatment is just a covariate which we can, at least in theory, manipulate, thereby creating other potential outcomes.
+
+Let's look at our refined question to create our Preceptor Table:
+
+*What is the probability that, if a Democrat shows up at the train station in Chicago, Illinois in 2012, he will be over 50 years old?*
 
 Our Preceptor Table:
 
@@ -102,8 +108,6 @@ tibble(ID = c("1", "2", "...", "10", "11", "...", "N"),
 ```
 
 Recall: a Preceptor Table is smallest possible table with rows and columns such that, if there is no missing data, all our questions are easy to answer. To answer questions --- like "What is the probability that, if a Democrat shows up at the train station, he will be over 50 years old?" --- we need a row for every individual at the station.
-
-When we take a look at the questions we discover that there is a fundamental flaw within our questions. We don't know the location or the time that exists within these questions making it harder to find the answers to resolve our questions. When this occurs, we need to discuss and dive deeper into the questions that have been asked to understand what the true question is at hand. For the questions that we have at hand we will be using the year 2023 and the location of Chicago, Illinois which will allow us to answer the questions more accurately. 
 
 #### Always Explore Your Data
 
@@ -160,7 +164,7 @@ Validity is the assumption which allows us to consider the Preceptor Table and o
 
 Now the **assumption of validity** may not hold due to the possibility of what our terms mean. For example, what it means to be a "Republican" might be very different in Massachusetts (meaning in our data) than what it means in the rest of the United States (meaning the Preceptor Table). Just slapping the two data sources together does not solve that problem. Similarly, `age` in the data is measured from a survey. People make mistakes. They even lie. In our Preceptor Table, we want the column `age` to be each person's actual age.
 
-If `party` or `age` are too different between the Preceptor Table and our data, then the assumption of validity fails. We can't consider both sources to have been drawn from the same popula
+If `party` or `age` are too different between the Preceptor Table and our data, then the assumption of validity fails. We can't consider both sources to have been drawn from the same population.
 
 Overall, however, the assumption of validity seems reasonable. `age` and `party` are close enough between our data and The Preceptor Table that we can "stack" them on top of each other. We will assume that both are drawn from the same population.
 
@@ -172,7 +176,7 @@ Overall, however, the assumption of validity seems reasonable. `age` and `party`
 knitr::include_graphics("other/images/Justice.jpg")
 ```
 
-Justice concerns five topics: population table, stability, representativeness, unconfoundedness and the mathematical structure of the data generating mechanism (DGM).
+Justice concerns five topics: Population Table, stability, representativeness, unconfoundedness and the mathematical structure of the data generating mechanism (DGM).
 
 #### Population Table
 
@@ -183,7 +187,7 @@ After assuming validity, we can now create our Population Table. Recall that eve
 tibble(source = c("...", "Data", "Data", "...", 
                   "...", "Preceptor Table", "Preceptor Table", "..."),
        city = c("...", "Boston, MA", "Boston, MA", "...", 
-                "...", "Wilmington, DE", "Atlanta, GA", "..."),
+                "...", "Chicago, IL", "Chicago, IL", "..."),
        year = c("...", "2012", "2012", "...", 
                 "...", "2023", "2023", "..."),
        age = c("...", "43", "52", "...", 
@@ -217,7 +221,9 @@ Our Preceptor Table rows are chronologically ordered. The "other" rows are our g
 
 **Stability** means that the relationship between the columns is the same for three categories of rows: the data, the Preceptor table, and the larger population from which both are drawn. With something like height, it is much easier to assume stability over a greater period of time. Changes in global height occur extremely slowly, so height being stable across a span of 20 years is reasonable to assume. With something like political ideology, it is much harder to make the assertion that data collected in 2010 would be stable to data collected in 2030. When we are confronted with this uncertainty, we can consider making our time frame smaller. However, we would still need to assume stability from 2014 (time of data collection) to today. Stability allows us to ignore the issue of time.
 
-**Representativeness** has to do with how well our sample represents the larger population we are interested in generalizing to. For example does the correlation between our "sampling mechanism" and other variables hold to be true. The "sampling mechanism" refers to a mechanism that utilizes sampling in order to get the best possible outcomes with the help of randomization and application to general population. Does the train experiment allow us to calculate a causal effect for people who commute by cars? Can we calculate the causal effect for people in New York City? Before we generalize to broader populations we have to consider if our experimental estimates are applicable beyond our experiment. Generally: *if there was no chance that a certain type of person would have been in this experiment, we cannot make an assumption for that person*.
+Discussions of representativeness might seem redundant. And, of course, we always mention the two potential problems: Is our data representative of the population and is our Preceptor Table representative of the population? Each of these points gets its own short paragraph. There are always two levels of concerns: first is generic, second only applies to the variables you need to answer the question.
+
+**Representativeness** has to do with how well our sample represents the larger population we are interested in generalizing to. We might run into two potential problems: Is our data representative of the population? Is our Preceptor Table representative of the population? When we look at the data being representative of the population, let's dive deeper and take a look at a few questions at hand. Does the train experiment allow us to calculate a predictive effect for people who commute by cars? Oftentimes the way that people commute change the way that we can intrepid their attitude regarding party. Can we calculate the predictive effect for people in Boston? When we deal with representativeness we deal with two primary concerns: the generic concern and the variable concern. The generic concern deals with our situation at hand and whether we can believe that our data and Preceptor Table is representative of the broader population that it is drawn from. Before we generalize to broader populations we have to consider if our experimental estimates are applicable beyond our experiment. Generally: *if there was no chance that a certain type of person would have been in this experiment, we cannot make an assumption for that person*. Our second level of concern deals with the variable concern which in this case deals with an individual's age and party. Out of our sample, we aren't able to contain all of the ages of individuals within the broader population. For example: we don't have the age less than 20 which does not representa a large amount of our broader population. When we deal with party we see a similar result. We are only dealing with Democrat and Republican as our two main factors, however, that is not representative of our entire broader population. There are multiple parties within the nation and limiting our data to two, condenses the parties that we have - ultimately undermining representativeness within the situation.
 
 **Unconfoundedness** means that the treatment assignment is independent of the potential outcomes, when we condition on pre-treatment covariates. However, with our scenario, we have a predictive model and this assumption is only relevant for causal models.
 
@@ -521,7 +527,7 @@ Above, we created a predictive model: with someone's party affiliation, we can m
 
 *What is the largest causal effect which still has a 1 in 10 chance of occurring?*
 
-Answering causal questions requires (at least) two potential outcomes: immigration attitudes when a person receives the treatment of being exposed to Spanish-speakers and immigration attitudes, for that same person, when they don't receive the treatment. We can answer these and similar questions by creating a model with immigration attitude as the dependent variable and exposure to Spanish-speakers as the independent variable. Let's follow the four Cardinal Virtue: Wisdom, Justice, Courage and Temperance.
+Answering causal questions requires (at least) two potential outcomes: immigration attitudes when a person receives the treatment of being exposed to Spanish-speakers and immigration attitudes, for that same person, when they don't receive the treatment. We can answer these and similar questions by creating a model with immigration attitude as the dependent variable and exposure to Spanish-speakers as the independent variable. Let's follow the four Cardinal Virtues: Wisdom, Justice, Courage and Temperance.
 
 ### Wisdom
 
@@ -534,13 +540,17 @@ Wisdom requires the creation of a Preceptor Table, an examination of our data, a
 
 #### Preceptor Table
 
-First, do we need a **causal** or **predictive** model? In this case, the model is clearly causal, so our Preceptor Table will have two columns for the potential outcomes.
+First, do we need a **causal** or **predictive** model? In this case, the model is clearly causal, so our Preceptor Table will have two columns for the potential outcomes. If all you need to know to answer the question is the outcome under one value of the treatment, then the model is predictive. Example: What is the attitude for all women if they were to get the treatment? Here we a question that implies a comparison, *for a single individual unit*, between two states of the world, when where they get treatment and one where they do not get treatment.
 
-Second, what is the outcome? A person's attitude toward immigration is the **outcome**. 
+Second, what is the outcome? A person's attitude toward immigration is the **outcome**. When we take a look at the questions we discover a flaw exists. The individual that asked this question did not tell us where or when we are looking at these questions. It is important to understand where and when that we are answering these questions because otherwise our data could be not accurately applied to the whole country, nation, or specific state. Therefore, by diving deeper within these questions we are able to accurately answer our question with the population that it refers to. For the questions that we have at hand we will be talking about all the adults in July 1, 2012 at the location of Chicago, Illinois which will allow us to answer the questions more accurately. 
 
-Third, what are the **units**? Our units for this scenario would be individuals because the questions are about the attributes of unique people at the station. The questions, however, leave unclear the details. Where are these people? Are they at a train station? In which country? Also, at what moment in time is this experiment taking place? We need to engage in a conversation with the person asking us these questions in order to flesh out some of the details.
+Third, what are the **units**? Our units for this scenario would be individuals because the questions are about the attributes of unique people at the station.
 
-Fourth, do we have a **treatment**? Yes. In any causal model, there is at least one covariate which is defined as the "treatment," something which we can manipulate so that some units receive one version and other units get a different version. In this case, the treatment is exposure to Spanish-speakers. Units can either be exposed, i.e., they receive the "treatment," or they can not be exposed, i.e., they receive the "control."
+Fourth, do we have a **treatment**? Yes. In any causal model, there is at least one covariate which is defined as the "treatment," something which we can manipulate so that some units receive one version and other units get a different version. A "treatment" is just a covariate in which we *can* manipulate and *need* to manipulate, at least in theory, to answer the question. In this case, the treatment is exposure to Spanish-speakers. Units can either be exposed, i.e., they receive the "treatment," or they can not be exposed, i.e., they receive the "control." 
+
+Let's look at our refined question to create our Preceptor Table:
+
+*What is the average treatment effect, of exposing people to Spanish-speakers in Chicago Illinois in 2012, on their attitudes toward immigration?*
 
 Our Preceptor Table:
 
@@ -571,8 +581,6 @@ tibble(ID = c("1", "2", "...", "10", "11", "...", "N"),
 Note: the values that have a star next to them symbolize the possible values that may exist if they were "control" instead of "treated" or vice versa.
 
 Recall: a Preceptor Table is the smallest possible table with rows and columns such that, if there is no missing data, all our questions are easy to answer. To answer questions --- like "What is the average treatment effect, of exposing people to Spanish-speakers, on their attitudes toward immigration? and What is the largest causal effect which still has a 1 in 10 chance of occurring?" --- we need a row for every individual.
-
-When we take a look at the questions we discover a flaw exists. The individual that asked this question did not tell us where or when we are looking at these questions. It is important to understand where and when that we are answering these questions because otherwise our data could be not accurately applied to the whole country, nation, or specific state. Therefore, by diving deeper within these questions we are able to accurately answer our question with the population that it refers to. For the questions that we have at hand we will be using the year 2023 and the location of Chicago, Illinois which will allow us to answer the questions more accurately. 
 
 #### Exploratory Data Analysis
 
@@ -627,7 +635,7 @@ While the assumption can prove validity to be wrong, overall, the assumption of 
 knitr::include_graphics("other/images/Justice.jpg")
 ```
 
-The five concerns of Justice in a data science project remain the same: population table, stability, representativeness, unconfoundedness and the mathematical structure of the data generating mechanism (DGM).
+The five concerns of Justice in a data science project remain the same: Population Table, stability, representativeness, unconfoundedness and the mathematical structure of the data generating mechanism (DGM).
 
 #### Population Table
 
@@ -642,7 +650,7 @@ tibble(source = c("...", "Data", "Data", "...",
        att_control = c("...", "2", "10*", "...", 
                        "...", "...", "...", "..."),
        city = c("...", "Boston, MA", "Boston, MA", "...", 
-                "...", "Wilmington, DE", "Atlanta, GA", "..."),
+                "...", "Chicago, IL", "Chicago, IL", "..."),
        year = c("...", "2012", "2012", "...", 
                 "...", "2023", "2023", "..."),
        treatment = c("...", "No", "Yes", "...", 
@@ -900,15 +908,19 @@ Wisdom requires the creation of a Preceptor Table, an examination of our data, a
 
 #### Preceptor Table
 
-First, do we need a **causal** or **predictive** model? In our question above we have a predictive model as we are only considered with one outcome: a person's income based on their age.
+First, do we need a **causal** or **predictive** model? In our question above we have a predictive model as we are only considered with one outcome: a person's income based on their age. Remember the motto: *No causation without manipulation*.
 
-Second, what is the outcome? A person's income would be our **outcome**.
+Second, what is the outcome? A person's income would be our **outcome**. The individual that asked this question did not tell us where or when we are looking at these questions. Do we need to look at the year 2022, 2020, 2018? Do we need to look in Florida, Connecticut, Maryland? It is vital to understand where and when that we are answering these questions because otherwise our data could be not accurately applied to the whole country, nation, or specific state. Therefore, by diving deeper within these questions we are able to accurately answer our question with the population that it refers to. For the questions that we have at hand we will be talking about all the adults in July 1, 2012 at the location of the United States which will allow us to answer the questions more accurately.
 
 Third, what are the **units**? Our units for this scenario would be dollars as we are concerned with dollars at the station for 40-year olds.
 
 Fourth, what are the **covariates**? In this case, a person's age is the only covariate. The Preceptor Table must include any covariates mentioned in the question.
 
 Fifth, do we have a **treatment**? No. We will be using a predictive model as discussed above and treatments will only apply to situations with causal models. A treatment is just a covariate which we can, at least in theory, manipulate, thereby creating other potential outcomes.
+
+Let's look at our refined question to create our Preceptor Table:
+
+*What would you expect the income to be for a 40-year old in the United States in 2012?*
 
 Our Preceptor Table:
 
@@ -987,7 +999,7 @@ While the assumption can prove validity to be wrong, overall, the assumption of 
 knitr::include_graphics("other/images/Justice.jpg")
 ```
 
-Once again, in **Justice**, we must consider the population table, stability, representativeness, unconfoundedness and the mathematical structure of the data generating mechanism (DGM).
+Once again, in **Justice**, we must consider the Population Table, stability, representativeness, unconfoundedness and the mathematical structure of the data generating mechanism (DGM).
 
 #### Population Table
 
@@ -1234,36 +1246,37 @@ Wisdom requires the creation of a Preceptor Table, an examination of our data, a
 
 #### Preceptor Table
 
-<!-- DK: Answer is predictive. Why? Because it is not causal. Looks for words like "cause" or "affect" or "influence." Look for a question which implies a comparison, *for a single individual unit*, between two states of the world, when where they get treatment X and one where they get treatment Y. Look for a discussion of something which we can *manipulate*. Remember the motto: *No causation without manipulation*. If none of this is present, use a predictive model. If all you need to know to answer the question is the outcome under one value of the treatment, then the model is predictive. Example: What is the att_end for all women if they were to get the treatment? -->
+<!-- DK: Answer is predictive. Why? Because it is not causal. Looks for words like "cause" or "affect" or "influence." Look for a question which implies a comparison, *for a single individual unit*, between two states of the world, when where they get treatment X and one where they get treatment Y. Look for a discussion of something which we can *manipulate*. Remember the motto: *No causation without manipulation*. If none of this is present, use a predictive model. If all you need to know to answer the question is the outcome under one value of the treatment, then the model is predictive. Example: What is the att_end for all women if they were to get the treatment? DONE (spread out throughout sections)-->
 
-First, do we need a **causal** or **predictive** model? In our question above we have a causal model as we would have multiple potential outcomes with a person's attitude based on whether the person is liberal or not.
+First, do we need a **causal** or **predictive** model? In our question above we have a predictive model. When we are deciding between a causal or predictive model we want to look at the question. Does it include key words such as: "cause," "affect," or "influence." Often these key words indicate that we are dealing with a causal model were a comparison exists between two states of a variable.
 
-Second, what is the outcome? A person's attitude would be the **outcome** in this scenario.
+Second, what is the outcome? A person's attitude would be the **outcome** in this scenario. When we take a look at the questions we discover that there is a flaw that exists. It is vital to understand where and when that we are answering these questions because otherwise it could apply to the whole country, nation, or specific state. Therefore, by diving deeper within these questions we are able to accurately answer our question with the population that it refers to. For the questions that we have at hand we will be talking about all the adults in July 1, 2012 at the location of the United States which will allow us to answer the questions more accurately. 
 
-<!-- DK: Add discussio about how the questions, like always, is in exact. Who are we talking about. Let's assume it is all adults in the US in 2012. In fact, the "what are the units" paragraphs always need this discussion, otherwise we can't create a Preceptor Table. And, in addition to units, you need to discuss time. When are we asking this question? Assume it is July 1, 2012.  -->
-
+<!-- DK: Add discussion about how the questions, like always, is in exact. Who are we talking about. Let's assume it is all adults in the US in 2012. In fact, the "what are the units" paragraphs always need this discussion, otherwise we can't create a Preceptor Table. And, in addition to units, you need to discuss time. When are we asking this question? Assume it is July 1, 2012. DONE (in the outcomes paragraph as discussed)-->
 
 Third, what are the **units**? Our units for this scenario would be individuals because the questions are about the attributes of unique people at the station.
 
-<!-- DK: Fix this. A "treatment" is just a covariate which, first, we *can* manipulate and, second, we *need* to manipulate, at least in theory, to answer the question. -->
+<!-- DK: Fix this. A "treatment" is just a covariate which, first, we *can* manipulate and, second, we *need* to manipulate, at least in theory, to answer the question. DONE-->
 
-Fourth, do we have a **treatment**? Yes. In any causal model, there is at least one covariate which is defined as the "treatment," something which we can manipulate so that some units receive one version and other units get a different version. In this case, the treatment would be whether an individual's attitude changes. Units can either be exposed, i.e., they are a "treated", or they can not be exposed, i.e., they are a "control."
+Fourth, do we have a **treatment**? No. When we deal with predictive models we don't have any treatments. In this case, the treatment does not apply as we aren't dealing with a covariate that we *can* manipulate and *need* to manipulate. 
+
+Let's look at our refined question to create our Preceptor Table:
+
+*Among all people in the United States in 2012 who have an income of \$100,000, what proportion are liberal?*
 
 Our Preceptor Table:
 
-<!-- DK: Make table predictive. -->
+<!-- DK: Make table predictive. DONE -->
 
 ```{r}
 #| echo: false
 tibble(ID = c("1", "2", "...", "10", "11", "...", "N"),
-       attitude_yes_liberal = c("3*", "7", "...", "10*", "4", "...", "6"),
-       attitude_no_liberal = c("8", "2*", "...", "5", "15*", "...", "7*"),
+       liberal = c("0", "0", "...", "1", "1", "...", "1"),
        income = c("150000", "50000", "...", "65000", "35000", "...", "78000")) |>
   gt() |>
   tab_header(title = "Preceptor Table") |> 
   cols_label(ID = md("ID"),
-             attitude_yes_liberal = md("Liberal Ending Attitude"),
-             attitude_no_liberal = md("Not Liberal Ending Attitude"),
+             liberal = md("Liberal"),
              income = md("Income")) |>
   tab_style(cell_borders(sides = "right"),
             location = cells_body(columns = c(ID))) |>
@@ -1272,7 +1285,7 @@ tibble(ID = c("1", "2", "...", "10", "11", "...", "N"),
   cols_align(align = "center", columns = everything()) |>
   cols_align(align = "left", columns = c(ID)) |>
   fmt_markdown(columns = everything()) |>
-  tab_spanner(label = "Potential Outcomes", columns = c(attitude_yes_liberal, attitude_no_liberal)) |>
+  tab_spanner(label = "Outcome", columns = c(liberal)) |>
   tab_spanner(label = "Covariate", columns = c(income))
 ```
 
@@ -1280,8 +1293,6 @@ Note: the values that have a star next to them symbolize the possible values tha
 
 Recall: a Preceptor Table is the smallest table with rows and columns such that, if there is no missing data, all our questions are easy to answer. To answer questions — like “Among all people who have an income $100,000, what proportion are liberal?
 and Assume we have a group of eight people, two of whom make $100,000, two $200,000, two $300,000 and two $400,000. How many will be liberal?” — we need a row for every individual at the station.
-
-When we take a look at the questions we discover that there is a flaw that exists. The individual that asked this question did not give us the location or the time that we want to use for these questions at hand. It is vital to understand where and when that we are answering these questions because otherwise it could apply to the whole country, nation, or specific state. Therefore, by diving deeper within these questions we are able to accurately answer our question with the population that it refers to. For the questions that we have at hand we will be using the year 2023 and the location of Chicago, Illinois which will allow us to answer the questions more accurately. 
 
 #### Data Analysis with Exploratory Approach
 
@@ -1302,30 +1313,29 @@ trains |>
 
 The range for `income` seems reasonable.
 
-<!-- DK: Change this plot to use liberal and income. -->
+<!-- DK: Change this plot to use liberal and income. DONE-->
 
 ```{r}
-trains |> 
-  ggplot(aes(x = income, fill = treatment)) +
-    geom_bar(aes(y = after_stat(count/sum(count))),
-                   position = "dodge") +
-    labs(title = "Expected Income Based On Treatment",
-         x = "Income in 1000s",
-         y = "Probability",
-         fill = NULL) +
-    scale_x_continuous(labels = scales::dollar_format(scale = 1/1000)) +
-    scale_y_continuous(labels = scales::percent_format()) + 
-    theme_classic()
+trains |>
+  ggplot(aes(x = income, y = liberal)) + 
+  geom_point() + 
+  labs(title = "Income Based On Liberal",
+       x = "Income in 1000s",
+       y = NULL,
+       fill = NULL) + 
+  scale_x_continuous(labels = scales::dollar_format(scale = 1/1000)) +
+  scale_y_discrete(labels=c("TRUE" = "Liberal", "FALSE" = "Not Liberal"))
 ```
 
-<!-- DK: Sentence should be something about it not being clear how strong the connection is between liberal and income. -->
+<!-- DK: Sentence should be something about it not being clear how strong the connection is between liberal and income. DONE-->
 
+Our plot above shows a wide assortment of incomes for both liberals and non-liberals, however, there is no clear connection between liberal and income. As we can see on the higher end there are both individuals that are liberal and not liberal that are attaining this sort of income. On the lower end it is the same, as a result we can see that a strong connection between liberal and income clearly does not exist within our situation. 
 
 #### Validity
 
 DK: Validity discussions always have one (short) paragraph about each variable, with examples of why validity might not hold. Validity discussion finishes with a brief discussion along the lines of: "Despite these concerns, we will assume that validity does hold."
 
-Now let's take a look at the **assumption of validity** for our data and Preceptor Table. There is no **truth** here. The **assumption of validity** may not hold due to the possibility of how our data was collected. We asked each individual whether they were "liberal," which means that we didn't rely on the government database. The possibility of the data being different from the government database and the way that we asked each individual may differ across both the Preceptor Table and the data which can prove the assumption of validity to be false.
+Now let's take a look at the **assumption of validity** for our data and Preceptor Table. There is no *truth* here. The **assumption of validity** may not hold due to the possibility of how our data was collected. We asked each individual whether they were "liberal," which means that we didn't rely on the government database. The possibility of the data being different from the government database and the way that we asked each individual may differ across both the Preceptor Table and the data which can prove the assumption of validity to be false.
 
 Another case where the **assumption of validity** may not hold would be from how our income data was collected similar to our age data collection. The data has been collected from filling out surveys about income without cross-checking with the government database. We don't know whether our income is accurate enough when compared to the government's database to the survey that each individual filled out.
 
@@ -1339,7 +1349,7 @@ While this assumption can prove validity wrong, overall, the assumption of valid
 knitr::include_graphics("other/images/Justice.jpg")
 ```
 
-Let's now consider Justice for the relationship between `liberal` and `income`. In **Justice**, we must consider the population table, stability, representativeness, unconfoundedness and the mathematical structure of the data generating mechanism (DGM).
+Let's now consider Justice for the relationship between `liberal` and `income`. In **Justice**, we must consider the Population Table, stability, representativeness, unconfoundedness and the mathematical structure of the data generating mechanism (DGM).
 
 #### Population Table
 
