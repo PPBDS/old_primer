@@ -1,15 +1,12 @@
 # Five Parameters {#sec-five-parameters}
 
-<!-- MF: MChanged Population Table and validity, stability, representativeness --> 
-
-
 <!-- Add more discussion below? Perhaps use as a good example of how the estimated posterior is not the true posterior because of the assumptions we are making about the structure of the error term. -->
 
 <!-- Do we really believe the posterior for male/female expected years lived? No! Or, at the very least, we are suspicious. -->
 
 <!-- In Temperance connect the expected value to the ideal Preceptor table. -->
 
-<!-- Improve summary section. -->
+<!-- Improve summary section. DONE-->
 
 <!-- Maybe consider posterior_predictive checks. Belongs at the end of the courage section. -->
 
@@ -35,18 +32,6 @@ library(rstanarm)
 library(broom.mixed)
 ```
 
-
-
-
-
-Consider the following questions:
-
-*How many years would we expect two gubernatorial candidates --- one male and one female, both 10 years older than the average candidate --- to live after the election? How different will their lifespans be? More broadly, how long do candidates, in general, live after the election? Does winning the election affect their longevity?*
-
-
-Note how far we have come in the *Primer*. These are difficult questions, involving issues of both prediction and causation. Yet, if we follow the Cardinal Virtues, we can provide sophisticated answers.
-
-
 ## Wisdom
 
 ```{r}
@@ -55,19 +40,32 @@ Note how far we have come in the *Primer*. These are difficult questions, involv
 knitr::include_graphics("other/images/Wisdom.jpg")
 ```
 
-Recall the most important aspects of Wisdom: the Preceptor Table, the EDA (exploratory data analysis), the population, and the Population Table. As always, we start with the Preceptor Table --- the table of data that would make all of our questions answerable with mere arithmetic (no inferences). 
+Consider the following predictive questions:
 
-### The Preceptor Table
+*How many years would we expect two gubernatorial candidates --- one male and one female, both 10 years older than the average candidate --- to live after the election?* 
+*How different will their lifespans be?*
 
-To create our Preceptor Table, we must first revisit our questions:
+Note how far we have come in the *Primer*. These are difficult questions, involving issues of both prediction and causation. Yet, if we follow the Cardinal Virtues, we can provide sophisticated answers.
 
-*How many years would we expect two gubernatorial candidates --- one male and one female, both 10 years older than the average candidate --- to live after the election? How different will their lifespans be? More broadly, how long do candidates, in general, live after the election? Does winning the election affect their longevity?*
+Recall the most important aspects of Wisdom: the Preceptor Table, the EDA (exploratory data analysis), and validity of the data. As always, we start with the Preceptor Table --- the table of data that would make all of our questions answerable with mere arithmetic (no inferences). 
 
-What (imagined) dataset would make all of these questions easy to solve with a little bit of math? Well, we obviously need data on all gubernatorial candidate elections in the United States. We also need to know their dates of birth, age at time of election, age at time of death, and data for age at time of death minus age at time of election. With these pieces of information, we could answer all of our questions with simple math. 
+### Preceptor Table
 
-Also, because this is an idealized table, we would know age at time of death assuming victory and age at time of death assuming loss. This would not be possible in the real world due to the Fundamental Problem of Causal Inference --- we cannot observe a unit under two different conditions (both victory and loss).
+To create our Preceptor Table, we need to ask ourselves a couple of questions based on our questions above.
 
-Here is a sample:
+<!-- MT: we should split between one causal and one predictive question. do predictive question first regarding the expectation and then causal question next regarding whether winning the election affects their longevity -->
+
+First, do we need a **causal** or **predictive** model? In our question above we have a predictive model as we only have one outcome which is the person's expected life expectancy based on our predictor which relates to an individual's sex.
+
+Second, what is the outcome? A person's life expectancy will be the **outcome**. The questions, however, leave unclear details. Where are these people at? Which country? Also, at what moment in time is this experiment taking place? In order to dive deeper into these questions we need to engage in a conversation with the person that is asking us these questions. For the questions that we have at hand we will be talking about the location of Chicago, Illinois on July 1, 2012. 
+
+Third, what are the **units**? Our units for this scenario would be individuals because the questions are about the life expectancy of unique candidates.
+
+Fourth, what are the **covariates**? In our case, a person's sex will be a covariate as it is another factor that plays to the individual's age and identity. The Preceptor Table must include any covariates mentioned in the question.
+
+Fifth, do we have a **treatment**? No. We will be using a predictive model as discussed above and treatments will only apply to situations with causal models. A treatment is just a covariate which we can, at least in theory, manipulate, thereby creating other potential outcomes.
+
+Our Preceptor Table:
 
 ```{r}
 #| echo: false
@@ -75,23 +73,32 @@ Here is a sample:
 # First, we create a tibble with the values we want for the table
 
 tibble(ID = c("Candidate 1", "Candidate 2"),
+       yeffect = c("+3", "+2"),
        sex = c("F", "M"),
        before = c("56", "72"),
        ytreat = c("12", "7"),
-       ycontrol = c("9", "5"),
-       yeffect = c("+3", "+2")) |>
+       ycontrol = c("9", "5")) |>
   
   # Then, we use the gt function to make it pretty
   
   gt() |>
+  tab_header(title = "Preceptor Table") |>
   cols_label(ID = md("ID"),
+             yeffect = md("Treatment Effect of Winning"),
              sex = md("Sex"),
              before = md("Age at Election"),
              ytreat = md("Years Lived (Win)"),
-             ycontrol = md("Years Lived (Loss)"),
-             yeffect = md("Treatment Effect of Winning")) 
+             ycontrol = md("Years Lived (Loss)")) |>
+  tab_style(cell_borders(sides = "right"),
+            location = cells_body(columns = c(ID))) |>
+  tab_style(style = cell_text(align = "left", v_align = "middle", size = "large"), 
+            locations = cells_column_labels(columns = c(ID))) |>
+  cols_align(align = "center", columns = everything()) |>
+  cols_align(align = "left", columns = c(ID)) |>
+  fmt_markdown(columns = everything()) |>
+  tab_spanner(label = "Outcome", columns = c(yeffect)) |>
+  tab_spanner(label = "Covariate", columns = c(sex, before, ytreat, ycontrol))
 ```
-
 
 We would have rows for *every* gubernatorial election candidate in U.S. history. We may want further details, such as election year. This is merely a sketch of our ideal dataset. Now that we know our "perfect" reality, what data do we actually have to work with? 
 
@@ -99,8 +106,7 @@ We would have rows for *every* gubernatorial election candidate in U.S. history.
 
 <!-- We discuss below that we only have data for people who are already dead. That is an interesting restriction, and effects the Preceptor Table in interesting ways. Or is such a discussion too advanced? -->
 
-The **primer.data** package includes the  `governors` data set which features demographic information about candidates for governor in the United States. @barfort2020 gathered this data and concluded that winning a gubernatorial election increases a candidate's lifespan.
-
+The **primer.data** package includes the `governors` data set which features demographic information about candidates for governor in the United States. @barfort2020 gathered this data and concluded that winning a gubernatorial election increases a candidate's lifespan.
 
 ```{r}
 glimpse(governors)
@@ -108,9 +114,7 @@ glimpse(governors)
 
 <!-- DK: Should restrict the data to one observation per person. A subtle issue. Think about the infinite Preceptor Table. -->
 
-
 There are `r ncol(governors)` variables and `r scales::comma(nrow(governors))` observations. In this Chapter, we will only be looking at the variables `last_name`, `year`, `state`, `sex`, `lived_after`, `election_age`, `won`, and `close_race`. 
-
 
 ```{r}
 ch10 <- governors |> 
@@ -131,7 +135,6 @@ ch10 |>
 For now, we leave in multiple observations for a single person.
 
 First, let's sample from our dataset. 
-
 
 ```{r}
 #| echo: false
@@ -157,7 +160,6 @@ Looking at the histogram for `year`, we see that it is skewed right --- meaning 
 
 In using this data set, our left-side variable will be `lived_after`. We are trying to understand/predict how many years a candidate will live after the election. 
 
-
 ```{r}
 ch10 |>
   ggplot(aes(x = year, y = lived_after)) +
@@ -170,7 +172,6 @@ ch10 |>
   scale_y_continuous(labels = scales::label_number()) +
   theme_classic() 
 ```
-
 
 Note that there is a rough line above which we see no observations. Why might this be? When looking at the year elected and years lived post-election, there is missing data in the upper right quadrant due to the fact that it is impossible to have been elected post-2000 and lived more than 21 years. Simply put: this "edge" of the data represents, approximately, the most years a candidate could have lived, and still have died, given the year that they were elected. 
 
@@ -191,29 +192,25 @@ ch10 |>
   theme_classic() 
 ```
 
-
 This plot shows that men live much longer, on average, than women after the election. Is there an intuitive explanation for why this might be? 
 
+### Validity
 
-### Population
+Is the meaning of the columns consistent, i.e., can we assume validity? That is the heart of validity. To put it simply, does the column for lifespan in our Preceptor Table equate to the column for lifespan from our dataset. Again, we look to the source of our data: @barfort2020. 
 
-The concept of the "population" is subtle and important. *The population is not the set of candidates for which we have data.* That is the dataset. The population is the larger --- potentially much larger --- set of individuals about whom we want to make inferences. *The parameters in our models refer to the population, not to the dataset.*
+The collection of birth and death dates for *winning* candidates is well documented. The birth and death dates for losing candidates, however, is not as easily gathered. In fact, @barfort2020 had to perform independent research for this information:
 
-Consider a simple example. Define $\mu$ as the average number of years lived by candidates for governor after Election Day. Can we calculate $\mu$ from our data? No! There are many candidates for governor who are still alive, who are not included in our data even though they are part of the "population" we want to study. $\mu$ can not be *calculated.* It can only be *estimated.*
+> "For losing candidates, we use information gathered from several online sources, including Wikipedia, The Political Graveyard..., Find a Grave... and Our Campaigns." 
 
-Another problem is that we would like to estimate the effect of winning on lifespan in *present day*. Because our data excludes the most recent candidates (since they are still alive), our predictions will not mirror the future as well as we may hope. 
+This is not nearly as reliable as the data collection for candidates who won their election. And, there was a further complication:
 
-Even though the original question is about "gubernatorial candidates" in general, and does not specifically refer to the United States, we will assume that the data we have for US governors is *representative enough* of the population we are interested in (global politicians) that the exercise is useful. If we did not believe that, then we should stop right now. *The major part of Wisdom is deciding what questions you can't answer because of the data you just don't have.*
+> "In a few cases, we are only able to identify the year of birth or death, not the exact date of the event. For these candidates, we impute the date as July 1 of the given year."
 
-The truth is: in the social sciences, there is never a perfect relationship between the data you have and the question you are trying to answer. Data for gubernatorial candidates in the past is not an analog for gubernatorial candidates today. Nor is it the same as the data for candidates in other countries. Yet, this data is relevant. Right? It is certainly better than nothing.
+For these candidates, then, our estimate for longevity will be inaccurate. We also have to *hope* that the birth and death dates listed on unreliable internet sources are accurate. It is possible that they are not, especially for older candidates.
 
-*Generally speaking, using not-perfect data is better than using no data at all.*
+The mission of this exploration is to ensure validity as much as possible --- that is, to equate our columns when they are not equated themselves. In this case, because we cannot fix the issues with data collection, we accept that our estimates may be slightly skewed. 
 
-Of course, this is not always true. If we wanted to predict lifespans of gubernatorial candidates in the U.S., and our data was from lifespans of presidential candidates in France... we would be better off not making any predictions at all. If the data won't help, don't use the data. 
-
-
-<!-- DK: Add more? Connect to Preceptor Table. -->
-
+Overall, however, the assumption of validity seems reasonable. Our data and The Preceptor Table can "stack" on top of each other. We will assume that both are drawn from the same population.
 
 ## Justice 
 
@@ -225,17 +222,11 @@ Of course, this is not always true. If we wanted to predict lifespans of guberna
 knitr::include_graphics("other/images/Justice.jpg")
 ```
 
-After inspecting our data and deciding that it is “close enough” to our questions to be useful, we move on to Justice.
-
-Justice emphasizes a few key concepts:
-
-* The Population Table, a structure which includes a row for every unit in the population. We generally break the rows in the Population Table into three categories: the data for units we want to have (the actual data set), the data for units which we actually have (the Preceptor Table), and the data for units we do not care about (the rest of the population, not included in the data or the Preceptor Table).
-* Is our data representative of the population?
-* Is the meaning of the columns consistent, i.e., can we assume validity? We then make an assumption about the data generating mechanism.
-
-We inspect both representativeness and validity through our Population Table. Representativeness focuses on the rows of the table, while validity focuses on the columns.
+Justice concerns five topics: Population Table, stability, representativeness, unconfoundedness and the mathematical structure of the data generating mechanism (DGM). After inspecting our data and deciding that it is “close enough” to our questions to be useful, we move on to Justice.
 
 ### Population Table
+
+The Population Table is a structure which includes a row for every unit in the population. We generally break the rows in the Population Table into three categories: the data for units we want to have (the actual data set), the data for units which we actually have (the Preceptor Table), and the data for units we do not care about (the rest of the population, not included in the data or the Preceptor Table).
 
 By determining that the data is drawn from the same population which we are analyzing, we can go on to produce a Population Table. 
 
@@ -246,7 +237,6 @@ Our **Preceptor Table** rows contain the information that we would *want* to kno
 Our **actual data** rows contain the information that we *do* know. These rows contain entries for both our covariates *and* the outcomes. In this case, the actual data comes from gubernatorial candidates who are deceased. All columns (covariates and outcomes) will be complete.
 
 Our **population** rows contain no data. These are subjects which fall under our desired population, but for which we have no data. As such, all rows are missing.
-
 
 ```{r}
 
@@ -288,23 +278,9 @@ tibble(source = c("Population", "Population", "...",
 
 Again, the Population Table shows the more expansive population for which we are making assumptions --- this includes data from our "population", our actual data, and the Preceptor Table. 
 
-### Validity
+### Assumptions
 
-Validity, on the other hand, involves our columns. To put it simply, does the column for lifespan in our Preceptor Table equate to the column for lifespan from our dataset. Again, we look to the source of our data: @barfort2020. 
-
-The collection of birth and death dates for *winning* candidates is well documented. The birth and death dates for losing candidates, however, is not as easily gathered. In fact, @barfort2020 had to perform independent research for this information:
-
-> "For losing candidates, we use information gathered from several online sources, including Wikipedia, The Political Graveyard..., Find a Grave... and Our Campaigns." 
-
-This is not nearly as reliable as the data collection for candidates who won their election. And, there was a further complication:
-
-> "In a few cases, we are only able to identify the year of birth or death, not the exact date of the event. For these candidates, we impute the date as July 1 of the given year."
-
-For these candidates, then, our estimate for longevity will be inaccurate. We also have to *hope* that the birth and death dates listed on unreliable internet sources are accurate. It is possible that they are not, especially for older candidates.
-
-The mission of this exploration is to ensure validity as much as possible --- that is, to equate our columns when they are not equated themselves. In this case, because we cannot fix the issues with data collection, we accept that our estimates may be slightly skewed. 
-
-### Stability
+#### Stability
 
 Stability means that the relationship between the columns is the same for three categories of rows: the data, the Preceptor table, and the larger population from which both are drawn. 
 
@@ -316,18 +292,34 @@ When we are confronted with this uncertainty, we can consider making our timefra
 
 Alternatively, if we believe that it is unlikely that our columns are stable, we have two choices. First, we abandon the experiment. If we believe our data is useless, so is our experiment. Second, we can choose to provide a sort of warning message with our conclusions: *this is based on data from ten years ago, but that was the most recent data available to us.*
 
-### Representativeness
+#### Representativeness
 
-The external validity of a study is often directly related to the representativeness of our sample. Representativeness has to do with how well our sample represents the larger population we are interested in generalizing to. 
+Is our data representative of the population? *The population is not the set of candidates for which we have data.* That is the dataset. The population is the larger --- potentially much larger --- set of individuals about whom we want to make inferences. *The parameters in our models refer to the population, not to the dataset.*
+
+Consider a simple example. Define $\mu$ as the average number of years lived by candidates for governor after Election Day. Can we calculate $\mu$ from our data? No! There are many candidates for governor who are still alive, who are not included in our data even though they are part of the "population" we want to study. $\mu$ can not be *calculated.* It can only be *estimated.*
+
+Another problem is that we would like to estimate the effect of winning on lifespan in *present day*. Because our data excludes the most recent candidates (since they are still alive), our predictions will not mirror the future as well as we may hope. 
+
+Even though the original question is about "gubernatorial candidates" in general, and does not specifically refer to the United States, we will assume that the data we have for US governors is **representative enough** of the population we are interested in (global politicians) that the exercise is useful. If we did not believe that, then we should stop right now. *The major part of Wisdom is deciding what questions you can't answer because of the data you just don't have.*
+
+The truth is: in the social sciences, there is never a perfect relationship between the data you have and the question you are trying to answer. Data for gubernatorial candidates in the past is not an analog for gubernatorial candidates today. Nor is it the same as the data for candidates in other countries. Yet, this data is relevant. Right? It is certainly better than nothing.
+
+*Generally speaking, using not-perfect data is better than using no data at all.*
+
+Of course, this is not always true. If we wanted to predict lifespans of gubernatorial candidates in the U.S., and our data was from lifespans of presidential candidates in France... we would be better off not making any predictions at all. If the data won't help, don't use the data.
 
 After looking at @barfort2020, the source for our dataset, we see that:
 
 "We collect data... for all candidates running in a gubernatorial election from 1945 to 2012. We limit attention to the two candidates who received the highest number of votes."
 
-This data is, then, *highly* representative of gubernatorial candidates, as it includes every candidate from 1945 to 2012. However, there is one large caveat: only the two candidates with the most votes are included in the dataset. This is unfortunate, as we would ideally look at all gubernatorial candidates (regardless of votes). Regardless, we still deem the dataset to be representative enough of our larger population. 
+This data is, then, **highly** representative of gubernatorial candidates, as it includes every candidate from 1945 to 2012. However, there is one large caveat: only the two candidates with the most votes are included in the dataset. This is unfortunate, as we would ideally look at all gubernatorial candidates (regardless of votes). Regardless, we still deem the dataset to be representative enough of our larger population. 
 
 Generally: *if there was no chance that a certain type of person would have been in this experiment, we cannot make an assumption for that person*. 
 
+### Data Generating Mechnaism
+
+<!-- MT: need to include the mathematics here -->
+<!-- MT: if there are separate mathematics for each section would it make sense to do something similar to three parameters? break up each section based on sex, election_age, election_age and sex, and then election_age, election_age, sex and election_age*sex. each section would then include its own data regarding the cardinal virtues. each could potentially answer each of the four different questions above?-->
 
 ## Courage
 
@@ -338,6 +330,8 @@ Generally: *if there was no chance that a certain type of person would have been
 #| fig.cap: Courage
 knitr::include_graphics("other/images/Courage.jpg")
 ```
+
+Courage centers around the creation of the data generating mechanism, i.e., our fitted model.
 
 ### sex
 
@@ -363,7 +357,6 @@ $\beta_0$ is our intercept, around `r round(coef(fit_2)["(Intercept)"], 0)` year
 $\beta_1$ only affects the outcome when the candidate is male. When the candidate is a male, we add the coefficient for male to the intercept value, which gives us the average lifespan of a male gubernatorial candidate after an election. 
 
 The posterior distribution for $\beta_0 + \beta_1$ can be constructed via simple addition.
-
 
 ```{r}
 fit_2 |> 
@@ -413,12 +406,12 @@ posterior_epred(fit_2,
     scale_y_continuous(labels = scales::percent_format()) +
     theme_classic()
 ```
+ 
 We see that the expected lifespan post-election is significantly lower for female candidates, with the average being around 15 years. 
 
 ### election_age
 
 To begin, let's model candidate lifespan after the election as a function of candidate lifespan prior to the election. The data:
-
 
 ```{r}
 ch10 |> 
@@ -433,7 +426,6 @@ ch10 |>
     scale_y_continuous(labels = scales::label_number()) +
     theme_classic()
 ```
-
 
 The math is fairly simple:
 
@@ -468,7 +460,6 @@ There are three unknown parameters --- $\beta_0$, $\beta_1$ and $\sigma$ --- jus
 You may recall from middle school algebra that the equation of a line is $y = m x + b$. There are two parameters: $m$ and $b$. The intercept $b$ is the value of $y$ when $x = 0$. The slope coefficient $m$ for $x$ is the increase in $y$ for every one unit increase in $x$. When defining a regression line, we use slightly different notation but the fundamental relationship is the same. 
 
 Rather repeat the process in Chapter 8, we will look at the resulting plot using a model that predicts years lived after as a factor of age at election. 
-
 
 ```{r}
 #| echo: false
@@ -527,7 +518,6 @@ fit_1 |>
 <!-- DK: Add some interpretation. Need to explain how the uncertainty in beta_1 is connected to the uncertainty we will see in lived_after, for a given difference (not "change") in election_age. -->
 
 <!-- DK: Priority is to add a graphic which shows the "cloud" of possible regression lines, consistent with the posterior for beta_1.  -->
-
 <!-- DK: Would using 50-year-old be better? -->
 
 <!-- DK: Fix. -->
@@ -568,16 +558,12 @@ fit_3 <- stan_glm(data = ch10,
 print(fit_3, detail = FALSE)
 ```
 
-
 Looking at our results, you can see that our intercept value is around `r round(coef(fit_3)["(Intercept)"], 0)`. The average female candidate, who had been alive the average number of years of all candidates, would live another `r round(coef(fit_3)["(Intercept)"], 0)` years or so after the election. 
 
-
 Note that `sexMale` is around `r round(coef(fit_3)["sexMale"], 0)`. This is our coefficient, $\beta_1$. We need to connect this value to our intercept value to get something meaningful. Using the formula $\beta_0 + \beta_1$, we find out that the number of years the average male candidate ---  who, on the day of election, is the average age of all candidates --- would live is around `r round(coef(fit_3)["(Intercept)"] + coef(fit_3)["sexMale"], 0)` years.  
-
 Now take a look at the coefficient for $c\_election\_age_i$, $\beta_2$. The median of the posterior, `r round(coef(fit_3)["election_age"], 1)`, represents the slope of the model. When comparing two candates who differ by one year in `election_age`, we expect that they will differ by `r round(coef(fit_3)["election_age"], 1)` years in `lived_after`. It makes sense that this value is negative. The more years a candidate has lived, the fewer years the candidate has left to live. So, for every extra year a candidate is alive before an election, their lifespan after the election will be `r abs(round(coef(fit_3)["election_age"], 1))` years lower, on average.
 
 We will now show you the parallel slopes model, which was created using the same process explained in the prior chapter. All we've done here is extracted the values for our intercepts and slopes, and separated them into two groups. This allows us to create a `geom_abline` object that takes a unique slope and intercept value, so we can separate the male and female observations. 
-
 
 ```{r}
 #| echo: false
@@ -617,7 +603,6 @@ sex_male_intercept <- intercept + sex_male
 sex_male_att_slope <- election_age
 ```
 
-
 ```{r}
 #| echo: false
 
@@ -656,7 +641,6 @@ ggplot(ch10, aes(x = lived_after, y = election_age, color = sex)) +
 ```
 
 <!-- MF: NEED TO ADD COMMENTARY -->
-
 
 ### election_age, sex and election_age*sex
 
@@ -702,9 +686,7 @@ The coefficient for $c\_election\_age_i$, $\beta_2$, is `r round(coef(fit_4)["el
 
 *Key point*: The interpretation of the intercepts only apply to candidates for whom $c\_election\_age_i = 0$. Candidates who are not `r round(mean(ch10$election_age), 0)` years-old will have a different expected number of years to live. The interpretation of the slope applies to everyone. In other words, the relationship between $lived\_after_i$ and $c\_election\_age_i$ is the same, regardless of your gender or how old you are.
 
-
 The posterior:
-
 
 ```{r}
 fit_4 |> 
@@ -867,7 +849,6 @@ The male line seems more sensible, as we might expect with far more datapoints. 
 
 <!-- DK: Answer this question!  -->
 
-
 ## Temperance
 
 ```{r}
@@ -875,6 +856,8 @@ The male line seems more sensible, as we might expect with far more datapoints. 
 #| fig.cap: Temperance
 knitr::include_graphics("other/images/Temperance.jpg")
 ```
+
+**Courage** gave us the fitted model. With **temperance** we can create posteriors of the quantities of interest. We should be modest in the claims we make.
 
 Recall the questions with which we began the chapter:
 
@@ -975,9 +958,7 @@ pp
 
 The resulting tibble has 2 columns, the first for a male candidate and the second for female candidate. Both columns are draws from the posterior predictive distributions. In both cases, the forecasts depend on the values of all the covariates. That is, we would provide a different forecast if the candidates were younger or older. 
 
-
 Let's look at the posterior predictive distribution for each candidate.
-
 
 ```{r}
 pp |> 
@@ -1025,7 +1006,6 @@ pp |>
 
 In words, we would predict that the male candidate would live longer than the female candidate. By how much? Well, that number is an unknown parameter. By looking at our posterior above, our best estimate is about `r round(pp |> mutate(diff = Male - Female) |> pull(diff) |> mean(), 1)` years. However, it is quite possible that, for any given male/female candidates, the female will live longer.
 
-
 ```{r}
 pp |> 
   mutate(diff = Male - Female) |> 
@@ -1033,14 +1013,14 @@ pp |>
             total = n(),
             f_live_longer / total)
 ```
+
 In fact, there is a 4 in 10 chance that the female candidate lives longer.
 
 *Note what is the same and what is different when we move from a question about averages to a question about individuals.* In both cases, the most likely value is about the same. That is, the average behavior is the same as our expected value for any given individual. But the uncertainty is much greater for an individual prediction. The chance of the true average for male candidates being less than that for female candidates is low. Yet, for any individual pair of candidates, it would not even be slightly surprising for the female candidate to outlive the male candidate. Individuals vary. Averages never tell the whole story.
 
-### Expectation versus individual variation
+### Expectation versus Individual Variation
 
 Let's compare the results from `posterior_epred()` and `posterior_predict()` for this scenario directly. Most of this code is the same as what we have shown you above, but we think it is useful to look at everything together.
-
 
 ```{r}
 newobs <- tibble(sex = c("Male", "Female"),
@@ -1082,7 +1062,6 @@ Expected values vary much less than predictions. The above chart makes that easy
 
 <!-- DK: Finish with Temperance/population/exchangability discussion. -->
 
-
 ### Testing
 
 "Tests," "testing," "hypothesis tests," "tests of significance," and "null hypothesis significance testing" all refer to the same concept. We will refer to this collection of approaches as NHST, a common abbreviation derived from the initials of the last phrase. Wikipedia provides an [overview](https://en.wikipedia.org/wiki/Statistical_hypothesis_testing). 
@@ -1119,17 +1098,41 @@ The same arguments apply in the case of "insignificant" results when we can't "r
 
 The same reasoning applies to every parameter we estimate, to every prediction we make. Never test --- unless your boss demands a test. *Use your judgment, make your models, summarize your knowledge of the world, and use that summary to make decisions.*
 
+## Wisdom for Causal Models
+
+```{r}
+#| echo: false
+#| fig.cap: Wisdom
+knitr::include_graphics("other/images/Wisdom.jpg")
+```
+
+Recall the most important aspects of Wisdom: the Preceptor Table, the EDA (exploratory data analysis), and validity of the data. As always, we start with the Preceptor Table --- the table of data that would make all of our questions answerable with mere arithmetic (no inferences). 
+
+Consider the following causal questions:
+
+*More broadly, how long do candidates, in general, live after the election?*
+*Does winning the election affect their longevity?*
+
+What (imagined) dataset would make all of these questions easy to solve with a little bit of math? Well, we obviously need data on all gubernatorial candidate elections in the United States. We also need to know their dates of birth, age at time of election, age at time of death, and data for age at time of death minus age at time of election. With these pieces of information, we could answer all of our questions with simple math. 
+
+Also, because this is an idealized table, we would know age at time of death assuming victory and age at time of death assuming loss. This would not be possible in the real world due to the Fundamental Problem of Causal Inference --- we cannot observe a unit under two different conditions (both victory and loss).
+
 ## Summary
 
-*The major part of Wisdom is deciding what questions you can't answer because of the data you don't have.*
+Throughout this chapter, we explored relationships between different variables in the `governors` data set. We built a predictive and causal model.
 
-*Avoid answering questions by working with parameters directly. Use `posterior_epred()` instead.*
+Just like in preceding chapters, our first objective remains with the use of **Wisdom**. We aim to assess the relevance of our data by examining the questions. Can we assume that the data we currently possess (e.g., election age and sex data from candidates in 2012) is drawn from the same population as the data we desire to obtain (e.g., election age and sex data from today)? Our inquires raise the issue of **assumption of validity** which leads into our next move.
 
-*Good data science involves an intelligent tour of the space of possible models.*
+Our next move involves the examination of **Justice**, which guides us in determining the best approach to representing the models we intend to construct. A little bit of mathematics won't pose major challenges. Translating these mathematical concepts into code will be accomplished with the help of **Courage**. With these Cardinal Virtues taken care of we now deal with **Temperance**. Our main objective is to generate posterior distributions for the parameters and comprehensively understand and interpret their significance. Finally, we conclude with the use of our models to address the questions. It is crucial to refine our questions to the greatest extent possible, as more detailed inquiries allow us to have the most precise answers.
 
-*Always think in terms of comparisons when using a predictive model.*
+*Always Remember the Following:*
 
-*Spend less time thinking about what parameters mean and more time using `posterior_epred()` and `posterior_predict()` to examine the implications of your models.*
+-   The major part of Wisdom is deciding what questions you can't answer because of the data you don't have.
 
+-   Avoid answering questions by working with parameters directly. Use `posterior_epred()` instead.
 
+-   Good data science involves an intelligent tour of the space of possible models.
 
+-   Always think in terms of comparisons when using a predictive model.
+
+-   Spend less time thinking about what parameters mean and more time using `posterior_epred()` and `posterior_predict()` to examine the implications of your models.
