@@ -12,11 +12,13 @@
 
 Last chapter, we studied four parameters: models in which we studied multiple right-hand side variables at once. The next step in our model building education is to learn about *interactions*. The effect of a treatment relative to a control is almost never uniform. The effect might be bigger in women than in men, smaller in the rich relative to the poor. The technical term for such effects is "heterogeneous," which is just Ph.D.'ese for "different." With enough data, all effects are heterogeneous. Causal effects, at least in the social science, always vary across units. To model this reality, we rely on interactions, on allowing the effect size to differ. The same applies for predictive models. The relationship between our outcome variable $y$ and a predictor variable $x$ is rarely constant. The relationship varies based on the values of other variables. To take account of interactions, we need models with at least 5 parameters. 
 
-
 Packages:
+
+<!-- Still seem to be warnings: Warning: package ___ was built under R version 4.3.1 -->
 
 ```{r}
 #| message: false
+#| warning: false
 library(primer.data)
 library(gt)
 library(gtsummary)
@@ -33,7 +35,6 @@ library(broom.mixed)
 
 ```{r}
 #| echo: false
-#| fig.cap: Wisdom
 knitr::include_graphics("other/images/Wisdom.jpg")
 ```
 
@@ -50,7 +51,6 @@ Recall the most important aspects of Wisdom: the Preceptor Table, the EDA (explo
 
 To create our Preceptor Table, we need to ask ourselves a couple of questions based on our questions above.
 
-
 First, do we need a **causal** or **predictive** model? In our question above we have a predictive model as we only have one outcome which is the person's expected life expectancy based on our predictor which relates to an individual's sex.
 
 Second, what is the outcome? A person's life expectancy will be the **outcome**. The questions, however, leave unclear details. Where are these people at? Which country? Also, at what moment in time is this experiment taking place? In order to dive deeper into these questions we need to engage in a conversation with the person that is asking us these questions. For the questions that we have at hand we will be talking about the location of Chicago, Illinois on July 1, 2012. 
@@ -62,39 +62,6 @@ Fourth, what are the **covariates**? In our case, a person's sex will be a covar
 Fifth, do we have a **treatment**? No. We will be using a predictive model as discussed above and treatments will only apply to situations with causal models. A treatment is just a covariate which we can, at least in theory, manipulate, thereby creating other potential outcomes.
 
 Our Preceptor Table:
-
-```{r}
-#| echo: false
-#| fig.align: left
-# First, we create a tibble with the values we want for the table
-
-tibble(ID = c("Candidate 1", "Candidate 2"),
-       yeffect = c("+3", "+2"),
-       sex = c("F", "M"),
-       before = c("56", "72"),
-       ytreat = c("12", "7"),
-       ycontrol = c("9", "5")) |>
-  
-  # Then, we use the gt function to make it pretty
-  
-  gt() |>
-  tab_header(title = "Preceptor Table") |>
-  cols_label(ID = md("ID"),
-             yeffect = md("Treatment Effect of Winning"),
-             sex = md("Sex"),
-             before = md("Age at Election"),
-             ytreat = md("Years Lived (Win)"),
-             ycontrol = md("Years Lived (Loss)")) |>
-  tab_style(cell_borders(sides = "right"),
-            location = cells_body(columns = c(ID))) |>
-  tab_style(style = cell_text(align = "left", v_align = "middle", size = "large"), 
-            locations = cells_column_labels(columns = c(ID))) |>
-  cols_align(align = "center", columns = everything()) |>
-  cols_align(align = "left", columns = c(ID)) |>
-  fmt_markdown(columns = everything()) |>
-  tab_spanner(label = "Outcome", columns = c(yeffect)) |>
-  tab_spanner(label = "Covariate", columns = c(sex, before, ytreat, ycontrol))
-```
 
 We would have rows for *every* gubernatorial election candidate in U.S. history. We may want further details, such as election year. This is merely a sketch of our ideal dataset. Now that we know our "perfect" reality, what data do we actually have to work with? 
 
@@ -190,6 +157,43 @@ ch10 |>
 
 This plot shows that men live much longer, on average, than women after the election. Is there an intuitive explanation for why this might be? 
 
+```{r}
+ch10 |> 
+  ggplot(aes(x = election_age, y = lived_after)) +
+    geom_point() +
+    labs(title = "Longevity of Gubernatorial Candidates",
+         subtitle = "Younger candidates live longer", 
+         caption = "Data Source: Barfort, Klemmensen and Larsen (2019)",
+         x = "Age in Years on Election Day",
+         y = "Years Lived After Election") +
+    scale_x_continuous(labels = scales::label_number()) +
+    scale_y_continuous(labels = scales::label_number()) +
+    theme_classic()
+```
+
+<!-- add commentary -->
+
+<!--```{r}
+ch10 |> 
+  ggplot(aes(x = election_age, y = lived_after)) +
+    geom_point() +
+    geom_line(aes(y = fitted(fit_2)), color = "blue") +
+  
+    # Add red box to highlight the slice of data we are discussing below using
+    # geom_rect().
+  
+    geom_rect(aes(xmin = 38.5 , xmax = 41.5, ymin = 0, ymax = 60),
+               fill = "transparent", color = "red", size = .5) +
+    labs(title = "Longevity of Gubernatorial Candidates",
+         subtitle = "Blue line shows fitted values", 
+         caption = "Data Source: Barfort, Klemmensen and Larsen (2019)",
+         x = "Age in Years at Time of Election",
+         y = "Years Lived After Election") +
+    scale_x_continuous(labels = scales::label_number()) +
+    scale_y_continuous(labels = scales::label_number()) +
+    theme_classic()
+```-->
+
 ### Validity
 
 Is the meaning of the columns consistent, i.e., can we assume validity? That is the heart of validity. To put it simply, does the column for lifespan in our Preceptor Table equate to the column for lifespan from our dataset. Again, we look to the source of our data: @barfort2020. 
@@ -212,9 +216,6 @@ Overall, however, the assumption of validity seems reasonable. Our data and The 
 
 ```{r}
 #| echo: false
-#| out.width: 60%
-#| fig.align: center
-#| fig.cap: Justice
 knitr::include_graphics("other/images/Justice.jpg")
 ```
 
@@ -235,7 +236,6 @@ Our **actual data** rows contain the information that we *do* know. These rows c
 Our **population** rows contain no data. These are subjects which fall under our desired population, but for which we have no data. As such, all rows are missing.
 
 ```{r}
-
 tibble(source = c("Population", "Population", "...",
                   "Data", "Data", "...",
                   "Population", "Population", "...",
@@ -274,9 +274,7 @@ tibble(source = c("Population", "Population", "...",
 
 Again, the Population Table shows the more expansive population for which we are making assumptions --- this includes data from our "population", our actual data, and the Preceptor Table. 
 
-### Assumptions
-
-#### Stability
+### Stability
 
 Stability means that the relationship between the columns is the same for three categories of rows: the data, the Preceptor table, and the larger population from which both are drawn. 
 
@@ -288,7 +286,7 @@ When we are confronted with this uncertainty, we can consider making our timefra
 
 Alternatively, if we believe that it is unlikely that our columns are stable, we have two choices. First, we abandon the experiment. If we believe our data is useless, so is our experiment. Second, we can choose to provide a sort of warning message with our conclusions: *this is based on data from ten years ago, but that was the most recent data available to us.*
 
-#### Representativeness
+### Representativeness
 
 Is our data representative of the population? *The population is not the set of candidates for which we have data.* That is the dataset. The population is the larger --- potentially much larger --- set of individuals about whom we want to make inferences. *The parameters in our models refer to the population, not to the dataset.*
 
@@ -310,92 +308,80 @@ After looking at @barfort2020, the source for our dataset, we see that:
 
 This data is, then, **highly** representative of gubernatorial candidates, as it includes every candidate from 1945 to 2012. However, there is one large caveat: only the two candidates with the most votes are included in the dataset. This is unfortunate, as we would ideally look at all gubernatorial candidates (regardless of votes). Regardless, we still deem the dataset to be representative enough of our larger population. 
 
-Generally: *if there was no chance that a certain type of person would have been in this experiment, we cannot make an assumption for that person*. 
-
-### Data Generating Mechnaism
-
-<!-- MT: need to include the mathematics here -->
-
-<!-- MT: if there are separate mathematics for each section would it make sense to do something similar to three parameters? break up each section based on sex, election_age, election_age and sex, and then election_age, election_age, sex and election_age*sex. each section would then include its own data regarding the cardinal virtues. each could potentially answer each of the four different questions above?-->
+Generally: *if there was no chance that a certain type of person would have been in this experiment, we cannot make an assumption for that person*.
 
 ## Courage
 
 ```{r}
 #| echo: false
-#| out.width: 60%
-#| fig.align: center
-#| fig.cap: Courage
 knitr::include_graphics("other/images/Courage.jpg")
 ```
 
-Courage centers around the creation of the data generating mechanism, i.e., our fitted model.
+Courage centers around the creation of the data generating mechanism, i.e., our fitted model. We often use `stan_glm()` when we want to create a fitted model. With `stan_glm()` we can generate generalized linear or logistic models with optional prior distributions for the coefficients, intercept, and auxiliary parameters.
 
 ### sex
 
-Let's regress `lived_after` on `sex` to see how candidates' post-election lifespans differ by sex. 
+Within this section we will dive deeper into a candidate's sex and how that may effect our question at hand. 
+
+#### Mathematics
+
+In this regression, our mathematical formula is:
+
+$$ lived\_after_i = \beta_0  + \beta_1 male_i + \epsilon_i$$
+$\beta_0$ is the intercept. In this type of model, our intercept represents the the variable which is not represented in the model. Therefore, the intercept value represents those who are not male (females). 
+
+$\beta_1$ only affects the outcome when the candidate is male. When the candidate is a male, we add the coefficient for male to the intercept value, which gives us the average lifespan of a male gubernatorial candidate after an election.
+
+#### Fitted Model
+
+With the help of **Courage** we can translate this math into code.
+
+To get posterior distributions for our parameters, we will use `stan_glm()`, just as we did in @sec-two-parameters. Let's regress `lived_after` on `sex` to see how candidates' post-election lifespans differ by sex with the help of mathematics first. 
 
 ```{r}
-fit_2 <- stan_glm(data = ch10,
+fit_1 <- stan_glm(data = ch10,
                        formula = lived_after ~ sex,
                        refresh = 0,
                        seed = 76)
 ```
 
 ```{r}
-print(fit_2, detail = FALSE)
+print(fit_1, detail = FALSE)
 ```
 
-We do not have a value for female. However we do have an intercept. In this regression, our mathematical formula is:
+As we can see $\beta_0$ is our intercept, around `r round(coef(fit_1)["(Intercept)"], 0)` years.
 
-$$ lived\_after_i = \beta_0  + \beta_1 male_i + \epsilon_i$$
-
-$\beta_0$ is our intercept, around `r round(coef(fit_2)["(Intercept)"], 0)` years. In this type of model, our intercept represents the the variable which is not represented in the model. Therefore, the intercept value represents those who are not male (females). 
-
-$\beta_1$ only affects the outcome when the candidate is male. When the candidate is a male, we add the coefficient for male to the intercept value, which gives us the average lifespan of a male gubernatorial candidate after an election. 
-
-
+We do not have a value for female. However we do have an intercept. `sexMale` is the median age of male candidates after winning an election. A higher `MAD_SD` indicates that we are more confident regarding the situation at hand. Typically we don't want to consider variables that are under 2 because they tend to show that we are not confident and don't need to use these variables within the data. However, there are several times where this case may not be accurate, and we will need to use variables that have a `MAD_SD` of under 2.
 
 ### election_age
 
 To begin, let's model candidate lifespan after the election as a function of candidate lifespan prior to the election. The data:
 
-```{r}
-ch10 |> 
-  ggplot(aes(x = election_age, y = lived_after)) +
-    geom_point() +
-    labs(title = "Longevity of Gubernatorial Candidates",
-         subtitle = "Younger candidates live longer", 
-         caption = "Data Source: Barfort, Klemmensen and Larsen (2019)",
-         x = "Age in Years on Election Day",
-         y = "Years Lived After Election") +
-    scale_x_continuous(labels = scales::label_number()) +
-    scale_y_continuous(labels = scales::label_number()) +
-    theme_classic()
-```
+#### Mathematics
 
-The math is fairly simple:
+The math that we have to calculate is fairly simple:
 
 $$ lived\_after_i =  \beta_0 + \beta_1 election\_age_i + \epsilon_i $$
 
-
 with $\epsilon_i \sim N(0, \sigma^2)$. 
+
 - $lived\_after_i$ is the number of years lived after the election for candidate $i$. 
+
 - $election\_age_i$ is the number of years lived before the election for candidate $i$. 
-- $\epsilon_i$ is the "error term," the difference between the actual years-lived for candidate $i$ and the modeled years-lived.  $\epsilon_i$ is normally distributed with a mean of 0 and a standard deviation of $\sigma$. 
+
+- $\epsilon_i$ is the "error term," the difference between the actual years-lived for candidate $i$ and the modeled years-lived. $\epsilon_i$ is normally distributed with a mean of 0 and a standard deviation of $\sigma$. 
 
 The key distinction is between:
 
-* *Variables*, always subscripted with $i$, whose values (potentially) vary across individuals.
+* *Variables*, always scripted with $i$, whose values (potentially) vary across individuals.
 
-* *Parameters*, never subscripted with $i$, whose values are constant across individuals.
+* *Parameters*, never scripted with $i$, whose values are constant across individuals.
 
 Why do we use $lived\_after_i$ in this formula instead of $y_i$? The more often we remind ourselves about the variable's actual substance, the better. But there is another common convention: to always use $y_i$ as the symbol for the dependent variable. It would not be unusual to describe this model as:
 
 $$ y_i =  \beta_0 + \beta_1 election\_age_i + \epsilon_i$$
 
-Both mean the same thing. 
-
-<!-- DK: Better words needed. -->
+Both of our mathematics mean the same. 
 
 Either way, $\beta_0$ is the "intercept" of the regression, the average value for the population of $lived\_after$, among those for whom $election\_age = 0$. 
 
@@ -405,34 +391,22 @@ There are three unknown parameters --- $\beta_0$, $\beta_1$ and $\sigma$ --- jus
 
 You may recall from middle school algebra that the equation of a line is $y = m x + b$. There are two parameters: $m$ and $b$. The intercept $b$ is the value of $y$ when $x = 0$. The slope coefficient $m$ for $x$ is the increase in $y$ for every one unit increase in $x$. When defining a regression line, we use slightly different notation but the fundamental relationship is the same. 
 
-Rather repeat the process in Chapter 8, we will look at the resulting plot using a model that predicts years lived after as a factor of age at election. 
+#### Fitted Model
+
+Now we want to use `stan_glm()` to convert our mathematics into code through a fitted model. 
 
 ```{r}
-#| echo: false
-fit_1 <- stan_glm(data = ch10,
+fit_2 <- stan_glm(data = ch10,
                       formula = lived_after ~ election_age,
                       refresh = 0,
                       seed = 9)
-
-ch10 |> 
-  ggplot(aes(x = election_age, y = lived_after)) +
-    geom_point() +
-    geom_line(aes(y = fitted(fit_1)), color = "blue") +
-  
-    # Add red box to highlight the slice of data we are discussing below using
-    # geom_rect().
-  
-    geom_rect(aes(xmin = 38.5 , xmax = 41.5, ymin = 0, ymax = 60),
-               fill = "transparent", color = "red", size = .5) +
-    labs(title = "Longevity of Gubernatorial Candidates",
-         subtitle = "Blue line shows fitted values", 
-         caption = "Data Source: Barfort, Klemmensen and Larsen (2019)",
-         x = "Age in Years at Time of Election",
-         y = "Years Lived After Election") +
-    scale_x_continuous(labels = scales::label_number()) +
-    scale_y_continuous(labels = scales::label_number()) +
-    theme_classic()
 ```
+
+-   The variable before the tilde, `lived_after`, is our outcome.
+
+-   The only explanatory variable is `election_age`. This variable can consist of several different integers.
+
+-   Recall that our model is linear. However, we don't have to specify that the `family` we are going to use is `gaussian` because that is the default input that is assumed within these fitted models.
 
 As we discussed in @sec-three-parameters, the most common term for a model like this is a "regression." We have "regressed" `lived_after`, our dependent variable, on `election_age`, our (only) independent variable.
 
@@ -444,43 +418,22 @@ Given that, it is important to monitor our language. We do not believe that that
 
 <!-- DK: THis is a critical point. Maybe give a precise example? Go through the math slowly, like ModernDive does? Highlight this somehow? At the very least, we should emphasize the point for each model going forward. -->
 
-Let's look at the posterior of $\beta_1$, the coefficient of $election\_age_i$:
-
-<!-- DK: We should standardize what these plots look like, both in this chapter and throughout the book. -->
-
-```{r}
-fit_1 |> 
-  as_tibble() |> 
-  ggplot(aes(election_age)) + 
-    geom_histogram(aes(y = after_stat(count/sum(count))),
-                   bins = 100) +
-    labs(title = "Posterior Distribution of the Coefficient of `election_age`",
-         y = "Probability",
-         x = "Coefficient of `election_age`") + 
-    scale_y_continuous(labels = scales::percent_format()) +
-    theme_classic()
-```
-
 <!-- DK: Add some interpretation. Need to explain how the uncertainty in beta_1 is connected to the uncertainty we will see in lived_after, for a given difference (not "change") in election_age. -->
 
 <!-- DK: Priority is to add a graphic which shows the "cloud" of possible regression lines, consistent with the posterior for beta_1.  -->
 <!-- DK: Would using 50-year-old be better? -->
 
-<!-- DK: Fix. -->
-
 ### election_age and sex
 
 In this model, our outcome variable continues to be `lived_after`, but now we will have two different explanatory variables: `election_age` and `sex`. Note that `sex` is a categorical explanatory variable and `election_age` is a continuous explanatory variable. This is the same type of model --- parallel slopes --- as we saw in @sec-four-parameters.
 
-Math: 
+#### Mathematics
 
 $$ lived\_after_i =  \beta_0 + \beta_1 male_i + \beta_2 c\_election\_age_i + \epsilon_i $$
 
 But wait! The variable name is `sex`, not `male`. Where does `male` come from?
 
-<!-- DK: Indicator versus index. Which is this? Explain both? -->
-
-The answer is that `male` is an *indicator* variable, meaning a 0/1 variable. `male` takes a value of one if the candidate is "Male" and zero otherwise. This is the same as the $male_i$ variable used in the previous two examples. 
+The answer is that `male` is an *indicator* variable, meaning a 0/1 variable. `male` takes a value of one if the candidate is "Male" and zero otherwise. This is the same as the $male_i$ variable used in the previous two examples. An *indicator* variable signals that we have something that deals with a factor, category, or ennumerated type. While *index* variables are those that allow us to stack and align data, eliminating the need to assign specific columns for different variables
 
 * The outcome variable is $lived\_after_i$, the number of years a person is alive after the election. $male_i$ is one of our explanatory variables. If we are predicting the number of years a male candidate lives after the election, this value will be 1. When we are making this prediction for female candidates, this value will be 0. $c\_election\_age_i$ is our other explanatory variable. It is the number of years a candidate has lived before the election, scaled by subtracting the average number of years lived by all candidates. 
 
@@ -490,10 +443,11 @@ The answer is that `male` is an *indicator* variable, meaning a 0/1 variable. `m
 
 * $\beta_2$ is, for the entire population, the average difference in $lived\_after_i$ between two individuals, one of whom has an $c\_election\_age_i$ value of 1 greater than the other. 
 
+#### Fitted Model
+
 Let's translate the model into code. 
 
 ```{r}
-#| cache: true
 fit_3 <- stan_glm(data = ch10,
                       formula = lived_after ~ sex + election_age,
                       refresh = 0,
@@ -592,7 +546,7 @@ ggplot(ch10, aes(x = lived_after, y = election_age, color = sex)) +
 
 Let's create another model. This time, however, the numeric outcome variable of `lived_after` is a function of the two explanatory variables we used above, `election_age` and `sex`, and of their interaction. To look at interactions, we need 5 parameters, which is why we needed to wait until this chapter to introduce the concept.
 
-Math:
+#### Mathematics
 
 $$ lived\_after_i =  \beta_0 + \beta_1 male_i + \beta_2 c\_election\_age_i + \\ \beta_3 male_i *  c\_election\_age_i + \epsilon_i $$
 
@@ -608,7 +562,9 @@ $$ lived\_after_i =  \beta_0 + \beta_1 male_i + \beta_2 c\_election\_age_i + \\ 
 
 * $\beta_3$ alone is difficult to interpret. However, when it is added to $\beta_2$, the result in the slope for men.
 
-Code:
+#### Fitted Model
+
+With the help of **Courage** we can translate all of the math from above into code. 
 
 ```{r}
 #| cache: true
@@ -665,32 +621,6 @@ Male candidates live longer on average than female candidates. Note, also, that 
 <!-- DK: Is the above right? -->
  
 <!-- DK: Need a better title. How do we describe the meaning of slope without using the word slope? -->
-
-*Slope* posteriors:
-
-```{r}
-fit_4 |> 
-  as_tibble() |> 
-  mutate(slope_men = election_age + `sexMale:election_age`) |> 
-  rename(slope_women = election_age) |> 
-  select(slope_women, slope_men) |> 
-  pivot_longer(cols = slope_women:slope_men, 
-               names_to = "parameters",
-               values_to = "slope") |> 
-  ggplot(aes(slope, fill = parameters)) +
-    geom_histogram(aes(y = after_stat(count/sum(count))),
-                   alpha = 0.5, 
-                   bins = 100, 
-                   position = "identity") +
-    labs(title = "Posterior for Slope of Years-Lived on Years-to-Live",
-         subtitle = "Men have a steeper slope",
-         x = "Slope",
-         y = "Probability") + 
-    scale_y_continuous(labels = scales::percent_format()) +
-    theme_classic() 
-```
-
-This posterior distribution shows the average slope values for men and women. You can see that men have a steeper slope, while the slope for women is practically 0! *If you are trying to forecast the number of years that a women will live after the election, you may ignore the number of years that she has already lived.* This is definitely not true for men. Why the difference?
 
 ### Interaction model
 
@@ -1044,7 +974,7 @@ The same arguments apply in the case of "insignificant" results when we can't "r
 
 The same reasoning applies to every parameter we estimate, to every prediction we make. Never test --- unless your boss demands a test. *Use your judgment, make your models, summarize your knowledge of the world, and use that summary to make decisions.*
 
-## Wisdom for Causal Models
+## Wisdom
 
 ```{r}
 #| echo: false
@@ -1052,13 +982,11 @@ The same reasoning applies to every parameter we estimate, to every prediction w
 knitr::include_graphics("other/images/Wisdom.jpg")
 ```
 
-Recall the most important aspects of Wisdom: the Preceptor Table, the EDA (exploratory data analysis), and validity of the data. As always, we start with the Preceptor Table --- the table of data that would make all of our questions answerable with mere arithmetic (no inferences). 
+Now that we have worked with our first question above, let's take a look at the next question we want to deal with. As always we want to deal with our Cardinal Virtues, with Wisdom being the first Cardinal Virtue. Recall the most important aspects of Wisdom: the Preceptor Table, the EDA (exploratory data analysis), and validity of the data. As always, we start with the Preceptor Table --- the table of data that would make all of our questions answerable with mere arithmetic (no inferences). 
 
-Consider the following causal questions:
+Consider the following question:
 
 *Does winning the election affect a candidate's longevity?*
-
-<!-- * What is the average causal effect of winning an election on candidates for state or federal office in the United States in 2023? -->
 
 What (imagined) dataset would make all of these questions easy to solve with a little bit of math? Well, we obviously need data on all gubernatorial candidate elections in the United States. We also need to know their dates of birth, age at time of election, age at time of death, and data for age at time of death minus age at time of election. With these pieces of information, we could answer all of our questions with simple math. 
 
@@ -1074,7 +1002,55 @@ Third, what are the **units**? Our units for this scenario would be individuals 
 
 Fourth, do we have a **treatment**? Yes. In any causal model, there is at least one covariate which is defined as the "treatment," something which we can manipulate so that some units receive one version and other units get a different version. A "treatment" is just a covariate in which we *can* manipulate and *need* to manipulate, at least in theory, to answer the question. In this case, the treatment is winning the election for candidates.
 
+Let's look at our refined question to create our Preceptor Table:
+
+*What is the average causal effect of winning an election on candidates for state or federal office in the United States in 2023?*
+
 Our Preceptor Table:
+
+```{r}
+#| echo: false
+tibble(ID = c("Candidate 1", "Candidate 2", "...", "Candidate 10", "Candidate 11", "...", "N"),
+       yeffect = c("Yes", "Yes", "...", "No", "Yes", "...", "No"),
+       sex = c("F", "M", "...", "F", "F", "...", "M"),
+       before = c("56", "72", "...", "60", "81", "...", "43"),
+       ytreat = c("12", "7", "...", "10*", "11", "...", "6*"),
+       ycontrol = c("9*", "5*", "...", "3", "4*", "...", "2")) |>
+  
+  gt() |>
+  tab_header(title = "Preceptor Table") |>
+  cols_label(ID = md("ID"),
+             yeffect = md("Treatment"),
+             sex = md("Sex"),
+             before = md("Age at Election"),
+             ytreat = md("Years Lived (Win)"),
+             ycontrol = md("Years Lived (Loss)")) |>
+  tab_style(cell_borders(sides = "right"),
+            location = cells_body(columns = c(ID))) |>
+  tab_style(style = cell_text(align = "left", v_align = "middle", size = "large"), 
+            locations = cells_column_labels(columns = c(ID))) |>
+  cols_align(align = "center", columns = everything()) |>
+  cols_align(align = "left", columns = c(ID)) |>
+  fmt_markdown(columns = everything()) |>
+  tab_spanner(label = "Outcomes", columns = c(ytreat, ycontrol)) |>
+  tab_spanner(label = "Covariates", columns = c(sex, before, yeffect))
+```
+
+Note: the values that have a star next to them symbolize the possible values that may exist if they were "control" instead of "treated" or vice versa.
+
+Recall: a Preceptor Table is the smallest possible table with rows and columns such that, if there is no missing data, all our questions are easy to answer. To answer questions --- like "What is the average causal effect of winning an election on candidates for state or federal office in the United States in 2023?" --- we need a row for every individual.
+
+### Data Analysis
+
+### Validity
+
+## Justice
+
+### Population Table
+
+## Courage
+
+## Temperance
 
 ## Summary
 
