@@ -30,7 +30,6 @@ library(broom.mixed)
 
 <!-- We should split between one causal and one predictive question. do predictive question first regarding the expectation and then causal question next regarding whether winning the election affects their longevity. Mention the questions in the introduction. Then sentence or two summary about Cardinal Virtues. -->
 
-
 ## Wisdom
 
 ```{r}
@@ -171,7 +170,7 @@ ch10 |>
     theme_classic()
 ```
 
-<!-- add commentary -->
+As we take a look at our data through this graph we can see that many younger candidates tend to live much longer than the older candidates after election. However, this graph does not factor into whether these candidates have won or lost. Therefore, the elections could potentially be more stressful for older candidates, while the younger candidates could be living longer because of the lack fo stress they faced within their election. It is important to note that our data includes all elections whether they were close or not, which plays a role in how our data will be skewed. 
 
 <!--```{r}
 ch10 |> 
@@ -236,31 +235,16 @@ Our **actual data** rows contain the information that we *do* know. These rows c
 Our **population** rows contain no data. These are subjects which fall under our desired population, but for which we have no data. As such, all rows are missing.
 
 ```{r}
-tibble(source = c("Population", "Population", "...",
-                  "Data", "Data", "...",
-                  "Population", "Population", "...",
-                  "Preceptor Table", "Preceptor Table", "...",
-                  "Population", "Population"),
-       year_elected = c("1912", "1924", "...",
-                "1967", "2004", "...",
-                "2018", "2019", "...",
-                "2021", "2021", "...",
-                "2035", "2040"),
-       election_age = c("?", "?", "...",
-                        "43", "67", "...",
-                        "?", "?", "...",
-                        "46", "39", "...",
-                        "?", "?"),
-       sex = c("?", "?", "...",
-               "Male", "Female", "...",
-               "?", "?", "...",
-               "Female", "Female", "...",
-                 "?", "?"),
-       lived_after = c("?", "?", "...", 
-                 "20", "19", "...",
-                 "?", "?", "...",
-                 "?", "?", "...",
-                 "?", "?")) |>
+tibble(source = c("...", "Data", "Data", "...", 
+                  "...", "Preceptor Table", "Preceptor Table", "..."),
+       year_elected = c("...", "1967", "2012", "...",
+                 "...", "2023", "2023", "..."),
+       election_age = c("...", "43", "67", "...", 
+                "...", "...", "...", "..."),
+       sex = c("...", "Male", "Female", "...", 
+                "...", "Female", "Female", "..."),
+       lived_after = c("...", "20", "19", "...", 
+                "...", "...", "...", "...")) |>
   
   # Then, we use the gt function to make it pretty
   
@@ -340,9 +324,9 @@ To get posterior distributions for our parameters, we will use `stan_glm()`, jus
 
 ```{r}
 fit_1 <- stan_glm(data = ch10,
-                       formula = lived_after ~ sex,
-                       refresh = 0,
-                       seed = 76)
+                  formula = lived_after ~ sex,
+                  refresh = 0,
+                  seed = 76)
 ```
 
 ```{r}
@@ -351,7 +335,7 @@ print(fit_1, detail = FALSE)
 
 As we can see $\beta_0$ is our intercept, around `r round(coef(fit_1)["(Intercept)"], 0)` years.
 
-We do not have a value for female. However we do have an intercept. `sexMale` is the median age of male candidates after winning an election. A higher `MAD_SD` indicates that we are more confident regarding the situation at hand. Typically we don't want to consider variables that are under 2 because they tend to show that we are not confident and don't need to use these variables within the data. However, there are several times where this case may not be accurate, and we will need to use variables that have a `MAD_SD` of under 2.
+We do not have a value for female. However we do have an intercept. `sexMale` is the median age of male candidates after winning an election. The MAD SD for each parameter is a measure of the variability of our posterior distributions for that parameter. Speaking roughly, 95% of the mass of a posterior probability distribution is located within +/- 3 MAD SDs from the median. Typically we don't want to consider parameters that are under 2 because they tend to show that the distribution of data may not be as important. However, there are several times where this case may not be accurate, and we will need to use parameters that have a MAD_SD of under 2.
 
 ### election_age
 
@@ -397,9 +381,9 @@ Now we want to use `stan_glm()` to convert our mathematics into code through a f
 
 ```{r}
 fit_2 <- stan_glm(data = ch10,
-                      formula = lived_after ~ election_age,
-                      refresh = 0,
-                      seed = 9)
+                  formula = lived_after ~ election_age,
+                  refresh = 0,
+                  seed = 9)
 ```
 
 -   The variable before the tilde, `lived_after`, is our outcome.
@@ -449,9 +433,9 @@ Let's translate the model into code.
 
 ```{r}
 fit_3 <- stan_glm(data = ch10,
-                      formula = lived_after ~ sex + election_age,
-                      refresh = 0,
-                      seed = 12)
+                  formula = lived_after ~ sex + election_age,
+                  refresh = 0,
+                  seed = 12)
 ```
 
 ```{r}
@@ -569,9 +553,9 @@ With the help of **Courage** we can translate all of the math from above into co
 ```{r}
 #| cache: true
 fit_4 <- stan_glm(data = ch10,
-                      formula = lived_after ~ sex*election_age,
-                      refresh = 0,
-                      seed = 13)
+                  formula = lived_after ~ sex*election_age,
+                  refresh = 0,
+                  seed = 13)
 ```
 
 ```{r}
@@ -1042,15 +1026,74 @@ Recall: a Preceptor Table is the smallest possible table with rows and columns s
 
 ### Data Analysis
 
+Once again we will look at the **primer.data** package which includes the `governors` data set which features demographic information about candidates for governor in the United States. @barfort2020 gathered this data and concluded that winning a gubernatorial election increases a candidate's lifespan.
+
+```{r}
+summary(ch10)
+```
+
+With the question that we are trying to answer, we will be more focused on exploring the variables of `won`, `sex`, `election_age`, and `close_race`.
+
+In using this data set, our left-side variable will be `lived_after`. We are trying to understand/predict how many years a candidate will live after they have won election and whether winning the election affects how long they live.  
+
 ### Validity
 
+A issue that we want to address is the assumption of validity. Do our columns stay consistent throughout for us to assume validity? To put it simply, do the columns in our Preceptor Table equate to the columns from our dataset. Again, we look to the source of our data: @barfort2020. 
+
+The collection for close races have been calculated by us for all of the candidates. The actual defintion of close races for candidates, however, is not gathered. In fact, @barfort2020 did not calculate what it meant to have a close race, we did. 
+
+This is not nearly as reliable as the data collection for candidates. As the assumption of validity that we have been applying the defintion of close race across the board will hold true. Will the same constraints that we applied for close races apply to the dataset's definition? Or the entire population's definition?
+
+The mission of this exploration is to ensure validity as much as possible --- that is, to equate our columns when they are not equated themselves. In this case, because we cannot fix the issues with data collection, we accept that our estimates may be slightly skewed. 
+
+Overall, however, the assumption of validity seems reasonable. Our data and The Preceptor Table can "stack" on top of each other. We will assume that both are drawn from the same population.
+
 ## Justice
+
+```{r}
+#| echo: false
+knitr::include_graphics("other/images/Justice.jpg")
+```
 
 ### Population Table
 
 ## Courage
 
+```{r}
+#| echo: false
+knitr::include_graphics("other/images/Courage.jpg")
+```
+
+### Mathematics
+
+The math is simple to calculate once we know what we want to discover through our questions:
+
+$$ lived\_after_i =  \beta_0 + \beta_1 won_i + \beta_2 male_i + \beta_3 c\_election\_age_i + \epsilon_i $$
+
+### Fitted Model
+
+```{r}
+fit_5 <- stan_glm(data = filter(ch10, close_race),
+                  formula = lived_after ~ won + sex + election_age,
+                  refresh = 0,
+                  seed = 12)
+```
+
+Having fit the model, we can look at a printed summary. Note the use of the `detail` argument to not display the specifics of the model we just created.
+
+```{r}
+print(fit_5, detail = FALSE)
+```
+
 ## Temperance
+
+```{r}
+#| echo: false
+#| fig.cap: Temperance
+knitr::include_graphics("other/images/Temperance.jpg")
+```
+
+**Courage** gave us the fitted model. With **temperance** we can create posteriors of the quantities of interest. We should be modest in the claims we make.
 
 ## Summary
 
