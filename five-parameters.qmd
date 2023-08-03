@@ -76,16 +76,14 @@ glimpse(governors)
 
 <!-- DK: Should restrict the data to one observation per person. A subtle issue. Think about the infinite Preceptor Table. -->
 
-There are `r ncol(governors)` variables and `r scales::comma(nrow(governors))` observations. In this Chapter, we will only be looking at the variables `last_name`, `year`, `state`, `sex`, `lived_after`, `election_age`, `won`, and `close_race`. 
+There are `r ncol(governors)` variables and `r scales::comma(nrow(governors))` observations. In this Chapter, we will only be looking at the variables `last_name`, `year`, `state`, `sex`, `lived_after`, and `election_age`.
 
 ```{r}
 ch10 <- governors |> 
-  mutate(won = if_else(win_margin > 0, TRUE, FALSE)) |> 
-  mutate(close_race = if_else(abs(win_margin) < 5, TRUE, FALSE)) |> 
-  select(last_name, year, state, sex, lived_after, election_age, won, close_race)
+  select(last_name, year, state, sex, lived_after, election_age)
 ```
 
-`election_age` and `lived_after` are how many years a candidate lived before and after the election, respectively. As a consequence, only politicians who are already deceased are included in this data set. This means that there are only a handful of observations from elections in the last 20 years. Most candidates from that time period are still alive and are, therefore, excluded. We created the `won` variable to indicate whether or not the candidate won the election. We define `close_race` to be true if the winning margin was less than 5%.
+`election_age` and `lived_after` are how many years a candidate lived before and after the election, respectively. As a consequence, only politicians who are already deceased are included in this data set. This means that there are only a handful of observations from elections in the last 20 years. Most candidates from that time period are still alive and are, therefore, excluded.
 
 One subtle issue: Should the same candidate be included multiple times? For example:
 
@@ -170,8 +168,7 @@ ch10 |>
     theme_classic()
 ```
 
-Yyounger candidates tend to live much longer than older candidates after election. This makes sense. It is hard for an 80 year-old candidate to live for another 40 years after the election. 
-
+Younger candidates tend to live much longer than older candidates after election. This makes sense. It is hard for an 80 year-old candidate to live for another 40 years after the election. 
 
 ### Validity
 
@@ -206,35 +203,35 @@ The Population Table is a structure which includes a row for every unit in the p
 
 By determining that the data is drawn from the same population which we are analyzing, we can go on to produce a Population Table. 
 
-The Population Table shows rows from three sources: the **Preceptor Table**, the **actual data**, and the **population** (outside of the data).
-
-Our **Preceptor Table** rows contain the information that we would *want* to know in order to answer our questions. These rows contain entries for our covariates (sex, election_age, year elected) but they do not contain any outcome results (lived_after). We are trying to answer questions about the train commuter population in 2021, so our year entries of these rows will read "2021". 
-
-Our **actual data** rows contain the information that we *do* know. These rows contain entries for both our covariates *and* the outcomes. In this case, the actual data comes from gubernatorial candidates who are deceased. All columns (covariates and outcomes) will be complete.
-
-Our **population** rows contain no data. These are subjects which fall under our desired population, but for which we have no data. As such, all rows are missing.
-
 ```{r}
 #| echo: false
 tibble(source = c("...", "Data", "Data", "...", 
                   "...", "Preceptor Table", "Preceptor Table", "..."),
-       year_elected = c("...", "1967", "2012", "...",
-                 "...", "2023", "2023", "..."),
+       lived_after = c("...", "20", "19", "...", 
+                 "...", "...", "...", "..."),
+       year_elected = c("...", "1967", "2012", "...", 
+                "...", "2023", "2023", "..."),
        election_age = c("...", "43", "67", "...", 
                 "...", "...", "...", "..."),
-       sex = c("...", "Male", "Female", "...", 
-                "...", "Female", "Female", "..."),
-       lived_after = c("...", "20", "19", "...", 
-                "...", "...", "...", "...")) |>
-  
-  # Then, we use the gt function to make it pretty
+       sex = c("...", "Male", "Male", "...", 
+               "...", "Female", "Male", "...")) |>
   
   gt() |>
+  tab_header(title = "Population Table") |> 
   cols_label(source = md("Source"),
-             year_elected = md("Year"),
+             lived_after = md("Years Lived After"),
+             year_elected = md("Year Elected"),
              election_age = md("Election Age"),
-             sex = md("Sex"),
-             lived_after = md("Years Lived After")) 
+             sex = md("Sex")) |>
+  tab_style(cell_borders(sides = "right"),
+            location = cells_body(columns = c(source))) |>
+  tab_style(style = cell_text(align = "left", v_align = "middle", size = "large"), 
+            locations = cells_column_labels(columns = c(source))) |>
+  cols_align(align = "center", columns = everything()) |>
+  cols_align(align = "left", columns = c(source)) |>
+  fmt_markdown(columns = everything()) |>
+  tab_spanner(label = "Outcome", columns = c(lived_after)) |>
+  tab_spanner(label = "Covariates", columns = c(sex, year_elected, election_age))
 ```
 
 Again, the Population Table shows the more expansive population for which we are making assumptions --- this includes data from our "population", our actual data, and the Preceptor Table. 
@@ -269,7 +266,7 @@ Of course, this is not always true. If we wanted to predict lifespans of guberna
 
 After looking at @barfort2020, the source for our dataset, we see that:
 
-"We collect data... for all candidates running in a gubernatorial election from 1945 to 2012. We limit attention to the two candidates who received the highest number of votes."
+> "We collect data... for all candidates running in a gubernatorial election from 1945 to 2012. We limit attention to the two candidates who received the highest number of votes."
 
 This data is, then, **highly** representative of gubernatorial candidates, as it includes every candidate from 1945 to 2012. However, there is one large caveat: only the two candidates with the most votes are included in the dataset. This is unfortunate, as we would ideally look at all gubernatorial candidates (regardless of votes). Regardless, we still deem the dataset to be representative enough of our larger population. 
 
@@ -316,11 +313,11 @@ print(fit_1, detail = FALSE)
 
 As we can see $\beta_0$ is our intercept, around `r round(coef(fit_1)["(Intercept)"], 0)` years.
 
-We do not have a value for female. However we do have an intercept. `sexMale` is the median age of male candidates after winning an election. The MAD SD for each parameter is a measure of the variability of our posterior distributions for that parameter. Speaking roughly, 95% of the mass of a posterior probability distribution is located within +/- 3 MAD SDs from the median. Typically we don't want to consider parameters that are under 2 because they tend to show that the distribution of data may not be as important. However, there are several times where this case may not be accurate, and we will need to use parameters that have a MAD_SD of under 2.
+We do not have a value for female. However we do have an intercept. `sexMale` is the median age of male candidates after winning an election. The MAD_SD for each parameter is a measure of the variability of our posterior distributions for that parameter. Speaking roughly, 95% of the mass of a posterior probability distribution is located within +/- 3 MAD_SDs from the median. Typically we don't want to consider parameters that are under 2 because they tend to show that the distribution of data may not be as important. However, there are several times where this case may not be accurate, and we will need to use parameters that have a MAD_SD of under 2.
 
 ### election_age
 
-To begin, let's model candidate lifespan after the election as a function of candidate lifespan prior to the election. The data:
+To begin, let's model candidate lifespan after the election as a function of candidate lifespan prior to the election with our mathematics.
 
 #### Mathematics
 
@@ -694,7 +691,6 @@ The male line seems more sensible, as we might expect with far more datapoints. 
 
 ```{r}
 #| echo: false
-#| fig.cap: Temperance
 knitr::include_graphics("other/images/Temperance.jpg")
 ```
 
@@ -943,7 +939,6 @@ The same reasoning applies to every parameter we estimate, to every prediction w
 
 ```{r}
 #| echo: false
-#| fig.cap: Wisdom
 knitr::include_graphics("other/images/Wisdom.jpg")
 ```
 
@@ -1005,25 +1000,53 @@ Note: the values that have a star next to them symbolize the possible values tha
 
 Recall: a Preceptor Table is the smallest possible table with rows and columns such that, if there is no missing data, all our questions are easy to answer. To answer questions --- like "What is the average causal effect of winning an election on candidates for state or federal office in the United States in 2023?" --- we need a row for every individual.
 
-### Data Analysis
+### EDA of `governors`
 
 Once again we will look at the **primer.data** package which includes the `governors` data set which features demographic information about candidates for governor in the United States. @barfort2020 gathered this data and concluded that winning a gubernatorial election increases a candidate's lifespan.
 
+There are `r ncol(governors)` variables and `r scales::comma(nrow(governors))` observations. In this section, we will only be looking at the variables `sex`, `lived_after`, `election_age`, `won`, and `close_race`. 
+
 ```{r}
-summary(ch10)
+ch10_b <- governors |> 
+  mutate(won = if_else(win_margin > 0, TRUE, FALSE)) |> 
+  mutate(close_race = if_else(abs(win_margin) < 5, TRUE, FALSE)) |> 
+  select(year, sex, lived_after, election_age, won, close_race)
+```
+
+We created the `won` variable to indicate whether or not the candidate won the election. We define `close_race` to be true if the winning margin was less than 5%. Within this section we want to dive deeper into understanding the causal effect of winning on a candidate's longevity which is why we want to specifically to create the `won` variable. 
+
+```{r}
+summary(ch10_b)
 ```
 
 With the question that we are trying to answer, we will be more focused on exploring the variables of `won`, `sex`, `election_age`, and `close_race`.
 
 In using this data set, our left-side variable will be `lived_after`. We are trying to understand/predict how many years a candidate will live after they have won election and whether winning the election affects how long they live.  
 
+```{r}
+ch10_b |>
+  ggplot(aes(x = election_age, y = lived_after, color = won)) +
+  geom_point() +
+  labs(title = "US Gubernatorial Candidate Years Lived Post Winning Election",
+       subtitle = "Candidates who won elections tend to live longer post-election",
+       caption = "Data: Barfort, Klemmensen and Larsen (2019)",
+       x = "Candidate Age",
+       y = "Years Lived After Election",
+       color = "Election Result") +
+  scale_color_discrete(labels=c('Lost', 'Won')) +
+  scale_y_continuous(labels = scales::label_number()) +
+  theme_classic()
+```
+
+This plot shows that candidates that win the election live much longer, on average, than candidates that lose the election. Is there an intuitive explanation for why this might be? 
+
 ### Validity
 
-A issue that we want to address is the assumption of validity. Do our columns stay consistent throughout for us to assume validity? To put it simply, do the columns in our Preceptor Table equate to the columns from our dataset. Again, we look to the source of our data: @barfort2020. 
+A issue that we want to address is the assumption of validity. Do our columns within the Preceptor Table and dataset stay consistent for us to assume validity? To put it simply, do the columns in our Preceptor Table equate to the columns from our dataset. Again, we look to the source of our data: @barfort2020. 
 
-The collection for close races have been calculated by us for all of the candidates. The actual defintion of close races for candidates, however, is not gathered. In fact, @barfort2020 did not calculate what it meant to have a close race, we did. 
+The collection for close races have been calculated by us for all of the candidates. The actual definition of close races for candidates, however, is not gathered. For example, a close race could be different in each state that we are relating to. The close race in our Preceptor Table could be any election that is within 7%, while that may differ within our dataset. 
 
-This is not nearly as reliable as the data collection for candidates. As the assumption of validity that we have been applying the defintion of close race across the board will hold true. Will the same constraints that we applied for close races apply to the dataset's definition? Or the entire population's definition?
+This is not nearly as reliable as the data collection for candidates. As the assumption of validity that we have been applying the definition of close race across the board will hold true. Will the same constraints that we applied for close races apply to the dataset's definition? Or the entire population's definition?
 
 The mission of this exploration is to ensure validity as much as possible --- that is, to equate our columns when they are not equated themselves. In this case, because we cannot fix the issues with data collection, we accept that our estimates may be slightly skewed. 
 
@@ -1037,6 +1060,55 @@ knitr::include_graphics("other/images/Justice.jpg")
 ```
 
 ### Population Table
+
+The Population Table shows rows from three sources: the **Preceptor Table** and the **actual data**
+
+Our **Preceptor Table** rows contain the information that we would *want* to know in order to answer our questions. These rows contain entries for our covariates (sex, election_age, won) but they do not contain any outcome results (lived_after).
+
+Our **actual data** rows contain the information that we *do* know. These rows contain entries for both our covariates *and* the outcomes. In this case, the actual data comes from gubernatorial candidates who are deceased. All columns (covariates and outcomes) will be complete.
+
+```{r}
+#| echo: false
+tibble(source = c("...", "Data", "Data", "...", 
+                  "...", "Preceptor Table", "Preceptor Table", "..."),
+       lived_after = c("...", "20", "19", "...", 
+                 "...", "...", "...", "..."),
+       won = c("...", "Yes", "Yes", "...", 
+                "...", "No", "Yes", "..."),
+       election_age = c("...", "43", "67", "...", 
+                "...", "...", "...", "..."),
+       sex = c("...", "Male", "Male", "...", 
+               "...", "Female", "Male", "...")) |>
+  
+  gt() |>
+  tab_header(title = "Population Table") |> 
+  cols_label(source = md("Source"),
+             lived_after = md("Years Lived After"),
+             won = md("Won Election"),
+             election_age = md("Election Age"),
+             sex = md("Sex")) |>
+  tab_style(cell_borders(sides = "right"),
+            location = cells_body(columns = c(source))) |>
+  tab_style(style = cell_text(align = "left", v_align = "middle", size = "large"), 
+            locations = cells_column_labels(columns = c(source))) |>
+  cols_align(align = "center", columns = everything()) |>
+  cols_align(align = "left", columns = c(source)) |>
+  fmt_markdown(columns = everything()) |>
+  tab_spanner(label = "Potential Outcomes", columns = c(lived_after)) |>
+  tab_spanner(label = "Covariates", columns = c(sex, won, election_age))
+```
+
+### Stability
+
+**Stability** means that the relationship between the columns is the same for three categories of rows: the data, the Preceptor table, and the larger population from which both are drawn.
+
+### Representativeness
+
+**Representativeness** has to do with how well our sample represents the larger population we are interested in generalizing to.
+
+### Unconfoundedness
+
+**Unconfoundedness** means that the treatment assignment is independent of the potential outcomes, when we condition on pre-treatment covariates. When we take a look at our scenario we can see that our treatment is independent when we look at a candidate's longevity. A candidate doesn't win the election because of their longevity, proving that the assumption of unconfoundedness holds to be true. Our treatment assignment of the possiblity of candidate's winning elections holds to be independent of the potential outcomes. Rather the potential outcomes are dependent on the treatment assignment.
 
 ## Courage
 
@@ -1054,7 +1126,7 @@ $$ lived\_after_i =  \beta_0 + \beta_1 won_i + \beta_2 male_i + \beta_3 c\_elect
 ### Fitted Model
 
 ```{r}
-fit_5 <- stan_glm(data = filter(ch10, close_race),
+fit_5 <- stan_glm(data = filter(ch10_b, close_race),
                   formula = lived_after ~ won + sex + election_age,
                   refresh = 0,
                   seed = 12)
@@ -1066,11 +1138,12 @@ Having fit the model, we can look at a printed summary. Note the use of the `det
 print(fit_5, detail = FALSE)
 ```
 
+Looking at our results, you can see that our intercept value is around `r round(coef(fit_5)["(Intercept)"], 0)`. The average electoral candidate that won, who had been alive the average number of years of all candidates, would live another 2 years or so after the election. 
+
 ## Temperance
 
 ```{r}
 #| echo: false
-#| fig.cap: Temperance
 knitr::include_graphics("other/images/Temperance.jpg")
 ```
 
