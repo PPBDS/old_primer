@@ -215,7 +215,20 @@ ul.task-list li input[type="checkbox"] {
 <div id="quarto-sidebar-glass" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass"></div>
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#steps-to-take-in-every-data-science-problem" id="toc-steps-to-take-in-every-data-science-problem" class="nav-link active" data-scroll-target="#steps-to-take-in-every-data-science-problem">Steps to Take in Every Data Science Problem</a>
+  <ul class="collapse">
+  <li><a href="#question" id="toc-question" class="nav-link" data-scroll-target="#question">Question</a></li>
+  <li><a href="#wisdom" id="toc-wisdom" class="nav-link" data-scroll-target="#wisdom">Wisdom</a></li>
+  <li><a href="#justice" id="toc-justice" class="nav-link" data-scroll-target="#justice">Justice</a></li>
+  <li><a href="#courage" id="toc-courage" class="nav-link" data-scroll-target="#courage">Courage</a></li>
+  <li><a href="#temperance" id="toc-temperance" class="nav-link" data-scroll-target="#temperance">Temperance</a></li>
+  </ul></li>
+  </ul>
+<div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/PPBDS/primer/edit/main/glossary.qmd" class="toc-action">Edit this page</a></p></div></div></nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
@@ -237,6 +250,7 @@ ul.task-list li input[type="checkbox"] {
 
 </header>
 
+<p><em>THIS IS A DRAFT</em></p>
 <p>These are the key concepts from the <em>Primer</em>. You should apply them whenever you face a choice, and some data to help you make it. The world confronts us. Makes decisions we must.</p>
 <p><strong>Quantity of Interest</strong> is the number which you want to estimate. You will almost always calculate a posterior probability distribution for your Quantity of Interest since, in the real world, it is almost always impossible to determine your QoI precisely.</p>
 <p><strong>Predictive Models and Causal Models</strong> are different because predictive models have only one outcome column. Causal models have more than one (potential) outcome column because we need more than one potential outcome in order to estimate a <em>causal effect</em>. The first step in a data science problem is to determine if your QoI requires a causal or a predictive model.</p>
@@ -254,8 +268,86 @@ ul.task-list li input[type="checkbox"] {
 <p><strong>Unconfoundedness</strong> means that the treatment assignment is independent of the potential outcomes, when we condition on pre-treatment covariates. This assumption is only relevant for causal models. We write that a model is “confounded” if this is not true. The easiest way to ensure unconfoundedness is to randonly assign treatment.</p>
 <p><strong>Courage</strong> is the third <a href="https://en.wikipedia.org/wiki/Cardinal_virtues">Cardinal Virtue</a> in data science. Justice gave us the data and the structure of the model. Courage allows us to explore different models. Even though Justice has provided the basic mathematical structure of the model, we still need to decide which variables to include and to estimate the values of unknown parameters. We avoid hypothesis tests. We check our models for consistency with the data we have. We select one model.</p>
 <p><strong>Temperance</strong> is the fourth <a href="https://en.wikipedia.org/wiki/Cardinal_virtues">Cardinal Virtue</a> in data science. Courage gave us the fitted model. Temperance guides us in the use of the model we have created to answer the questions we began with. We create posteriors of the quantities of interest. We should be modest in the claims we make. The posteriors we create are never the “truth.” The assumptions we made to create the model are never perfect. Yet decisions made with flawed posteriors are almost always better than decisions made without them.</p>
+<section id="steps-to-take-in-every-data-science-problem" class="level2">
+<h2 class="anchored" data-anchor-id="steps-to-take-in-every-data-science-problem">Steps to Take in Every Data Science Problem</h2>
+<p>In the spirit of transparency, here are the guidelines which we provide to co-authors updating chapters in the <em>Primer</em>. This is how we think data science ought to be taught. It is also, perhaps unsurprisingly, how we think data science ought to be done, at least at this introductory level.</p>
+<section id="question" class="level3">
+<h3 class="anchored" data-anchor-id="question">Question</h3>
+<p>Start with the question. This will generally be something simple, easily expressed in just a sentence, using colloquial language. Every data science problem starts with a question. The goal is to provide an answer to the question, along with your uncertainty about that answer. The most common form for the answer is a posterior probability distribution. This PPD is either the answer itself, or the tool we use to answer the question. Example:</p>
+<p>“What proportion of people who make $100,000 are liberal?”</p>
+<p>Of course, every data science problem does not start with a question. It actually starts with a decision. The world confronts us. Make decisions we must. Yet, in this introductory textbook, starting with a decision to make is too hard. So, we simplify and start with a question. But we should always at least mention the sort of decision which the answer to the question might help us to make.</p>
+<p>Note that the sophistication of these discussions increases as we go further into the book. Your discussion should be more sophisticated than that found in the previous chapter and less sophisticated than what comes later.</p>
+<p>Each chapter features all the same sections and sub-sections as we use below. That is, there are three sub-sections to Wisdom, five sub-sections for Justice, and so on.</p>
+<p>Once we have our question, we can start with the Cardinal Virtues. Each section begins with a one sentence summary about the component steps of the relevant virtue. These will, obviously, be highly similar from chapter to chapter. But that is OK! We want to reinforce the steps in the path over and over again.</p>
+</section>
+<section id="wisdom" class="level3">
+<h3 class="anchored" data-anchor-id="wisdom">Wisdom</h3>
+<p>“Wisdom requires the creation of a Preceptor Table, an examination of our data, and a determination, using the concept of validity, as to whether or not we can (reasonably!) assume that the two come from the same population.”</p>
+<section id="preceptor-table" class="level4">
+<h4 class="anchored" data-anchor-id="preceptor-table">Preceptor Table</h4>
+<p>The Preceptor Table always begins with a restatement of the definition: “A Preceptor Table is smallest possible table with rows and columns such that, if there is no missing data, our question is easy to answer.”</p>
+<p>To create the Preceptor Table, we answer a series of questions. (Don’t ask these questions rhetorically. Just describe the answer. There is also no need to number them, although you should always use this order.)</p>
+<ul>
+<li>Is the question causal? Looks for words like “cause” or “affect” or “influence.” Look for a question which implies a comparison, <em>for a single individual unit</em>, between two states of the world, one where they get treatment X and one where they get treatment Y. Look for a discussion of something which we can <em>manipulate</em>. Remember the motto: <em>No causation without manipulation</em>. We look to see if the question seeks to compare two potential outcomes <em>within the same unit</em>, rather than the same outcome between two different units.</li>
+</ul>
+<p>If none of this is present, use a predictive model. If all you need to know to answer the question is the outcome under one value of the treatment, then the model is predictive. Example: What is the att_end for all women if they were to get the treatment? This is a predictive question, not a causal one, because we do not need to know the outcome under treatment and under control for any individual woman.</p>
+<ul>
+<li>What is the moment in time to which the question refers? Every question refers to a moment in time, even if that moment stretches a bit. The set of adults <em>today</em> is different from the set 10 years ago, or even yesterday. We need to <em>refine</em> the origial question. Assume that we are referring to July 1, 2012. We have changed the original question from:</li>
+</ul>
+<p>“What proportion of people who make $100,000 are liberal?”</p>
+<p>to</p>
+<p>“On July 1, 2012, what proportion of people who make $100,000 were liberal?”</p>
+<ul>
+<li>What are the units? The question often makes this fairly clear, at least in terms of what each row corresponds to, whether it be individuals, classrooms or countries. But, questions often fail to make clear the total number of the rows. Our example question above does not specify the relevant population. Is it about all the people in the world? All the adults? All the adults in the United States? The purpose of this paragraph is to <em>refine</em> the question, to make it more specific. Assume that we are interested in all the adults in Chicago. Our question now is:</li>
+</ul>
+<p>“On July 1, 2012, what proportion of the adults in Chicago who make $100,000 were liberal?”</p>
+<p>This back-and-forth between the question and the analysis is a standard part of data science. We rarely answer the exact question we started with, especially because that question is never specific enough to answer without further qualifications. Furthermore, the data we have may not allow us to answer that question, but it may be enough to answer a related question. Is that good enough for the boss/client/colleague who asked the original question? Maybe? We won’t know till we ask.</p>
+<p>Our job as data scientists is not to simply answer the question we have been asked, but to help the questioner determine a question which can be answered with the data we have, a question which helps them to make the decision which they face.</p>
+<ul>
+<li>What are the outcomes? (If the model is causal, then there must be at least two potential outcomes. If you can’t figure them out, then the model is probably predictive.) If the model is predictive, then there is only one outcome. This paragraph does more than just name the relevant variable. It also starts the discussion about how exactly we might measure this variable. We consider both underlying concept, “liberal,” and the process by which we might operationalize the concept. Perhaps we are using a written survey with a YES/NO answer. Perhaps it is an in person interview with a 1-7 Likert scale, in which answers of 1 or 2 are coded, by us, as “liberal.” The details don’t matter, but we need to discuss.</li>
+</ul>
+<p>What are the covariates? Discussing covariates in the context of the Preceptor Table is different than discussing covariates in the context of the data. Recall that the Preceptor Table is the smallest possible table, so we don’t need to include every relevant variable. <em>We only need to discuss variables that are necessary to answer the question.</em></p>
+<p>What are the treatments, if any? (There are no treatments in predictive models.) A treatment is a covariate which, at least in theory, we can manipulate and the manipulation of which is necessary to answer our question.</p>
+<p>With all the above, create the Preceptor Table.</p>
+</section>
+<section id="validity" class="level4">
+<h4 class="anchored" data-anchor-id="validity">Validity</h4>
+<p>Validity discussions always have one (short) paragraph about each variable, with examples of why validity might <em>not</em> hold. Validity discussion finishes with a brief discussion along the lines of: “Despite these concerns, we will assume that validity does hold.”</p>
+</section>
+</section>
+<section id="justice" class="level3">
+<h3 class="anchored" data-anchor-id="justice">Justice</h3>
+<p>“Justice concerns five topics: the Population Table, stability, representativeness, unconfoundedness and the mathematical structure of the data generating mechanism (DGM).”</p>
+<section id="population-table" class="level4">
+<h4 class="anchored" data-anchor-id="population-table">Population Table</h4>
+</section>
+<section id="stability" class="level4">
+<h4 class="anchored" data-anchor-id="stability">Stability</h4>
+</section>
+<section id="representativeness" class="level4">
+<h4 class="anchored" data-anchor-id="representativeness">Representativeness</h4>
+<p>And, of course, we always mention the two potential problems: Is our data representative of the population and is our Preceptor Table representative of the population? Each of these points gets its own short paragraph. There are always two levels of concerns: first is generic, second only applies to the variables you need to answer the question.</p>
+<p>Representativeness is a concern for both the data and for the Preceptor Table. If you need data for an unrepresentative subset of the population, you might be in trouble. Or, you can try to adjust your question so that it is answerable for the data you have.</p>
+</section>
+<section id="unconfoundedness" class="level4">
+<h4 class="anchored" data-anchor-id="unconfoundedness">Unconfoundedness</h4>
+</section>
+</section>
+<section id="courage" class="level3">
+<h3 class="anchored" data-anchor-id="courage">Courage</h3>
+<p>The opening Courage paragraph reminds us about Courage and also explains why we are using a linear (or logistic or whatever) model.</p>
+<p>Series of fitted models, none of which are used to answer our question yet. Each time, we fit, print and the describe with math. Then, we explain it English what the model shows.</p>
+<p>“Courage centers around the creation of the data generating mechanism, i.e., our fitted model.”</p>
+<p>Use gtsummary::tbl_regression() to show a nice table of the parameter values toward the end of the Courage section.</p>
+<p>Courage section ends with a clear statement in English, in its own paragraph, describing the model. That is, what are the two sentence which a student would say at a presentation describing the model. First sentence specifies the model, including making clear the units, outcome and key covariates. (No need to use the terms “units,” “outcomes,” and so on.) The second sentence tells us about one key number, along with its associated uncertainty. With predictive models, the language almost always includes “When comparing two units (whatever those units are), one with covariate (whatever it is) value X and the other with value Y, the difference in outcome is . . .” With a causal model, you are almost always interested in the average causal effect (or treatment effect), although sometimes you provide this number for a particularly interesting/important subset of the data.</p>
+</section>
+<section id="temperance" class="level3">
+<h3 class="anchored" data-anchor-id="temperance">Temperance</h3>
+<p>“Temperance guides us in the use of the DGM to answer the questions wit which we began.”</p>
 
 
+</section>
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
@@ -507,4 +599,4 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 
 
 
-<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/PPBDS/primer/edit/main/glossary.qmd" class="toc-action">Edit this page</a></p></div></div></div></div></footer></body></html>
+</body></html>
