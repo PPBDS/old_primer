@@ -6,15 +6,20 @@
 #| echo: false
 #| warning: false
 library(gt)
+library(tidyverse)
 ```
 
+<!-- DK: Make everything more like the tutorial.  -->
 
+<!-- Change name to 05-height.qmd, title us just "Height". -->
 
+<!-- Keep all data. -->
 
-<!-- Two parameter chapter is missing the math. -->
+<!-- Treatment var? diabetes! -->
 
+<!-- Reorganize Cardinal Virtues -->
 
-@sec-models used a logistic regression model, an appropriate approach when the outcome variable takes on just two possible values, generally recoded as `0` or `1`. In this chapter, we will a linear regression model because our outcome variable, `height`, is continuous.
+@sec-models used a logistic regression model, an appropriate approach when the outcome variable takes on just two possible values. In this chapter, we will use a linear regression model because our outcome variable, `height`, is continuous.
 
 The reason for making models is not, primarily, that making models is fun -- although it is! The reason is that the world confronts us. Make decisions we must. We must decide between options X or Y. We must choose from actions A, B and C. Confronted by a choice, we need to make a model of the world to help us choose wisely.
 
@@ -60,29 +65,34 @@ So, what does our Preceptor Table look like? Assuming we are predicting height f
 
 Here are some rows from our Preceptor Table: 
 
-
 ```{r}
 #| echo: false
 
-dplyr::tibble(ID = c("1", "2", "...", "10", "11", "...", "N"),
-       height = c("150", "172", "...", "160", "142", "...", "190"),
-       sex = c("M", "F", "...", "F", "F", "...", "M")) |>
-
+tibble(
+  ID = c("1", "2", "...", "5000", "5001", "...", "N"),
+  height = c("150", "172", "...", "160", "142", "...", "190"),
+  sex = c("F", "M", "...", "M", "F", "...", "M")
+) |>
   gt() |>
   tab_header(title = "Preceptor Table") |>
-  cols_label(ID = md("ID"),
-             height = md("Height"),
-             sex = md("Sex")) |>
-  tab_style(cell_borders(sides = "right"),
-            location = cells_body(columns = c(ID))) |>
-  tab_style(style = cell_text(align = "left", v_align = "middle", size = "large"),
-            locations = cells_column_labels(columns = c(ID))) |>
+  cols_label(
+    ID = md("ID"),
+    height = md("Height"),
+    sex = md("Sex")
+  ) |>
+  tab_style(
+    style = cell_borders(sides = "right"),
+    locations = cells_body(columns = c(ID))
+  ) |>
+  tab_style(
+    style = cell_text(align = "left", v_align = "middle", size = "large"),
+    locations = cells_column_labels(columns = c(ID))
+  ) |>
   cols_align(align = "center", columns = everything()) |>
   cols_align(align = "left", columns = c(ID)) |>
   fmt_markdown(columns = everything()) |>
   tab_spanner(label = "Outcome", columns = c(height)) |>
   tab_spanner(label = "Covariate", columns = c(sex))
-
 ```
 
 This table would extend all the way until person 8 billion-and-something. We don't know the number of rows, so we use `N`. If we had this table, all of our questions could be answered with simple math. No inference is necessary if we have a Preceptor Table. But what does our actual data look like? 
@@ -100,6 +110,8 @@ library(skimr)
 glimpse(nhanes)
 ```
 
+This `nhanes` table contains 10,000 entries from the 2009 survey, each representing an individual’s health and demographic data. The dataset includes repeated values, likely from individuals in the same household, and has some missing data in variables like `pulse` and `pregnancies`.
+
 `nhanes` includes `r ncol(nhanes)` variables, including physical attributes like weight and height. Let's restrict our attention to three variables: `age`, `sex` and `height`. 
 
 ```{r}
@@ -107,6 +119,8 @@ glimpse(nhanes)
 nhanes |> 
   select(age, sex, height)
 ```
+
+This subset shows `age`, `sex`, and `height` for 10,000 individuals, with a mix of children and adults. Repeated rows suggest possible household clustering or duplicated entries.
 
 Examine a random sample:
 
@@ -172,12 +186,29 @@ x |>
          ) 
 ```
 
+Let's take a look at another example of the plotted data using height as our outcome variable:
+
+```{r}
+nhanes |>
+  filter(age >= 18) |>
+  drop_na() |>
+  ggplot(aes(x = height)) +
+  geom_histogram(bins = 50, fill = "#69b3a2", color = "white") +
+  labs(
+    title = "Adult Heights in the US in 2010",
+    subtitle = "The Average Height of Adults in the US in 2010 was around 162 cm (64 in)",
+    x = "Height (cm)",
+    y = "Count",
+    caption = "Source: National Health and Nutrition Examination Survey"
+  ) +
+  theme_minimal(base_size = 14)
+```
 
 Will the data we have --- which is only for a sample of adult Americans more than a decade ago --- allow us to answer our questions, however roughly? Only if the assumption of *validity* makes sense.
 
 ### Validity
 
-Validity involves our columns. More specifically, whether our columns mean the same thing. Does "height" in our Preceptor Table mean the same thing as "height" in NHANES? Almost certainly. Of course, we need to be careful about mistakes like measurement units, like centimeters in one and inches in the other. And there can be issues like: Are measurements taken with shoes on or shoes off? But, for the most part, the "height" variable in NHANES in 2010 is a *valid* proxy for the "height" of individuals today. We can stack the two data sets together and consider them to have come from the same population. The same applies to sex.
+Validity refers to whether columns from different datasets represent the same concept. For example, does "height" in the Preceptor Table mean the same as "height" in NHANES? Most likely, yes. However, we need to watch for differences like measurement units—centimeters versus inches—or whether people were measured with shoes on or off. These kinds of differences could mean that the `height` columns don’t truly align. Still, overall, the NHANES 2010 height data is a valid stand-in for modern height measurements. That means we can reasonably stack the two datasets and treat them as if they come from the same population. The same logic applies to the `sex` variable.
 
 Since validity holds, we can combine the Preceptor Table and our data into a Population Table.
 
@@ -218,37 +249,40 @@ Our **actual data** rows contain the information that we *do* know. These rows c
 
 Our **other** rows contain no data. These are subjects which fall under our desired population, but for which we have no data. As such, all outcomes and covariates are missing. (A subtle point is that, even for other data, we "know" the ID and the Year for each subject. Of course, we don't *really* know these things, but, conceptually, we are defining the meaning of those rows on the basis of those variables.)
 
-<!-- DK: Need to standardize the creation of the Population Table, include ID/time column. -->
 
 ```{r}
 #| echo: false
-tibble(source = c("Preceptor Table", "Preceptor Table", "...",
-                  "Actual Data", "Actual Data", "Actual Data", "...", 
-                  "Other", "Other", "Other"),
-       sex = c("Male", "Female", "...",
-                  "Male", "Female", "Male", "...",
-                  "?", "?", "?"),
-       year = c("2024", "2024", "...",
-                "2009", "2011", "2010", "...",
-                "?", "?", "?"),
-       height = c("?", "?", "...",
-                 "180", "160", "168", "...",
-                 "?", "?", "?")) |>
-  
-  # Then, we use the gt function to make it pretty
-  
+tibble(
+  ID = c("P1", "P2", "...", "D1", "D2", "D3", "...", "O1", "O2", "O3"),
+  source = c("Preceptor", "Preceptor", "...", 
+             "Actual", "Actual", "Actual", "...", 
+             "Other", "Other", "Other"),
+  year = c("2024", "2024", "...", 
+           "2009", "2010", "2011", "...", 
+           "?", "?", "?"),
+  sex = c("Male", "Female", "...", 
+          "Male", "Female", "Male", "...", 
+          "?", "?", "?"),
+  height = c("?", "?", "...", 
+             "180", "160", "168", "...", 
+             "?", "?", "?")
+) |>
   gt() |>
-  cols_label(source = md("Source"),
-             sex = md("Sex"),
-             year = md("Year"),
-             height = md("Height")) |>
+  tab_header(title = "Population Table") |>
+  cols_label(
+    ID = md("ID"),
+    source = md("Source"),
+    year = md("Year"),
+    sex = md("Sex"),
+    height = md("Height")
+  ) |>
   tab_style(cell_borders(sides = "right"),
-            location = cells_body(columns = c(source))) |>
-  tab_style(style = cell_text(align = "left", v_align = "middle", size = "large"), 
-            locations = cells_column_labels(columns = c(source))) |>
+            location = cells_body(columns = c(ID))) |>
+  tab_style(style = cell_text(align = "left", v_align = "middle", size = "large"),
+            locations = cells_column_labels(columns = c(ID))) |>
   cols_align(align = "center", columns = everything()) |>
-  cols_align(align = "left", columns = c(source)) |>
-  fmt_markdown(columns = everything())  
+  cols_align(align = "left", columns = c(ID)) |>
+  fmt_markdown(columns = everything())
 ```
 
 ### Stability
@@ -360,7 +394,7 @@ library(broom)
 tidy(fit_1, conf.int = TRUE)
 ```
 
-<!-- DK: Insert interpretions of the parameters. perhaps equixomatic? -->
+The intercept (about 165 cm) estimates the average height for females (the reference group). The coefficient for sexMale (around 9.56 cm) shows that males are on average taller by that amount compared to females.
 
 
 ```{r}
@@ -368,6 +402,8 @@ tidy(fit_1, conf.int = TRUE)
 x |> 
   summarise(avg_heigh = mean(height), .by = sex)
 ```
+
+The average heights confirm the regression results: males average about 174 cm and females about 165 cm in this sample.
 
 * The estimated error ("Est.Error") also makes sense. This is the standard error and can be calculated by hand as the standard deviation of the data divided by the squart root of the number of observations:
 
