@@ -29,10 +29,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # Required for rendering and dependencies
       - uses: r-lib/actions/setup-pandoc@v2
 
-      # Set up Quarto manually with a valid version
       - uses: quarto-dev/quarto-actions/setup@v2
         with:
           version: "1.4.550"
@@ -41,12 +39,9 @@ jobs:
         with:
           use-public-rspm: true
 
-      - uses: r-lib/actions/setup-r-dependencies@v2
-        with:
-         cache-version: 2
-         extra-packages: |
-          any::PPBDS/primer.data
+      - run: Rscript -e 'install.packages("renv")'
 
+      - run: Rscript -e 'renv::restore()'
 
       - run: Rscript -e 'install.packages("rcmdcheck")'
 
