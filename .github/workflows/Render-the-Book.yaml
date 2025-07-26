@@ -12,22 +12,24 @@ name: Build-the-book
 jobs:
   build-the-book:
     runs-on: ubuntu-latest
-    container: rocker/r2u:latest
+    container: 
+      image: rocker/r2u:latest
     name: ubuntu-latest (release)
 
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
-      R_KEEP_PKG_SOURCE: yes
 
     steps:
       - uses: actions/checkout@v4
 
-      - uses: r-lib/actions/setup-pandoc@v2
-
-      - uses: quarto-dev/quarto-actions/setup@v2
+      - name: Install Quarto
+        run: |
+          curl -LO https://quarto.org/download/latest/quarto-linux-amd64.deb
+          dpkg -i quarto-linux-amd64.deb
 
       - name: Restore R packages with renv
         run: |
           R -e "renv::restore()"
 
       - run: quarto render
+      
