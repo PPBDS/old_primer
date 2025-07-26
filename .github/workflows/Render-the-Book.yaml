@@ -25,10 +25,12 @@ jobs:
       - name: Setup r2u
         uses: eddelbuettel/github-actions/r2u-setup@master
 
-      - name: Install system dependencies
+      - name: Check r2u setup
         run: |
-          sudo apt-get update
-          sudo apt-get install -y libcurl4-openssl-dev
+          echo "Available r-cran-curl packages:"
+          apt list --all-versions r-cran-curl 2>/dev/null || echo "r-cran-curl not found"
+          echo "R will use install.packages() which should use bspm/r2u:"
+          R -q -e 'install.packages("curl", verbose=TRUE)'
 
       - name: Restore R packages with renv
         run: R -q -e 'renv::restore()'
