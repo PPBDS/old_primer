@@ -25,12 +25,12 @@ jobs:
       - name: Setup r2u
         uses: eddelbuettel/github-actions/r2u-setup@master
 
-      - name: Check r2u setup
+      - name: Install and enable bspm
         run: |
-          echo "Available r-cran-curl packages:"
-          apt list --all-versions r-cran-curl 2>/dev/null || echo "r-cran-curl not found"
-          echo "R will use install.packages() which should use bspm/r2u:"
-          R -q -e 'install.packages("curl", verbose=TRUE)'
+          # Install bspm as Ubuntu binary
+          sudo apt-get install -y r-cran-bspm
+          # Enable bspm in R
+          R -q -e 'bspm::enable()'
 
       - name: Restore R packages with renv
         run: R -q -e 'renv::restore()'
