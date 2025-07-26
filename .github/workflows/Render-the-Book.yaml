@@ -25,15 +25,17 @@ jobs:
       - name: Setup r2u
         uses: eddelbuettel/github-actions/r2u-setup@master
 
-      - name: Install and enable bspm
+      - name: Install R packages using r2u/bspm
         run: |
           # Install bspm as Ubuntu binary
           sudo apt-get install -y r-cran-bspm
-          # Enable bspm in R
-          R -q -e 'bspm::enable()'
-
-      - name: Restore R packages with renv
-        run: R -q -e 'renv::restore()'
+          # Get package list from renv.lock and install via bspm
+          R -q -e '
+            bspm::enable()
+            lockfile <- renv:::lockfile_read()
+            packages <- names(lockfile$Packages)
+            cat("Installing", length(packages), "packages via r2u/bspm\n")
+            install.packages(packages)
+          '
 
       - run: quarto render
-      
