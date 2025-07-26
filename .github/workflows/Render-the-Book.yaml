@@ -11,16 +11,8 @@ name: Build-the-book
 
 jobs:
   build-the-book:
-    runs-on: ${{ matrix.config.os }}
-    name: ${{ matrix.config.os }} (${{ matrix.config.r }})
-
-    strategy:
-      fail-fast: false
-      matrix:
-        config:
-          - {os: macos-latest,   r: 'release'}
-          - {os: windows-latest, r: 'release'}
-          - {os: ubuntu-latest,  r: 'release'}
+    runs-on: ubuntu-latest
+    name: ubuntu-latest (release)
 
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
@@ -33,31 +25,12 @@ jobs:
 
       - uses: quarto-dev/quarto-actions/setup@v2
 
-      - uses: r-lib/actions/setup-r@v2
-        with:
-          use-public-rspm: true
-
-      - name: Install system dependencies
-        if: runner.os == 'Linux'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            libmagick++-dev \
-            libpoppler-cpp-dev \
-            libtesseract-dev \
-            libleptonica-dev \
-            tesseract-ocr-eng
-
-      - name: Install system dependencies (macOS)
-        if: runner.os == 'macOS'
-        run: |
-          brew install gettext
-          brew link --force gettext
+      - name: Setup r2u
+        uses: eddelbuettel/github-actions/r2u-setup@master
 
       - uses: r-lib/actions/setup-renv@v2
         with:
           cache-version: 1
 
-
-      # Render the Quarto project at the end
       - run: quarto render
+      
