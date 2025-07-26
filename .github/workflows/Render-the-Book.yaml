@@ -12,8 +12,6 @@ name: Build-the-book
 jobs:
   build-the-book:
     runs-on: ubuntu-latest
-    container: 
-      image: rocker/r2u:latest
     name: ubuntu-latest (release)
 
     env:
@@ -22,16 +20,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Quarto
+      - uses: quarto-dev/quarto-actions/setup@v2
+
+      - name: Setup r2u
+        uses: eddelbuettel/github-actions/r2u-setup@master
+
+      - name: Install system dependencies
         run: |
-          apt-get update -qq
-          apt-get install -y curl
-          curl -LO https://quarto.org/download/latest/quarto-linux-amd64.deb
-          dpkg -i quarto-linux-amd64.deb
+          sudo apt-get update
+          sudo apt-get install -y libcurl4-openssl-dev
 
       - name: Restore R packages with renv
-        run: |
-          R -e "renv::restore()"
+        run: R -q -e 'renv::restore()'
 
       - run: quarto render
       
